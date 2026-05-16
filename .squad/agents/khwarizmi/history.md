@@ -119,3 +119,19 @@ Backend inventory audit wrapped. Findings merged into team decision archive:
 - 59 flashcards across all units (vocabulary, rules, definitions, examples, duas)
 - 26 Arabic terms with transliteration and translation
 - All content sourced from Coursebook1.html with supplemental context from parent guide
+
+### 2026-05-19 — Maktab Coursebook 2 Seed Script
+
+**File:** `backend/prisma/seed-maktab-coursebook2.ts` (~92KB, ~1800 lines)
+
+#### Content
+- Course: "Maktab Coursebook 2", ageLevels `['CHILD', 'PRE_TEEN']` (ages 7-8), category `FIQH`
+- 7 Units (same subject structure as CB1): Fiqh (wuḍū'/ṣalāh/tayammum), Aḥādīth (6 ḥadīth), Sīrah (revelation to persecution), Tārīkh (Hūd & Ṣāliḥ), Aqā'id (names of Allāh/angels/books), Akhlāq (promises/gratitude/kindness), Ādāb (greeting/speaking/sneezing)
+- 41 quiz questions (5-7 per unit, MULTIPLE_CHOICE/TRUE_FALSE/FILL_BLANK, EASY/MEDIUM)
+- 58 flashcards with global orderIndex tracking (vocabulary, rules, examples, du'ā's)
+- 31 Arabic terms across 6 units (Fiqh 8, Sīrah 4, Tārīkh 4, Aqā'id 8, Akhlāq 4, Ādāb 3)
+
+#### Pattern Consistency
+- Identical structure to CB1 seed: imports → export function → idempotency → course → 7 units → questions createMany → flashcards createMany with global index → arabicTerms createMany → summary → main wrapper
+- Quiz questions hand-crafted from actual coursebook content (not generic parent guide questions)
+- Rich HTML content with h2/h3/p/ul/ol tags, Arabic blocks with dir="rtl", Qur'ānic references
