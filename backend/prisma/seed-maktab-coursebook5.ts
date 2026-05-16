@@ -1477,47 +1477,47 @@ export async function seedMaktabCoursebook5() {
   // ══════════════════════════════════════════════
 
   console.log('');
-  console.log('�� Creating Arabic terms...');
+  console.log('🔤 Creating Arabic terms...');
 
   await prisma.arabicTerm.createMany({
     data: [
       // Fiqh terms (10)
-      { unitId: unitFiqh.id, arabicText: 'فَرَائِض', transliteration: 'Farā\'iḍ', translation: 'Obligatory acts — must be performed for validity' },
-      { unitId: unitFiqh.id, arabicText: 'سُنَن', transliteration: 'Sunan', translation: 'Recommended acts — rewarded but not obligatory' },
-      { unitId: unitFiqh.id, arabicText: 'مَكْرُوهَات', transliteration: 'Makrūhāt', translation: 'Disliked acts — better to avoid' },
-      { unitId: unitFiqh.id, arabicText: 'نَوَاقِض', transliteration: 'Nawāqiḍ', translation: 'Nullifiers — things that break an act of worship' },
-      { unitId: unitFiqh.id, arabicText: 'تَيَمُّم', transliteration: 'Tayammum', translation: 'Dry ablution using clean earth' },
-      { unitId: unitFiqh.id, arabicText: 'مَسْبُوق', transliteration: 'Masbūq', translation: 'Latecomer to congregational prayer' },
-      { unitId: unitFiqh.id, arabicText: 'قَضَاء', transliteration: 'Qaḍā\'', translation: 'Making up a missed obligation' },
+      { unitId: unitFiqh.id, arabicText: 'تَيَمُّم', transliteration: 'Tayammum', translation: 'Dry ablution using soil when water is unavailable' },
+      { unitId: unitFiqh.id, arabicText: 'مَسْبُوق', transliteration: 'Masbūq', translation: 'One who misses rak\'āt behind the imām' },
+      { unitId: unitFiqh.id, arabicText: 'قَضَاء', transliteration: 'Qaḍā\'', translation: 'Making up missed obligatory prayers' },
       { unitId: unitFiqh.id, arabicText: 'إِحْرَام', transliteration: 'Iḥrām', translation: 'Sacred state entered for ḥajj or \'umrah' },
+      { unitId: unitFiqh.id, arabicText: 'تَلْبِيَة', transliteration: 'Talbiyah', translation: 'The du\'ā\' recited when entering iḥrām' },
+      { unitId: unitFiqh.id, arabicText: 'سَعْي', transliteration: 'Sa\'y', translation: 'Walking between Ṣafā and Marwah seven times' },
       { unitId: unitFiqh.id, arabicText: 'طَوَاف', transliteration: 'Ṭawāf', translation: 'Circling the Ka\'bah seven times' },
-      { unitId: unitFiqh.id, arabicText: 'زِيَارَة', transliteration: 'Ziyārah', translation: 'Visitation — especially of Madīnah al-Munawwarah' },
+      { unitId: unitFiqh.id, arabicText: 'مِيقَات', transliteration: 'Mīqāt', translation: 'Boundary where iḥrām becomes compulsory' },
+      { unitId: unitFiqh.id, arabicText: 'حَلَق', transliteration: 'Ḥalaq', translation: 'Shaving the head after ḥajj or \'umrah' },
+      { unitId: unitFiqh.id, arabicText: 'صَدَقَة الفِطْر', transliteration: 'Ṣadaqah al-Fiṭr', translation: 'Compulsory charity given before \'Īd al-Fiṭr ṣalāh' },
       // Aḥādīth terms (4)
-      { unitId: unitAhadith.id, arabicText: 'مُنَافِق', transliteration: 'Munāfiq', translation: 'Hypocrite — one who outwardly shows faith but conceals disbelief' },
-      { unitId: unitAhadith.id, arabicText: 'غِيبَة', transliteration: 'Ghībah', translation: 'Backbiting — mentioning your brother with what he dislikes' },
-      { unitId: unitAhadith.id, arabicText: 'بُهْتَان', transliteration: 'Buhtān', translation: 'Slander — saying something false about someone' },
-      { unitId: unitAhadith.id, arabicText: 'خَمْر', transliteration: 'Khamr', translation: 'Intoxicant — anything that intoxicates, all of which is ḥarām' },
+      { unitId: unitAhadith.id, arabicText: 'غِيبَة', transliteration: 'Ghībah', translation: 'Backbiting — speaking ill of someone in their absence' },
+      { unitId: unitAhadith.id, arabicText: 'مُفْلِس', transliteration: 'Muflīs', translation: 'Spiritually bankrupt — one whose good deeds are taken on Judgement Day' },
+      { unitId: unitAhadith.id, arabicText: 'إِحْصَاء', transliteration: 'Iḥṣā\'', translation: 'Comprehending and acting upon the 99 Names of Allāh' },
+      { unitId: unitAhadith.id, arabicText: 'مُعَوِّذَات', transliteration: 'Mu\'awwidhāt', translation: 'Sūrahs al-Ikhlāṣ, al-Falaq, an-Nās — recited for protection' },
       // Sīrah terms (3)
-      { unitId: unitSirah.id, arabicText: 'صُلْح الحُدَيْبِيَة', transliteration: 'Ṣulḥ al-Ḥudaybiyah', translation: 'The Treaty of Ḥudaybiyah — a peace agreement in 6 AH' },
-      { unitId: unitSirah.id, arabicText: 'فَتْح مَكَّة', transliteration: 'Fatḥ Makkah', translation: 'The Conquest of Makkah in 8 AH' },
-      { unitId: unitSirah.id, arabicText: 'خُطْبَة الوَدَاع', transliteration: 'Khuṭbah al-Wadā\'', translation: 'The Farewell Sermon of the Prophet ﷺ in 10 AH' },
+      { unitId: unitSirah.id, arabicText: 'صُلْح', transliteration: 'Ṣulḥ', translation: 'Treaty / peace agreement' },
+      { unitId: unitSirah.id, arabicText: 'بَيْعَة', transliteration: 'Bay\'ah', translation: 'Pledge of allegiance' },
+      { unitId: unitSirah.id, arabicText: 'حَجَّة الوَدَاع', transliteration: 'Ḥajjatul Wadā\'', translation: 'The farewell pilgrimage of Rasūlullāh ﷺ' },
       // Tārīkh terms (3)
-      { unitId: unitTarikh.id, arabicText: 'فِرْعَوْن', transliteration: 'Fir\'awn', translation: 'Pharaoh — the tyrannical ruler of Egypt' },
-      { unitId: unitTarikh.id, arabicText: 'كَلِيمُ اللَّه', transliteration: 'Kalīmullāh', translation: 'The one Allāh spoke to — a title of Mūsā عليه السلام' },
-      { unitId: unitTarikh.id, arabicText: 'رُوحُ اللَّه', transliteration: 'Rūḥullāh', translation: 'The Spirit of Allāh — a title of \'Īsā عليه السلام' },
+      { unitId: unitTarikh.id, arabicText: 'حَوَارِيُّون', transliteration: 'Ḥawāriyyūn', translation: 'The disciples of \'Īsā عليه السلام' },
+      { unitId: unitTarikh.id, arabicText: 'تَوْرَاة', transliteration: 'Tawrāh', translation: 'The scripture revealed to Mūsā عليه السلام' },
+      { unitId: unitTarikh.id, arabicText: 'بَنِي إِسْرَائِيل', transliteration: 'Banī Isrā\'īl', translation: 'The Children of Israel — descendants of Ya\'qūb عليه السلام' },
       // Aqā'id terms (5)
-      { unitId: unitAqaid.id, arabicText: 'بَرْزَخ', transliteration: 'Barzakh', translation: 'The barrier/interval between death and resurrection' },
-      { unitId: unitAqaid.id, arabicText: 'مِيزَان', transliteration: 'Mīzān', translation: 'The scale of justice on the Day of Judgement' },
-      { unitId: unitAqaid.id, arabicText: 'صِرَاط', transliteration: 'Ṣirāṭ', translation: 'The bridge over Jahannam all must cross' },
-      { unitId: unitAqaid.id, arabicText: 'أَعْرَاف', transliteration: 'A\'rāf', translation: 'The heights between Jannah and Jahannam' },
-      { unitId: unitAqaid.id, arabicText: 'القَدْر', transliteration: 'Al-Qadr', translation: 'Divine decree and predestination' },
+      { unitId: unitAqaid.id, arabicText: 'بَرْزَخ', transliteration: 'Barzakh', translation: 'The life of the grave between death and resurrection' },
+      { unitId: unitAqaid.id, arabicText: 'القَدَر', transliteration: 'Al-Qadr', translation: 'Fate — the belief that everything is ordained by Allāh' },
+      { unitId: unitAqaid.id, arabicText: 'عِلِّيُّون', transliteration: '\'Illiyyūn', translation: 'Register in the Seventh Heaven for the righteous' },
+      { unitId: unitAqaid.id, arabicText: 'سِجِّين', transliteration: 'Sijjīn', translation: 'Register for the wicked in the lowest earth' },
+      { unitId: unitAqaid.id, arabicText: 'أَعْرَاف', transliteration: 'A\'rāf', translation: 'Place between Jannah and Jahannam' },
       // Akhlāq terms (3)
       { unitId: unitAkhlaq.id, arabicText: 'مَشْوَرَة', transliteration: 'Mashwarah', translation: 'Consultation — seeking advice before decisions' },
-      { unitId: unitAkhlaq.id, arabicText: 'صَبْر', transliteration: 'Ṣabr', translation: 'Patience — enduring with faith' },
-      { unitId: unitAkhlaq.id, arabicText: 'صِلَة الرَّحِم', transliteration: 'Ṣilah al-Raḥim', translation: 'Maintaining family ties' },
+      { unitId: unitAkhlaq.id, arabicText: 'صَبْر', transliteration: 'Ṣabr', translation: 'Patience — in obedience, abstinence, and endurance' },
+      { unitId: unitAkhlaq.id, arabicText: 'ذِكْر', transliteration: 'Dhikr', translation: 'Remembrance of Allāh' },
       // Ādāb terms (2)
-      { unitId: unitAdab.id, arabicText: 'مِسْوَاك', transliteration: 'Miswāk', translation: 'A natural tooth-cleaning twig — sunnah to use' },
-      { unitId: unitAdab.id, arabicText: 'عِيَادَة', transliteration: '\'Iyādah', translation: 'Visiting the sick — a right of every Muslim' },
+      { unitId: unitAdab.id, arabicText: 'غُسْل', transliteration: 'Ghusl', translation: 'Full ritual bath / body wash' },
+      { unitId: unitAdab.id, arabicText: 'مِسْوَاك', transliteration: 'Miswāk', translation: 'Natural toothbrush twig — sunnah to use' },
     ],
   });
 

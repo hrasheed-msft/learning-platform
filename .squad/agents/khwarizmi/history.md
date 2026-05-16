@@ -177,3 +177,58 @@ Backend inventory audit wrapped. Findings merged into team decision archive:
 - Identical structure to CB1/CB2 seeds: imports → export function → idempotency → course → 7 units → questions createMany → flashcards createMany with global index → arabicTerms createMany → summary → main wrapper
 - TypeScript parses cleanly (verified via TS createSourceFile)
 - Difficulty mix: EASY and MEDIUM (per conversion strategy: Books 3-5 use both levels)
+
+### 2026-07-22 — Maktab Coursebook 4 Seed Script
+
+**File:** `backend/prisma/seed-maktab-coursebook4.ts` (~91KB, ~1765 lines)
+
+#### Content
+- Course: "Maktab Coursebook 4", ageLevels `['CHILD', 'PRE_TEEN']` (ages 9-10), category `FIQH`
+- 7 Units: Fiqh (masaḥ 'alal khuffayn/wounds/wājib acts of ṣalāh/sajdah as-sahw/ṣawm rules/tarāwīḥ), Aḥādīth (feeding others/racism/good character/friendship/kindness/trust/keys to Paradise/dhikr/du'ā'), Sīrah (Pledges of 'Aqabah/Hijrah/Cave of Thawr/arrival in Madīnah/Mu'ākhāt/treaties with Jews/Battles: Badr, Uḥud, Aḥzāb), Tārīkh (complete story of Yūsuf عليه السلام), Aqā'id (major signs of Qiyāmah: Mahdī/Dajjāl/protection/descent of 'Īsā/Ya'jūj & Ma'jūj/Beast/Sun from West/Smoke/Trumpet/Shafā'ah/Ṣirāṭ), Akhlāq (amānah/seeking permission/removing harm/good neighbours), Ādāb (du'ā' etiquette/dressing & satr/guests & hosts/gatherings/istinjā')
+- 33 quiz questions (5+5+5+5+5+4+4 per unit, MULTIPLE_CHOICE/TRUE_FALSE/FILL_BLANK, EASY/MEDIUM)
+- 59 flashcards with global orderIndex tracking
+- 33 Arabic terms across all units
+
+#### Source Material Notes
+- CB4 HTML (126KB, 935 lines) has OCR artifacts from PDF conversion similar to CB3 — garbled Arabic text in ḥadīth headers
+- Content is substantially more complex than CB1-CB3: advanced fiqh (masaḥ conditions, qaḍā'/kaffārah distinctions), detailed military sīrah (three battles with numbers), and comprehensive eschatology (10+ major signs of Qiyāmah)
+- Tārīkh unit is a single extended narrative (Story of Yūsuf) vs. multiple prophets — different structure, heavy Qur'ānic quotation from Sūrah 12
+- Parent guide quiz questions were generic templates — all quiz questions hand-crafted from actual coursebook content
+
+#### Pattern Consistency
+- Identical structure to CB1-CB3 seeds
+- Flashcard categories validated against schema: vocabulary, definition, rule, example (fixed non-standard categories: event→definition, person→definition, ḥadīth→example)
+- TypeScript parses cleanly (verified via TS createSourceFile)
+- Difficulty: primarily MEDIUM with some EASY for basic recall (per conversion strategy for Book 4)
+
+### Maktab Coursebook 5 Seed — 2026-06-24
+
+#### File Created
+- `backend/prisma/seed-maktab-coursebook5.ts` — ~1560 lines, 107KB
+- Course: "Maktab Coursebook 5", category FIQH, ageLevels ['CHILD', 'PRE_TEEN'], ages 10–11
+
+#### Content Structure (7 units)
+0. **Fiqh** — Advanced wuḍū' rulings (farā'iḍ, sunan, makrūhāt, nawāqiḍ), tayammum, ṣalāh sunan (qiyām/rukū'/sajdah/qa'dah), forbidden times, masbūq, qaḍā', 'Īd ṣalāh (6 takbīrs, DROP mnemonic), iḥrām, 'umrah (ṭawāf/sa'y), ḥajj (3 types, day-by-day 8th-13th Dhul Ḥijjah), ziyārah (Madīnah, Rawḍah, Jannatul Baqī')
+1. **Aḥādīth** — 10 ḥadīth: promises, tongue, ghībah (muflīs ḥadīth), intoxicants, beauty of Islam, carrying tales, 99 names (iḥṣā'), Mu'awwidhāt, speaking good, good character (Anas serving 10 years)
+2. **Sīrah** — Treaty of Ḥudaybiyah, Bay'ah ar-Riḍwān, ambassadors to world leaders, breaking of treaty, conquest of Makkah (10,000 Muslims, general amnesty, Bilāl's adhān), Battle of Ḥunayn, Farewell Sermon
+3. **Tārīkh** — Story of Mūsā (magicians, parting of Red Sea, Fir'awn drowned, Tawrāh), Story of 'Īsā (Maryam, miraculous birth, speaking in cradle, miracles, Ḥawāriyyūn, raised to heavens)
+4. **Aqā'id** — Death journey (believer vs disbeliever), Munkar and Nakīr, Barzakh, 'Illiyyūn/Sijjīn, Jannah (8 gates, rivers, Ṭūbā tree, seeing Allāh), 'Asharah Mubasharah (10 names), Jahannam (7 gates, Zaqqūm tree), A'rāf, al-Qadr, core beliefs (Allāh/prophets/Ṣaḥābah/Khulafā')
+5. **Akhlāq** — Mashwarah (Qur'ān 3:159, story of Yūsuf), Ṣabr (3 types: obedience/abstinence/endurance), family ties (ṣilah al-raḥim), gifts/hospitality, dhikr (Ibn al-Qayyim's benefits)
+6. **Ādāb** — Ghusl method, social interaction (comprehensive manners list), writing letters, miswāk (benefits, occasions), visiting the sick (Ḥadīth Qudsī)
+
+#### Content Totals
+- 39 quiz questions (7+5+6+5+6+5+5): MC/TF/FILL types, mostly MEDIUM difficulty
+- 58 flashcards (10+10+8+8+8+7+7): vocabulary/definition/rule/example categories with Arabic text
+- 30 Arabic terms across all units with transliteration and translation
+
+#### Source Material Notes
+- CB5 HTML (151KB, 1148 lines) has significant OCR artifacts: `#ajj`, `far}`, `ṣa#ābah`, `*\ﬁ~`, `^|natul` — all cleaned in seed content
+- Sīrah and Tārīkh content were embedded inside the Aḥādīth HTML section — extracted and separated into proper units
+- Content is the most complex coursebook so far: detailed ḥajj day-by-day itinerary, comprehensive eschatology with 'Illiyyūn/Sijjīn/A'rāf/Barzakh, and two complete prophet narratives
+- Parent guide quiz questions were auto-generated (low quality: "What is this?", "What is if a person?") — all quiz questions hand-crafted from content understanding
+
+#### Pattern Consistency
+- Identical structure to CB1-CB4 seeds
+- Flashcard categories: vocabulary, definition, rule, example
+- TypeScript parses cleanly (verified via TS createSourceFile)
+- Difficulty: primarily MEDIUM with some EASY (per conversion strategy for Book 5)
