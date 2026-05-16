@@ -135,3 +135,45 @@ Backend inventory audit wrapped. Findings merged into team decision archive:
 - Identical structure to CB1 seed: imports → export function → idempotency → course → 7 units → questions createMany → flashcards createMany with global index → arabicTerms createMany → summary → main wrapper
 - Quiz questions hand-crafted from actual coursebook content (not generic parent guide questions)
 - Rich HTML content with h2/h3/p/ul/ol tags, Arabic blocks with dir="rtl", Qur'ānic references
+
+### 2026-07-14 — Mukhtasar al-Quduri: Kitab al-Taharah Seed Script
+
+**File:** `backend/prisma/seed-quduri-taharah.ts` (~128KB, 2092 lines)
+
+#### Content
+- Course: "Mukhtasar al-Quduri: Kitab al-Taharah (Book of Purification)", ageLevels `['TEEN', 'ADULT']`, category `FIQH`
+- Source: Classical Hanafi fiqh text by Imam Ahmad ibn Muhammad al-Quduri (d. 428 AH), Kitab al-Taharah chapter
+- 10 Units: Fard of Wudu, Sunan of Wudu, Nawaqid al-Wudu, Fard/Sunan of Ghusl, Types of Water, Rulings on Wells, Tayammum, Wiping Over Footwear, Menstruation & Nifas, Impurities & Purification
+- 65 quiz questions (5-8 per unit, MULTIPLE_CHOICE/TRUE_FALSE/FILL_BLANK, MEDIUM/HARD)
+- 53 flashcards with Arabic fiqh terminology (orderIndex resets per unit — @@unique is [unitId, orderIndex])
+- 68 Arabic terms with transliteration and translation
+
+#### Pattern Notes
+- Uses `<div class="bilingual-text">` format with `<div class="arabic-original" dir="rtl" lang="ar">` + `<div class="english-translation"><em>[AI-Generated Translation]</em>` — different from CB1/CB2 pattern but appropriate for classical text + translation format
+- English translations clearly marked as AI-generated (not scholarly) throughout
+- Full Arabic diacritics (tashkeel) preserved from source text
+- Questions test understanding of RULINGS (Hanafi positions, conditions, exceptions) — not memorization
+- FlashCard orderIndex is per-unit (resets to 0), NOT global — confirmed by @@unique([unitId, orderIndex]) constraint
+
+### 2026-07-18 — Maktab Coursebook 3 Seed Script
+
+**File:** `backend/prisma/seed-maktab-coursebook3.ts` (~104KB, ~1962 lines)
+
+#### Content
+- Course: "Maktab Coursebook 3", ageLevels `['CHILD', 'PRE_TEEN']` (ages 8-9), category `FIQH`
+- 7 Units: Fiqh (key terms/ṭahārah/najāsah/ghusl/ṣalāh method+types/Witr/Qaṣr/Marīḍ), Aḥādīth (10 ḥadīth: ṣalāh/love/steadfastness/life/world/du'ā'/guests/mercy/modesty/shukr), Sīrah (Abyssinia→Mi'rāj), Tārīkh (Ibrāhīm & Ismā'īl: idols/fire/Namrūd/Zamzam/sacrifice/Ka'bah), Aqā'id (prophets/messengers/25 names/Rasūl vs Nabī/signs of Last Day), Akhlāq (thinking good/sharing/parents/truth/good words/ghībah), Ādāb (travelling/studying/Qur'ān/walking/masjid)
+- 41 quiz questions (7+6+6+6+5+6+5 per unit, MULTIPLE_CHOICE/TRUE_FALSE/FILL_BLANK, EASY/MEDIUM)
+- 60 flashcards with global orderIndex tracking (vocabulary, rules, definitions, examples)
+- 30 Arabic terms across all units
+
+#### Source Material Notes
+- CB3 HTML (107KB) has significant OCR artifacts from PDF conversion — garbled text in diagram-heavy sections (fiqh key words diagram, ṣalāh table, nawāqiḍ list). Content was cleaned and rewritten.
+- Sīrah and Tārīkh content is embedded under the Aḥādīth section in the HTML (articles with "SīrahLearning" and "TārīkhLearning" objectives headers) — mapped to separate units.
+- Aḥādīth section has 10 ḥadīth (not 6 like CB1/CB2) — significant jump in content depth for age 8-9.
+- Parent guide has 94 questions across 28 topics — quiz questions derived from these but adapted for the seed format.
+- Du'ā' Qunūt Arabic text partially garbled in HTML — cleaned version used in seed.
+
+#### Pattern Consistency
+- Identical structure to CB1/CB2 seeds: imports → export function → idempotency → course → 7 units → questions createMany → flashcards createMany with global index → arabicTerms createMany → summary → main wrapper
+- TypeScript parses cleanly (verified via TS createSourceFile)
+- Difficulty mix: EASY and MEDIUM (per conversion strategy: Books 3-5 use both levels)
