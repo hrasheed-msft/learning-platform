@@ -95,3 +95,27 @@ Backend inventory audit wrapped. Findings merged into team decision archive:
 - Decision filed: "Consolidate Dual SRS Systems" — Recommends migrating MemorizationItem to FlashCard SRS (FlashCard is more mature, reduces duplication)
 - Critical issue identified: Quiz answers exposed in GET endpoint (item 7 above) — should be fixed immediately
 - Backend is feature-complete with clear architectural decisions needed on SRS consolidation and schema extensions
+
+### 2026-05-16 — Maktab Coursebook 1 Seed Script
+
+**File:** `backend/prisma/seed-maktab-coursebook1.ts`
+
+#### Seed Script Pattern (for future coursebooks)
+- Each coursebook is a standalone seed file exporting a named function (`seedMaktabCoursebook1`) plus a `main()` wrapper for standalone execution (`npx ts-node prisma/seed-maktab-coursebook1.ts`).
+- Follows the sarf seed pattern: find demo family first, create course, then units with `orderIndex` starting at 0, then questions/flashcards/arabicTerms via `createMany`.
+- Idempotent: checks if course title already exists before seeding.
+- Does NOT use non-standard schema fields (learned from sarf seed mismatch). Only uses fields present in the actual Prisma schema: `title`, `description`, `category`, `ageLevels`, `isPublished` for Course; `title`, `description`, `content`, `orderIndex`, `courseId` for Unit.
+
+#### Content Mapping Decisions
+- Coursebook has 7 subjects → 7 Units: Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā'id, Akhlāq, Ādāb
+- Each topic within a subject is embedded as a `<h3>` section inside the unit's HTML `content` field (not separate units) — matches the coursebook's natural hierarchy where subjects have 2-10 topics each.
+- Course category set to `FIQH` (closest match — the coursebook is interdisciplinary but Fiqh is the dominant subject).
+- Age levels: `['EARLY_CHILD', 'CHILD']` matching the 6-7 year target.
+- Arabic text preserved with full tashkeel/diacritics in flashcards, arabicTerms, and content HTML using `<p class="arabic" dir="rtl" lang="ar">` blocks.
+- Transliterations use academic convention: ṣ, ṭ, ḍ, ḥ, dh, th, etc.
+
+#### Content Totals
+- 41 quiz questions (5-7 per unit, EASY/MEDIUM difficulty, age-appropriate)
+- 59 flashcards across all units (vocabulary, rules, definitions, examples, duas)
+- 26 Arabic terms with transliteration and translation
+- All content sourced from Coursebook1.html with supplemental context from parent guide
