@@ -232,3 +232,111 @@ Backend inventory audit wrapped. Findings merged into team decision archive:
 - Flashcard categories: vocabulary, definition, rule, example
 - TypeScript parses cleanly (verified via TS createSourceFile)
 - Difficulty: primarily MEDIUM with some EASY (per conversion strategy for Book 5)
+
+### Coursebook 7 Seed — seed-maktab-coursebook7.ts
+
+#### Content (Age 12–13, PRE_TEEN/TEEN)
+- 7 units: Fiqh (Advanced Ṣalāh/Zakāh/Inheritance), Aḥādīth (15 narrations), Sīrah (Shamā'il + 'Umar ibn al-Khaṭṭāb), Tārīkh (Zakariyyā/Yaḥyā + Abbasids), Aqā'id (Qaḍā'/Qadr, Barzakh, Day of Judgement), Akhlāq (Rumours, Time, Knowledge, Durūd), Ādāb (Social Manners)
+- Fiqh is the largest unit: 14 topics including makrūhāt, sutrah, sajdah tilāwah, kusūf/khusūf, taḥarrī, qaṣr, marīḍ, ma'dhūr, zakāh (with niṣāb calculations), inheritance, i'tikāf, laylatul qadr, ḥalāl foods, uḍḥiyah
+- 43 quiz questions (7 per unit on average), 40 flashcards, 25 Arabic terms
+- CB7 HTML (985 lines) had the same OCR artifact patterns as earlier books: `|` for ī, `}` for ḍ, `{` for ṭ, `#` for ḥ, `~` for ẓ, `\` for ā, compass coordinate gibberish
+- Parent guide quiz questions were auto-generated and low quality — all questions hand-crafted
+
+#### Pattern Consistency
+- Identical structure to CB1-CB6 seeds
+- TypeScript parses cleanly (verified via TS createSourceFile)
+- Difficulty: mix of EASY and MEDIUM throughout
+
+### Coursebook 8 Seed — seed-maktab-coursebook8.ts
+
+#### Content (Age 13–14, PRE_TEEN/TEEN)
+- 7 units: Fiqh (Nawāfil Ṣalāh/Nikāḥ/Ṭalāq/Buyū'/Ijārah/Ribā/Gambling/Four Schools), Aḥādīth (9 narrations on character & worship), Sīrah (Shamā'il + 'Uthmān + 'Alī), Tārīkh (Ayyūb/Andalusia/Crusades/Ottomans), Aqā'id (Ṣifāt/Mutashābihāt/Istiwā'/Īmān/Isnād), Akhlāq (Taqwā/Tawakkul/Tawbah/Modesty), Ādāb (Debates/Nikāḥ etiquette/Transactions)
+- Most advanced content yet: nikāḥ/ṭalāq/mahr legal rules, ribā and gambling prohibition with Qur'ānic evidence, four schools of fiqh (biographical details of all four imāms), ḥadīth qudsī (closeness to Allāh), shamā'il (7 character traits of the Prophet ﷺ), 'Uthmān & 'Alī biographical detail, Andalusia rise and fall (711-1492 AD), Crusades with Nūruddīn and Ṣalāḥuddīn, Ottoman Empire (1299-1923 AD), theological concepts (mutashābihāt/tafwīḍ/ta'wīl)
+- 44 quiz questions, 54 flashcards, 29 Arabic terms
+- 1157 lines of TypeScript, transpiles cleanly
+
+#### Source Material Notes
+- CB8 HTML (1195 lines) had extensive OCR artifacts similar to earlier books — ligature issues (ﬁ→fi), broken diacritics (#→ḥ, |→ī, \→ā), garbled Arabic text blocks
+- Parent guide quiz questions were generic auto-generated templates — all 44 quiz questions hand-crafted from actual coursebook content
+- Content density significantly higher than earlier books: Fiqh unit alone covers 14+ topics with detailed legal rulings
+- Tārīkh unit spans multiple historical periods (prophetic, medieval, modern) unlike single-narrative approach of some earlier books
+
+#### Pattern Consistency
+- Identical structure to CB1-CB7 seeds
+- TypeScript transpiles cleanly (verified via ts.transpileModule)
+- Difficulty: mix of EASY and MEDIUM throughout
+
+### 2026-05-16 — Seed: An Nasihah Further Studies (North West)
+
+Created `backend/prisma/seed-maktab-further-studies-nw.ts` — advanced Islamic curriculum for ages 14+.
+
+#### Stats
+- 9 units covering: Essentials 1 & 2, Faith & Belief, Devotional Acts, Muslim Identity, Living Islām, Money & Wealth, Contemporary Matters, Forty Aḥādīth
+- 56 quiz questions (MEDIUM/HARD difficulty), 66 flashcards, 36 Arabic terms
+- 2414 lines of TypeScript, transpiles cleanly
+
+#### Source Material Notes
+- FurtherStudiesNW.html (1793 lines) is the most content-dense book in the series — covers theology, advanced fiqh, Islamic finance, mental health, and contemporary social issues
+- Significant OCR artifacts in the source HTML — garbled Arabic text blocks, merged columns from PDF layout, broken diacritics
+- Parent guide HTML (FurtherStudiesNW-parent-guide.html) had low-quality auto-generated quiz questions — all 56 questions hand-crafted from actual content
+- Content structure differs from CB1-CB8: organized by thematic chapters (Faith, Devotion, Identity, etc.) rather than traditional subject divisions (Fiqh, Sīrah, etc.)
+- Names of Allāh section required careful extraction — Ar-Raḥmān, Al-Ghafūr, Al-Mu'izz, Al-Wakīl, Al-Mutakabbir, Al-Qādir, Ash-Shakūr, Al-Mumīt
+
+#### Pattern Consistency
+- Identical structure to CB1-CB8 seeds (idempotent check, unit.create, createMany for questions/flashcards/terms)
+- TypeScript transpiles cleanly (verified via ts.transpileModule)
+- Difficulty: MEDIUM and HARD throughout (advanced level curriculum for teens/adults)
+- First seed with ageLevels: ['TEEN', 'ADULT'] instead of child-oriented levels
+
+### Maktab Coursebook 6 Boys Seed — 2026-07-15
+
+#### File: `backend/prisma/seed-maktab-coursebook6boys.ts`
+- 1171 lines — 7 units (Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā'id, Akhlāq, Ādāb), 44 quiz questions, 54 flashcards, 34 Arabic terms
+- Age range: PRE_TEEN, TEEN (11–12 years)
+- Course category: FIQH (primary subject emphasis)
+
+#### Content Notes
+- Source HTML (`maktab-coursebook-html/Coursebook6Boys.html`, 1142+ lines) had heavy OCR artifacts: `|` → `ī`, `#` → `ḥ`, `~` → `ẓ`, `[`/`]` → `ṣ`, `{` → `ṭ`, `}` → `ḍ`, `\` → `ā`
+- Parent guide HTML (`Coursebook6Boys-parent-guide.html`, ~800 lines) had poor auto-generated quiz questions — all questions hand-crafted from actual content instead
+- Advanced fiqh content: water types (ṭāhir muṭahhir, ṭāhir ghayr muṭahhir, najis), impurities (ghalīẓah vs khafīfah), maturity signs, ghusl farā'iḍ, 14 wājib acts of ṣalāh, imām requirements, janāzah (ghusl/shrouding/ṣalāh), Jumu'ah, adhān & iqāmah
+- Sīrah covers both Shamā'il (physical description of Prophet ﷺ) and full biography of Abū Bakr al-Ṣiddīq
+- Tārīkh combines prophetic stories (Dāwūd, Sulaymān, Yūnus) with Umayyad dynasty history
+- Aqā'id section covers prophethood theology (rasūl vs nabī), mu'jizāt of multiple prophets, Isrā' wal-Mi'rāj, karāmāt
+
+#### Pattern Consistency
+- Identical structure to CB1 seed (idempotent check, unit.create, question.createMany, flashCard.createMany with global index, arabicTerm.createMany, standalone main())
+- TypeScript syntax verified clean
+- Flashcard difficulty uses `'EASY' as const` / `'MEDIUM' as const` / `'HARD' as const` for enum typing
+- Question options: `JSON.stringify([...])` for MC/TF, `null` for FILL_BLANK
+
+### Session: Coursebook 6 Girls Seed (seed-maktab-coursebook6girls.ts)
+**Date:** 2025-07-16
+**Task:** Convert `maktab-coursebook-html/Coursebook6Girls.html` and parent guide into Prisma seed script
+
+#### What Was Done
+- Created `backend/prisma/seed-maktab-coursebook6girls.ts` (1382 lines)
+- Course: "An Nasihah Coursebook 6 (Girls)", ages 11-12 (PRE_TEEN, TEEN)
+- 7 units: Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā'id, Akhlāq, Ādāb
+- 46 quiz questions, 54 flashcards, 37 Arabic terms
+- Rich HTML content for each unit covering the full curriculum
+
+#### OCR Artifacts Cleaned
+- `#ay}` → `ḥayḍ`, `isti#\}ah` → `istiḥāḍah`, `#ā'iḍah` → `ḥā'iḍah`
+- `Ghal|~ah` → `Ghalīẓah`, `Qam|]` → `Qamīṣ`, `nab|` → `nabī`
+- `~ulm` → `ẓulm`, `Sub#ānallāh` → `SubḥānAllāh`
+- `*ākim` → `Ḥākim`, `Kha{{āb` → `Khaṭṭāb`
+- `|` chars replacing `ī` throughout (e.g., `Ban[ Isrā'|l` → `Banī Isrā'īl`)
+- `ﬁ` → `fi`, `ﬂ` → `fl` ligature artifacts
+- Garbled Arabic text in Janāzah prayers was omitted and replaced with transliterated references
+
+#### Girls-Specific Content
+- Fiqh unit covers ḥayḍ/istiḥāḍah/nifās rulings in detail (maturity, prohibitions during menstruation)
+- Kafan section covers female-specific 5-cloth shrouding
+- Ādāb unit covers ḥijāb, importance of women in society (as daughter/wife/mother)
+- Personal hygiene section includes menstruation hygiene guidance
+
+#### Pattern Consistency
+- Identical structure to CB1 and CB6 Boys seeds
+- TypeScript transpiles cleanly (verified via ts.transpileModule)
+- All flashcards use `as const` for difficulty, global flashcardIndex counter
+- Arabic terms include tashkīl on Arabic text
