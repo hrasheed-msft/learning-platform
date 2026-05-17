@@ -118,3 +118,63 @@ Frontend inventory audit wrapped. Findings merged into team decision archive:
   - Items 1-2 (404 page, @utils/@hooks dirs) are quick wins for Ibn Sina to complete immediately
   - Items 3-7 (family admin, AI quiz UI, gamification page, orphaned component, localStorage→backend) blocked on product direction
 - Frontend codebase is 90-95% feature-complete with clear gaps now documented
+
+---
+
+### 2026-05-17 — Child Login + Parent Dashboard Frontend
+
+**Status:** COMPLETED
+
+Built the full child auth and parent monitoring frontend. Key files and patterns:
+
+#### New Routes
+| Route | Component | Layout | Guard |
+|-------|-----------|--------|-------|
+| `/child-login` | ChildLoginPage | Standalone | None |
+| `/child/dashboard` | ChildDashboardHome | ChildLayout | ChildProtectedRoute |
+| `/child/courses` | ChildCoursesPage | ChildLayout | ChildProtectedRoute |
+| `/child/flashcards` | ChildFlashcardsPage | ChildLayout | ChildProtectedRoute |
+| `/child/achievements` | ChildAchievementsPage | ChildLayout | ChildProtectedRoute |
+| `/dashboard/parent` | ParentDashboard | MainLayout | ProtectedRoute |
+| `/dashboard/parent/child/:memberId` | ChildDetailView | MainLayout | ProtectedRoute |
+
+#### New Stores
+- **childAuthStore** — persist-enabled, separate from authStore. Uses `child-auth-storage` localStorage key.
+- **dashboardStore** — children list, child stats, activity feed with pagination, family summary.
+- **notificationStore** — notification list, unread count, mark-as-read.
+
+#### New Services
+- **childAuthService** — `childLogin()`, `setCredentials()` 
+- **dashboardService** — `getChildren()`, `getChildStats()`, `getChildActivity()`, `getFamilySummary()`, `getNotifications()`, `markNotificationRead()`
+
+#### New Types
+- `types/childAuth.ts` — ChildLoginRequest, ChildMember, ChildAuthResponse, SetCredentialsRequest
+- `types/dashboard.ts` — ChildSummary, ChildDetailStats, ActivityEvent, FamilySummary, Notification
+
+#### Architecture Decisions
+- **Separate child auth store** rather than extending authStore — keeps parent/child sessions isolated, avoids token conflicts.
+- **ChildLayout is a separate layout** — simplified nav with no access to settings, family management, or billing.
+- **ChildProtectedRoute** checks `useChildAuthStore()` — completely independent of parent auth guard.
+- **SetCredentialsModal** added to FamilySettings member rows — parents can set child username/password per member.
+- **ChildLoginPage is standalone** — not nested in AuthLayout to allow a distinct child-friendly look.
+- Child page stubs (courses, flashcards, achievements) are placeholders ready for backend integration.
+
+### 2026-05-17 — Child Login + Parent Dashboard Frontend Implementation
+
+**Status:** COMPLETED  
+**Orchestration Log:** `.squad/orchestration-log/2026-05-17T10-54-ibn-sina.md`
+
+Implemented complete frontend for child authentication, child-scoped layout, parent dashboard, and credential management. All builds pass with no TypeScript errors.
+
+**Outcomes:**
+- 24 files created: childAuthStore (isolated persist), childAuthService, dashboardService, notificationStore
+- ChildLoginPage: Child-friendly design with larger inputs, "Assalamu Alaikum!" greeting, GraduationCap icon
+- ChildLayout: Restricted navigation (Dashboard, Courses, Flashcards, Achievements only)
+- ParentDashboard: Family summary, per-child stats, activity feeds, notification panel
+- ChildDetailView: Individual child statistics drill-down
+- SetCredentialsModal: Username + password management in FamilySettings
+- 4 child page stubs: ChildDashboardHome, ChildCoursesPage, ChildFlashcardsPage, ChildAchievementsPage
+- ChildProtectedRoute: Independent auth guard (separate from parent ProtectedRoute)
+- All API contracts documented in decision entry #8
+
+**Team Integration:** Ready for backend integration testing with Khwarizmi; dashboard UI prepared for parental controls additions (pending games blueprint finalization).

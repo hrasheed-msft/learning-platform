@@ -99,6 +99,25 @@ Key fields standardized:
 - **Key file paths for auth flow:** `backend/src/services/auth.service.ts` (login logic, bcrypt, JWT), `backend/src/routes/auth.routes.ts` (validation), `backend/src/controllers/auth.controller.ts` (thin controller), `frontend/src/services/api.ts` (axios interceptors, error extraction), `frontend/src/services/authService.ts` (API calls), `frontend/src/stores/authStore.ts` (Zustand state).
 - **API versioning:** Backend routes are at `/api/v1/*`, Vite proxy forwards `/api/v1` → `localhost:3000`.
 
+### 2026-05-17 — Child Auth + Parent Dashboard Backend Implementation
+
+**Status:** COMPLETED  
+**Orchestration Log:** `.squad/orchestration-log/2026-05-17T10-54-khwarizmi.md`
+
+Implemented three backend features: Seed wiring fix, Child Auth Phase 1, Parent Dashboard backend.
+
+**Outcomes:**
+- All 12+ seed files now wired into main seed.ts; seed-sarf-simple.ts standalone alternative
+- Sarf schema mismatch resolved (added descriptionArabic, titleArabic, level, ageCategory, estimatedHours)
+- FamilyMember extended: username, passwordHash, loginEnabled fields
+- Dual JWT middleware: role-based branching (CHILD vs PARENT), req.child vs req.user population
+- 9 new files: 4 services (child-auth, activity, dashboard, notification) + 3 controllers + 3 route files
+- 6 new endpoints: /api/v1/auth/child-login, /api/v1/family/members/:memberId/credentials, /api/v1/dashboard/*, /api/v1/notifications/*
+- ActivityEvent model wired to quiz completion; recordActivity() helper ready for other services (flashcard, course deferred)
+- Notification model for parent alerts + marking read
+
+**Team Integration:** Ready for Ibn Sina frontend integration testing; parental controls awaiting Khaldun games blueprint finalization.
+
 ### Session Summary (2026-05-17T02:05:32Z)
 **Status:** Login error bug fixed and documented in decisions.md #3.
 - Health check moved above rate limiter middleware (always reachable for monitoring)

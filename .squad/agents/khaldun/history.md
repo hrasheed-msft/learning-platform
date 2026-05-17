@@ -5,68 +5,49 @@
 - **Stack:** React 18 + Vite + TypeScript (frontend), Node.js + Express + Prisma + PostgreSQL + Redis (backend), TailwindCSS, Zustand, JWT auth
 - **Created:** 2026-05-16
 
-## Learnings
+## Learnings (Summarized)
 
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
+**ARCHIVE NOTE:** This file reached 20.2 KB on 2026-05-17T10:54:54Z. Historical entries from 2026-05-16 (Architecture Audit, Maktab Analysis) have been archived. See orchestration logs in `.squad/orchestration-log/` for full details.
 
-### 2026-05-16 — Architecture Audit Summary (ARCHIVED)
+### Summary of Prior Work (2026-05-16)
 
-**Status:** COMPLETED — See `.squad/orchestration-log/2026-05-16T08-36-khaldun.md` for details
+**Architecture Audit:** Completed comprehensive inventory. Platform is 90-95% feature-complete (15+ models, 70+ routes, 20+ pages). Known gaps: Gamification trigger logic, Directus integration, email verification, SRS consolidation opportunity, seed file fragmentation. **Ref:** decisions.md #1
 
-Comprehensive architectural inventory completed. Key findings:
+**Maktab Coursebook Strategy:** Analyzed 10 HTML coursebooks + parent guides. HTML-to-Prisma mapping strategy defined: subject-centric courses (1 course per subject per level), auto-generation from parent guide quizzes (high quality), flashcard extraction, gender-differentiated variants. **Ref:** Orchestration log 2026-05-16
 
-**System Stack:** Frontend (React18 + Vite + TypeScript + Zustand), Backend (Express + Prisma + PostgreSQL + Redis), Auth (JWT + bcrypt), CMS (Directus scaffolded but not integrated).
-
-**Coverage:** 15+ data models, 70+ API routes, 20+ frontend pages/components, 11 seeded courses, 10 Maktab coursebooks (HTML structured, ready for ingestion).
-
-**Gaps:** AI quiz generation is stub only. Gamification engine missing (Achievement model exists but no trigger logic). Directus not integrated. Email verification stubbed. Age-based content filtering not implemented. Dual SRS systems (MemorizationItem + FlashCardProgress) may overlap.
-
-**Known Issues:** 25 orphaned Vite `.mjs` files in frontend/. Directus credentials hardcoded. Seed file fragmentation (5 files not wired into main). 65KB transcript file (Habits course already seeded).
-
-**Decisions:** Stored in `.squad/decisions.md` entry #1 + archived findings. All specific workstreams deferred to respective implementation agents (SRS consolidation, Maktab ingestion, seed orchestration, gamification activation).
+**Games + Parent Dashboard Research:** Three interconnected features designed: 13 game types (7 course-integrated, 6 standalone), parent dashboard (stats/activity/notifications), child login (JWT role branching on FamilyMember). All architectural decisions documented with 8 open questions. **Ref:** decisions.md #4 (high-level overview), inbox/khaldun-games-detailed-design.md (full 3335-line blueprint)
 
 ---
 
-### 2026-05-17 — Games, Parent Dashboard & Child Auth Design Document
+### 2026-05-17 — Games Detailed Design + Parental Controls Addendum
 
 **Status:** COMPLETED  
-**Deliverable:** `.squad/decisions/inbox/khaldun-games-dashboard-childauth-research.md` → merged to `decisions.md` entry #4
+**Orchestration Log:** `.squad/orchestration-log/2026-05-17T10-54-khaldun.md`
 
-Comprehensive research and design document covering three interconnected features: Games (13 game types across course-integrated and standalone categories), Parent Dashboard (statistics, activity feed, notifications, comparative views), and Child/Teen Login (username-only auth with JWT role branching).
+Games engine detailed design document finalized with parental controls section added. Document now 3335 lines, provides full implementation blueprint for engineering teams.
 
-**Key Architectural Decisions:**
+**Outcomes:**
+- Complete 13-game catalog with mechanics, scoring, difficulty scaling, SRS integration
+- Game engine state machine architecture (IDLE → LOADING → READY → PLAYING → COMPLETED)
+- Content selection algorithm (4-tier priority: SRS-due, recently-wrong, unseen, random)
+- 15-endpoint API specification (game metadata, lifecycle, scoring, leaderboards)
+- Frontend component architecture (GameLauncher, GameBoard, GameResult, ParentalControlsPanel)
+- Placement strategy (course-integrated, standalone hub, habit formation widgets)
+- Phase 1 vs Phase 2 scope clearly delineated (5 games MVP vs leaderboard/multiplayer future)
+- Gamification layer: Points, achievements, reward unlock progression
+- **NEW: Section 12 — Parental Controls** (Khaldun-4, Haiku)
+  - Time Limits: DailyTimeLimit model per child + game type (e.g., 30 min/day Term Match)
+  - Type Restrictions: Blocklist of restricted games per child
+  - Enforcement: Game launch checks; parent dashboard usage tracking
+  - Age-Based Defaults: Auto-apply restrictions by AgeCategory
+  - Dashboard UI: Parental Controls panel with full CRUD
+  - Notification Alerts: Parent notified on limit approach/restriction attempt
 
-1. **Child Auth on FamilyMember (Option A):** Add username/passwordHash/loginEnabled fields directly to FamilyMember rather than creating a separate ChildCredential model. FamilyMember is already the child identity anchor — separate model would require unnecessary joins on every child auth check.
+**Implementation Readiness:** Design includes scoring formulas, UI wireframes, test case scenarios, pseudocode. Sufficient for Khwarizmi (backend) and Ibn Sina (frontend) to implement without guessing.
 
-2. **JWT Role Branching:** Child JWTs use `role: "CHILD"` with `sub` = FamilyMember ID (not User ID). Middleware branches on role to resolve actor identity. Route protection matrix documented for all 15+ route categories.
+**Full Document Reference:** `.squad/decisions/inbox/khaldun-games-detailed-design.md` (3335 lines; kept as reference artifact; summary merged to decisions.md entry #9)
 
-3. **Games use existing content:** Phase 1 games (Term Match, Speed Quiz, Flashcard Flip, Daily Challenge) are 100% auto-generated from existing Question, FlashCard, and ArabicTerm data. No manual content authoring needed for initial launch.
-
-4. **SRS writeback from games:** Game results feed back into FlashCardProgress (correct answer = SM-2 rating 4, incorrect = rating 2). Playing games reduces review burden — major engagement lever.
-
-5. **ActivityEvent as shared infrastructure:** Single model written by all learning activities (quiz, course, game, flashcard milestones), read by parent dashboard and notification system. Unifies the activity tracking layer.
-
-6. **Single Prisma migration for all 3 features:** 10 new models + modifications to 4 existing models. Implementation is phased (Child Auth → Parent Dashboard → Games) but schema lands atomically to avoid migration churn.
-
-7. **Implementation order:** Child Auth first (establishes child-as-actor identity), Parent Dashboard second (reads child activity data), Games third (children play, parents monitor). Dependency chain is clear.
-
-8. **13 game types designed:** 7 course-integrated (Term Match, Ayah Completion, Fiqh Scenario, Hadith Chain, Word Search, Speed Quiz, Flashcard Flip) + 6 standalone (Daily Challenge, Knowledge Expedition, Trivia Battle, Mosque Builder, Pattern Creator, Seerah Timeline). Each has content source, difficulty scaling, age mapping, and trigger conditions documented.
-
-**Open Questions (8):** Documented in design doc with recommendations. Key pending decisions: global vs family-scoped usernames, SRS writeback confirmation, email digest deferral to Phase 2.
-
----
-
-## Cross-Agent Session Summary (2026-05-17T10:30:29Z)
-
-**Parallel Work from Khwarizmi (Backend):**
-- **Catalog Fix:** Course pagination limit bumped 12→50; all 17 courses now load
-- **Rate Limiter:** Health check moved above middleware; always reachable for monitoring
-- **Error Handling:** Frontend error extraction now handles both response shapes
-
-**Next Phase Handoff:**
-- Design document ready for team review (8 open questions capture decision gates)
-- Implementation sequence: Child Auth → Parent Dashboard → Games Phase 1
-- Team consensus needed on 8 architectural decisions before sprint
+**Team Handoff:** All three features (Child Auth, Parent Dashboard, Games) now have complete backend + frontend designs. Ready for parallel implementation sprint.
 
 ### 2026-05-16 — Maktab Coursebook HTML Structure & Conversion Analysis
 
@@ -210,3 +191,72 @@ Comprehensive research and design document covering three interconnected feature
 - **Khaldun:** Design document ready for team review (8 open questions capture decision gates)
 - **Khwarizmi:** Available to implement Child Auth (Phase 1 of games/dashboard work)
 - **Team:** Consensus needed on 8 architectural decisions before implementation sprint
+
+### 2026-05-17 — Games Engine Detailed Design Document
+
+**Status:** COMPLETED
+**Deliverable:** `.squad/decisions/inbox/khaldun-games-detailed-design.md` (~900 lines)
+
+Comprehensive implementation blueprint covering all 13 game types with full specifications. Key architectural decisions made in this document:
+
+1. **Phase 1 scope: 5 games** — Term Match, Speed Quiz, Flashcard Flip, Daily Challenge, Word Search. Chosen for highest engagement-to-effort ratio (3×S + 1×S-reuse + 1×M).
+
+2. **Game engine is a state machine** — IDLE → LOADING → READY → PLAYING → COMPLETED/ABANDONED. State transitions managed client-side (Zustand), session lifecycle server-side.
+
+3. **Content selection algorithm: 4-tier priority** — (1) SRS-due items, (2) recently-wrong items, (3) unseen items, (4) random. Diversity constraint: max 2 items per unit in standalone games.
+
+4. **No mid-game difficulty adaptation** — Feels unfair; between-session suggestions only. Phase 2 may add adaptive difficulty within Knowledge Expedition.
+
+5. **SRS rating mapping standardized** — Fast correct → 5, correct → 4, slow correct → 3, incorrect → 2, timeout → 1. Uses existing `sm2-algorithm.service.ts` (1-5 scale).
+
+6. **Streak grace period: 1 day** — Miss 1 day without breaking streak (once per gap). Prevents frustration while maintaining habit pressure.
+
+7. **XP is cosmetic only** — No content gating, no pay-to-win. XP unlocks Knowledge Expedition cities and Mosque Builder materials.
+
+8. **Quality gates hide unavailable games** — If a unit lacks minimum content (e.g., <4 ArabicTerms for Term Match), the game simply doesn't appear. No broken empty games.
+
+9. **Sprint plan: 4 sprints (8 weeks)** — Foundation → First Games → More Games + Hub → Gamification + Polish.
+
+10. **Data model: 13 new Prisma models** — GameTemplate, Game, GameSession, GameRound, GameScore, BadgeDefinition, UserBadge, UserAchievement, Leaderboard, LeaderboardEntry, DailyChallenge, DailyChallengeAttempt, UserStreakRecord, StreakAchievement.
+
+**Key file paths:**
+- Design doc: `.squad/decisions/inbox/khaldun-games-detailed-design.md`
+- Existing SM-2: `backend/src/services/flashcard/sm2-algorithm.service.ts`
+- Existing schema: `backend/prisma/schema.prisma`
+- Frontend stores: `frontend/src/stores/` (gameStore.ts will be new)
+**Key file paths:**
+- Design doc: `.squad/decisions/inbox/khaldun-games-detailed-design.md`
+- Existing SM-2: `backend/src/services/flashcard/sm2-algorithm.service.ts`
+- Existing schema: `backend/prisma/schema.prisma`
+- Frontend stores: `frontend/src/stores/` (gameStore.ts will be new)
+- Backend services pattern: `backend/src/services/` (game/ directory will be new)
+
+### 2026-05-17 — Games Detailed Design + Parental Controls Addendum
+
+**Status:** COMPLETED  
+**Orchestration Log:** `.squad/orchestration-log/2026-05-17T10-54-khaldun.md`
+
+Games engine detailed design document finalized with parental controls section added. Document now 3335 lines, provides full implementation blueprint for engineering teams.
+
+**Outcomes:**
+- Complete 13-game catalog with mechanics, scoring, difficulty scaling, SRS integration
+- Game engine state machine architecture (IDLE → LOADING → READY → PLAYING → COMPLETED)
+- Content selection algorithm (4-tier priority: SRS-due, recently-wrong, unseen, random)
+- 15-endpoint API specification (game metadata, lifecycle, scoring, leaderboards)
+- Frontend component architecture (GameLauncher, GameBoard, GameResult, ParentalControlsPanel)
+- Placement strategy (course-integrated, standalone hub, habit formation widgets)
+- Phase 1 vs Phase 2 scope clearly delineated (5 games MVP vs leaderboard/multiplayer future)
+- Gamification layer: Points, achievements, reward unlock progression
+- **NEW: Section 12 — Parental Controls** (Khaldun-4, Haiku)
+  - Time Limits: DailyTimeLimit model per child + game type (e.g., 30 min/day Term Match)
+  - Type Restrictions: Blocklist of restricted games per child
+  - Enforcement: Game launch checks; parent dashboard usage tracking
+  - Age-Based Defaults: Auto-apply restrictions by AgeCategory
+  - Dashboard UI: Parental Controls panel with full CRUD
+  - Notification Alerts: Parent notified on limit approach/restriction attempt
+
+**Implementation Readiness:** Design includes scoring formulas, UI wireframes, test case scenarios, pseudocode. Sufficient for Khwarizmi (backend) and Ibn Sina (frontend) to implement without guessing.
+
+**Full Document Reference:** `.squad/decisions/inbox/khaldun-games-detailed-design.md` (3335 lines; kept as reference artifact; summary merged to decisions.md entry #9)
+
+**Team Handoff:** All three features (Child Auth, Parent Dashboard, Games) now have complete backend + frontend designs. Ready for parallel implementation sprint.

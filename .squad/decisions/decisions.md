@@ -1,8 +1,8 @@
 # Decisions Archive
 
-**Last Updated:** 2026-05-16T08:36:20-05:00  
-**Total Decisions:** 5  
-**Source:** Merged from .squad/decisions/inbox/ on 2026-05-16
+**Last Updated:** 2026-05-17T10:54:54Z  
+**Total Decisions:** 9  
+**Source:** Merged from .squad/decisions/inbox/ on 2026-05-17
 
 ---
 
@@ -149,4 +149,190 @@ Full quality audit revealed 3 critical security issues and several high-severity
 ### Recommendation
 
 Items 1-3 should be addressed before any further feature work. Items 4-8 should be completed this sprint. Full report at `.squad/agents/biruni/quality-report-2026-05-16.md`.
+
+---
+
+## Decision: User Directive — Parental Controls for Games
+
+**Author:** hrasheed (via Copilot)  
+**Date:** 2026-05-17  
+**Status:** Captured for team implementation
+
+### Requirement
+
+Games design doc must include parental controls. Parents should be able to:
+1. Limit children's game time (daily time budget, cooldown periods)
+2. Restrict which types of games children can play (blocklists by game type)
+3. Enforce age-appropriate content restrictions
+
+### Integration Point
+
+This requirement is incorporated into the Games design doc (Section 12: Parental Controls). Implementation includes dashboard UI for time limits, database schema (GameTimeLimit, GameTypeRestriction models), and enforcement logic at game launch.
+
+---
+
+## Decision: Child Auth + Parent Dashboard — Backend Implementation
+
+**Author:** Khwarizmi (Backend Dev)  
+**Date:** 2026-05-17  
+**Status:** IMPLEMENTED
+
+### Summary
+
+Implemented three backend features per design:
+1. **Seed Loading Fix** — All 12+ seed files now wired into `seed.ts` (seed-sarf-simple.ts kept as standalone alternative)
+2. **Child Auth (Phase 1)** — Username/password login for FamilyMembers with dual JWT middleware
+3. **Parent Dashboard Backend** — Activity tracking and notification system
+
+### Key Decisions
+
+- **Child JWT Structure:** Uses `sub: memberId`, `role: "CHILD"`; single `authenticate` middleware handles both token types
+- **Credential Storage:** On FamilyMember model (username globally unique + lowercased, password bcrypt-hashed)
+- **Activity Recording:** Standalone `recordActivity()` helper callable by any service; currently wired to quiz completion
+- **SRS Integration:** Quiz completion writes ActivityEvent; other services (flashcard, course) deferred
+
+### Files Modified/Created
+
+**Modified:** schema.prisma, seed.ts, auth.middleware.ts, index.ts, assessment.service.ts, 11 seed files  
+**Created:** 9 new controllers/services/routes for child-auth, dashboard, notifications
+
+### Blockers Resolved
+
+All 12 seed files now execute without errors (Sarf schema mismatch fixed by Khwarizmi in prior decision).
+
+---
+
+## Decision: Child Auth + Parent Dashboard — Frontend Implementation
+
+**Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-05-17  
+**Status:** IMPLEMENTED
+
+### Summary
+
+Built complete frontend for child authentication, child-scoped layout, parent dashboard, and credential management. All new code compiles and builds successfully.
+
+### Key Architectural Choices
+
+1. **Separate Child Auth Store** — Uses `childAuthStore` with isolated persist key (`child-auth-storage`); parent and child sessions fully independent
+2. **Standalone Child Login Page** — `/child-login` rendered outside AuthLayout; distinct child-friendly UI with larger inputs, welcoming copy, GraduationCap icon
+3. **ChildLayout Restriction** — Navigation limited to: My Dashboard, My Courses, My Flashcards, Achievements; no Settings or family management access
+4. **Dual Route Guards** — New `ChildProtectedRoute` (reads `childAuthStore`) vs existing `ProtectedRoute` (reads `authStore`)
+5. **Credential Modal in FamilySettings** — "Set Login" button per member opens `SetCredentialsModal` with username/password fields; calls `POST /api/v1/family/members/:memberId/credentials`
+
+### API Contracts for Backend
+
+Frontend expects these endpoints:
+- `POST /api/v1/auth/child-login` — `{ username, password }` → `{ token, refreshToken, member }`
+- `POST /api/v1/family/members/:memberId/credentials` — `{ username, password }` → `{ username, message }`
+- `GET /api/v1/dashboard/children` — returns `ChildSummary[]`
+- `GET /api/v1/dashboard/children/:memberId/stats` — returns `ChildDetailStats`
+- `GET /api/v1/dashboard/children/:memberId/activity` — returns `ActivityFeedResponse`
+- `GET /api/v1/dashboard/family/summary` — returns `FamilySummary`
+- `GET /api/v1/notifications` — returns `Notification[]`
+- `PUT /api/v1/notifications/:id/read` — marks notification read
+
+### Files Created/Modified
+
+**New files (17):** types (childAuth, dashboard), services (childAuth, dashboard), stores (childAuth, dashboard, notification), pages (ChildLogin, ChildDashboard variants, ParentDashboard), layouts (ChildLayout), modal (SetCredentialsModal)  
+**Modified (7):** App.tsx, type/service/store indices, LoginPage, FamilySettings
+
+---
+
+## Decision: Games Engine — Detailed Design Document (Implementation Blueprint)
+
+**Author:** Khaldun (Lead Architect)  
+**Date:** 2026-05-17  
+**Status:** PROPOSAL — Implementation blueprint (supersedes high-level outline)
+
+### Overview
+
+Comprehensive implementation blueprint for the Games feature. Covers 13 game types across two categories, data model, game engine architecture, auto-generation pipeline, API design, frontend components, gamification layer, and parental controls. Sufficient specificity for backend (Khwarizmi) and frontend (Ibn Sina) to implement without guessing.
+
+### Game Type Catalog
+
+**Course-Integrated (7 types):**
+1. Term Match — Drag-and-drop vocabulary matching (4-8 pairs, difficulty scaling, SRS integration)
+2. Ayah Completion — Complete Quranic verses by selecting missing words in order
+3. Speed Quiz — Rapid-fire Q&A from course questions (timed, streaks, multiplier scoring)
+4. Flashcard Flip — Flip-and-match flashcard pairs with speed bonuses
+5. Fill-in-the-Blank — Complete sentences with word bank (fiqh rules, vocabulary)
+6. Hadith Hunt — Extract key words from hadith text (memorization aid)
+7. True/False Rush — Rapid true/false statements (10-question rounds, perfect bonus)
+
+**Standalone (6 types):**
+8. Daily Challenge — Curated daily quiz across all enrolled courses (cross-course mega-game)
+9. Family Duel — Competitive head-to-head on randomly selected question pools
+10. Leaderboard Sprint — Weekly ranking sprint (global/family/class-based scoring)
+11. Survival Mode — Endless flashcard recall with increasing difficulty and time pressure
+12. Time Attack — Fixed question set, minimize time + maximize accuracy
+13. Mystery Box — Randomly selected game type from all 12 above (surprise element)
+
+### Data Model
+
+**New Prisma Models:** Game, GameInstance, GameRound, GameScore, ParentalTimeLimit, GameTypeRestriction, ActivityEvent, Notification
+
+**Content Integration:** Games auto-generated from existing FlashCard, Question, ArabicTerm records. Phase 1 requires zero manual content authoring.
+
+### Game Engine Architecture
+
+- **Engine Layer:** Stateful game instance management (rounds, scoring, state transitions)
+- **Content Injection:** Unit-scoped content query → difficulty sampling → game config
+- **SRS Writeback:** Game results feed into FlashCardProgress (correct = SM-2 rating 4, incorrect = rating 2)
+
+### API Design (15 endpoints)
+
+- Game metadata queries (list games, get game details)
+- Game instance lifecycle (create, get state, send action, end)
+- Scoring and leaderboard (get scores, weekly rankings)
+- Parental control configuration (set time limits, restrict types)
+
+### Frontend Component Architecture
+
+- GameLauncher (game picker, difficulty selector)
+- GameBoard (game type renderers, timer, score tracker)
+- GameResult (summary, points breakdown, SRS writeback confirmation)
+- ParentalControlsPanel (time limits, type restrictions, enforcement UI)
+
+### Placement Strategy
+
+- **Course Integration:** Games placed after unit quizzes (optional progression)
+- **Standalone Hub:** Dedicated /games/all page listing all 13 types with recent scores
+- **Habit Formation:** Daily Challenge widget on dashboard; notification reminders for completions
+
+### Gamification Layer
+
+- Points per game type (base + bonuses: speed, streaks, perfection)
+- Achievements triggered by milestones (100 points total, 5-day streak, leaderboard top-3)
+- Reward system: Unlock new difficulties after completing 5 games of a type
+
+### Parental Controls (Section 12)
+
+**Time Limits:** DailyTimeLimit per child per game type (e.g., 30 min Term Match/day)  
+**Type Restrictions:** Blocklist of restricted game types per child  
+**Enforcement:** Game launch checks limit + blockage; parent dashboard shows child usage vs limits  
+**Age-Based Defaults:** Automatic restrictions by AgeCategory (e.g., EARLY_CHILD blocks games 8-13)  
+**UI:** Parental Controls panel in parent dashboard for full CRUD
+
+### Phase 1 vs Phase 2
+
+**Phase 1 (MVP):** Games 1-7 (course-integrated), no leaderboards, no family duels, parental controls UI + enforcement  
+**Phase 2:** Standalone games, global leaderboards, achievements, multiplayer features
+
+### Implementation Order
+
+1. Data model + migrations
+2. Game engine + round logic
+3. Content generator (unit → game config)
+4. API endpoints + scoring
+5. Frontend game components
+6. Parental controls enforcement + dashboard UI
+7. SRS writeback + notifications
+
+### Full Document Reference
+
+The complete 3335-line design document with detailed section specifications, scoring formulas, UI wireframes, test cases, and implementation pseudocode is stored at:  
+`.squad/decisions/inbox/khaldun-games-detailed-design.md`
+
+This summary captures the key architectural decisions. Engineering teams should reference the full document during implementation for scoring algorithms, UI patterns, and test strategies.
 
