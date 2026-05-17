@@ -9,99 +9,204 @@
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
 
-### 2026-05-16 — Full Architectural Inventory
+### 2026-05-16 — Architecture Audit Summary (ARCHIVED)
 
-#### System Architecture
-- **Frontend:** React 18 + Vite + TypeScript, TailwindCSS, Zustand (4 stores: auth, course, family, flashcard), React Router v6, Axios API layer
-- **Backend:** Express + TypeScript, Prisma ORM, PostgreSQL, Redis, JWT auth (access+refresh tokens), bcrypt, rate limiting, Helmet, CORS
-- **CMS:** Directus configured via Docker (port 8055) pointing at same PostgreSQL DB — but NOT actively integrated into app code. It's scaffolded only.
-- **Routing:** `frontend/src/App.tsx` — ProtectedRoute/PublicRoute pattern with nested layouts (AuthLayout, MainLayout)
+**Status:** COMPLETED — See `.squad/orchestration-log/2026-05-16T08-36-khaldun.md` for details
 
-#### Database Schema (Prisma — 2 migrations applied)
-- **Core models:** Family → User, FamilyMember (with ageCategory, streaks, points)
-- **Content:** Course → Unit → (VideoResource, AudioResource, ArabicTerm, Question, FlashCard)
-- **Assessment:** Question (MCQ, T/F, Matching, Fill-blank), QuizResult
-- **Flashcards:** FlashCard (with SM-2 fields), FlashCardProgress (per-member tracking)
-- **SRS:** MemorizationItem (AYAH, HADITH, DUA, TERM types), ReviewLog
-- **Progress:** CourseEnrollment, UnitProgress
-- **Gamification:** Achievement model exists
+Comprehensive architectural inventory completed. Key findings:
 
-#### Backend Routes (all under /api/v1)
-- **Auth:** 8 endpoints (register, login, refresh, logout, forgot/reset password, verify email, resend verification)
-- **Family:** 8 endpoints (CRUD members, switch member, get progress)
-- **Courses:** 9 endpoints (list, detail, units, enrollments, progress)
-- **Assessments:** 5 endpoints (questions, submit, results, AI generate)
-- **SRS:** 6 endpoints (due items, all items, add, review, history, stats) — SM-2 algorithm fully implemented
-- **Flashcards:** 23 endpoints (CRUD, batch, reorder, metadata, progress, review, due cards, stats, reset)
-- **Users:** 6 endpoints (profile, password, settings, achievements)
+**System Stack:** Frontend (React18 + Vite + TypeScript + Zustand), Backend (Express + Prisma + PostgreSQL + Redis), Auth (JWT + bcrypt), CMS (Directus scaffolded but not integrated).
 
-#### Frontend Pages (all real implementations, no placeholders)
-- **Auth:** Login, Register, ForgotPassword, ResetPassword, VerifyEmail
-- **Dashboard:** FamilyDashboard (stats+member cards), ChildDashboard (streaks, goals, badges), MemberProgress
-- **Courses:** CourseCatalog (search+filter), CourseDetail (enrollment), CourseLearner (unit navigation), UnitViewer (video+reading+completion), QuizPage (MCQ/TF/fill-blank with timing)
-- **Flashcards:** StudySessionPage, ReviewSessionPage, UnitFlashCardsPage, CourseFlashCardsPage
-- **Settings:** FamilySettings (name, add/delete members)
-- **UI Components:** Avatar, Badge, Button, Card, Input, Modal, ProgressBar, Spinner
-- **Flashcard Components:** FlashCard, FlashCardEditor, FlashCardList, ProgressStats, StudySession
+**Coverage:** 15+ data models, 70+ API routes, 20+ frontend pages/components, 11 seeded courses, 10 Maktab coursebooks (HTML structured, ready for ingestion).
 
-#### Zustand Stores
-- `authStore` — login/register/logout/refresh with persist middleware
-- `courseStore` — courses, units, enrollments, filters
-- `familyStore` — members CRUD, selectMember
-- `flashcardStore` — comprehensive: CRUD, metadata, progress/review, study session management (start/end/next/rate)
+**Gaps:** AI quiz generation is stub only. Gamification engine missing (Achievement model exists but no trigger logic). Directus not integrated. Email verification stubbed. Age-based content filtering not implemented. Dual SRS systems (MemorizationItem + FlashCardProgress) may overlap.
 
-#### Seeded Courses (11 total)
-- **In main seed.ts (6):** Intro to Tawheed (3 units, 8 Qs), Stories of the Prophets (5 units, 7 Qs), Learn Arabic Basics (3 units, 6 Qs), Five Pillars of Islam (5 units, 7 Qs), Daily Duas and Adhkar (3 units), How to Pray - Hanafi Way (6 units)
-- **Separate seed files (5):** Advanced Sarf/Arabic Morphology (2+ units, flashcards+quizzes), Habits to Win (16 units), Hujjatullah Al-Balighah (7 units), Tazkiyah (7 units), Rawai Hadaratina (7 units)
-- **Note:** Separate seed files are NOT called by main seed.ts — they must be run independently and depend on demo family existing first
+**Known Issues:** 25 orphaned Vite `.mjs` files in frontend/. Directus credentials hardcoded. Seed file fragmentation (5 files not wired into main). 65KB transcript file (Habits course already seeded).
 
-#### Maktab Coursebook HTML Content
-- **10 coursebook packages** (9 numbered + FurtherStudiesNW), each with student book + parent guide
-- Coursebook 1-5 (ages ~6-12), Coursebook 6 splits into Boys/Girls versions, Coursebook 7-8, FurtherStudiesNW (advanced)
-- Well-structured HTML with CSS classes: `.subject`, `.topic`, `.toc`, `.arabic` (RTL support), `.diagram`
-- Subjects per book: Fiqh, Ahadith, Sirah, Tarikh, Aqaid, Akhlaq, Dua
-- 267 PNG images in images/ directory
-- Sizes range from 69KB (Book 1) to 641KB (FurtherStudies) — progressive complexity
-- **This is the content source for upcoming Maktab course creation work**
-
-#### Test Coverage
-- Backend: auth.service, course.service, srs.service, flashcard.service, SM-2 algorithm, integration (flashcard study session)
-- Frontend: 6 page tests (FamilyDashboard, ChildDashboard, CourseCatalog, MemberProgress, QuizPage, ReviewSession), 5 flashcard component tests, 1 integration test (learning flow)
-
-#### README vs Reality — Gaps Found
-- **"AI-Powered: Automatic quiz question generation"** — endpoint exists (`POST /assessments/generate`) but no AI service implementation found; likely a stub
-- **Directus CMS** — Docker config exists but NO active integration in app code; Directus README lists "Collections to Create" as future work
-- **Gamification** — Achievement model exists in schema, `GET /users/me/achievements` endpoint exists, but no achievement-granting logic found (no trigger on quiz completion, streak milestones, etc.)
-- **Multi-Age Support** — ageCategory field exists on FamilyMember, courses have ageLevels array, but no evidence of content filtering by age in course service
-- **Email verification** — endpoint exists but no email sending service configured
-
-#### Architecture Concerns
-- **Vite timestamp files:** 25+ orphaned `.mjs` timestamp files in frontend/ root — build artifact pollution
-- **Directus credentials hardcoded** in docker-compose.yml (DB_PASSWORD, ADMIN_PASSWORD)
-- **Seed file fragmentation:** 5 course seed files not connected to main seed.ts; no unified seeding strategy
-- **Dual SRS systems:** Both MemorizationItem (general SRS) and FlashCardProgress (flashcard-specific SM-2) exist — potential conceptual overlap
-- **new_course_description.txt:** 65KB file with full video transcripts for "Habits to Win" course — this course is already seeded via seed-habits-course.ts
-- **No gamification engine:** Achievement model is passive; no logic awards achievements
-
-#### Key File Paths
-- Frontend entry: `frontend/src/App.tsx`
-- Backend entry: `backend/src/index.ts`
-- Schema: `backend/prisma/schema.prisma`
-- Main seed: `backend/prisma/seed.ts`
-- Stores: `frontend/src/stores/` (authStore, courseStore, familyStore, flashcardStore)
-- Services: `frontend/src/services/` (api, auth, course, family, flashcard, assessment, srs)
-- Backend routes: `backend/src/routes/` (auth, family, course, assessment, srs, user, flashcard/)
-- Maktab content: `maktab-coursebook-html/` (10 coursebooks + parent guides + images/)
-- Docs: `docs/` (14 files including flashcard implementation plans, deployment, content creation guides)
+**Decisions:** Stored in `.squad/decisions.md` entry #1 + archived findings. All specific workstreams deferred to respective implementation agents (SRS consolidation, Maktab ingestion, seed orchestration, gamification activation).
 
 ---
 
-### 2026-05-16 — Orchestration Complete
+### 2026-05-17 — Games, Parent Dashboard & Child Auth Design Document
 
 **Status:** COMPLETED  
-**Orchestration Log:** `.squad/orchestration-log/2026-05-16T08-36-khaldun.md`
+**Deliverable:** `.squad/decisions/inbox/khaldun-games-dashboard-childauth-research.md` → merged to `decisions.md` entry #4
 
-Architecture inventory audit wrapped. Findings merged into team decision archive:
-- Decision filed: "Architecture Inventory Key Findings" (Informational) — 5 findings documented for team awareness
-- No blocking items; specific decisions deferred to respective workstreams (SRS consolidation, gamification activation, Maktab ingestion, seed orchestration)
-- Team can now make informed architectural decisions based on full system visibility
+Comprehensive research and design document covering three interconnected features: Games (13 game types across course-integrated and standalone categories), Parent Dashboard (statistics, activity feed, notifications, comparative views), and Child/Teen Login (username-only auth with JWT role branching).
+
+**Key Architectural Decisions:**
+
+1. **Child Auth on FamilyMember (Option A):** Add username/passwordHash/loginEnabled fields directly to FamilyMember rather than creating a separate ChildCredential model. FamilyMember is already the child identity anchor — separate model would require unnecessary joins on every child auth check.
+
+2. **JWT Role Branching:** Child JWTs use `role: "CHILD"` with `sub` = FamilyMember ID (not User ID). Middleware branches on role to resolve actor identity. Route protection matrix documented for all 15+ route categories.
+
+3. **Games use existing content:** Phase 1 games (Term Match, Speed Quiz, Flashcard Flip, Daily Challenge) are 100% auto-generated from existing Question, FlashCard, and ArabicTerm data. No manual content authoring needed for initial launch.
+
+4. **SRS writeback from games:** Game results feed back into FlashCardProgress (correct answer = SM-2 rating 4, incorrect = rating 2). Playing games reduces review burden — major engagement lever.
+
+5. **ActivityEvent as shared infrastructure:** Single model written by all learning activities (quiz, course, game, flashcard milestones), read by parent dashboard and notification system. Unifies the activity tracking layer.
+
+6. **Single Prisma migration for all 3 features:** 10 new models + modifications to 4 existing models. Implementation is phased (Child Auth → Parent Dashboard → Games) but schema lands atomically to avoid migration churn.
+
+7. **Implementation order:** Child Auth first (establishes child-as-actor identity), Parent Dashboard second (reads child activity data), Games third (children play, parents monitor). Dependency chain is clear.
+
+8. **13 game types designed:** 7 course-integrated (Term Match, Ayah Completion, Fiqh Scenario, Hadith Chain, Word Search, Speed Quiz, Flashcard Flip) + 6 standalone (Daily Challenge, Knowledge Expedition, Trivia Battle, Mosque Builder, Pattern Creator, Seerah Timeline). Each has content source, difficulty scaling, age mapping, and trigger conditions documented.
+
+**Open Questions (8):** Documented in design doc with recommendations. Key pending decisions: global vs family-scoped usernames, SRS writeback confirmation, email digest deferral to Phase 2.
+
+---
+
+## Cross-Agent Session Summary (2026-05-17T10:30:29Z)
+
+**Parallel Work from Khwarizmi (Backend):**
+- **Catalog Fix:** Course pagination limit bumped 12→50; all 17 courses now load
+- **Rate Limiter:** Health check moved above middleware; always reachable for monitoring
+- **Error Handling:** Frontend error extraction now handles both response shapes
+
+**Next Phase Handoff:**
+- Design document ready for team review (8 open questions capture decision gates)
+- Implementation sequence: Child Auth → Parent Dashboard → Games Phase 1
+- Team consensus needed on 8 architectural decisions before sprint
+
+### 2026-05-16 — Maktab Coursebook HTML Structure & Conversion Analysis
+
+**Status:** COMPLETED  
+**Deliverable:** `.squad/decisions/inbox/khaldun-maktab-conversion-strategy.md` (10 sections, 600+ lines)
+
+Comprehensive analysis of 10 Maktab coursebook HTML files and parent guides completed. Strategy document provides architectural blueprint for converting all coursebooks into platform courses with quizzes, flashcards, and ArabicTerms.
+
+**Key Findings:**
+
+1. **Consistent HTML Structure** across all 10 coursebooks:
+   - `<section class="subject">` (7-8 per book: Fiqh, Ahadith, Sirah, Tarikh, Aqaid, Akhlaq, Adab, Dua)
+   - `<article class="topic">` (3-15 per subject; individual lessons)
+   - Content: `<p>` (narrative), `<ul>` (lists), `<div class="arabic">` (RTL with diacritics), `<div class="diagram">` (PNG references)
+   - Parent guides (parallel structure): Summary + Quiz + Discussion per topic
+
+2. **HTML-to-Prisma Mapping Decision:** Subject-centric Course architecture
+   - `<section class="subject">` → Prisma `Course` (title, category, ageLevels)
+   - `<article class="topic">` → Prisma `Unit` (title, description, content as @db.Text HTML)
+   - Rationale: Islamic education is subject-centric; enables cross-level subject progression (Fiqh Book 1 → 2 → ... → 8)
+
+3. **Quiz Generation Rules:**
+   - Source: Parent guide quizzes (3-4 per topic) → migrate directly to Platform Questions
+   - Type mapping: "Is it...?" → TRUE_FALSE, "Which...?" → MULTIPLE_CHOICE, "Match..." → MATCHING, "Fill..." → FILL_BLANK
+   - AI gap-filling: Generate additional questions if parent guide has <3 per unit
+   - Difficulty assignment: Book 1-2 = EASY, Book 3-5 = MEDIUM, Book 6-8 = HARD, FurtherStudiesNW = HARD
+   - Target: 3-5 questions per Unit (3 from parent guide + 1-2 AI if depth warrants)
+
+4. **Flashcard Generation Rules:**
+   - Categories: vocabulary, definition, pattern, example, rule (Prisma enum)
+   - Extraction heuristic: Arabic terms + translations → vocabulary, concept definitions → definition, rules in lists → rule, Quranic refs → example
+   - Per-unit target: 5-8 flashcards (adjusted by content depth)
+   - Arabic support: Split front/back with frontArabic/backArabic (preserve diacritics: "Shahādah" → "الشهادة")
+   - Tags: category + subject (e.g., ["vocabulary", "fiqh"])
+
+5. **Seed Script Pattern:**
+   - File naming: `backend/prisma/seed-maktab-coursebook{N}.ts` (N = 1-8, 6b/6g for gender variants, fs for FurtherStudies)
+   - Template: Upsert Course → Upsert Units → Create Questions → Create FlashCards → Create ArabicTerms
+   - IDs: kebab-case with coursebook identifier (e.g., `coursebook1-fiqh-shahada`)
+   - Key pattern: Helper functions for HTML parsing (extractSubjects, extractTopics, extractParentGuideQuestions, extractFlashcardTerms)
+
+6. **Arabic Text Handling Strategy:**
+   - Preservation: Extract full Unicode with diacritics intact (UTF-8, already in HTML)
+   - Storage: arabicText (Unicode with diacritics), transliteration (Latin with diacritics for UI), translation (English)
+   - Flashcards: Split Arabic vs English (frontArabic, front, backArabic, back)
+   - HTML content: Keep `<div class="arabic">` tags inline in Unit.content for semantic rendering
+   - Font recommendation: `font-family: 'Amiri', 'Scheherazade New', serif` for diacritics rendering
+
+7. **Coursebook Priority Order:**
+   - Priority 1: Book 1 (ages 6-7; simplest; validates pattern)
+   - Priority 2: Book 2 (incremental complexity)
+   - Priority 3: Book 4 (mid-level; tests content depth before gender differentiation)
+   - Priority 4: Book 6 Boys (tests gender variant handling)
+   - Priority 5: Book 5 (intermediate level)
+   - Priority 6: Book 3 (confirms pattern stability)
+   - Priority 7: Book 7 (advanced jurisprudence)
+   - Priority 8: Book 8 (highest complexity)
+   - Priority 9: Book 6 Girls (gender-specific variant)
+   - Priority 10: FurtherStudiesNW (specialized, highest difficulty)
+   - Rationale: Early books validate pattern quickly; Book 6 Boys before Girls; Book 7-8 last for robustness before advanced content
+
+8. **Unresolved Decisions (with Recommendations):**
+   - **Image handling:** Keep PNG filenames in Unit.content for Phase 1; defer CDN migration to Phase 2
+   - **Gender-differentiated books:** Create separate Courses (coursebook6-boys-fiqh, coursebook6-girls-fiqh) rather than single Course with variant flag (simpler query/recommend logic)
+   - **Learning Objectives:** Store in Unit.description (already supports text)
+   - **Parent guide quizzes:** Migrate directly to Platform Questions (educator-designed; high quality)
+
+9. **Implementation Checklist for Khwarizmi:**
+   - Parse all 10 coursebooks + parent guides to extract subjects/topics/quizzes
+   - Generate 10 seed-maktab-coursebook{N}.ts files following template
+   - Validate seed scripts: no data loss, all FKs resolve
+   - Seed test DB; verify counts and spot-check content
+   - Run seed scripts against production DB (with backup)
+   - Spot-check UI rendering (especially Arabic + diacritics + RTL)
+
+10. **Key Files & References:**
+    - HTML: Coursebook1.html (ages 6-7, simplest), Coursebook4.html (ages 9-10, mid-level), Coursebook6Boys.html (gender-differentiated)
+    - Guides: Coursebook1-parent-guide.html (shows summary+quiz+discussion structure)
+    - Exemplar seed: backend/prisma/seed-sarf-course.ts (rich HTML, Arabic fields)
+    - Schema: backend/prisma/schema.prisma (Course/Unit/Question/FlashCard/ArabicTerm models)
+
+**Edge Cases Documented:**
+- Coursebooks 6B/6G: Gender-differentiated content → separate courses
+- FurtherStudiesNW: Highest complexity → last in priority order
+- Image embedding: 267 PNGs in images/ directory → filenames embedded in Unit.content
+- Learning Objectives: Present in most books → store in Unit.description
+- Quiz coverage: Parent guides provide 3-4 Qs per topic → supplement with AI if needed
+
+**Next Steps:**
+- Strategy document approved by team
+- Khwarizmi (Implementation Agent) takes ownership
+- Execution follows coursebook priority order (Books 1, 2, 4, 6B first)
+- CI/CD integration of seed scripts with validation
+
+---
+
+### 2026-05-17 — Games, Parent Dashboard & Child Auth Design Document
+
+**Status:** COMPLETED  
+**Deliverable:** `.squad/decisions/inbox/khaldun-games-dashboard-childauth-research.md`
+
+Comprehensive research and design document covering three interconnected features: Games (13 game types across course-integrated and standalone categories), Parent Dashboard (statistics, activity feed, notifications, comparative views), and Child/Teen Login (username-only auth with JWT role branching).
+
+**Key Architectural Decisions:**
+
+1. **Child Auth on FamilyMember (Option A):** Add username/passwordHash/loginEnabled fields directly to FamilyMember rather than creating a separate ChildCredential model. FamilyMember is already the child identity anchor — separate model would require unnecessary joins on every child auth check.
+
+2. **JWT Role Branching:** Child JWTs use `role: "CHILD"` with `sub` = FamilyMember ID (not User ID). Middleware branches on role to resolve actor identity. Route protection matrix documented for all 15+ route categories.
+
+3. **Games use existing content:** Phase 1 games (Term Match, Speed Quiz, Flashcard Flip, Daily Challenge) are 100% auto-generated from existing Question, FlashCard, and ArabicTerm data. No manual content authoring needed for initial launch.
+
+4. **SRS writeback from games:** Game results feed back into FlashCardProgress (correct answer = SM-2 rating 4, incorrect = rating 2). Playing games reduces review burden — major engagement lever.
+
+5. **ActivityEvent as shared infrastructure:** Single model written by all learning activities (quiz, course, game, flashcard milestones), read by parent dashboard and notification system. Unifies the activity tracking layer.
+
+6. **Single Prisma migration for all 3 features:** 10 new models + modifications to 4 existing models. Implementation is phased (Child Auth → Parent Dashboard → Games) but schema lands atomically to avoid migration churn.
+
+7. **Implementation order:** Child Auth first (establishes child-as-actor identity), Parent Dashboard second (reads child activity data), Games third (children play, parents monitor). Dependency chain is clear.
+
+8. **13 game types designed:** 7 course-integrated (Term Match, Ayah Completion, Fiqh Scenario, Hadith Chain, Word Search, Speed Quiz, Flashcard Flip) + 6 standalone (Daily Challenge, Knowledge Expedition, Trivia Battle, Mosque Builder, Pattern Creator, Seerah Timeline). Each has content source, difficulty scaling, age mapping, and trigger conditions documented.
+
+**Open Questions (8):** Documented in design doc with recommendations. Key pending decisions: global vs family-scoped usernames, SRS writeback confirmation, email digest deferral to Phase 2.
+
+---
+
+## 2026-05-17 — Cross-Agent Session Summary
+
+**Team Session:** Games research + Catalog fix (2026-05-17T10:30:29Z)
+
+### Khwarizmi's Parallel Work
+**Status:** Course catalog loading bug FIXED ✅
+
+1. **Pagination limit issue:** `courseStore.ts` defaultFilters.limit was 12; bumped to 50. All 17 published courses now load.
+2. **Rate limiter stabilization:** Moved health check above rate limiter middleware in `backend/src/index.ts`. Prevents monitoring endpoint exhaustion.
+3. **Error handling robustness:** Frontend `getErrorMessage()` now handles both error response shapes.
+4. **Dev config:** Rate limit increased 100 → 1000 in `.env`.
+
+**Impact on Games/Dashboard Work:** Clean catalog ensures users can browse all courses before engaging with games feature. Stable health checks ensure Phase 2 monitoring for large feature rollouts.
+
+### Next Phase Handoff
+- **Khaldun:** Design document ready for team review (8 open questions capture decision gates)
+- **Khwarizmi:** Available to implement Child Auth (Phase 1 of games/dashboard work)
+- **Team:** Consensus needed on 8 architectural decisions before implementation sprint

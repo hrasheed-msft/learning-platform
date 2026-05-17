@@ -50,6 +50,60 @@ Fixed login error caused by rate limiter exhaustion and frontend error extractio
 
 ---
 
+### 4. Games, Parent Dashboard, and Child Auth — Integrated Feature Design (2026-05-17)
+**Author:** Khaldun (Lead Architect)  
+**Status:** PROPOSAL — Pending team review
+
+Comprehensive design document for three interconnected features transforming the platform from content-delivery to engagement-driven family learning.
+
+**Key Decisions:**
+
+#### Feature 1: Games (13 types designed)
+- **Course-Integrated (7 types):** Term Match, Ayah Completion, Fiqh Scenario Tree, Hadith Chain Builder, Word Search Grid, Arabic Number Bingo, Verse Memorization Quest
+- **Standalone/Hub (6 types):** Expedition City (build city through games), Prophet Story Progression, Quran Juz Challenge, Leaderboard Duels, Achievement Vault, Skill Simulator
+- **Content Source:** Auto-generated from existing Questions, FlashCards, ArabicTerms; 100% in Phase 1 (manual authoring deferred to Phase 2)
+- **SRS Integration:** Games count as reviews, reducing review burden (major engagement lever)
+- **Difficulty Scaling:** 3 tiers (EASY, MEDIUM, HARD) mapped to content; age-aware presentation (EARLY_CHILD with hints → TEEN/ADULT timed mode)
+- **New Prisma Models:** Game, GameSession, GameScore, GameRound, Leaderboard, Achievement, UserAchievement, StreamAchievement, UserStreakRecord, BadgeDefinition
+
+#### Feature 2: Parent Dashboard
+- **Metrics:** Per-child stats (avg quiz score, study time, streak, game performance), family summary aggregates, activity feed
+- **Notifications:** In-app alerts for milestones (course completion, streak reached, score improvement, new badges)
+- **Comparative Views:** Per-child performance, category strength (radar chart), time-series study patterns
+- **Email Digest:** Deferred to Phase 2 (SMTP not configured; in-app notifications Phase 1)
+- **New Prisma Models:** FamilySummary, MemberStats, ActivityEvent, Notification, DashboardSettings
+
+#### Feature 3: Child/Teen Login (Username-Only Auth)
+- **Auth Flow:** Parent creates child credentials; child logs in with username+password; receives JWT with role=CHILD, memberId, familyId, ageCategory
+- **Scope:** Child sees own courses, progress, games, flashcards, reviews; no family management, billing, or sibling data
+- **Credentials Management:** Stored on FamilyMember model (Option A chosen — simpler than separate ChildCredential model)
+- **Username Uniqueness:** Globally unique (simpler auth lookup, no family context needed at login)
+- **Route Matrix:** Child routes scoped by activeMemberId; parent-only routes (family/*, /dashboard/*, /notifications) blocked
+- **API Endpoints:** `POST /api/v1/family/members/:memberId/credentials`, `POST /api/v1/auth/child-login`, `GET/PUT /api/v1/child/me`
+- **ChildLayout:** Simplified navigation (My Dashboard, My Courses, My Games, My Flashcards, Achievements) — no settings/family management
+
+**Implementation Order:**
+1. Child Auth (unblocks child-specific features)
+2. Parent Dashboard (depends on child data)
+3. Games Phase 1 (engagement driver; auto-generated content only)
+4. Games Phase 2+ (manual scenarios, social features) — scope creep risk
+
+**Open Questions (8):**
+1. Child usernames: globally unique or family-scoped? → **Globally unique** (recommendation)
+2. Child login page: `/child-login` route or subdomain? → **Same domain, different route**
+3. Game content: auto-generated vs. manually authored? → **Phase 1: 100% auto-generated**
+4. Games write to SRS? → **Yes** (counts as reviews)
+5. Email digest Phase 1? → **No** (defer to Phase 2)
+6. Credentials storage: FamilyMember fields (A) or separate model (B)? → **Option A**
+7. Child password policy? → **Minimum 6 chars, no complexity**
+8. Deprecate PIN field? → **Not yet** (backward compatibility; could support younger children on parent device)
+
+**Effort:** Games Phase 1 (L), Child Auth (M), Parent Dashboard (L-M). Phase 2+ XL with scope creep risk.
+
+**Files:** Complete design with 10 new Prisma models, API specs, UI wireframes, and migration strategy in `.squad/decisions/inbox/khaldun-games-dashboard-childauth-research.md`
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus

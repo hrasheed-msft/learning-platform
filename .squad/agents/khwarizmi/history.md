@@ -115,3 +115,19 @@ Key fields standardized:
 - **Pattern:** When a catalog page has no pagination UI, the default fetch limit must exceed the total item count. Consider adding pagination UI if course count grows past 50.
 - **Rate limiter note:** In-memory store means restart clears the counter. For dev, consider switching to Redis store or exempting read-only public endpoints from rate limiting.
 
+### Games, Parent Dashboard & Child Auth Design Ready (2026-05-17)
+
+**Parallel Work from Khaldun:** Design document delivered, 700+ lines covering three interconnected features.
+
+**What This Enables for Backend:**
+1. **Child Auth Implementation (Phase 1):** You can now implement username/password login on FamilyMember with JWT role branching. Schema additions documented; 8 open questions resolved with recommendations.
+2. **Parent Dashboard API:** ActivityEvent model captures all learning activity for dashboard stats/feed. Can be integrated alongside existing assessment result logging.
+3. **Games API Layer:** 13 game types designed; all auto-generated from existing Question/FlashCard/ArabicTerm data in Phase 1. SRS writeback from games is confirmed as engagement lever (game result feeds back to SM-2 reviews).
+
+**Implementation Order:** Child Auth → Parent Dashboard → Games Phase 1
+
+**Next Steps for Backend:**
+- Review design doc for 8 open questions (team consensus needed)
+- Once approved: Child Auth implementation sprint
+- Catalog fix (this session) ensures courses load smoothly for game content integration
+
