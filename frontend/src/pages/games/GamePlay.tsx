@@ -3,9 +3,19 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import TermMatchGame from './TermMatchGame';
 import SpeedQuizGame from './SpeedQuizGame';
 import FlashcardFlipGame from './FlashcardFlipGame';
-import DailyChallengeGame from './DailyChallengeGame';
+import WordScrambleGame from './WordScrambleGame';
+import FillInBlankGame from './FillInBlankGame';
+import MemoryMatchGame from './MemoryMatchGame';
+import TrueFalseGame from './TrueFalseGame';
+import MultipleChoiceGame from './MultipleChoiceGame';
+import SentenceBuildGame from './SentenceBuildGame';
+import ListeningQuizGame from './ListeningQuizGame';
+import CalligraphyTraceGame from './CalligraphyTraceGame';
+import SpellingBeeGame from './SpellingBeeGame';
+import StoryPuzzleGame from './StoryPuzzleGame';
 import EscapeRoomGame from './EscapeRoomGame';
-import MazeNavigatorGame from './MazeNavigatorGame';
+import MazeRunnerGame from './MazeRunnerGame';
+import DailyChallengeGame from './DailyChallengeGame';
 import { GameBlockedScreen } from '@/components/games';
 import type { GameDifficulty } from '@/types/game';
 
@@ -13,9 +23,19 @@ const GAME_COMPONENTS: Record<string, React.ComponentType<{ gameId?: string; dif
   'term-match': TermMatchGame,
   'speed-quiz': SpeedQuizGame,
   'flashcard-flip': FlashcardFlipGame,
-  'daily-challenge': DailyChallengeGame,
+  'word-scramble': WordScrambleGame,
+  'fill-in-blank': FillInBlankGame,
+  'memory-match': MemoryMatchGame,
+  'true-false': TrueFalseGame,
+  'multiple-choice': MultipleChoiceGame,
+  'sentence-build': SentenceBuildGame,
+  'listening-quiz': ListeningQuizGame,
+  'calligraphy-trace': CalligraphyTraceGame,
+  'spelling-bee': SpellingBeeGame,
+  'story-puzzle': StoryPuzzleGame,
   'escape-room': EscapeRoomGame,
-  'maze': MazeNavigatorGame,
+  'maze-runner': MazeRunnerGame,
+  'daily-challenge': DailyChallengeGame,
 };
 
 export default function GamePlay() {

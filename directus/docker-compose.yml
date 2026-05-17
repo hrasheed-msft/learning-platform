@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  directus:
+    image: directus/directus:latest
+    container_name: islamic-learning-directus
+    ports:
+      - "8055:8055"
+    environment:
+      # Core Directus Configuration
+      KEY: "255d861b-5ea1-5996-9aa3-922530ec40b1"
+      SECRET: "6116487b-1ca0-452c-8b59-3eef8c3b58f0"
+      DB_CLIENT: "postgres"
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_DATABASE: "islamic_learning_dev"
+      DB_USER: "postgres"
+      DB_PASSWORD: "harith"
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "http://localhost:5173,http://localhost:3000,http://localhost:8055"
+      
+      # Admin Settings
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_PASSWORD: "AdminPassword123!"
+      
+      # Application Settings
+      APP_URL: "http://localhost:8055"
+      PUBLIC_URL: "http://localhost:8055"
+      
+    volumes:
+      - directus_uploads:/directus/uploads
+      - directus_extensions:/directus/extensions
+    networks:
+      - islamic-learning
+
+volumes:
+  directus_uploads:
+  directus_extensions:
+
+networks:
+  islamic-learning:
+    driver: bridge

@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 8 — Parent Guide</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --quiz-bg: #fff8e1;
+    --summary-bg: #e3f2fd;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle { color: #666; font-size: 1rem; }
+  .intro {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+  }
+  .intro p { margin-bottom: 0.5rem; }
+  .subject-guide {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject-guide > h2 {
+    color: var(--primary);
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .lesson-card {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lesson-card h3 {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.15rem;
+  }
+  .summary {
+    background: var(--summary-bg);
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  .summary p { margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .summary ul {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  .quiz {
+    background: var(--quiz-bg);
+    padding: 1.2rem;
+  }
+  .quiz h4 {
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+  }
+  .quiz ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .quiz li {
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+  }
+  .quiz .answer {
+    display: none;
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+  .quiz details {
+    margin-top: 0.8rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.8rem;
+  }
+  .quiz details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quiz details p {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .discussion {
+    padding: 1rem 1.2rem;
+    background: #f3e5f5;
+    border-top: 1px solid var(--border);
+  }
+  .discussion h4 {
+    color: #6a1b9a;
+    margin-bottom: 0.5rem;
+  }
+  .discussion ul {
+    margin-left: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .toc h2 { color: var(--primary); margin-bottom: 1rem; }
+  .toc h3 { color: var(--accent); margin: 0.8rem 0 0.3rem; font-size: 1.05rem; }
+  .toc ul { list-style: none; padding-left: 1.2rem; }
+  .toc a { color: var(--primary); text-decoration: none; border-bottom: 1px dotted var(--primary); }
+  .toc a:hover { border-bottom-style: solid; }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  @media print {
+    body { max-width: 100%; }
+    .quiz details { display: block; }
+    .quiz details[open] summary { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>📖 Coursebook 8 — Parent Guide</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 13–14 years</div>
+</header>
+<div class="intro">
+  <p><strong>How to use this guide:</strong> Each lesson has three parts:</p>
+  <ul style="margin-left:1.5rem">
+    <li><strong>Summary</strong> — Key points to review with your child</li>
+    <li><strong>Quiz</strong> — Questions to test understanding (answers are hidden — click to reveal)</li>
+    <li><strong>Discussion</strong> — Conversation starters to deepen learning</li>
+  </ul>
+  <p>Work through one topic at a time. Read the summary together, then try the quiz orally or in writing.</p>
+</div>
+<nav class="toc"><h2>Contents</h2>
+<h3><a href="#fiqh-guide">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-naw--l-g">Naw\ﬁl</a></li>
+  <li><a href="#fiqh-khush---g">Khushū'</a></li>
+  <li><a href="#fiqh-jam--ah--al-h-g">Jamā'ah Ṣalāh</a></li>
+  <li><a href="#fiqh-nik---g">Nikāḥ</a></li>
+  <li><a href="#fiqh--al-q-g">Ṭalāq</a></li>
+  <li><a href="#fiqh-buy---g">Buyū'</a></li>
+  <li><a href="#fiqh-ij-rah-g">Ijārah</a></li>
+  <li><a href="#fiqh-rib--g">Ribā</a></li>
+  <li><a href="#fiqh-gambling-g">Gambling</a></li>
+</ul>
+<h3><a href="#a--d-th-guide">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-clean-heart-g">Clean Heart</a></li>
+  <li><a href="#a--d-th--adaqah-g">Ṣadaqah</a></li>
+  <li><a href="#a--d-th-sal-m-g">Salām</a></li>
+  <li><a href="#a--d-th-rights-of-a-muslim-g">Rights of a Muslim</a></li>
+  <li><a href="#a--d-th-reward-of-patience-g">Reward of Patience</a></li>
+  <li><a href="#a--d-th-true-wealth-g">True Wealth</a></li>
+  <li><a href="#a--d-th-sweetness-of--m-n-g">Sweetness of Īmān</a></li>
+  <li><a href="#a--d-th-closeness-to-all-h-g">Closeness to Allāh</a></li>
+  <li><a href="#a--d-th-being-self-suf-cient-g">Being Self-Sufﬁcient</a></li>
+</ul>
+<h3><a href="#s-rah-guide">Sīrah</a></h3>
+<ul>
+  <li><a href="#s-rah-sham--il-g">Shamā'il</a></li>
+  <li><a href="#s-rah--uthm-n-ibn--aff-n-g">'Uthmān Ibn 'Affān</a></li>
+  <li><a href="#s-rah--al--g">'Al|</a></li>
+</ul>
+<h3><a href="#t-r-kh-guide">Tārīkh</a></h3>
+<ul>
+</ul>
+<h3><a href="#aq--id-guide">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-istiw---g">Istiwā'</a></li>
+  <li><a href="#aq--id--m-n-g">Īmān</a></li>
+  <li><a href="#aq--id-consulting-the--ulam---g">Consulting the 'Ulamā'</a></li>
+</ul>
+<h3><a href="#akhl-q-guide">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-taqw--g">Taqwā</a></li>
+  <li><a href="#akhl-q-tawakkul-g">Tawakkul</a></li>
+  <li><a href="#akhl-q-tawbah-g">Tawbah</a></li>
+  <li><a href="#akhl-q-modesty-in-gaze-g">Modesty in Gaze</a></li>
+</ul>
+<h3><a href="#-d-b-guide">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b-nik---g">Nikāḥ</a></li>
+  <li><a href="#-d-b-transactions-g">Transactions</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject-guide" id="fiqh-guide">
+<h2>Fiqh</h2>
+<div class="lesson-card" id="fiqh-naw--l-g">
+<h3>Naw\ﬁl</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Ṣalāh Allāh  has made the ﬁve daily ṣalāh compulsory upon us. Ṣalāh can be thought of as 'meetings and conversations' with the King of the universe. It is a time when we get a chance to talk to our Creator and Provider. Ṣalāh is a chance to seek the mercy and help of Allāh . Ṣalāh is a chance to become a friend of the Ruler of the universe. The Beloved Messenger  had the most love for Allāh . He showed and taught us how to get even closer to Allāh  and how to be Allāh 's closest friends.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Ṣalāh Allāh  has made the ﬁve daily ṣalāh compulsory upon us. Ṣalāh can be thought of as 'meetings and conversations' with the King of the universe.</li>
+  <li>The Beloved Messenger  had the most love for Allāh .</li>
+  <li>He showed and taught us how to get even closer to Allāh  and how to be Allāh 's closest friends.</li>
+  <li>From among the ways to become much closer to Allāh  is by performing extra ṣalāh.</li>
+  <li>The Messenger of Allāh  said, "Allāh, the Exalted, has said: 'I will declare war against he who harms my pious worshippers.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does the ḥadīth "Allāh, the Exalted, has said:" teach us?</li>
+  <li>What is tahajjud tahajjud?</li>
+  <li>What is tahajjud?</li>
+  <li>What is this?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does the ḥadīth "Allāh, the Exalted, has said:" teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What is tahajjud tahajjud?</strong><br>Tahajjud Tahajjud is the ṣalāh performed at night after waking up from one's sleep.</li>
+  <li><strong>What is tahajjud?</strong><br>Tahajjud is the most rewarding naﬂ ṣalāh.</li>
+  <li><strong>What is this?</strong><br>This is offered as a means of expressing respect when entering the house of Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do naw\ﬁl step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-khush---g">
+<h3>Khushū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Another important point to remember with regard to ṣalāh is Khushū'. Khushū' is humility and devotion in ṣalāh. Allāh states in the Qur'ān when mentioning the traits of those that shall enter Jannah al-Firdaws. "Success is really attained by the believers. Who concentrate their attention in humbleness when offering ṣalāh ….Those are the inheritors.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Another important point to remember with regard to ṣalāh is Khushū'.</li>
+  <li>Khushū' is humility and devotion in ṣalāh.</li>
+  <li>Allāh states in the Qur'ān when mentioning the traits of those that shall enter Jannah al-Firdaws. "Success is really attained by the believers.</li>
+  <li>Who concentrate their attention in humbleness when offering ṣalāh ….Those are the inheritors.</li>
+  <li>They will be there forever." (Qur'ān 23:1-11) There are many ways a person can attain Khushū' in ṣalāh.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is khushū'?</li>
+  <li>What are the key rules or steps of Khushū'?</li>
+  <li>Why is Khushū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Khushū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is khushū'?</strong><br>Khushū' is humility and devotion in ṣalāh.</li>
+  <li><strong>What are the key rules or steps of Khushū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Khushū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Khushū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do khushū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-jam--ah--al-h-g">
+<h3>Jamā'ah Ṣalāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Ṣalāh with Jamā'ah is of great importance. To perform ṣalāh with jamā'ah is greatly emphasised for men. A person that leaves ṣalāh with jamā'ah without a valid reason will be sinful. The Prophet said: "A man's ṣalāh in congregation is twenty-ﬁve times more rewarding than his ṣalāh at home or in his shop, and that is because when he performs his wuḍū' properly and proceeds towards the masjid with the purpose of performing ṣalāh in congregation, he does not take a step without being raised a degre...</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Ṣalāh with Jamā'ah is of great importance.</li>
+  <li>To perform ṣalāh with jamā'ah is greatly emphasised for men.</li>
+  <li>When he is performing ṣalāh, the angels continue to invoke the Blessings of Allāh on him as long as he is in his place of worship in a state of wuḍū'.</li>
+  <li>They say: 'O Allāh!</li>
+  <li>The Prophet would remind people before ṣalāh to straighten the rows.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is to perform ṣalāh with jamā'ah?</li>
+  <li>What does the ḥadīth "Make the rows straight and do not differ, lest your hearts d..." teach us?</li>
+  <li>What are the key rules or steps of Jamā'ah Ṣalāh?</li>
+  <li>Why is Jamā'ah Ṣalāh important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is to perform ṣalāh with jamā'ah?</strong><br>To perform ṣalāh with jamā'ah is greatly emphasised for men.</li>
+  <li><strong>What does the ḥadīth "Make the rows straight and do not differ, lest your hearts d..." teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What are the key rules or steps of Jamā'ah Ṣalāh?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Jamā'ah Ṣalāh important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do jamā'ah ṣalāh step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-nik---g">
+<h3>Nikāḥ</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Nikāḥ (marriage) is a great sunnah in Islām. When a man and a woman marry, love, peace and companionship is created between them. The Prophet  equated marriage to half of one's faith. He said: "Whoever marries has completed (by protecting) half of his faith: let him fear violating the other half." (Ṭabarān|) The purpose of marriage A Muslim should marry because: 1)Marriage is a form of worshipping Allāh . 2)It is the sunnah (way) of the Prophets . 3)A human being naturally needs to marry.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Nikāḥ (marriage) is a great sunnah in Islām.</li>
+  <li>When a man and a woman marry, love, peace and companionship is created between them.</li>
+  <li>The Prophet  equated marriage to half of one's faith.</li>
+  <li>The Prophet  said: "Women are (usually) married for four reasons: for their wealth, ancestry, beauty and piety.</li>
+  <li>Marry the pious one and you will be successful." (Ṣahīh al-Bukhārī) From all the different qualities in a person, piety is the most desirable quality.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is nikāḥ (marriage)?</li>
+  <li>What is this?</li>
+  <li>What is it is important one?</li>
+  <li>What is even after a couple are engaged, it?</li>
+  <li>What is before marrying a person, it?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is nikāḥ (marriage)?</strong><br>Nikāḥ (marriage) is a great sunnah in Islām.</li>
+  <li><strong>What is this?</strong><br>This is because they fear the displeasure of Allāh.</li>
+  <li><strong>What is it is important one?</strong><br>It is important one is attracted to one's spouse to help protect one's gaze.</li>
+  <li><strong>What is even after a couple are engaged, it?</strong><br>Even after a couple are engaged, it is not permissible for them to have contact with one another.</li>
+  <li><strong>What is before marrying a person, it?</strong><br>Before marrying a person, it is permissible to see them.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do nikāḥ step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-q-g">
+<h3>Ṭalāq</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>FiqhFiqh Everybody has ups and downs. Brothers and sisters have good days and bad days together. Likewise, a husband and wife may experience some good days and some bad days. Anytime you experience anger in your marriage, extinguish the anger by: •Drinking a glass of water •Changing your position to a lower state: If you are standing, sit down.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>This is known as ṭalāq (divorce).</li>
+  <li>If by chance she gets married to another person and then gets divorced, she may re-marry her ﬁrst husband after the waiting period (iddah) is over.</li>
+  <li>After a ṭalāq raj'|, if the 'iddah (waiting period) has not ended then a new marriage is not required to get back together.</li>
+  <li>In the waiting period, a woman is not permitted to marry anyone besides the husband who gave her ṭalāq bā'in.</li>
+  <li>After the 'iddah is complete, she is free to marry whomever she wishes.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this?</li>
+  <li>What is in the waiting period, a woman?</li>
+  <li>What is after the 'iddah?</li>
+  <li>What is the duration of the 'iddah?</li>
+  <li>What is if a woman?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this?</strong><br>This is known as ṭalāq (divorce).</li>
+  <li><strong>What is in the waiting period, a woman?</strong><br>In the waiting period, a woman is not permitted to marry anyone besides the husband who gave her ṭalāq bā'in.</li>
+  <li><strong>What is after the 'iddah?</strong><br>After the 'iddah is complete, she is free to marry whomever she wishes.</li>
+  <li><strong>What is the duration of the 'iddah?</strong><br>The duration of the 'iddah is three menstrual cycles.</li>
+  <li><strong>What is if a woman?</strong><br>If a woman is not menstruating, then she will observe 'iddah for 90 days (3 months).</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ṭalāq step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-buy---g">
+<h3>Buyū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"The truthful merchant is rewarded by being ranked on the Day of Resurrection with the prophets, the truthful elite and the martyrs." (Tirmidhī) There are some conditions which must be present at the time of buying and selling items: 1)The product must be ḥalāl. It is not permissible to sell ḥarām items. For example, it is not permissible to sell alcohol, stolen goods, pork etc. 2)The price and the item for sale must be clearly speciﬁed at the time of the transaction.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>It is not permissible to sell ḥarām items.</li>
+  <li>For example, Mūsā sells a watch to Idrīs on the condition that Idrīs gives Mūsā the watch to wear once a week.</li>
+  <li>This will not be permissible.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Buyū'?</li>
+  <li>Why is Buyū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Buyū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Buyū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Buyū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Buyū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do buyū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-ij-rah-g">
+<h3>Ijārah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"O you who believe, when you transact a debt payable at a speciﬁed time, put it in writing..." (Qur'ān 2:282) Allāh teaches us to write things down when we conduct any transaction to avoid any confusion and misunderstanding between the two parties. Remember the Arabic proverb: "Live like brothers and deal like strangers." Ijārah refers to employment and leasing. 'Ā'ishah  reports that the Prophet said: "Verily Allāh loves perfection in one's work.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Remember the Arabic proverb: "Live like brothers and deal like strangers." Ijārah refers to employment and leasing.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Ijārah?</li>
+  <li>Why is Ijārah important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Ijārah?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Ijārah?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ijārah important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Ijārah?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ijārah step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-rib--g">
+<h3>Ribā</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Interest is charging money for giving someone a loan. ĪFor example, if Yūsuf wanted a loan of 10,000, the bank only gives it to him on condition that Yūsuf ĪĪpays back 12,000. The extra 2,000 is interest and is ḥarām to give and take. Through interest, the rich become richer and the poor become poorer. Allāh  states in the Qur'ān: "Those who consume interest shall not stand up on the Day of Resurrection except like him who Shayṭān has driven mad by his touch.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Ribā means interest.</li>
+  <li>The extra 2,000 is interest and is ḥarām to give and take.</li>
+  <li>That is because they say: "Trade is just like interest." But Allāh has permitted trade and has forbidden interest.</li>
+  <li>So whoever has received an admonition from his Lord and desists may have that (amount) which has passed, and his affair rests with Allāh.</li>
+  <li>What is meant by 'destroys interest' is that Allāh  deprives the money generated by interest of all blessings.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the extra 2,000?</li>
+  <li>What is that is because they say: "trade?</li>
+  <li>What is what is meant by 'destroys interest'?</li>
+  <li>What is most terrifying of all?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the extra 2,000?</strong><br>The extra 2,000 is interest and is ḥarām to give and take.</li>
+  <li><strong>What is that is because they say: "trade?</strong><br>That is because they say: "Trade is just like interest." But Allāh has permitted trade and has forbidden interest.</li>
+  <li><strong>What is what is meant by 'destroys interest'?</strong><br>What is meant by 'destroys interest' is that Allāh  deprives the money generated by interest of all blessings.</li>
+  <li><strong>What is most terrifying of all?</strong><br>Most terrifying of all is the punishment that awaits him in the Hereafter.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ribā step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-gambling-g">
+<h3>Gambling</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Eat of the lawful things that We have provided you." (Qur'ān 2:172) "O those who believe, verily wine, gambling, altar- stones and divining arrows are ﬁlth, a work of Shayṭān. Therefore, refrain from it, so that you may be successful. The Shayṭān wants nothing but to plant enmity and malice between you through wine and gambling, and to prevent you from the remembrance of Allāh and from the ṣalāh.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Would you, then, abstain?" (Qur'ān 5:90-91) Gambling, betting, lotteries and similar activities are all ḥarām.</li>
+  <li>He was extremely respectful of the ḥadīth of our Beloved Messenger .</li>
+  <li>He would apply perfume, wear nice clothing and sit humbly in his place out of respect for the words of our Beloved Messenger Muḥammad .</li>
+  <li>Hence, the founder of the Ḥanaf| madh'hab (school) is Imām Abū Ḥanīfah  and his students.</li>
+  <li>The founder of the Sh\ﬁ'| madh'hab is Imām Sh\ﬁ'|  and his students.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the founder of the sh\ﬁ'| madh'hab?</li>
+  <li>What are the key rules or steps of Gambling?</li>
+  <li>Why is Gambling important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Gambling?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the founder of the sh\ﬁ'| madh'hab?</strong><br>The founder of the Sh\ﬁ'| madh'hab is Imām Sh\ﬁ'|  and his students.</li>
+  <li><strong>What are the key rules or steps of Gambling?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Gambling important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Gambling?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do gambling step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="a--d-th-guide">
+<h2>Aḥādīth</h2>
+<div class="lesson-card" id="a--d-th-clean-heart-g">
+<h3>Clean Heart</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Anas  relates "Allāh's Messenger  said to me, 'O my son, if you can spend each morning and evening with a heart free of hatred or deception against anyone, then do so.' Then he  said 'My dear son, this is my practice (sunnah) and whoever loves my sunnah loves me and whoever loves me will be with me in Jannah.</p>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th--adaqah-g">
+<h3>Ṣadaqah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Abū Hurayrah  narrates that the Beloved Messenger Muḥammad  said: "Every morning at dawn, two angels descend and one of them says, 'O Allāh, give more to the person who spends in charity!' while the other one says, 'O Allāh, destroy the wealth of the one who withholds his wealth from giving in charity!'" (Ṣaḥīḥ al-Bukhārī)</p>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-sal-m-g">
+<h3>Salām</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Anas ibn Mālik narrates that the Beloved Messenger Muḥammad  said to me: "O my dear son, whenever you enter a home greet your family members by saying: 'Assalāmu 'alaykum,': it will be a blessing for you and the people of your household." (Tirmidhī)</p>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-rights-of-a-muslim-g">
+<h3>Rights of a Muslim</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Barā' ibn 'Āzib  narrates: "The Beloved Messenger instructed us upon seven things: to visit the sick; to follow funeral processions; to pray for Allāh's mercy for someone who sneezes (by saying Yarḥamukallāh); to accept invitations, to return greetings; to help those who are wronged; and to help others fulﬁl their oaths.</p>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-reward-of-patience-g">
+<h3>Reward of Patience</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Anas  narrates that the Messenger  said: "Great rewards are given for great trials, and when Allāh loves a people, He tests them. Whoever accepts the trial cheerfully earns His good pleasure, and whoever resents it earns His wrath." (Tirmidhī) Forgiving Others Abud Dardā'  narrates that I heard the Messenger  saying: "Whoever suffers an injury done to him and forgives (the person responsible), Allāh will raise his status to a higher degree and remove one of his sins." (Tirmidhī)</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Anas  narrates that the Messenger  said: "Great rewards are given for great trials, and when Allāh loves a people, He tests them.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-true-wealth-g">
+<h3>True Wealth</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Abū Hurayrah  narrates that the Messenger said: "Wealth is not in having great riches: (true) wealth is contentment of the soul." (Ṣaḥīḥ al-Bukhārī) Islām is Easy Abū Hurayrah  narrates that the Messenger said: "The religion of Islām is easy. No one ever made it difﬁcult without it becoming too much for him.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>No one ever made it difﬁcult without it becoming too much for him.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-sweetness-of--m-n-g">
+<h3>Sweetness of Īmān</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Anas ibn Mālik  narrates that the Messenger said: "Whoever has three qualities will taste the sweetness of īmān: To love Allāh and His Messenger more than anything else; to love someone for Allāh's sake alone, and to hate to return to unbelief just as much as one would hate to be thrown into the Fire." (Ṣaḥīḥ al-Bukhārī) Ṣalāh Abū Hurayrah  narrates that the Beloved Messenger  said: "The ﬁrst deed that a person will be called to account for on the Day of Judgement will be his prayers.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>If they are in order he will be successful and prosper, but if they are not then he will be ruined and lost." (Tirmidhī).</li>
+  <li>If they are in order he will be successful and prosper, but if they are not then he will be ruined and lost." (Tirmidhī).</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-closeness-to-all-h-g">
+<h3>Closeness to Allāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Abū Hurayrah  narrates that the Beloved Messenger  said that Allāh says: "I am as My servant thinks I am. I am with him when he mentions Me. If he makes mention of Me to himself, I make mention of him to Myself. And if he makes mention of Me in an assembly, I make mention of him in an assembly that is better.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Abū Hurayrah  narrates that the Beloved Messenger  said that Allāh says: "I am as My servant thinks I am.</li>
+  <li>And if he makes mention of Me in an assembly, I make mention of him in an assembly that is better.</li>
+  <li>If you ask, then ask Allāh (alone).</li>
+  <li>And if you seek help, then seek help from Allāh (alone).</li>
+  <li>And if they were to gather together to harm you with anything, they would not harm you except with what Allāh had already prescribed against you.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-being-self-suf-cient-g">
+<h3>Being Self-Sufﬁcient</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Miqdām  narrates that the Beloved Messenger  said: "No one eats better food than what he earns with his own hands. The Prophet Dāwūd  used to eat from what he earned by the work of his own hands." (Ṣaḥīḥ al-Bukhārī)</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Miqdām  narrates that the Beloved Messenger  said: "No one eats better food than what he earns with his own hands.</li>
+  <li>The Prophet Dāwūd  used to eat from what he earned by the work of his own hands." (Ṣaḥīḥ al-Bukhārī).</li>
+  <li>The Prophet Dāwūd  used to eat from what he earned by the work of his own hands." (Ṣaḥīḥ al-Bukhārī).</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="s-rah-guide">
+<h2>Sīrah</h2>
+<div class="lesson-card" id="s-rah-sham--il-g">
+<h3>Shamā'il</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>'And you are surely on an excellent standard of character' (Qur'ān 68:4) Our Beloved Messenger Muḥammad  had the best manners and character. We can see some examples from his noble life. His consideration Once a bird came ﬂapping over the blessed head of the Prophet . On seeing the bird ﬂap its wings frantically, the Prophet  asked his Ṣa#ābah if any one of them had taken an egg from this bird's nest.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>'And you are surely on an excellent standard of character' (Qur'ān 68:4) Our Beloved Messenger Muḥammad  had the best manners and character.</li>
+  <li>His consideration Once a bird came ﬂapping over the blessed head of the Prophet .</li>
+  <li>On seeing the bird ﬂap its wings frantically, the Prophet  asked his Ṣa#ābah if any one of them had taken an egg from this bird's nest.</li>
+  <li>The Prophet  ordered that the egg be returned, out of compassion for the bird.</li>
+  <li>Stop!" but our Beloved Messenger said, "Don't interrupt him.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What happened during Shamā'il?</li>
+  <li>What lesson can we learn from this event?</li>
+  <li>Why is this event important in Islamic history?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must follow his example to the letter.</li>
+  <li><strong>What happened during Shamā'il?</strong><br>Retell the key events in your own words.</li>
+  <li><strong>What lesson can we learn from this event?</strong><br>Think about what it teaches us about character and faith.</li>
+  <li><strong>Why is this event important in Islamic history?</strong><br>Explain its significance.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>If you were there, what would you have done?</li>
+  <li>What quality of the Prophet ﷺ do you admire most from this story?</li>
+  <li>How does this event connect to our life today?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="s-rah--uthm-n-ibn--aff-n-g">
+<h3>'Uthmān Ibn 'Affān</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The Early life of 'Uthmān 'Uthmān  belonged to the inﬂuential Ban[ Umayyah clan of the Quraysh tribe. He was born in the year 576 CE, six years after the birth of the Prophet Muḥammad . His lineage coincides with that of the Beloved Messenger  as 'Uthmān 's grandmother was the sister of our Beloved Messenger 's father 'Abdullāh. The mother of 'Uthmān , Arw\ became a Muslim and died during the khilāfah of 'Uthmān .</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>He was born in the year 576 CE, six years after the birth of the Prophet Muḥammad .</li>
+  <li>His lineage coincides with that of the Beloved Messenger  as 'Uthmān 's grandmother was the sister of our Beloved Messenger 's father 'Abdullāh.</li>
+  <li>The mother of 'Uthmān , Arw\ became a Muslim and died during the khilāfah of 'Uthmān .</li>
+  <li>His physical attributes are quite striking; he was not short or tall, and was soft-skinned.</li>
+  <li>It was as if he was overpowered by the glory of Allāh  and viewed in himself some faults and imperfections!</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this pledge?</li>
+  <li>What happened during 'Uthmān Ibn 'Affān?</li>
+  <li>What lesson can we learn from this event?</li>
+  <li>Why is this event important in Islamic history?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this pledge?</strong><br>This pledge is known as Bay'ah ar-Riḍwān.</li>
+  <li><strong>What happened during 'Uthmān Ibn 'Affān?</strong><br>Retell the key events in your own words.</li>
+  <li><strong>What lesson can we learn from this event?</strong><br>Think about what it teaches us about character and faith.</li>
+  <li><strong>Why is this event important in Islamic history?</strong><br>Explain its significance.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>If you were there, what would you have done?</li>
+  <li>What quality of the Prophet ﷺ do you admire most from this story?</li>
+  <li>How does this event connect to our life today?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="s-rah--al--g">
+<h3>'Al|</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>'Al|  was the son of Abū Ṭālib. Abū Ṭālib was the famous uncle and aide of the Prophet . Thus, 'Al|  was the cousin of the Beloved Prophet . 'Al| was born ten years before the Beloved Prophet  received Prophethood.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Abū Ṭālib was the famous uncle and aide of the Prophet .</li>
+  <li>Thus, 'Al|  was the cousin of the Beloved Prophet .</li>
+  <li>'Al| was born ten years before the Beloved Prophet  received Prophethood.</li>
+  <li>The Prophet wanted to help his uncle.</li>
+  <li>The Prophet took 'Al|  under his roof and cared for him from a very young age.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does the ḥadīth "Call him here." When" teach us?</li>
+  <li>What happened during 'Al|?</li>
+  <li>What lesson can we learn from this event?</li>
+  <li>Why is this event important in Islamic history?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does the ḥadīth "Call him here." When" teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What happened during 'Al|?</strong><br>Retell the key events in your own words.</li>
+  <li><strong>What lesson can we learn from this event?</strong><br>Think about what it teaches us about character and faith.</li>
+  <li><strong>Why is this event important in Islamic history?</strong><br>Explain its significance.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>If you were there, what would you have done?</li>
+  <li>What quality of the Prophet ﷺ do you admire most from this story?</li>
+  <li>How does this event connect to our life today?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="t-r-kh-guide">
+<h2>Tārīkh</h2>
+</section>
+
+<section class="subject-guide" id="aq--id-guide">
+<h2>Aqā'id</h2>
+<div class="lesson-card" id="aq--id-istiw---g">
+<h3>Istiwā'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>There are different verses and a#ādīth which have a location attributed to Allāh. For example: a) "The All-Merciful istaw\ (literal meaning: positioned Himself) upon the Throne." (Qur'ān 20:5) b) "Have you become fearless of Him who is in the sky if He makes you sink into the earth, and it starts trembling at once?" (Qur'ān 67:17) c) "Indeed, We have created man, and We know whatever thoughts his inner self develops, and We are closer to him than his jugular vein.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>There are different verses and a#ādīth which have a location attributed to Allāh.</li>
+  <li>The meaning is unknown.</li>
+  <li>The outward meanings suggest that Allāh  is in a place and result in a resemblance between Allāh  and His Creation.</li>
+  <li>Such an outward meaning goes against the universally accepted principle of Allāh  being totally free from any resemblance to His Creation.</li>
+  <li>This is known as anthropomorphism (tashbīh).</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the outward meanings suggest that allāh?</li>
+  <li>What is this?</li>
+  <li>What is what?</li>
+  <li>What does Islam teach us about Istiwā'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the outward meanings suggest that allāh?</strong><br>The outward meanings suggest that Allāh is in a place and result in a resemblance between Allāh  and His Creation.</li>
+  <li><strong>What is this?</strong><br>This is known as anthropomorphism (tashbīh).</li>
+  <li><strong>What is what?</strong><br>What is the correct belief?.</li>
+  <li><strong>What does Islam teach us about Istiwā'?</strong><br>Explain the key belief from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id--m-n-g">
+<h3>Īmān</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Īmān refers to being convinced about everything the Prophet Muḥammad  has presented to us from Allāh . It is not necessary for a person to be regarded as a Believer to know everything about Islām in detail. To simply have the belief in one's heart that 'everything the Prophet  has presented to us, is from Allāh  and is true' is sufﬁcient to make one a Muslim.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Īmān refers to being convinced about everything the Prophet Muḥammad  has presented to us from Allāh .</li>
+  <li>It is not necessary for a person to be regarded as a Believer to know everything about Islām in detail.</li>
+  <li>So whoever believes in Allāh  and whatever has come from Allāh , and believes in the Messenger Muḥammad  and whatever has come from him is a Believer.</li>
+  <li>The recitation of the shahādah is to declare oneself a Muslim in this world so that they may be treated as a Muslim.</li>
+  <li>A person who says the shahādah will be treated as Muslim, will be deemed permissible to marry, and their slaughtering of animals will be valid.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the recitation of the shahādah?</li>
+  <li>What is rather, īmān?</li>
+  <li>What does Islam teach us about Īmān?</li>
+  <li>Why is this belief important for a Muslim?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the recitation of the shahādah?</strong><br>The recitation of the shahādah is to declare oneself a Muslim in this world so that they may be treated as a Muslim.</li>
+  <li><strong>What is rather, īmān?</strong><br>Rather, īmān is one unit which 'Aqā'id strengthens or weakens.</li>
+  <li><strong>What does Islam teach us about Īmān?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-consulting-the--ulam---g">
+<h3>Consulting the 'Ulamā'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Islām and one's own logic The Islām revealed by Allāh  to the Prophet and practised by the Ṣa#ābah is the Islām upon which our success is guaranteed in this World and the Hereafter. Any other form or version of Islām is not the Islām of success. Allāh  and the Prophet  want us to practice Islām the way it was revealed and practised in the time of the Ṣa#ābah. The way they practised Islām was approved by Allāh and the Prophet .</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Any other form or version of Islām is not the Islām of success.</li>
+  <li>Allāh  and the Prophet  want us to practice Islām the way it was revealed and practised in the time of the Ṣa#ābah.</li>
+  <li>The way they practised Islām was approved by Allāh and the Prophet .</li>
+  <li>That is the great attainment." (Qur'ān 9:100) The Prophet  said: "My Companions are like the stars.</li>
+  <li>If he still could not ﬁnd the answer, he would ask other Ṣa#ābah if they had heard anything from the Prophet  about the issue he was researching.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is any other form or version of islām?</li>
+  <li>What is that?</li>
+  <li>What is there?</li>
+  <li>What does the ḥadīth "Indeed the example of the" teach us?</li>
+  <li>What is when stars lose their radiance, it?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is any other form or version of islām?</strong><br>Any other form or version of Islām is not the Islām of success.</li>
+  <li><strong>What is that?</strong><br>That is the great attainment." (Qur'ān 9:100) The Prophet  said: "My Companions are like the stars.</li>
+  <li><strong>What is there?</strong><br>There is no harm in reading, learning and asking 'ulamā' over the internet.</li>
+  <li><strong>What does the ḥadīth "Indeed the example of the" teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What is when stars lose their radiance, it?</strong><br>When stars lose their radiance, it is likely that travellers will go astray." (Aḥmad) The Beloved Messenger said: "Behold!.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="akhl-q-guide">
+<h2>Akhlāq</h2>
+<div class="lesson-card" id="akhl-q-taqw--g">
+<h3>Taqwā</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The literal meaning of 'taqwā' is to abstain. When it is used in conjunction with Allāh , taqwā means to abstain for the fear of Allāh , to have the awareness that Allāh  is watching us at all times which inevitably will result in one abstaining from sins. Taqwā is one of the greatest qualities a believer can have and has been mentioned in the Qur'ān numerous times. The believers have been commanded to have taqwā in all aspects of their lives.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>The literal meaning of 'taqwā' is to abstain.</li>
+  <li>Taqwā is one of the greatest qualities a believer can have and has been mentioned in the Qur'ān numerous times.</li>
+  <li>Taqwā is to abstain from everything that Allāh has forbidden for us.</li>
+  <li>The cost of leading a life of sin is much greater than the quick temporary pleasure felt at the time of indulgence.</li>
+  <li>As we know, a web is a sticky, tangling trap.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the literal meaning of 'taqwā'?</li>
+  <li>What is taqwā?</li>
+  <li>What is the cost of leading a life of sin?</li>
+  <li>What is as we know, a web?</li>
+  <li>What is when the owner of everything?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the literal meaning of 'taqwā'?</strong><br>The literal meaning of 'taqwā' is to abstain.</li>
+  <li><strong>What is taqwā?</strong><br>Taqwā is to abstain from everything that Allāh has forbidden for us.</li>
+  <li><strong>What is the cost of leading a life of sin?</strong><br>The cost of leading a life of sin is much greater than the quick temporary pleasure felt at the time of indulgence.</li>
+  <li><strong>What is as we know, a web?</strong><br>As we know, a web is a sticky, tangling trap.</li>
+  <li><strong>What is when the owner of everything?</strong><br>When the Owner of everything is none other than Allāh  then ask yourself why are you watching those things you watch?.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-tawakkul-g">
+<h3>Tawakkul</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The Prophet said: "If you truly put your trust in Allāh, He would provide you (sustenance) as He provides the birds: where they leave in the morning with empty stomachs and return with full stomachs." (Tirmidhī) Umm Salamah  narrated that the Prophet said: "There is no Muslim that is afﬂicted with a calamity, and he says what Allāh  has commanded him to say: 'To Allāh we belong and to Him we will return! Give me the rewards (of being patient over) this calamity, and grant me something better tha...</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>He had full tawakkul and trust in Allāh .</li>
+  <li>He knew Allāh  controls everything and Allāh  controls the ﬁre also.</li>
+  <li>He placed his trust in Allāh alone to save him.</li>
+  <li>When Ibrāhīm  was thrown into the ﬁre, instead of allowing it burn him, Allāh  changed the ﬁre and made it cool and comforting!</li>
+  <li>When the Prophet  was about to leave Makkah and make hijrah to Madīnah, his house was surrounded by the Quraysh.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What does Tawakkul mean and why is it important?</li>
+  <li>Give an example of how you can practice Tawakkul at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about Tawakkul?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must ask Allāh  and seek His help.</li>
+  <li><strong>What does Tawakkul mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Tawakkul at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about Tawakkul?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-tawbah-g">
+<h3>Tawbah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Truly, Allāh loves those who turn unto Him in repentance and loves those who purify themselves" (Qur'ān 2:222) "O you who believe, turn to Allāh with a faithful repentance. It is hoped from your Lord that He will write off your faults, and will admit you to the Gardens beneath which rivers ﬂow.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Once these three conditions are present, no matter how large the sin may be, or how many sins a person may have committed, Allāh will forgive.</li>
+  <li>Immediately, there was a dispute between the angels of mercy and the angels of punishment.</li>
+  <li>He is independent.</li>
+  <li>We are in need of Him at all times, yet He is so merciful that He is happy at the repentance of His slave.</li>
+  <li>Despair not of the Mercy of Allāh, verily Allāh forgives all sins.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is truly, he?</li>
+  <li>What should we do?</li>
+  <li>What is one of the reasons music?</li>
+  <li>What does Tawbah mean and why is it important?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is truly, he?</strong><br>Truly, He is Oft-Forgiving, Most Merciful. (Qur'ān 39:53) We must never despair of the mercy of Allāh.</li>
+  <li><strong>What should we do?</strong><br>We must try to cultivate a habit of repenting to Allāh  every night before we sleep.</li>
+  <li><strong>What is one of the reasons music?</strong><br>One of the reasons music is prohibited is because it plays around and affects one's emotions.</li>
+  <li><strong>What does Tawbah mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-modesty-in-gaze-g">
+<h3>Modesty in Gaze</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Modesty is a very important quality in Islām. Modesty should be in all our actions. The Prophet  said: "Īmān (faith) consists of more than sixty branches. And #ayā' (modesty) is a part of faith." (Ṣaḥīḥ al-Bukhārī) The eyes are a great blessing of Allāh .</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Modesty is a very important quality in Islām.</li>
+  <li>The Prophet  said: "Īmān (faith) consists of more than sixty branches.</li>
+  <li>And #ayā' (modesty) is a part of faith." (Ṣaḥīḥ al-Bukhārī) The eyes are a great blessing of Allāh .</li>
+  <li>These are given to us by Allāh .</li>
+  <li>This is known as the modesty of the eyes.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is modesty?</li>
+  <li>What is and #ayā' (modesty)?</li>
+  <li>What should we do?</li>
+  <li>What is this?</li>
+  <li>What is that?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is modesty?</strong><br>Modesty is a very important quality in Islām.</li>
+  <li><strong>What is and #ayā' (modesty)?</strong><br>And #ayā' (modesty) is a part of faith." (Ṣaḥīḥ al-Bukhārī) The eyes are a great blessing of Allāh.</li>
+  <li><strong>What should we do?</strong><br>We must not look at the opposite gender without need.</li>
+  <li><strong>What is this?</strong><br>This is known as the modesty of the eyes.</li>
+  <li><strong>What is that?</strong><br>That is purer for them.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="-d-b-guide">
+<h2>Ādāb</h2>
+<div class="lesson-card" id="-d-b-nik---g">
+<h3>Nikāḥ</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"It is He who created you from a single person, and made his partner from him, in order that he may ﬁnd comfort in her"  (Qur'ān 7:189) "And among His signs is this: that He created for you mates from among yourselves that you may dwell in tranquillity with them, and He has put love and mercy between your (hearts): verily in that are signs for those who reﬂect.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Nikāḥ should be performed as soon as one is engaged.</li>
+  <li>Having a wedding-style engagement is totally against the teachings of our Beloved Messenger Muḥammad and should never be done.</li>
+  <li>It is an emphasised Sunnah to hold a feast known as a walīmah after the spouses have met.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is having a wedding-style engagement?</li>
+  <li>What are the main manners related to Nikāḥ?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Nikāḥ?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is having a wedding-style engagement?</strong><br>Having a wedding-style engagement is totally against the teachings of our Beloved Messenger Muḥammad and should never be done.</li>
+  <li><strong>What are the main manners related to Nikāḥ?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Nikāḥ?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b-transactions-g">
+<h3>Transactions</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"O you who believe! when you deal with each other in contracting a debt for a ﬁxed time, then write it down." (Qur'ān 2:282) "Verily, the best one you can hire is the competent, the trustworthy." (Al-Qur'ān 28:26) R\ﬁ' ibn Khadīj  narrates 'The Beloved Prophet  was asked: "Which is the purest form of earning a livelihood?" He replied, "Working with your own two hands and every acceptable transaction.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>The seller should not force customers into buying the products he is selling.</li>
+  <li>A businessperson should make sure his shop is clean and in line with hygiene requirements.</li>
+  <li>If any item being sold has a fault which the seller is aware of, he should not sell the item without telling the buyer of the fault.</li>
+  <li>The shopkeeper should always close his shop when it is time for ṣalāh and go to the masjid for ṣalāh.</li>
+  <li>In Ramaḍān, a Muslim shopkeeper should try to spend more time in worship.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Transactions?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Transactions?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Transactions?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Transactions?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+</section>
+
+</main>
+<footer>
+  Parent Guide for An Nasihah Islamic Curriculum &middot; For home learning support
+</footer>
+</body>
+</html>

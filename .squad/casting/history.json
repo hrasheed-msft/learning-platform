@@ -1,0 +1,15 @@
+{
+  "assignments": [
+    {
+      "assignment_id": "ilp-2026-05-16",
+      "universe": "Islamic Scholars",
+      "created_at": "2026-05-16T08:36:20-05:00",
+      "agents": [
+        { "name": "Khaldun", "role": "Lead" },
+        { "name": "Ibn Sina", "role": "Frontend Dev" },
+        { "name": "Khwarizmi", "role": "Backend Dev" },
+        { "name": "Biruni", "role": "Tester" }
+      ]
+    }
+  ]
+}

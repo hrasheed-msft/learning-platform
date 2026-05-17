@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { DifficultySelector } from '@/components/games/DifficultySelector';
 import { useGameStore } from '@/stores/gameStore';
 import { useFamilyStore } from '@/stores/familyStore';
+import { useAuthStore } from '@/stores/authStore';
 import { GAME_META } from '@/types/game';
 import type { GameDifficulty, GameCategory, Game } from '@/types/game';
 
@@ -19,7 +20,7 @@ type CategoryFilter = 'ALL' | GameCategory;
 
 export default function GamesHub() {
   const navigate = useNavigate();
-  const { members, selectedMember } = useFamilyStore();
+  const { members, selectedMember, fetchMembers } = useFamilyStore();
   const {
     availableGames, dailyChallenge, isLoadingGames, streakInfo,
     achievements, leaderboardEntries,
@@ -30,6 +31,14 @@ export default function GamesHub() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Record<string, GameDifficulty>>({});
 
   const activeMemberId = selectedMember?.id || members[0]?.id;
+
+  // Ensure family members are loaded
+  useEffect(() => {
+    if (members.length === 0) {
+      const family = useAuthStore.getState().family;
+      if (family?.id) fetchMembers(family.id);
+    }
+  }, [members.length, fetchMembers]);
 
   useEffect(() => {
     if (activeMemberId) {
@@ -155,11 +164,14 @@ export default function GamesHub() {
               {/* Color header */}
               <div className={clsx('h-2', meta?.color || 'bg-primary-500')} />
               <div className="p-5">
-                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl">{meta?.emoji || '🎮'}</span>
                     <div>
                       <h3 className="font-bold text-gray-900">{game.template.name}</h3>
+                      {game.courseName && (
+                        <p className="text-xs font-medium text-primary-600 mt-0.5">{game.courseName}</p>
+                      )}
                       <p className="text-xs text-gray-500">{game.template.description}</p>
                     </div>
                   </div>

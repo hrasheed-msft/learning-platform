@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 1 — Islamic Curriculum</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2.2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle {
+    color: #666;
+    font-size: 1rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .toc h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+  .toc h3 {
+    color: var(--accent);
+    margin: 0.8rem 0 0.3rem;
+    font-size: 1.1rem;
+  }
+  .toc ul {
+    list-style: none;
+    padding-left: 1.2rem;
+  }
+  .toc li { margin: 0.2rem 0; }
+  .toc a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--primary);
+  }
+  .toc a:hover { border-bottom-style: solid; }
+  .subject {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject > h2 {
+    color: var(--primary);
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .topic {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--accent);
+  }
+  .topic h3 {
+    color: var(--accent);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  .topic p {
+    margin-bottom: 0.6rem;
+    text-align: justify;
+    line-height: 1.65;
+  }
+  .topic p + p {
+    margin-top: 0;
+  }
+  .topic ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+  }
+  .topic li {
+    margin-bottom: 0.3rem;
+  }
+  .arabic {
+    font-family: 'Traditional Arabic', 'Scheherazade New', 'Amiri', serif;
+    font-size: 1.4rem;
+    text-align: right;
+    direction: rtl;
+    background: #f9f9f0;
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    margin: 0.8rem 0;
+    line-height: 2;
+    color: #333;
+  }
+  .page {
+    margin-bottom: 0.5rem;
+  }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+
+  .diagram {
+    text-align: center;
+    margin: 1rem 0 1.5rem;
+    padding: 0.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+  }
+  .diagram img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  @media print {
+    body { max-width: 100%; padding: 1rem; }
+    .topic { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Coursebook 1 — Islamic Curriculum</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 6–7 years</div>
+</header>
+<nav class="toc"><h2>Table of Contents</h2>
+<h3><a href="#fiqh">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#fiqh-shah-dah">Shahādah</a></li>
+  <li><a href="#fiqh--al-h">Ṣalāh</a></li>
+  <li><a href="#fiqh-zak-h">Zakāh</a></li>
+  <li><a href="#fiqh--awm">Ṣawm</a></li>
+  <li><a href="#fiqh--ajj">Ḥajj</a></li>
+  <li><a href="#fiqh--ah-rah">Ṭahārah</a></li>
+  <li><a href="#fiqh-wu---">Wuḍū'</a></li>
+  <li><a href="#fiqh-how-to-do-wu---">How to do wuḍū'</a></li>
+  <li><a href="#fiqh-wu---">Wuḍū'</a></li>
+</ul>
+<h3><a href="#a--d-th">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-singular---ad-th">Singular: Ḥadīth</a></li>
+  <li><a href="#a--d-th-feeding-the-hungry">Feeding the Hungry</a></li>
+  <li><a href="#a--d-th-helping-others">Helping Others</a></li>
+  <li><a href="#a--d-th-doing-things-calmly">Doing Things Calmly</a></li>
+  <li><a href="#a--d-th-staying-clean">Staying Clean</a></li>
+  <li><a href="#a--d-th-speaking-the-truth">Speaking the Truth</a></li>
+</ul>
+<h3><a href="#s-rah">Sīrah</a></h3>
+<ul>
+  <li><a href="#s-rah-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#s-rah-childhood-of-ras-lull-h">Childhood of Rasūlullāh</a></li>
+  <li><a href="#s-rah-when-ras-lull-h--was-six-years">When Rasūlullāh  was six years</a></li>
+  <li><a href="#s-rah-he-told-ab----lib-not-to-take-him-to-syria">He told Abū Ṭālib not to take him to Syria</a></li>
+  <li><a href="#s-rah-marriage-to-khad-jah">Marriage to Khadījah</a></li>
+  <li><a href="#s-rah-important-names-to-remember-">Important names to remember:</a></li>
+</ul>
+<h3><a href="#t-r-kh">Tārīkh</a></h3>
+<ul>
+  <li><a href="#t-r-kh-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#t-r-kh--dam">Ādam</a></li>
+  <li><a href="#t-r-kh-n--">Nūḥ</a></li>
+</ul>
+<h3><a href="#aq--id">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#aq--id-articles-of-faith">Articles of Faith</a></li>
+</ul>
+<h3><a href="#akhl-q">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#akhl-q-respect">Respect</a></li>
+  <li><a href="#akhl-q-cleanliness">Cleanliness</a></li>
+  <li><a href="#akhl-q-our-body">Our Body</a></li>
+  <li><a href="#akhl-q-around-us">Around us</a></li>
+  <li><a href="#akhl-q-when-eating">When Eating</a></li>
+  <li><a href="#akhl-q-water">Water</a></li>
+  <li><a href="#akhl-q-gentleness-in-speech">Gentleness in Speech</a></li>
+  <li><a href="#akhl-q-smiling">Smiling</a></li>
+</ul>
+<h3><a href="#-d-b">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#-d-b--d-b-of-eating">Ādāb of Eating</a></li>
+  <li><a href="#-d-b--d-b-of-drinking">Ādāb of Drinking</a></li>
+  <li><a href="#-d-b--d-b-of-sleeping">Ādāb of Sleeping</a></li>
+  <li><a href="#-d-b--d-b-of-waking-up">Ādāb of Waking Up</a></li>
+  <li><a href="#-d-b--d-b-of-using">Ādāb of Using</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject" id="fiqh">
+<h2>Fiqh</h2>
+<article class="topic" id="fiqh-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this chapter pupils will be able to:</p>
+<p>Summarise the ﬁve pillars of Islam and develop an understanding of each pillar.</p>
+<p>Apply ṭahārah and understand its importance in everyday life.</p>
+<p>Identify and practise the method of wuḍū’.</p>
+<p>The Pillars of Islām Shahādah Ṣalāh Zakāh Ṣawm Ḥajj</p>
+<p>The Pillars of Islām Imagine a house with very strong walls.</p>
+<p>No matter how much it rains or how windy it is, the house will stay strong.</p>
+<p>You can push as hard as you want, but the house will just not move!</p>
+<p>Now, imagine yourself as that strong house!</p>
+<p>Stand up and stay strong! Keep your legs straight and ﬁxed to the ground. If someone pushes you, will you fall down? Just like this strong house, Islām also has strong walls which are called pillars. These pillars are called the 'Pillars of Islam'.</p>
+<p>There are ﬁve pillars of Islam. If we keep these pillars strong in our life, our Islām will never fall down!</p>
+</article>
+<article class="topic" id="fiqh-shah-dah">
+<h3>Shahādah</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh-shah-dah.png" alt="Diagram: Shahādah" loading="lazy"></div>
+<p>The ﬁrst and most important pillar of Islām is the shahādah.</p>
+<p>What is the shahādah? The shahādah is to believe and say that there is no god but Allāh and our Beloved Messenger Muḥammad  is His servant and messenger.</p>
+<p>The words of shahādah are:</p>
+<p>I believe that there is no god but Allāh , and I believe that Muḥammad  is His servant and messenger.</p>
+</article>
+<article class="topic" id="fiqh--al-h">
+<h3>Ṣalāh</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh--al-h.png" alt="Diagram: Ṣalāh" loading="lazy"></div>
+<p>Ṣalāh is the second pillar of Islām. It is a special way Muslims pray to Allāh ﬁve times a day.</p>
+<p>Ṣalāh is a gift from Allāh .</p>
+<p>Ṣalāh is a way of asking Allāh .</p>
+<p>Ṣalāh is a way of thanking Allāh . If we pray ṣalāh everyday, Allāh will be happy with us and give us jannah. The ﬁve ṣalāh are:</p>
+<p>FajrḌhuhr'AṣrMaghrib'Ishā'</p>
+<p>Here is a little poem for you to remember the times and names of the ﬁve daily ṣalāh:</p>
+<p>Fajr in the morning Ḍhuhr after midday 'Aṣr in the afternoon Maghrib when the sun goes down 'Ishā' before we sleep</p>
+</article>
+<article class="topic" id="fiqh-zak-h">
+<h3>Zakāh</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh-zak-h.png" alt="Diagram: Zakāh" loading="lazy"></div>
+<p>The third pillar of Islām is zakāh.</p>
+<p>Zakāh is giving money to those in need.</p>
+<p>Allāh  has told us to give a little amount of money once a year to the people in need.</p>
+<p>Zakāh teaches us to care.</p>
+<p>Zakāh teaches us to share. If we give zakāh, Allāh  will be happy with us and give us more!</p>
+</article>
+<article class="topic" id="fiqh--awm">
+<h3>Ṣawm</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh--awm.png" alt="Diagram: Ṣawm" loading="lazy"></div>
+<p>The fourth pillar of Islām is ṣawm.</p>
+<p>Ṣawm is the Arabic word for fasting.</p>
+<p>Fasting is when a person does not eat or drink during the day.</p>
+<p>Allāh  has told  us to fast in the month of Ramaḍān.</p>
+<p>Fasting teaches us how the poor people feel.</p>
+<p>Fasting teaches us to be thankful.</p>
+<p>Fasting teaches us to share. If we fast, we can become close friends of Allāh .</p>
+</article>
+<article class="topic" id="fiqh--ajj">
+<h3>Ḥajj</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh--ajj.png" alt="Diagram: Ḥajj" loading="lazy"></div>
+<p>The ﬁfth pillar of Islām is #ajj.</p>
+<p>Ḥajj is a special journey to the city of Makkah. A Muslim who has enough money for the journey and is able to go, must do #ajj at least once in their life. In Makkah there is a special building called the ka’bah. We face the ka’bah when we pray our ṣalāh ﬁve times a day. In #ajj, we go around the ka’bah seven times. This is known as ṭawāf.  Ḥajj has many other actions too, taught to us by Rasūlullāh . After #ajj, muslims go to Madīnah Munawwarah to visit the blessed city of Rasūlullāh . This is known as ziyārah.</p>
+</article>
+<article class="topic" id="fiqh--ah-rah">
+<h3>Ṭahārah</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh--ah-rah.png" alt="Diagram: Ṭahārah" loading="lazy"></div>
+<p>For us to pray ṣalāh, we must have ṭahārah.</p>
+<p>Ṭahārah means to be clean. We all like clean things, clean places and to be clean.</p>
+<p>Allāh             loves clean people.</p>
+<p>Rasūlullāh                 taught and showed us how to be clean all the time. We must wash and take a bath regularly. We should clean ourselves properly in the washroom. If we do this we will be loved by Allāh            .</p>
+</article>
+<article class="topic" id="fiqh-wu---">
+<h3>Wuḍū'</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh-wu---.png" alt="Diagram: Wuḍū'" loading="lazy"></div>
+<p>Allāh              has taught us a special way to clean ourselves before we stand in ṣalāh. This special way is called wuḍū‘.</p>
+<p>Whoever does wuḍū‘ properly all the time, his face, hands and feet will shine brightly on the Day of Judgement.</p>
+</article>
+<article class="topic" id="fiqh-how-to-do-wu---">
+<h3>How to do wuḍū'</h3>
+<div class="diagram"><img src="images/Coursebook1-fiqh-how-to-do-wu---.png" alt="Diagram: How to do wuḍū'" loading="lazy"></div>
+<p>We say 'Bismillāh' to start. We then wash both hands till the wrist. We rinse our mouth three times. We rinse our nose three times with the right hand and then clean it once with the left hand.</p>
+<p>We then wash our full face three times, from the top of the forehead to the bottom of the chin and from one ear to the other.</p>
+<p>Next we wash both arms three times, including the elbows, starting with the right. We pass the ﬁngers of each hand through the other hand. This is called khilāl.</p>
+</article>
+<article class="topic" id="fiqh-wu---">
+<h3>Wuḍū'</h3>
+<p>We pass wet hands on our head all the way to the back. This is called 'masa#'. We wipe our ears inside and out using our index ﬁngers and then we use our thumbs to wipe the back of our ears.</p>
+<p>Finally, we wash our feet three times, starting with the right, including the ankles. We then do khilāl of our toes.</p>
+</article>
+</section>
+
+<section class="subject" id="a--d-th">
+<h2>Aḥādīth</h2>
+<article class="topic" id="a--d-th-singular---ad-th">
+<h3>Singular: Ḥadīth</h3>
+<div class="diagram"><img src="images/Coursebook1-a--d-th-singular---ad-th.png" alt="Diagram: Singular: Ḥadīth" loading="lazy"></div>
+<p>Plural: Aḥādīth Ḥadīth is what Rasūlullāh                said, did himself, or didn’t say ‘no’ to when he saw it.</p>
+<p>َُْْْRasūlullāh  said:</p>
+<p>"Feed the hungry and visit the sick."</p>
+<p>ُّّRasūlullāh  said:ُْ "The best of people are those who are most helpful to others."</p>
+<p>َََََRasūlullāh  said:ْ "Doing things calmly is from Allāh  and doing things in a hurry is from Shayṭān."</p>
+<p>ُRasūlullāh  said:َُْْ "Purity is half of īmān."</p>
+<p>ّRasūlullāh  said:ْْ "Hold on to the truth."</p>
+</article>
+<article class="topic" id="a--d-th-feeding-the-hungry">
+<h3>Feeding the Hungry</h3>
+<div class="diagram"><img src="images/Coursebook1-a--d-th-feeding-the-hungry.png" alt="Diagram: Feeding the Hungry" loading="lazy"></div>
+<p>Feeding the Hungry &amp; Visiting the Sick ََْْRasūlullāh  said:</p>
+<p>A{'imul jāi'a wa 'ūdul mar|}a “Feed the hungry and visit the sick.” (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Feeding the Hungry &amp; Visiting the Sick Allāh  has blessed us in so many ways. If we think about the things that Allāh  has given us, we will not be able to count them all. In this ḥadīth, Rasūlullāh  is reminding us to feed the hungry so we can share what we have. Can you remember a time when you felt really hun- gry? How happy did you feel after you had eaten your food?</p>
+<p>Dear children, there are many people in the world who are hungry and we must try to help them. The second lesson that Rasūlullāh  is giving us in this ḥadīth is to visit the sick. When a person is not well they are usually in bed, unable to go out and meet other people like they normally would do. When someone comes to visit them it makes them very happy and to make someone happy is a good deed. If we hear someone is not well, we should visit them and if we can't, then we should at least call them. By following these two lessons we will learn to care and be grateful.</p>
+</article>
+<article class="topic" id="a--d-th-helping-others">
+<h3>Helping Others</h3>
+<div class="diagram"><img src="images/Coursebook1-a--d-th-helping-others.png" alt="Diagram: Helping Others" loading="lazy"></div>
+<p>ْRasūlullāh  said:ُ Khayrun nāsi anfa'uhum linnāsi "The best of people are those who are most helpful to others."</p>
+<p>(al-Mu’jam al-Awsaṭ)</p>
+<p>To help someone in need is a good action. By helping someone, we can make them happy. In this ḥadīth, Rasūllullāh  is teaching us that the best people are those that help others.</p>
+<p>There are so many ways we can be helpful. Can you think of some?</p>
+<p>Here are some ideas you can try this week:</p>
+<ul><li>Clean your room.</li><li>Tidy up your toys.</li><li>Pick up some litter.</li><li>Help wash the dishes.</li><li>Explain the lesson to someone.</li></ul>
+</article>
+<article class="topic" id="a--d-th-doing-things-calmly">
+<h3>Doing Things Calmly</h3>
+<div class="diagram"><img src="images/Coursebook1-a--d-th-doing-things-calmly.png" alt="Diagram: Doing Things Calmly" loading="lazy"></div>
+<p>Rasūlullāh  said:</p>
+<p>Al anātu minallāhi wal 'ajalatu minash shayṭāni “Doing things calmly is from Allāh and doing things in a hurry is from Shayṭān.” (Tirmidhī)</p>
+<p>If we do something in a hurry, we are more likely to make mistakes and we will not be able to do it correctly. In this ḥadīth, Rasūlullāh  is teaching us that doing things calmly is something that Allāh loves, and doing things in a hurry is something that shayṭān likes. For example, we want to eat our food because we are very hungry: if we eat quickly we may choke, cough, or even get a stomach ache, if we take our time and chew the food properly, we will be able to eat and enjoy the food too.</p>
+<p>Always remember to do things calmly!</p>
+<p>Think of other things that can go wrong when we do things in a hurry.</p>
+</article>
+<article class="topic" id="a--d-th-staying-clean">
+<h3>Staying Clean</h3>
+<div class="diagram"><img src="images/Coursebook1-a--d-th-staying-clean.png" alt="Diagram: Staying Clean" loading="lazy"></div>
+<p>َْRasūlullāh  said:َّْ Aṭ ṭuhūru shaṭrul īmāni “Purity is half of īmān.” (Ṣaḥīḥ Muslim)</p>
+<p>It is so important for us to stay clean that Rasūlullāh  said it is "half of īmān."</p>
+<p>Īmān is what we believe in. Īmān is the key to jannah. We must keep our body and clothes clean, our house, our masjid and our surroundings clean. A clean person is loved by Allāh , the angels and all the people. It is easy to stay clean if we try. By staying clean, half of our īmān is complete.</p>
+<p>Think of all the ways we can stay clean.</p>
+</article>
+<article class="topic" id="a--d-th-speaking-the-truth">
+<h3>Speaking the Truth</h3>
+<div class="diagram"><img src="images/Coursebook1-a--d-th-speaking-the-truth.png" alt="Diagram: Speaking the Truth" loading="lazy"></div>
+<p>Rasūlullāh  said:ْ 'Alaykum bi ṣidqi “Hold on to the truth.” (Ṣaḥīḥ Muslim)</p>
+<p>Our Beloved Messenger Muḥammad                has told us to hold on to the truth. When something is important, we always hold on to it and refuse to let go. Just like that, we must never let the truth go, and we must stay away from lying. We must always speak the truth.</p>
+<p>'Abdul Qādir was a young boy who went to Baghdād to learn. To set him on his way, his mum gave him some money and told him, “My dear son, never lie! whatever happens to you.” One day a gang of robbers stopped the caravan and began asking all the people what they had. When 'Abdul Qādir’s turn came, he told them that he had forty gold coins. The robbers then took him to their leader. When the leader asked why he had spoken the truth, 'Abdul Qādir told the leader of the gang what his mum had taught him. The leader was so shocked by this answer that he began crying and said that,“this boy is so young, but he listens to his mum, whilst I am so old and don’t even listen to Allāh           .” He changed his ways and gave the money back to all the people.</p>
+<p>'Abdul Qādir became a very great friend of Allāh             when he grew up. We too must remember the lesson of speaking the truth at all times.</p>
+</article>
+</section>
+
+<section class="subject" id="s-rah">
+<h2>Sīrah</h2>
+<article class="topic" id="s-rah-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this chapter pupils will be able to:</p>
+<p>Outline key points from the childhood of Rasūlullāh          .</p>
+<p>Describe the youth of Rasūlullāh       .</p>
+<p>Summarise the marriage of Rasūlullāh               to Khadījah   .</p>
+<p>Recall the names of Rasūlullāh               ’s children.</p>
+</article>
+<article class="topic" id="s-rah-childhood-of-ras-lull-h">
+<h3>Childhood of Rasūlullāh</h3>
+<div class="diagram"><img src="images/Coursebook1-s-rah-childhood-of-ras-lull-h.png" alt="Diagram: Childhood of Rasūlullāh" loading="lazy"></div>
+<p>Our Beloved Messenger Muḥammad  was born in the city of Makkah, early on a Monday morning of Rabī' al-Awwal. The year he was born was known as 'The Year of the Elephant' as it was in this year that Abrahah, the governor of Yemen, decided to build his own place of worship.</p>
+<p>Abrahah also decided to attack the Ka'bah with his army of elephants because he wanted people to visit his place of worship instead of the Ka'bah in Makkah. The Ka'bah is a building in the city of Makkah which Ibrāhīm  built for the worship of Allāh . We face the Ka'bah when we pray our ṣalāh ﬁve times a day. It is a very special place where Allāh  is remembered.</p>
+<p>Allāh  protected the Ka'bah and destroyed Abrahah along with his army by sending a group of birds that dropped tiny stones from their beaks.</p>
+<p>Muḥammad 's father's name was 'Abdullāh, and his mother's name was Āminah.</p>
+<p>Muḥammad  was an orphan because his father, 'Abdullāh, had passed away just before Muḥammad  was born. It was a habit of the Arabs to send their children to the villages for the ﬁrst few years of their life.</p>
+<p>Parents would send their children to the villages so they could grow up learning the pure Arabic language whilst being away from the pollution and busy life of the city.</p>
+<p>Women from the villages would come to the city to look after the children.</p>
+<p>Ḥalīmah  was from the tribe of Ban[ Sīrah Sa'd who lived in a village. She also came to Makkah, along with others, looking for a child to take back with her, so that the child could grow up in the village.</p>
+<p>Rasūlullāh 's mother, Āminah, allowed Ḥalīmah to take Rasūlullāh with her back to the village.</p>
+<p>Allāh  blessed Ḥalīmah  through Rasūlullāh . Her animals began to give more milk than ever before and her camel which was weak and slow suddenly became strong and fast.</p>
+<p>Ḥalīmah  kept Rasūlullāh  for four years.</p>
+</article>
+<article class="topic" id="s-rah-when-ras-lull-h--was-six-years">
+<h3>When Rasūlullāh  was six years</h3>
+<div class="diagram"><img src="images/Coursebook1-s-rah-when-ras-lull-h--was-six-years.png" alt="Diagram: When Rasūlullāh  was six years" loading="lazy"></div>
+<p>old, he went with his mother Āminah to visit their relatives in Madīnah. On their way back, Āminah passed away at a place called Abwā'. Umm Ayman, who was travelling with them, brought Rasūlullāh  back to Makkah.</p>
+<p>Rasūlullāh  was cared for by his grandfather, 'Abdul Muṭṭalib who loved Rasūlullāh  very much.</p>
+<p>'Abdul Muṭṭalib was the leader of Makkah at that time. When Rasūlullāh  was eight years old, 'Abdul Muṭṭalib passed away, after which Rasūlullāh  was looked after by his uncle, Abū Ṭālib.</p>
+<p>Rasūlullāh 's Youth When Rasūlullāh  was 12 years old, he went with his uncle Abū Ṭālib, on a journey to Syria. On the way they stopped at a place and were met by a monk whose name was Baḥīrah.</p>
+<p>Baḥīrah told Abū Ṭālib that his nephew was going to become the last messenger of Allāh.</p>
+<p>Abū Ṭālib asked him how he knew this. Baḥīrah replied that he saw the trees and stones bowing down to Rasūlullāh  and they do not do this for any other person except for a messenger of Allāh Baḥīrah also said he had recognised the seal of prophethood between Rasūlullāh 's shoulders.</p>
+</article>
+<article class="topic" id="s-rah-he-told-ab----lib-not-to-take-him-to-syria">
+<h3>He told Abū Ṭālib not to take him to Syria</h3>
+<div class="diagram"><img src="images/Coursebook1-s-rah-he-told-ab----lib-not-to-take-him-to-syria.png" alt="Diagram: He told Abū Ṭālib not to take him to Syria" loading="lazy"></div>
+<p>because people would recognise him and might want to hurt him out of jealousy.</p>
+<p>Baḥīrah said that he saw the trees bowing down to Muḥammad . As Muḥammad  grew up, the people began to see that he had great qualities: he was always honest and trustworthy. They began calling himA-%ādiq(the most honest) andAl-Amīn(the most trustworthy). They would all respect him.</p>
+<p>One day the Quraysh decided to rebuild the Ka'bah as its walls had become weak. When the time came to put the 'Black Stone' in its place, they had an argument. They could not decide who should put the Black Stone in the wall of the Ka'bah. They were so angry that they were ready to ﬁght.</p>
+<p>However, someone suggested that whoever came into the Masjid next could decide what should be done. Muḥammad  was the ﬁrst person to enter. They were all happy and said that:</p>
+<p>"He is a-%ādiq and al-Amīn, and we are happy."</p>
+<p>Muḥammad  told a person from each tribe to come forward and take hold of a piece of cloth with the Black Stone in the middle, and take it to the Ka'bah, after which he lifted it and put in its place.</p>
+</article>
+<article class="topic" id="s-rah-marriage-to-khad-jah">
+<h3>Marriage to Khadījah</h3>
+<div class="diagram"><img src="images/Coursebook1-s-rah-marriage-to-khad-jah.png" alt="Diagram: Marriage to Khadījah" loading="lazy"></div>
+<p>In Makkah there lived a very rich woman whose name was Khadījah . When Khadījah heard how honest and trustworthy Muḥammad was, she asked him to go on a business Sīrah trip to Syria and sell her goods. She sent her servant Maysara to go along with him.</p>
+<p>Muḥammad 's trip was very successful for Khadījah . On the way, another monk had told Maysarah that Muḥammad  was going to be a prophet.</p>
+<p>Khadījah  expressed her wish to marry Muḥammad .</p>
+<p>Muḥammad  was 25 years old when he married Khadījah , while Khadījah 's age was 40.</p>
+<p>Allāh  blessed them with four daughters and two sons.</p>
+</article>
+<article class="topic" id="s-rah-important-names-to-remember-">
+<h3>Important names to remember:</h3>
+<div class="diagram"><img src="images/Coursebook1-s-rah-important-names-to-remember-.png" alt="Diagram: Important names to remember:" loading="lazy"></div>
+<p>Muḥammad Father: 'Abdullāh Mother: Āminah Tribe: Quraysh City: Makkah Foster Mother: Ḥalīmah Sa'diyyah Grandfather: 'Abdul Muṭṭalib Uncle: Abū Ṭālib Wife: Khadījah Daughters:  Zaynab, Ruqayyah, Umm Kulthūm and Fāṭimah Sons : Qāsim, 'Abdullāh &amp; 'Ibrāhīm</p>
+</article>
+</section>
+
+<section class="subject" id="t-r-kh">
+<h2>Tārīkh</h2>
+<article class="topic" id="t-r-kh-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>Recall the creation of Ādam and Ḥaww\’.</p>
+<p>Describe the harms of jealousy through the story of Shayṭān.</p>
+<p>Summarise the story of Nūḥ and recall the lessons learnt.</p>
+</article>
+<article class="topic" id="t-r-kh--dam">
+<h3>Ādam</h3>
+<div class="diagram"><img src="images/Coursebook1-t-r-kh--dam.png" alt="Diagram: Ādam" loading="lazy"></div>
+<p>.Ādam The ﬁrst man to be created was from clay. created Ādam Allāh ,  created Ādam When Allāh commanded all the angels to Allāh prostrate in front of him as a form of salām.</p>
+<p>All the angels obeyed and listened. did not obey and bow down to Shayṭān and he said:Ādam "I am better than him! You created me from ﬁre and created him from clay." (Qur'ān 38:76)</p>
+<p>Shayṭān did not look at who was telling him to bow down. was angry with Shayṭān and sent him Allāh far from His mercy. if he could have a very Shayṭān asked Allāh long life, and live until the Last Day. granted this wish of his, even though Allāh was angry with him.Allāh</p>
+<p>Ādam  was placed in Jannah, where he was very happy but lonely.</p>
+<p>Allāh  created a lady named Ḥawwā' and made her Ādam 's wife.</p>
+<p>Ādam and Ḥawwā' both lived in Jannah.</p>
+<p>Shayṭān, who is also called Iblīs, was very jealous. He felt it was because of Ādam that he had been taken out from the mercy of Allāh . He was looking for a way to take revenge.</p>
+<p>Allāh  had told Ādam and Ḥawwā' that they could live happily in Jannah and eat from wherever they wanted except the fruits of one tree.</p>
+<p>Shayṭān found out and planned to trick Ādam and Ḥawwā' into disobeying Allāh .</p>
+<p>and Shayṭān found a way to trick Ādam disguised himself. He said that he was a good friend and encouraged them to eat from the forbidden tree. When they ate from the tree, their clothes were removed; they covered themselves with the leaves of Jannah.</p>
+<p>,and Ḥawwā' called out to Ādam Allāh saying: "Did I not forbid you both from that tree and tell you that Shayṭān is your open enemy? They replied, "Our Lord we have done wrong and if You do not forgive us and have mercy upon us we will most certainly be from amongst the losers."</p>
+<p>(Qur'ān 7:22-23) forgave them both and selected them Allāh for His mercy. However at the same time He took them out of Jannah, and sent them to the Earth.</p>
+<p>Now whilst in the world, they had to work hard for everything.</p>
+<p>We must remember the lessons from the story of Ādam . We must remember that Shayṭān is our enemy and he is always trying to make us do those things that displease our Creator. We must ask Allāh  to protect us from him and his evil whispers.</p>
+<p>Look how kind and merciful Allāh is.</p>
+<p>Shayṭān did not listen to Him but still Allāh accepted his du'ā' for a long life. We must never stop making du'ā' to Allāh , for He will surely answer our prayers.</p>
+</article>
+<article class="topic" id="t-r-kh-n--">
+<h3>Nūḥ</h3>
+<div class="diagram"><img src="images/Coursebook1-t-r-kh-n--.png" alt="Diagram: Nūḥ" loading="lazy"></div>
+<p>and Ḥawwā' passed away, When Ādam their children continued to worship Allāh as their prophet and father Ādam had taught them. Nobody prayed to anyone Tārīkh . other than Allāh Shayṭān was still angry and jealous. He to wanted to take the children of Ādam Jahannam. He thought of a plan.</p>
+<p>There were many pious and good people who . Many of these were very close to Allāh great people had passed away.</p>
+<p>Shayṭān went to the people in disguise.</p>
+<p>Shayṭān asked them about the pious people who had passed away. They replied, "They were great people who worshipped ."</p>
+<p>Allāh</p>
+<p>Shayṭān said, "Why don't you look at them and remember them every day?" When they asked how that was possible he told them to draw pictures of these pious people and leave them in their houses: this way they would be able to look at them whenever they wanted. The people thought this was a good idea. They drew the pictures.</p>
+<p>Every morning they would look at these pictures and remember the great people. The children would watch their fathers. When these children grew up they changed these pictures into statues.</p>
+<p>- Every morning these children, who were now grown up, would look at these statues and remember the great people, while their children would watch them do this. When these children became old, they did not know that these statues were there just for remembrance. They changed these statues into idols and began worshipping them. They began praying to these idols.</p>
+<p>Shayṭān was happy about this. was not happy that His servants were Allāh praying to idols. decided to send a messenger to remind Allāh them. chose a man named Nūḥ. Allāh was a very respected young man.Nūḥ made him a messenger to give people the Allāh message of truth.</p>
+<p>- Nūḥ stood in front of the people and called them to pray to Allāh and not to the idols made of stone. The people did not like what Nūḥ was saying to them. They laughed at him and did not listen. They troubled and hit Nūḥ but Nūḥ did not give up. He told them that if they repented to Allāh by changing their ways, Allāh would bless them with so many good things. They said to him, "Should we believe in you when only the weak and poor follow you?" (Qur'ān 26:111) They wanted him to push the weaker people away, then they might think about following him.</p>
+<p>Nūḥ made it clear that he would never drive these believers away.</p>
+<p>Nūḥ kept calling people to Allāh for 950 years and still Allāh did not punish those who did not listen but gave them so many chances.</p>
+<p>At times he called upon them publicly, while at other times he went to them individually.</p>
+<p>Each time he called them they would put their ﬁngers in their ears and cover themselves with their clothes. Very few people accepted the message after all the hard work of Nūḥ .</p>
+<p>Nūḥ  warned the people that if they did not stop the evil, then Allāh  would send a punishment to them. The people laughed and said, "Bring to us the punishment that you have promised, if you are truthful." (Qur'ān 11:32)</p>
+<p>Nūḥ  then made du'ā' to Allāh  to punish the people and said: "My Lord, do not leave a single disbelieving person on the Earth." (Qur'ān 71:26)</p>
+<p>Allāh  commanded Nūḥ  to build a large ship, also known as an ark.</p>
+<p>Nūḥ  began to build.</p>
+<p>When the ship was ready, Allāh  commanded Nūḥ  to take aboard the Ark all the people that had believed in Him, and a male and female from each and every type of animal. It then started to rain so much that the sky opened its waters and the earth's springs gushed forth to the extent that there was a huge ﬂood. The Ark began sailing through the waves which were rising as high as mountains.</p>
+<p>All the people who had disobeyed Allāh  were drowned. The people that had believed in Allāh  were saved.</p>
+<p>. did not believe in Allāh One son of Nūḥ called him to join him in the Ark by Nūḥ . He said to his father, "I shall believing in Allāh climb a mountain that will save me from the rising water." (Qur'ān 11:43) reminded him that no one could be saved Nūḥ had mercy on. that day except those that Allāh As they were speaking, a large wave came and swept the son away. He was amongst the people who drowned. that his son was not from  told Nūḥ Allāh his family as his actions were not good. and his companions thanked Allāh Nūḥ for saving them from the ﬂood. Everyone came out safely from the Ark. prayed: "Oh my Lord let my landing from Nūḥ this Ark be blessed, for You alone can make me land in safety." (Qur'ān 23:29) The Ark stopped at a mountain called Jūdiyy.</p>
+<p>No one from the disbelievers survived.</p>
+<p>We must remember the lessons from the story of Nūḥ .</p>
+<p>• No matter who we are, whether we are rich or poor, if we love and listen to Allāh  then we are special. If we don't obey His commands then our richness or beauty is of no use. For Allāh  does not look at our faces or bodies but He looks at our hearts and actions.</p>
+<p>• We must never disobey Allāh  and make fun of the people who invite others to the worship of Allāh . Look what happened to those who made fun of Nūḥ  . Where are they now? No one knows about them.</p>
+<p>• We must never give up doing good things. Our duty is to keep trying. Nūḥ  continued to invite his people for 950 years.</p>
+<p>• It does not matter who our parents are, or whom we are related to. What matters is that we are good and obedient to our Creator. We see this in the story of the son of Nūḥ .</p>
+<p>• No one can be saved from the punishment of Allāh  except those that He has mercy on.</p>
+</article>
+</section>
+
+<section class="subject" id="aq--id">
+<h2>Aqā'id</h2>
+<article class="topic" id="aq--id-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>‘Aq\’id Outline the articles of faith every Muslim must believe in.</p>
+<p>Develop an understanding of the qualities of 'Aqā'id Allāh             .</p>
+<p>Recall two names of Allāh              and explain them.</p>
+</article>
+<article class="topic" id="aq--id-articles-of-faith">
+<h3>Articles of Faith</h3>
+<div class="diagram"><img src="images/Coursebook1-aq--id-articles-of-faith.png" alt="Diagram: Articles of Faith" loading="lazy"></div>
+<p>These are the Articles of Faith that all Muslims must believe in:</p>
+<p>Allāh His angels'Aqā'id His books His messengers The Last Day Fate: good and bad is all from Allāh Life after death</p>
+<p>Allāh ٌَََُّّ'Aqā'id</p>
+<p class="arabic" dir="rtl" lang="ar">لقوہ ا  هللا  دحا ﴾۱﴿ۚ  هلل مصلا  ﴾۲﴿ۚ د لليمو  ۬ۙ ديمل  دلوِل  و  ﴾۳﴿ۙ يمل  نكفكها  اودح﴾۴﴿٪</p>
+<p>Say, Allāh is One. Allāh is A-Ṣamad, (He needs no one and everyone needs Him). He did not give birth nor was He born and no one is equal to Him.</p>
+<p>(Qur’ān, Sūrah: 112)</p>
+<p>Allāh             is our Lord. We are all His servants; He created us and to Him we shall all return.</p>
+<p>Allāh              is one. This means He is alone and He does not have any partners. He does not have a mum or dad, or brothers or sisters, or any sons or daughters.</p>
+<p>Allāh             has always been and will always be. We cannot see Allāh             but He is watching over each and every one of us all the time.</p>
+<p>He was not created by anyone. He does not depend on anybody but everyone depends on Him.</p>
+<p>Allāh             has created us to worship and obey Him.</p>
+<p>Allāh             is the Most Kind.</p>
+<p>Allāh             is the Most Merciful.</p>
+<p>Allāh             has many qualities.</p>
+<p>Allāhhas many names which are known as al-Asm\-ul-Ḥusn\ (The Most Beautiful Names of Allāh             ). We shall now discuss some of these qualities of Allāh           .</p>
+<p>Ar-Razzāq - The Provider This means He gives us everything - from clothes to food and from family to friends. Everything we see around us is provided by Him. We may see that our parents feed us, but let us think: who gave them the strength to work? Who put love for us into their hearts? Who granted them their knowledge? So in reality Allāh            is the real provider.</p>
+<p>Ar-Razzāq - The Provider One day, the Companions of our Beloved Messenger Muḥammad   were on a journey wherein they had no food except dates and water. Each Companion was given one date to eat every day. They then began eating the leaves of trees until they reached the coast where they saw a large object. When they came near it, they saw it was a huge ﬁsh, known as Al ‘Anbar.</p>
+<p>Jābir    says: “Three hundred of us ate from it for a whole month and then packed its meat for our journey. When we came back to Madīnah, we went to Allah's Messenger and told him, He    said: That was food which Allāh       had brought out (from the ocean) for you.” (Ṣaḥīḥ Muslim)</p>
+<p>Dear children, look how Allāh     provided such a large ﬁsh for the Companions of our Beloved Messenger       . We must also ask Allāh   to provide for us in this world and the ākhirah. Allāh loves it when we ask Him.</p>
+<p>Ar-Razzāq - The Provider Did you know Allāh is the Provider for you? Through the earth that grows the food for you Through the shops that bring the food for you Through your dad who brings the money for you Through your mum who makes the food for you Just so you know:</p>
+<p>Allāh is the Provider for you!</p>
+<p>Another quality of Allāh              is:</p>
+<p>Ar-Raḥmān - The Most Merciful In Sūrah Fātiḥah, the word Ar-Raḥmān has been mentioned.</p>
+<p>Mercy is to show kindness.</p>
+<p>Allāh            is the Most Kind and the Most Forgiving.</p>
+<p>One day the mother of Mūsā           was worried as there were people around that were trying to take her child away. Allāh            told her not to worry and told her to put baby Mūsā           in a box in the river. The box ﬂoated right into the enemy’s palace. At this time, the enemy of Islām was Fir’awn, and when his wife Āsiyah saw the baby, she pleaded to her husband to let her keep the child in the palace.</p>
+<p>Mūsā          became hungry so they tried giving him milk but he would not take milk from anyone at the palace.</p>
+<p>Ar-Raḥmān - The Most Merciful Mūsā           ’s sister, who had been following, said: ‘I know of a lady that may be able to help.’ When the mother of Mūsā           was brought to the palace, Mūsā           immediately took milk from her. Fir’awn asked her if she could look after Mūsā           and so 'Aqā'idsent him with her without knowing that she was the mother.</p>
+<p>Sub#ānallāh, look how Allāh             returned Mūsā            to his mother.</p>
+<p>Allāh              is so merciful and kind, and we must always pray to Him for everything we need in this world and the ākhirah.</p>
+<p>Ar-Raḥmān - The Most Merciful One day, a woman was searching for her lost child. When she found him, she took hold of him, pressed him against her chest and gave him milk. Our Beloved Messenger Muḥammad    asked his Companions: "Do you think this woman would ever throw her child in the ﬁre?” They replied: "By Allāh, as long as she is able to, she would never throw her child in the ﬁre.” Thereupon our Beloved Messenger          said:</p>
+<p>“Allāh        is more merciful to His servants than this lady to her son." (Ṣaḥi# al-Bukhārī)</p>
+<p>Allāh knows when you are in trouble and even when you go through struggle.</p>
+<p>Allāh also knows when life is difﬁcult. But we always recite when we start the Qur’ān:</p>
+<p>‘Bismillāhir Raḥmānir Ra#|m’ In this there is surely a message for all: that everything is from the mercy of Allāh The Merciful.</p>
+</article>
+</section>
+
+<section class="subject" id="akhl-q">
+<h2>Akhlāq</h2>
+<article class="topic" id="akhl-q-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>State the meaning of respect and compare scenarios relating to it.</p>
+<p>Identify cleanliness and list ways of keeping ourselves and our surroundings clean.</p>
+<p>Develop the method of speaking in a polite and gentle manner.</p>
+<p>State and apply the advantages of smiling and how it affects us all.</p>
+<p>Identify and practise beginning with the right hand on related actions.</p>
+</article>
+<article class="topic" id="akhl-q-respect">
+<h3>Respect</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-respect.png" alt="Diagram: Respect" loading="lazy"></div>
+<p>‘Ubādah ibn a-%āmit            stated that the Messenger                 said, ‘Whoever does not respect our elders is not one of us.’ (Aḥmad)</p>
+<p>Respect is to carry out something in a nice way.</p>
+<p>Respect is to treat someone nicely, knowing and thinking that they are a precious human being.</p>
+<p>Respect is being kind.</p>
+<p>Respect is treating someone in a special way. An elder person is someone who is older than us in age.</p>
+<p>Giving respect to those who have more knowledge than us is also neccessary, even if they may be younger. When we show respect to our elders Allāh             is happy.</p>
+<p>There are many ways we can show respect.</p>
+<p>Let’s take a look at some of them:</p>
+<p>1.An elderly person is walking behind you as you enter a shop.</p>
+<p>Disrespect:</p>
+<p>Respect:</p>
+<p>You hold the door You walk into open, allowing the the shop and let elder person to enter the door close before you. As they behind you. enter, you smile and say a kind word.</p>
+<p>OPEN</p>
+<p>Another example of how you should show respect to people: Your teacher - who has two reasons to be 2. respected, having more knowledge and being older than you - enters the class as you are talking and laughing with your friends.</p>
+<p>Respect:</p>
+<p>Disrespect:</p>
+<p>You stop talking and You carry on talking smile at the teacher and laughing as if as you quickly sit you did not notice properly. the teacher at all.</p>
+<p>If someone gave you a pen to use, and you chewed the pen, wrote on the wall with it (instead of paper), threw it around the room, then you would be showing the pen disrespect. The person who gave you the pen is not going to give it to you again. If you held the pen properly, kept it in a safe place, and wrote with it on paper, you would be showing respect. The person who gave you the pen would be happy and may let you use it again.</p>
+<p>Similarly Allāh             has blessed us with many blessings: if we respect them, and use them in the right way, Allāh             will be pleased and will reward us. We must also show respect to Allāh   when we pray ṣalāh by making sure that we do not ﬁdget or look around.</p>
+<p>The whole creation is dependent on Allāh             and Muḥammad                  told us that the most beloved to Allāh              is the one who is kindest to His creation. (Bayhaq|)</p>
+<p>Older people can sometimes make mistakes too, we must never laugh at them. If we see them doing something wrong we should not say:</p>
+<p>‘Don’t you even know that?’ AkhlāqNo! We must think of the most respectful way we can inform them.</p>
+<p>One day the beloved grandchildren of the Messenger Muḥammad                 saw an old man who was doing wuḍū’ incorrectly. They were younger than him. So they came up with an idea. They asked the man if he could watch them do wuḍū’ and check if they were missing any parts out. The man became happy that the grandchildren of the Beloved Messenger                 were asking him. They then washed all the parts necessary in wuḍū’. When the man saw how they did wuḍū’, he realised he had missed one part out. Without being disrespectful they were able to teach the elder person his error in wuḍū’.</p>
+<p>Dear children we must also think when we meet an elder person:</p>
+<p>“How should I behave? What is the best way to do this action?” Please If we are eating, it would be disrespectful to start eating before an elder. We must wait till they begin.</p>
+<p>Jazakallahu We must not walk in front of our khayra elders nor raise our voice above theirs. When we speak we must speak with respect by saying polite things such as: “please” and “Jazākallāhu Khayr\”.</p>
+<p>How are you? If they offer us something we must take it with two hands and thank them. If we discuss something with them, let them speak ﬁrst; we must listen carefully. If they say something to us which we do not like, we must not raise our voice.</p>
+<p>Our Beloved Messenger Muḥammad said: “There is not a person who respects an elderly person because of his old age, but Allāh            appoints a person who will respect him when he grows old.” (Tirmidhī) This means that if we show respect to our elders, when we grow old people will show respect to us. So next time you see an old person remember to think ‘How can I treat this person in the best way?’ This could include picking their bags up, opening a door, carrying out some shopping or just a kind word to say: ‘How are you today?’</p>
+</article>
+<article class="topic" id="akhl-q-cleanliness">
+<h3>Cleanliness</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-cleanliness.png" alt="Diagram: Cleanliness" loading="lazy"></div>
+<p>Staying clean is so important.</p>
+<p>Cleanliness is loved by Allāh            . A clean person is loved by everyone. If we do not look after ourselves we will automatically become unclean. To become clean, we have to put some effort in, we have to wash and we have to scrub. If we don’t, germs and bacteria will come and stay on us and around us.</p>
+<p>Our bodies are amazing Each day they are busy working hard doing lots of important things through the will of Allāh           , such as digesting food, pumping blood and oxygen.</p>
+<p>There is a group of tiny invaders that are invisible to us but if they come they can These tiny invaders are make our bodies ill. called germs.</p>
+<p>Some germs are called viruses. If viruses get inside our bodies they can spread and make us unwell. Some viruses only live for a while on something like a door handle or table. The best way to stay clean and away from germs is to wash regularly.</p>
+<p>Let’s look at different ways we can make sure we stay clean all the time.</p>
+</article>
+<article class="topic" id="akhl-q-our-body">
+<h3>Our Body</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-our-body.png" alt="Diagram: Our Body" loading="lazy"></div>
+<p>Wash your hands before and after meals.</p>
+<p>Brush your teeth twice a day. Have a bath regularly.</p>
+<p>Wear clean clothes.</p>
+<p>Comb your hair.</p>
+<p>Wash yourself after you use the washroom.</p>
+<p>Make sure your nails are short, as germs can live under your nails.</p>
+</article>
+<article class="topic" id="akhl-q-around-us">
+<h3>Around us</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-around-us.png" alt="Diagram: Around us" loading="lazy"></div>
+<p>See that your toys and books are neatly put away and not left around.</p>
+<p>Make your bed as soon as you wake up. Do not eat in your bedroom as this can leave crumbs behind which may invite insects to visit! Be sure to leave things as you found them.</p>
+<p>Move anything that may be harmful out of the way.</p>
+<p>In the Washroom When using the washroom:</p>
+<p>Make sure you sit down completely. Do not stand and use the toilet.</p>
+<p>Clean your private parts after using the toilet with tissue paper and water. Our Beloved Messenger Muḥammad                has told us about a person who was being punished by Allāh             because he did not keep himself clean after urinating. (Ṣaḥīḥ al-Bukhārī)</p>
+</article>
+<article class="topic" id="akhl-q-when-eating">
+<h3>When Eating</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-when-eating.png" alt="Diagram: When Eating" loading="lazy"></div>
+<p>Wash your hands before and after the meal. The hands are the best place germs like to stay.</p>
+<p>See that no food crumbs fall around you. Do not let food fall onto your clothes.</p>
+</article>
+<article class="topic" id="akhl-q-water">
+<h3>Water</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-water.png" alt="Diagram: Water" loading="lazy"></div>
+<p>Using water is the best way we can stay clean!</p>
+<p>Use it wisely - do not waste it. If we stay clean we will feel happy too.</p>
+<p>Water is a gift to us from Allāh Remember:</p>
+<p>Allāh            loves those who make themselves clean. (Qur’ān 9:108)</p>
+<p>Wash your hands Both palms Fingertips Back of Palms Under the Nails Add soap, and Rinse and dry Fingers clean properly your handsAkhlāq Nails Wrists Rinse well Wipe In between yourRub your hands ﬁngertipstogether</p>
+</article>
+<article class="topic" id="akhl-q-gentleness-in-speech">
+<h3>Gentleness in Speech</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-gentleness-in-speech.png" alt="Diagram: Gentleness in Speech" loading="lazy"></div>
+<p>The tongue is a gift from Allāh            . We must think before we use it to speak.</p>
+<p>Always think of how we can speak nicely. If we say something which is not nice we may make the other person, who we are talking to, upset. Our Beloved Messenger                 always spoke gently. He always said nice and kind words to people. We must think how we would feel if someone spoke to us rudely.Akhlāq Let us look at some examples of how we can say something nicely and gently.</p>
+<p>Example 1 You have some sweets and you want to share with someone: How should you ask them?</p>
+<p>Hey! Do you want one?</p>
+<p>Shall I give you one?</p>
+<p>Please, take some.</p>
+<p>How nice and friendly does the third one sound? You are actually asking them to take some. They will feel so special. If you make someone happy, Allāh             will be happy with you.</p>
+<p>Example 2 We really want something from an elder.</p>
+<p>How should we speak?</p>
+<p>Give me that!</p>
+<p>2Please, may I have this? Are you going to give me that or not? Which one sounds the most polite?</p>
+<p>That’s right. The second sentence.</p>
+<p>Example 3 You see your elderly neighbour carrying some bags.</p>
+<p>How would you offer your help?</p>
+<p>You watch them carry the bags and after they have put them where they wanted, you say:</p>
+<p>“You should’ve asked for help!” You see them carrying the bags and you say:</p>
+<p>“Do you want any help?” As soon as you see them you immediately rush to their side and say: “Please, allow me to take the bags for you.” How kind does the third one sound? If we try to be polite we will develop good manners.</p>
+<p>Our Beloved Messenger Muḥammad said: “I promise a palace in the highest stages of Jannah for the person who has good manners.” (Abū Dāwūd) In another ḥadīth our Beloved Messenger Muḥammad                 told us that, in Paradise there are (special) palaces, which Allāh             has prepared for those who feed the hungry, speak softly and gently, fast continuously and pray at night whilst people are asleep. (Tirmidhī) In another #adith our Beloved Messenger Muḥammad                 told us to protect ourselves from Jahannam with whatever charity we can give. And he said: “He who cannot ﬁnd anything to give, then let him speak good words.” (Ṣaḥīḥ al-Bukhārī) Through speaking good words we can enter Jannah and be saved from Jahannam.</p>
+<p>It is said about our Beloved Messenger Muḥammad                that he did not speak too slowly or too fast. He spoke in a medium tone. His words were neither too short nor too many but were always just right. When he spoke, people felt as if exactly the right amount of words were used. He                was perfect in everything.</p>
+<p>Next time you want to speak, STOP AND THINK!</p>
+<p>“How can I be gentle in my speech?”</p>
+</article>
+<article class="topic" id="akhl-q-smiling">
+<h3>Smiling</h3>
+<div class="diagram"><img src="images/Coursebook1-akhl-q-smiling.png" alt="Diagram: Smiling" loading="lazy"></div>
+<p>Our Beloved Messenger Muḥammad Do not think of any good action to be small, even if it may be meeting your Muslim brother with a smile.” ār|)</p>
+<p>(Ṣaḥīḥ al-Bukh Our Beloved Messenger Muḥammad “Your smile for your brother (Tirmidhī) is charity.” When we smile at someone, Allāh            is rewarding us. This is because the act of smiling makes the person whom you smiled at happy.</p>
+<p>Smiling does not cost anything. We should try to smile more often. We should not be grumpy.</p>
+<p>Smiling is contagious; it spreads very fast. If you smile at someone they will smile back at you and if they then look at someone else with a smile, it will spread very fast.</p>
+<p>Smiling brightens up your face and makes you look nicer.</p>
+<p>Smiling will keep us happy and keep us safe from becoming jealous. A jealous person is not a happy person.</p>
+<p>Smiling is fun.</p>
+<p>Smiling can take pain away from our body. When Rasūlullāh               was with people, he was happy. He               smiled and made others feel joyful. He               never made them feel sad.</p>
+<p>Beginning from the Right Hand Side Ā’ishah            says, ‘ "The Beloved Prophet                liked to begin with the right when putting on his shoes, combing his hair, while performing ablution and in doing anything (Ṣaḥīḥ al-Bukhārī)else.” Stay to the right</p>
+<p>Beginning from the Right Hand Side The Prophet                said: “If one of you puts his sandals on, let him start with his right foot. When he takes them off, let him start with his left, so that his right foot is the ﬁrst to wear the sandal and the last to be taken out of it.” (Ṣaḥīḥ al-Bukhārī) The rule is when we put something on: right ﬁrst then left and when we take something off: it’s left ﬁrst then right.</p>
+<p>Activities of an opposite nature, like blowing the nose and removing any dirt, should be done with the left hand.</p>
+<p>Beginning from the Right Hand Side We should use the right side in actions such as:</p>
+<ul><li>Entering the masjid</li><li>Giving or taking something</li><li>Entering the house</li><li>Boarding a vehicle</li><li>Eating and drinking</li></ul>
+<p>We should use the left side in actions such as:</p>
+<ul><li>Entering the washroom</li><li>Cleaning oneself</li><li>Blowing the nose</li><li>Leaving the masjid</li><li>Removing the shoes</li></ul>
+<p>Beginning from the Right Hand Side We learn from this chapter that it was a sunnah of Rasūlullāh                to do good things with the right side.</p>
+<p>Another thing we can learn is that we should always think before we do something: this will allow us to do it properly and follow the sunnah. Our Beloved Messenger Muḥammad                has taught us everything in We should try to follow great detail. We are the sunnah in everything rewarded for the simplest we do. of things, like putting our Akhlāqshoes on, if we do it ‘Sunnah’ means something according to the sunnah. which our Beloved Messenger Muḥammad used to do.</p>
+<p>Allāh             has told us in the Qur’ān that if we love Allāh             then we should follow Muḥammad . If we follow him then Allāh            will love us and forgive our sins.</p>
+</article>
+</section>
+
+<section class="subject" id="-d-b">
+<h2>Ādāb</h2>
+<article class="topic" id="-d-b-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>List the Ādāb of eating.</p>
+<p>List the Ādāb of drinking.</p>
+<p>Identify and order the Ādāb of sleeping.</p>
+<p>Identify and order the Ādāb of waking up.</p>
+<p>State the Ādāb of using the washroom.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-eating">
+<h3>Ādāb of Eating</h3>
+<div class="diagram"><img src="images/Coursebook1--d-b--d-b-of-eating.png" alt="Diagram: Ādāb of Eating" loading="lazy"></div>
+<p>h \    Ibn ‘Umar            said the Messenger of All “None of you should eat with his said, left hand or drink with it, because the Shayṭān eats with his left hand and drinks with it.” (Ṣaḥīḥ Muslim) The Beloved Messenger Muḥammad “When one of you eats he should mention said, h’s name (say ‘Bismillāh’). If he forgets to \All h’s name at the beginning, then he \ mention All should say (when he remembers), “In the name h in the beginning, and the end.’” \ of All In the name of Allāh in the beginning and the end.</p>
+<p>(Abū Dāwūd)</p>
+<p>Wash both hands up to the wrist.</p>
+<p>Rinse the mouth before beginning to eat. Do not ﬁnd faults in the food.</p>
+<p>Hurayrah            reported that the ūAb Prophet                never found fault with food. If he liked it, he would eat it, if he disliked it, he left it. (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Remove your shoes before sitting to eat.</p>
+<p>You should not eat whilst standing: sit on the ﬂoor to eat. Do not lean whilst eating.</p>
+<p>Eat with your right hand.</p>
+<p>It’s best to use three ﬁngers while eating.</p>
+<p>ĀdābDo not eat hot food: let it cool down.</p>
+<p>If you are sharing a plate with someone, then eat from the side that is closest to you. If any food falls on the tablespread, eat it after removing any dirt.</p>
+<p>Finish the food on your plate.</p>
+<p>Lick your ﬁngers: it is a sunnah, and also helps with digestion. When you are eating in a group, take one item at a time.</p>
+<p>Pray the du‘\’ after eating.</p>
+<p>Praise be to Allāh who fed us, gave us drink and made us Muslims. (Abū Dāwūd) After eating, rinse the mouth and wash the hands.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-drinking">
+<h3>Ādāb of Drinking</h3>
+<div class="diagram"><img src="images/Coursebook1--d-b--d-b-of-drinking.png" alt="Diagram: Ādāb of Drinking" loading="lazy"></div>
+<p>Our Beloved Messenger Muḥammad               said, h’s name \“Do not drink water in one gulp like camels, but drink it in two or three sips, and say All when you begin, and praise Him when you ﬁnish.” (Tirmidhī)</p>
+<p>Remember the following when drinking water:</p>
+<p>Drink from a cup and not directly from a large bottle. before you drink.</p>
+<p>BismillāhSay Drink in three sips.</p>
+<p>Look inside the cup. Do not use gold or silver cups to drink from. Do not breathe into the cup. Do not drink from the chipped side of a cup.</p>
+<p>Drink whilst you are seated.</p>
+<p>Say ‘Alḥamdulillāh’ when you ﬁnish.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-sleeping">
+<h3>Ādāb of Sleeping</h3>
+<div class="diagram"><img src="images/Coursebook1--d-b--d-b-of-sleeping.png" alt="Diagram: Ādāb of Sleeping" loading="lazy"></div>
+<p>Bar\’            reports that when the Messenger                went to bed (to sleep) he put his right hand under his right cheek, and recited this du‘\’:</p>
+<p>O Allāh, save me from Your punishment on the Day of Qiyāmah.  (Abū Dāwūd) When going to bed we should:</p>
+<p>Sleep with wuḍū'</p>
+<p>Dust the bed Sleep on the right side Sleep with our right hand under the right cheek Avoid sleeping on the stomach Recite the du‘\’ O Allāh, with Your name I die and live.</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Read Sūrah Ikhlās, Falaq and Nās.</p>
+<p>Blow into your palms, and then rub them over the entire body three times, beginning with your head and reaching as far as possible.</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Recite: Sub#ānallāh 33 times, Alḥamdulillāh 33 times and Allāhu Akbar 34 times. (Ṣaḥīḥ al-Bukhārī) If you have a nightmare then read: h from the cursed Shayṭān.\ I seek refuge in All Thereafter, make a spitting or blowing sound on the left side three times and change the side of sleeping. (Ṣaḥīḥ Muslim) If you were sleeping on the right side, turn to the left side. If you woke up sleeping on the left side, turn to the right side.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-waking-up">
+<h3>Ādāb of Waking Up</h3>
+<div class="diagram"><img src="images/Coursebook1--d-b--d-b-of-waking-up.png" alt="Diagram: Ādāb of Waking Up" loading="lazy"></div>
+<p>When the Messenger               woke up from his sleep, he would say:</p>
+<p>All praise is for Allāh who gave us life after causing us to die and to Him is the return.</p>
+<p>(Ṣaḥīḥ al-Bukhārī) Upon awakening, be sure to do the following:</p>
+<p>Recite the du‘\’.</p>
+<p>Rub your palms on your eyes to wipe the sleep away.</p>
+<p>Wash your hands.</p>
+<p>Brush your teeth: it’s better to use a miswāk. Our Beloved Prophet Muḥammad taught us to wash germs away.</p>
+<p>Practising a Sunnah is not only rewarding 130but beneﬁcial too.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-using">
+<h3>Ādāb of Using</h3>
+<div class="diagram"><img src="images/Coursebook1--d-b--d-b-of-using.png" alt="Diagram: Ādāb of Using" loading="lazy"></div>
+<p>the Washroom Anas            reports that when the h                would \ Messenger of All enter the washroom he would say:</p>
+<p>Oh Allāh I seek refuge in You from all evil and evil doers.</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>the Washroom Cover your hair.</p>
+<p>Recite the du‘\’.</p>
+<p>Enter with your left foot. Do not face your front or back towards the Qiblah.</p>
+<p>Sit and use the toilet.</p>
+<p>You should not stand and use the toilet.</p>
+<p>Wash yourself with your left hand. Do not talk.</p>
+<p>Wash your hands with soap.</p>
+<p>Leave with your right foot.</p>
+<p>Recite the following du’\’ upon leaving:</p>
+<p>I seek Your forgiveness.</p>
+<p>ََّْٰٰ(Tirmidhī)َّ</p>
+<p class="arabic" dir="rtl" lang="ar">ينافاعو ىذالا ينع بہذأ يذلا هلل دمحلاِِِ</p>
+<p>Praise be to Allāh who took away harm from me and relieved me.</p>
+<p>(Ibn Mājah)</p>
+<p>Bibliography Fiqh Section ‘al-Sughdi (d.461AH), ‘‘al-Nutaf ﬁ ‘al-Fatāwā', Dar ‘al-Furqān, 1984 ‘al-Samarqandi(d.540AH), ‘Tuḥfat ‘al-Fuqahā'', Dār ‘al-Kutub ‘al-'ilmiyyah, 1994 ‘al-Kāsān| (d.587AH), ‘Badā'i' ‘al-ṣanā'i' f| al-Tartīb al-Sharā'ī'', Dār ‘al-Ku- tub ‘al-ilmiyyah, 1986 ‘al-Marghinān| (d.593AH), ‘‘al-Hidāyah f| sharh bidāyah ‘al-mubtad|', Mak- tabah ‘al-Bushra, 2007 ‘al-Bukhāri, Burhān ‘al-Dīn (d.616AH), ‘‘al-Mu#|{ ‘al-Burhān| ﬁ ‘al-Fiqh ‘al- Nu'mān|', Idārah ‘al-Qur'ān, 2004 ‘al-Mawṣil| (d.683AH), ‘‘al-ikhtiyār li ta'līl ‘al-Mukhtār', ‘al-Halab|, 1937 Khusr[ (d.885AH), ‘Durar ‘al-Ḥukkām Sharh Gurar ‘al-Aḥkām', Dar ‘ihyā'</p>
+<p>‘al-Kutub Ibn Nujaym (970AH), ‘‘al-Baḥr ‘al-Rā'iq Sharh Kanz ‘al-Daqā'iq', Dār ‘al- Kitāb ‘al-Islām| A-Qudūr| (d.428 AH), ‘Mukhtasar ‘al-Qudūr|', Dār Qubā', 2003 ‘al-Ṭa#{āw| (d.1321 AH), ‘*āshiyah ‘al-Ṭa#{āw| 'al\ Marāq| ‘al-Fal\#', Dār ‘al-Kutub ‘al-'ilmiyyah, 1997 Ibn 'Ābidīn (d.1252 AH), ‘Radd ‘al-Muḥtār', H.M.Saeed Ḥaydar, Al| (d.1353 AH), ‘Durar ‘al-Ḥukkām F| Sharh Majallah ‘al-Aḥkām', Dār ‘al-Jiyal, 1991 Ni~ām ‘al-Dīn et al, ‘‘al-Fatāw\ ‘al-Hindiyyah', Maktabah ‘al-Rashīdiyyah Ludhyānwi, Muft| Rashīd Ahmed (d.2002 CE), ‘Aḥsan ‘al-Fatāwā', H.M Saeed, 1979 Gangohi, Muft| Maḥmūd ‘al-Ḥasan (d.1996 CE), ‘Fatāw\ ‘al-Maḥmudiyyah', Idārah ‘al-Farūq, 2008 Muft| Ra}ā' ‘al-Ḥaq et al, ‘Fatāw\ Dār ‘al-'Ulūm ‘al-Zakariyyā', Zamzam Publishers, 2007 ‘al-Tatw|, Muḥammad Hāshim (d.1174 AH), ‘Fākihat ‘al-Bustān', Dār ‘al-Ku- tub ‘al-'ilmiyyah, 2012 Bibliography</p>
+<p>Bibliography Aqīdah Section ‘al-Taftāzān|, Sa'd ‘al-Dīn (791 AH), ‘Sharh ‘al-Aqā'id ‘al-Nasaﬁyyah', Dār ‘al-Bayrūt|, 2007 ‘al-Ghaznaw| (d.773 AH), ‘Sharh ‘al-Aqīdah ‘al-Ṭa#āwiyyah', Dār ‘al-Kuraz, 2009 ‘al-Māturīd| (d.333 AH), ‘Kitāb ‘al-Tawhīd', Dār ]ādir, ‘al-Maydān| (d.1298 AH), ‘Sharh ‘al-Aqīdah ‘al-Ṭa#āwiyyah', Dār ‘al-Fikr, 1995 ‘al-Bayjūr| (d.1276 AH) , ‘Tuḥfat ‘al-Murīd 'al\ Jawharah ‘al-Tawhīd', Dār ‘al-Salām, 2002 ‘al-Qār|, Mulla 'Al| (d.1014 AH), ‘Mina# ‘al-Rawdh ‘al-Azhar F| Sharh ‘al- Fiqh ‘al-Akbar', Dār a;-Bashā'ir ‘al-islāmiyyah, 1998 ‘al-Qār|, Mulla 'Al| (d.1014 AH), ‘Dhaw' ‘al-Ma'āl| 'al\ Man~ūmah Bad'a ‘al- amāl|', Dār ‘al-Bayrūt|, 2006 ‘al-Bayhaq| (d.458 AH), ‘Kitāb ‘al-Asmā' wa ‘al-ṣifāt', ‘al-Maktabah ‘al-Azhariyyah li ‘al-Turāth ‘al-Shahrastān| (d.548 AH), ‘‘al-Milal wa ‘al-Niḥal', Dār ‘al-Kutub ‘al-'ilmi- yyah, 1992 ‘al-'Āṣr|, Saif ibn 'Al|, ‘‘al-Qawl ‘al-Tamām bi Ithbāt ‘al-Tafwīdh Madhaban li ‘al-Salaf ‘al-Kirām', Dār ‘al-Fat#, 2010 Kan'ān, Muḥammad Aḥmad, ‘Jāmi' ‘al-La'āl| Sharh Bad'a ‘al-‘Amāli', Dār al-Bashā'ir al-Islāmiyyah', 2010 ‘Al-Nawaw| (d.676 AH), ‘ ‘al-Minhāj Sharh Ṣaḥīḥ Muslim ibn al-Hajjāj', Dār ‘Ihyā' al-Turāth Hadīth Section Bibliography‘al-Bukhārī, Muḥammad ibn Ismā'īl (d.256AH), ‘Ṣaḥīḥ al-Bukhārī', Dar ^ūq al-Najāh, 2001 Muslim, Muslim ibn al-Ḥajjāj (d.261AH), ‘Ṣaḥīḥ Muslim', Dār ‘iḥy\ al-Turāth al-‘Arab|, Nasa'|, Aḥmad ibn Shu'ayb (d.303AH), ‘Sunan al-Nasa'|', al-Risālah, 2001 Abū Dāwūd, Sulaymān ibn al-‘Ash'ath (d.275AH), ‘Sunan Ab| Dāwūd, Dār al-Risālah al-‘ālamiyyah, 2009</p>
+<p>Bibliography ‘al-Tirmidhī, Muḥammad ibn '|s\ (d.279AH), ‘Sunan al-Tirmidhī', Dār al- Gharb al-‘islām|,  1996 ‘Ibn Mājah, Muḥammad ibn Yazīd (d.273AH), ‘Sunan Ibn Mājah', Dār al- Risālah al-‘ālamiyyah, 2009 Ibn Ḥanbal, Aḥmad (d.241AH), ‘Musnad Aḥmad, Mu'assasah al-Risālah, 2001 Al-Ṭabarān|, Sulaymān ibn Aḥmad  (360AH), ‘al-Mu'jam al-Kabīr', Makta- bah ibn Taymiyyah, Al-Ṭabarān|, Sulaymān ibn Aḥmad  (360AH), ‘al-Mu'jam al-Awsa{', Dār al-Ḥaramayn ‘al-Bazzār, Aḥmad ibn ‘Amr (d.292 AH), Musnad al-Bazzār', Maktabah al- 'Ulūm wa al-Ḥikam, 2009 Ibn Ḥibbān, Muḥammad ibn Ḥibbān (d.354 AH), ‘Ṣaḥīḥ Ibn Ḥibbān', Mu'assasah al-Risālah, 1988 Al-*ākim, Muḥammad ibn 'Abdullāh (d.405 AH), ‘al-Mustadrak al\ al- Ṣaḥīḥayn', Dār al-Kutub al-'ilmiyyah, 1990 Al-Bayhaq|, Aḥmad ibn al-Ḥusain (d.458 AH), ‘al-Sunan al-Kubrā', Dār al-Kutub al-'ilmiyyah, 2003 Tārīkh Section Ibn Kathīr (d.774 AH), ‘ ‘al-Bidāyah wa al-Nihāyah', Dār ‘Ihy\ al-Turath', 1988 Al-Dhahab| (d.748 AH), ‘Siyar al-‘A'lām al-Nubalā'', Mu'assah al-Risālah, 1985 ‘al-Sarjān| et al, ‘al-Mawsū'ah al-Muyassarah f| al-Tārīkh al-‘islām|', Mu'as- sasah Iqra', 2014 Alkhateeb, Firas, ‘Lost Islamic History', Hurst Publishers, 2014 ‘Al-Hassani, Salim et al, ‘1001 inventions: Muslim Heritage in Our World', Foundation for Science Technology and Civilisation, 2006 Bibliography</p>
+<p>Credits Mawlān\ Muḥammad Yaḥy\ ibn Fārūq Director Mawlān\ Muḥammad Qāsim Manjra Project Manager Mawlān\ Harūn Makda, Mawlān\ Isḥāq Boodi and Mawlān\ Ḍhahīr Sidat Consultation Panel 'Irfān Chhatbar Design &amp; Artwork Shakīl Zikr Illustration 'Ābid Russell, Rachel Larson &amp; Khadījah Vania Editing Bakh Sumira Sul{ān Workbooks &amp; Extension Activities Media Jamshidi Vectorisation Rest of the team at An Nasihah Publications May Allāh  reward them all abundantly in this world with blessings and grant them all Jannat al-Firdaws with His everlasting pleasure in the next.</p>
+<p>Credits Āmīn.</p>
+</article>
+</section>
+
+</main>
+<footer>
+  Content from An Nasihah Publications Ltd. &middot; Organized for reference
+</footer>
+</body>
+</html>

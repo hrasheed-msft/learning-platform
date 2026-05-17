@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 5 — Parent Guide</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --quiz-bg: #fff8e1;
+    --summary-bg: #e3f2fd;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle { color: #666; font-size: 1rem; }
+  .intro {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+  }
+  .intro p { margin-bottom: 0.5rem; }
+  .subject-guide {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject-guide > h2 {
+    color: var(--primary);
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .lesson-card {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lesson-card h3 {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.15rem;
+  }
+  .summary {
+    background: var(--summary-bg);
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  .summary p { margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .summary ul {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  .quiz {
+    background: var(--quiz-bg);
+    padding: 1.2rem;
+  }
+  .quiz h4 {
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+  }
+  .quiz ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .quiz li {
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+  }
+  .quiz .answer {
+    display: none;
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+  .quiz details {
+    margin-top: 0.8rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.8rem;
+  }
+  .quiz details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quiz details p {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .discussion {
+    padding: 1rem 1.2rem;
+    background: #f3e5f5;
+    border-top: 1px solid var(--border);
+  }
+  .discussion h4 {
+    color: #6a1b9a;
+    margin-bottom: 0.5rem;
+  }
+  .discussion ul {
+    margin-left: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .toc h2 { color: var(--primary); margin-bottom: 1rem; }
+  .toc h3 { color: var(--accent); margin: 0.8rem 0 0.3rem; font-size: 1.05rem; }
+  .toc ul { list-style: none; padding-left: 1.2rem; }
+  .toc a { color: var(--primary); text-decoration: none; border-bottom: 1px dotted var(--primary); }
+  .toc a:hover { border-bottom-style: solid; }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  @media print {
+    body { max-width: 100%; }
+    .quiz details { display: block; }
+    .quiz details[open] summary { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>📖 Coursebook 5 — Parent Guide</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 10–11 years</div>
+</header>
+<div class="intro">
+  <p><strong>How to use this guide:</strong> Each lesson has three parts:</p>
+  <ul style="margin-left:1.5rem">
+    <li><strong>Summary</strong> — Key points to review with your child</li>
+    <li><strong>Quiz</strong> — Questions to test understanding (answers are hidden — click to reveal)</li>
+    <li><strong>Discussion</strong> — Conversation starters to deepen learning</li>
+  </ul>
+  <p>Work through one topic at a time. Read the summary together, then try the quiz orally or in writing.</p>
+</div>
+<nav class="toc"><h2>Contents</h2>
+<h3><a href="#fiqh-guide">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-wu----g">Wuḍū'</a></li>
+  <li><a href="#fiqh-tayammum-g">Tayammum</a></li>
+  <li><a href="#fiqh--al-h-g">Ṣalāh</a></li>
+  <li><a href="#fiqh--umrah-and--ajj-g">'Umrah and Ḥajj</a></li>
+  <li><a href="#fiqh--umrah-g">'Umrah</a></li>
+  <li><a href="#fiqh--ajj-g">Ḥajj</a></li>
+  <li><a href="#fiqh-ziy-rah-g">Ziyārah</a></li>
+</ul>
+<h3><a href="#a--d-th-guide">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-a--d-th-g">Aḥādīth</a></li>
+</ul>
+<h3><a href="#aq--id-guide">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-jannah-g">Jannah</a></li>
+  <li><a href="#aq--id-seeing-all-h-g">Seeing Allāh</a></li>
+  <li><a href="#aq--id-jannah-g">Jannah</a></li>
+  <li><a href="#aq--id-actions-that-will-g">Actions that will</a></li>
+  <li><a href="#aq--id--asharah-mubasharah-g">'Asharah Mubasharah</a></li>
+  <li><a href="#aq--id-jahannam-g">Jahannam</a></li>
+  <li><a href="#aq--id-actions-that-lead-g">Actions that Lead</a></li>
+  <li><a href="#aq--id-a-r-f-g">A'rāf</a></li>
+  <li><a href="#aq--id-al-qadr--fate--g">Al-Qadr (Fate)</a></li>
+</ul>
+<h3><a href="#akhl-q-guide">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-mashwarah-g">Mashwarah</a></li>
+  <li><a href="#akhl-q--abr-g">Ṣabr</a></li>
+  <li><a href="#akhl-q-there-are-a-few-etiquettes-of-giving-gifts-such-as-g">There are a few etiquettes of giving gifts such as</a></li>
+  <li><a href="#akhl-q-dhikr-g">Dhikr</a></li>
+</ul>
+<h3><a href="#-d-b-guide">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b--d-b-of-ghusl-g">Ādāb of Ghusl</a></li>
+  <li><a href="#-d-b--d-b-of-social-g">Ādāb of Social</a></li>
+  <li><a href="#-d-b--d-b-of-writing-g">Ādāb of Writing</a></li>
+  <li><a href="#-d-b--d-b-of-misw-k-g">Ādāb of Miswāk</a></li>
+  <li><a href="#-d-b--d-b-of-visiting-g">Ādāb of Visiting</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject-guide" id="fiqh-guide">
+<h2>Fiqh</h2>
+<div class="lesson-card" id="fiqh-wu----g">
+<h3>Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Miscellaneous points of wuḍū' A person’s wuḍū' will only break if the For example, when blood actually ﬂows a person gets from its place. If the scratched and sees blood doesn’t ﬂow some blood on his but remains in its skin which does not place, the wuḍū' will move, with such not be broken. blood, the wuḍū' will not be broken as it did not ﬂow.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>This can be understood if the saliva is yellowish red.</li>
+  <li>If a person is wearing a tight ring, he must ensure water reaches the skin beneath the ring.</li>
+  <li>This is a wājib requirement.</li>
+  <li>If anything sticks onto the skin which stops water from reaching the skin below, it is compulsory to remove that substance.</li>
+  <li>Wuḍū' will not be valid until the 4substance is removed and water touches the skin.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this can be understood if the saliva?</li>
+  <li>What is if a person?</li>
+  <li>What is this?</li>
+  <li>What is wuḍū'?</li>
+  <li>What is if one has long nails, it?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this can be understood if the saliva?</strong><br>This can be understood if the saliva is yellowish red.</li>
+  <li><strong>What is if a person?</strong><br>If a person is wearing a tight ring, he must ensure water reaches the skin beneath the ring.</li>
+  <li><strong>What is this?</strong><br>This is a wājib requirement.</li>
+  <li><strong>What is wuḍū'?</strong><br>Wuḍū' is not broken by cutting one's hair or nails.</li>
+  <li><strong>What is if one has long nails, it?</strong><br>If one has long nails, it is essential that water reaches under them.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-tayammum-g">
+<h3>Tayammum</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Tayammum means to use soil as a means of attaining purity in the absence of water or being unable to use it due to illness. Did you know that no other ummah before us had the blessing and advantage of doing tayammum? Allāh  reserved the option of tayammum for us as a way of making it easier to worship Him. When is tayammum permissible?</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Tayammum means to use soil as a means of attaining purity in the absence of water or being unable to use it due to illness.</li>
+  <li>When is tayammum permissible?</li>
+  <li>If water is nearby but one If water is available but is cannot reach it due to only enough for drinking. fear.</li>
+  <li>Items on which tayammum IS permitted: Clean soil Walls of mud, stone, or brick All items coated Sand with a thick Stone layer of dust.</li>
+  <li>Limestone Items on which tayammum IS NOT permitted: Wood Metal Glass Food All items that burn to ash, rot, or melt.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is when?</li>
+  <li>What is if water?</li>
+  <li>What is all acts that tayammum that break wuḍū'?</li>
+  <li>What are the key rules or steps of Tayammum?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is when?</strong><br>When is tayammum permissible?.</li>
+  <li><strong>What is if water?</strong><br>If water is nearby but one If water is available but is cannot reach it due to only enough for drinking. fear.</li>
+  <li><strong>What is all acts that tayammum that break wuḍū'?</strong><br>All acts that Tayammum that break wuḍū' is done due to break the absence of tayammum. water shall break if there is access to water. 3.</li>
+  <li><strong>What are the key rules or steps of Tayammum?</strong><br>List the main rules from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do tayammum step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-h-g">
+<h3>Ṣalāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Stand upright facing the qiblah. The head should not be bent. The eyesight should be focused on the place of sajdah. 2. The toes should be pointing towards the qiblah, and one should stand in the normal standing position. 3.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>In any ṣalāh with jam\‘ah, only the imām is to recite the Qur'ān.</li>
+  <li>Females will keep the back slightly bent. 6.  (Perfect is my Lord, the Great) should be recited at least three times in rukū'. ٰ7.</li>
+  <li>Place the head 6. (Perfect between the two is my Lord, the Most hands.</li>
+  <li>This is usually a few minutes before zawāl time. 3)Whilst the sun is setting.</li>
+  <li>Only the Sunnah of Fajr should be performed.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is in any ṣalāh with jam\‘ah, only the imām?</li>
+  <li>What is this?</li>
+  <li>What is qaḍā'?</li>
+  <li>What is there?</li>
+  <li>What is the performance of all sunnah ṣalāh?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is in any ṣalāh with jam\‘ah, only the imām?</strong><br>In any ṣalāh with jam\‘ah, only the imām is to recite the Qur'ān.</li>
+  <li><strong>What is this?</strong><br>This is usually a few minutes before zawāl time. 3)Whilst the sun is setting.</li>
+  <li><strong>What is qaḍā'?</strong><br>Qaḍā' is only for the far} and witr ṣalāh.</li>
+  <li><strong>What is there?</strong><br>There is no ﬁxed time for qaḍā' ṣalāh.</li>
+  <li><strong>What is the performance of all sunnah ṣalāh?</strong><br>The performance of all sunnah ṣalāh is highly emphasised especially the two sunnah of Fajr.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ṣalāh step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--umrah-and--ajj-g">
+<h3>'Umrah and Ḥajj</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The Prophet  said: "The performance of 'umrah erases the sins committed between it and the previous one. And the reward for #ajj mabrūr (pilgrimage accepted by Allāh) is nothing but Paradise." (Ṣaḥīḥ al-Bukhārī) Iḥrām People generally refer to the white clothing as iḥrām. However, iḥrām in reality is a state wherein certain ḥalāl things become ḥarām for a temporary period. The white clothing is a sign that a person is in this state.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>The Prophet  said: "The performance of 'umrah erases the sins committed between it and the previous one.</li>
+  <li>However, iḥrām in reality is a state wherein certain ḥalāl things become ḥarām for a temporary period.</li>
+  <li>The white clothing is a sign that a person is in this state.</li>
+  <li>Mīqāt is the boundary at which iḥrām becomes compulsory for those intending to perform #ajj or 'umrah.</li>
+  <li>At the time of making intention, one should recite: "Here I am at Your service, O Allāh, here I am.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does the ḥadīth "The performance of" teach us?</li>
+  <li>What is however, iḥrām in reality?</li>
+  <li>What is the white clothing?</li>
+  <li>What is mīqāt?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does the ḥadīth "The performance of" teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What is however, iḥrām in reality?</strong><br>However, iḥrām in reality is a state wherein certain ḥalāl things become ḥarām for a temporary period.</li>
+  <li><strong>What is the white clothing?</strong><br>The white clothing is a sign that a person is in this state.</li>
+  <li><strong>What is mīqāt?</strong><br>Mīqāt is the boundary at which iḥrām becomes compulsory for those intending to perform #ajj or 'umrah.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do 'umrah and ḥajj step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--umrah-g">
+<h3>'Umrah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>'Umrah is a sunnah of our Beloved Messenger Muḥammad . The method of 'umrah is: Make ghusl for iḥrām Sunnah Pray two rak'āt before iḥrām Enter the state of iḥrām with intention and talbiyah Far} Perform ṭawāf Perform sa‘y Wājib Ḥalaq (shaving)/qaṣr (trimming) of the hair on the head. Extra caution must be taken to avoid any sort of arguments or sin on this journey of a lifetime. How to perform Ṭawāf: •To begin ṭawāf, stand in front of the Ka'bah facing al-Ḥajar al-Aswad (the Black Stone).</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>'Umrah is a sunnah of our Beloved Messenger Muḥammad .</li>
+  <li>This is called 'Raml.' Rukn Yamān| al-Ḥajar al-Aswad Maqām Ibrāhīm Start &amp; End PointṢaf\ and Marwah It is wājib to perform two rak'āt after ṭawāf.</li>
+  <li>Sa‘y is performed by walking between these two hillocks seven times, starting at Ṣaf\ and ending at Marwah.</li>
+  <li>It is a sunnah for men to run between the area marked with green lights.</li>
+  <li>Marwah Ṣaf\ Shaving or trimming the hair is wājib for men to be able to come out of the state of iḥrām.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is sa‘y?</li>
+  <li>What is marwah ṣaf\ shaving or trimming the hair?</li>
+  <li>What are the key rules or steps of 'Umrah?</li>
+  <li>Why is 'Umrah important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is sa‘y?</strong><br>Sa‘y is performed by walking between these two hillocks seven times, starting at Ṣaf\ and ending at Marwah.</li>
+  <li><strong>What is marwah ṣaf\ shaving or trimming the hair?</strong><br>Marwah Ṣaf\ Shaving or trimming the hair is wājib for men to be able to come out of the state of iḥrām.</li>
+  <li><strong>What are the key rules or steps of 'Umrah?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is 'Umrah important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do 'umrah step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--ajj-g">
+<h3>Ḥajj</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Ḥajj is the ﬁfth pillar of Islām The Prophet  said, "Whoever performs #ajj to this house – Ka'bah – and does not commit any wrongdoing, they will return as the day they were born – pure from sins." (Ṣaḥīḥ al-Bukhārī) Ḥajj is far} once in a lifetime. It only becomes far} if one has the money needed to perform #ajj and is able to travel to Makkah. For a woman, she must have her husband or a close male family member (maḥram) to accompany her on #ajj.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>It only becomes far} if one has the money needed to perform #ajj and is able to travel to Makkah.</li>
+  <li>There are three types of #ajj: •Ḥajj Qirān = Ḥajj + 'Umrah in one iḥrām. •Ḥajj Tamattu' = Ḥajj + 'Umrah in two iḥrāms. •Ḥajj Ifrād = Only #ajj.</li>
+  <li>Day 6: 13th Dhul Ḥijjah – Min\ •It is optional, however virtuous to stay in Min\ and pelt the three jamarāt on this day also.</li>
+  <li>It is advisable to visit a #ajj workshop or consult a scholar before going for #ajj.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>How many types of #ajj: •Ḥajj Qirān = Ḥajj + 'Umrah in one iḥrām. •Ḥ are there?</li>
+  <li>What is day 6: 13th dhul ḥijjah – min\ •it?</li>
+  <li>What are the key rules or steps of Ḥajj?</li>
+  <li>Why is Ḥajj important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>How many types of #ajj: •Ḥajj Qirān = Ḥajj + 'Umrah in one iḥrām. •Ḥ are there?</strong><br>There are three types of #ajj: •Ḥajj Qirān = Ḥajj + 'Umrah in one iḥrām. •Ḥ.</li>
+  <li><strong>What is day 6: 13th dhul ḥijjah – min\ •it?</strong><br>Day 6: 13th Dhul Ḥijjah – Min\ •It is optional, however virtuous to stay in Min\ and pelt the three jamarāt on this day also.</li>
+  <li><strong>What are the key rules or steps of Ḥajj?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ḥajj important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ḥajj step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-ziy-rah-g">
+<h3>Ziyārah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Visiting Madīnah Munawarrah Virtues of visiting Madīnah and the Beloved Prophet ’s grave. Our Beloved Messenger Muḥammad said: "My intercession is incumbent for he who visits my grave." (Ibn Khuzaymah) Our Beloved Messenger Muḥammad said: "The person who offers 40 prayers consecutively in my masjid, without missing a prayer in between, will receive protection from the ﬁre of Hell, and from other punishments and also from hypocrisy.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Visiting Madīnah Munawarrah Virtues of visiting Madīnah and the Beloved Prophet ’s grave.</li>
+  <li>A person should make the intention of visiting the grave of the Prophet  and Masjid Nabaw|.</li>
+  <li>Places to visit in Madīnah The Rawḍah al-Jannah (The Garden) The masjid of the Prophet  has many beautiful and sacred areas.</li>
+  <li>From among them is the Rawḍah.</li>
+  <li>There are hundreds of Ṣa#ābah and pious people buried in this graveyard.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is from among them?</li>
+  <li>What does the ḥadīth "The area between my house and my mimbar is a garden from the..." teach us?</li>
+  <li>What are the key rules or steps of Ziyārah?</li>
+  <li>Why is Ziyārah important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is from among them?</strong><br>From among them is the Rawḍah.</li>
+  <li><strong>What does the ḥadīth "The area between my house and my mimbar is a garden from the..." teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What are the key rules or steps of Ziyārah?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ziyārah important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ziyārah step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="a--d-th-guide">
+<h2>Aḥādīth</h2>
+<div class="lesson-card" id="a--d-th-a--d-th-g">
+<h3>Aḥādīth</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Aḥadīth Promises Rasūlullāh َ said: "A person who does not keep his promise does not have (complete) religion (dīn)." (Aḥmad) A promise is made to show that you will deﬁnitely carry out an action. Once you make a promise, you have made a verbal contract which you must fulﬁl. A person who breaks his promise is a liar, for he said something which he was not going to do. "O you who believe! Why do you say that which you do not do?</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>A person who breaks his promise is a liar, for he said something which he was not going to do. "O you who believe!</li>
+  <li>Tongue Rasūlullāh  said: "Safeguard your tongue." (Ṭabarān|) The tongue is a boneless piece of ﬂesh, yet it is very powerful.</li>
+  <li>Words are like arrows: once released they cannot be stopped.</li>
+  <li>But as long as they remain unspoken, they are under our control.</li>
+  <li>So we must always think before we speak.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does the ḥadīth "A person who does not keep his promise does not have (comple..." teach us?</li>
+  <li>What is a person who breaks his promise?</li>
+  <li>What does the ḥadīth "Safeguard your tongue." teach us?</li>
+  <li>What should we do?</li>
+  <li>What is he  said: "the best person?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does the ḥadīth "A person who does not keep his promise does not have (comple..." teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What is a person who breaks his promise?</strong><br>A person who breaks his promise is a liar, for he said something which he was not going to do. "O you who believe!.</li>
+  <li><strong>What does the ḥadīth "Safeguard your tongue." teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>What should we do?</strong><br>We must always think before we speak.</li>
+  <li><strong>What is he  said: "the best person?</strong><br>He  said: "The best person is he who beneﬁts others." (Ṭabarān|) Indeed our time in this world is short.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="aq--id-guide">
+<h2>Aqā'id</h2>
+<div class="lesson-card" id="aq--id-jannah-g">
+<h3>Jannah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Jannah is a beautiful and peaceful place which Allāh has prepared for the Believers. It is such a beautiful place that no eye has ever seen, no ear has ever heard of, and no mind has ever imagined. Just before the Believers enter Jannah, they will come by a fountain in which each and every one of them will make ghusl (bath), by which their faces will shine and look very radiant.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Jannah is a beautiful and peaceful place which Allāh has prepared for the Believers.</li>
+  <li>It is such a beautiful place that no eye has ever seen, no ear has ever heard of, and no mind has ever imagined.</li>
+  <li>The men will become extremely handsome and the women will become so beautiful that even the #ūrs (women of Jannah) will envy them.</li>
+  <li>Angels will welcome the Believers into Jannah.</li>
+  <li>The people entering Jannah will wear crowns.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is jannah?</li>
+  <li>What does Islam teach us about Jannah?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is jannah?</strong><br>Jannah is a beautiful and peaceful place which Allāh has prepared for the Believers.</li>
+  <li><strong>What does Islam teach us about Jannah?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-seeing-all-h-g">
+<h3>Seeing Allāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Many faces, that day, will be glowing, looking towards their Lord." (Qur'ān 75:22-23) The greatest blessing of Jannah will be seeing Allāh . Our Beloved Messenger Muḥammad said, "When the people of Jannah shall enter Jannah, and the people of Jahannam shall enter Jahannam, a caller shall call: "O people of Jannah, is inviting you to a gathering in which Allāh He wishes to reward you.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>"Many faces, that day, will be glowing, looking towards their Lord." (Qur'ān 75:22-23) The greatest blessing of Jannah will be seeing Allāh .</li>
+  <li>If you see them, you would think they are scattered pearls.</li>
+  <li>Has He not saved us from the Fire?</li>
+  <li>Reclining on raised thrones, they will not see therein neither excessive sunlight nor extreme bitter cold, (the climate shall be just right).</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Islam teach us about Seeing Allāh?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Islam teach us about Seeing Allāh?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-jannah-g">
+<h3>Jannah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Verily, the dwellers of Paradise that Day will be busy in joyful things. They and their wives will be in pleasant shade, reclining on thrones. They will have therein fruits (of all kinds), and all that they will ask for. (It will be said to them): "Salām" (Peace be on you), a word from the Lord, Most Merciful.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>"Verily, the dwellers of Paradise that Day will be busy in joyful things.</li>
+  <li>They and their wives will be in pleasant shade, reclining on thrones.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Islam teach us about Jannah?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Islam teach us about Jannah?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-actions-that-will-g">
+<h3>Actions that will</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Lead us to Jannah Belief in Allāh and doing good actions "Whoever believes in Allāh, and does so righteously, He will write off his evil deeds, and will admit him to gardens beneath which rivers ﬂow, where they will live forever. That is the great achievement.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Feeding people Praying ṣalāh at night (tahajjud) Abdullah ibn Salām said the ﬁrst words from the Messenger when he arrived in Madīnah were, "O people!</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Islam teach us about Actions that will?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Islam teach us about Actions that will?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id--asharah-mubasharah-g">
+<h3>'Asharah Mubasharah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>There are ten Ṣa#ābah who were given the glad tidings of Paradise in this world in one gathering by our Beloved Messenger . He said, "Abū Bakr will be in Paradise, 'Umar will be in Paradise, 'Uthmān will be in Paradise, 'Al| will be in Paradise, Ṭalḥah will be in Paradise, az-Zubayr will be in Paradise, 'Abdur Raḥmān ibn 'Awf will be in Paradise, Sa'd (ibn Abi Waqq\]) will be in Paradise, Sa'|d (ibn Zayd) will be in Paradise, and Abū 'Ubaydah ibn al-Jarr\# will be in Paradise.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>There are ten Ṣa#ābah who were given the glad tidings of Paradise in this world in one gathering by our Beloved Messenger .</li>
+  <li>May Allāh be pleased with them and grant us all Jannah al-Firdaws.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Islam teach us about 'Asharah Mubasharah?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Islam teach us about 'Asharah Mubasharah?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-jahannam-g">
+<h3>Jahannam</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Surely Jahannam (the Hell) lurks in ambush. It is an abode for the rebellious people who will be abiding in it for ages. They will taste nothing cool in it, nor a drink, except boiling water and pus: this being a punishment fully commensurate (with their deeds). They did not expect (to face) accounting (of their deeds), and they rejected Our signs totally.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>"Surely Jahannam (the Hell) lurks in ambush.</li>
+  <li>It is an abode for the rebellious people who will be abiding in it for ages.</li>
+  <li>They will taste nothing cool in it, nor a drink, except boiling water and pus: this being a punishment fully commensurate (with their deeds).</li>
+  <li>And everything (from their deeds) is thoroughly recorded by Us in writing.</li>
+  <li>If anyone of these bites a person of Jahannam, he will feel the pain for 40 years….</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is and everything (from their deeds)?</li>
+  <li>What does Islam teach us about Jahannam?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is and everything (from their deeds)?</strong><br>And everything (from their deeds) is thoroughly recorded by Us in writing.</li>
+  <li><strong>What does Islam teach us about Jahannam?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-actions-that-lead-g">
+<h3>Actions that Lead</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>to Jahannam – acting as a Muslim Hypocrisy outwardly but having disbelief inwardly "Indeed Allāh will gather the hypocrites and disbelievers in Hell all together." (Qur'ān 4:140) reports that the 'Abdullāh ibn 'Amr said, Beloved Messenger Muḥammad "If anyone has four characteristics, he is a pure hypocrite, and if anyone has one of them, he has an aspect of hypocrisy until he gives up: when he is trusted, he betrays his trust; whenever he speaks, he lies; when he makes an agreement, he breaks it...</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>May Allāh Āmīn.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Islam teach us about Actions that Lead?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Islam teach us about Actions that Lead?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-a-r-f-g">
+<h3>A'rāf</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>A'rāf is a place between Jannah and Jahannam. Those people who have the same amount of good and bad deeds will be sent here. Eventually they will enter Jannah. The Qur'ān informs us of the people of A'rāf in the following verse: "Between the two groups there will be a barrier.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>A'rāf is a place between Jannah and Jahannam.</li>
+  <li>Eventually they will enter Jannah.</li>
+  <li>Those people who have the same amount of good and bad deeds will be sent here.</li>
+  <li>The Qur'ān informs us of the people of A'rāf in the following verse: "Between the two groups there will be a barrier.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is a'rāf?</li>
+  <li>What does Islam teach us about A'rāf?</li>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How would you explain this belief to a friend?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is a'rāf?</strong><br>A'rāf is a place between Jannah and Jahannam.</li>
+  <li><strong>What does Islam teach us about A'rāf?</strong><br>Explain the key belief from the lesson.</li>
+  <li><strong>Why is this belief important for a Muslim?</strong><br>Discuss how it strengthens our faith.</li>
+  <li><strong>How would you explain this belief to a friend?</strong><br>Put it in simple, clear words.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-al-qadr--fate--g">
+<h3>Al-Qadr (Fate)</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>reported that 'Abdullāh ibn 'Abbās "One day I was behind the Prophet and he said to me: "O young man, I shall teach you some words of advice: Be mindful of Allāh, and Allāh will protect you. Be mindful of Allāh, and you will ﬁnd Him in front of you. If you (have need to) ask, ask of Allāh; and if you seek help, seek help from Allāh.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Be mindful of Allāh, and you will ﬁnd Him in front of you.</li>
+  <li>If you (have need to) ask, ask of Allāh; and if you seek help, seek help from Allāh.</li>
+  <li>Surely, Allāh is All Knowing, All Aware." (Qur'ān 31:34) "With Him are the keys of the unseen.</li>
+  <li>He knows what is in the land and the sea.</li>
+  <li>This is part of our faith, that we must believe that everything is from Allāh .</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is surely, allāh?</li>
+  <li>What is he knows what?</li>
+  <li>What is this?</li>
+  <li>What is there?</li>
+  <li>What is every claim to prophethood • after him?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is surely, allāh?</strong><br>Surely, Allāh is All Knowing, All Aware." (Qur'ān 31:34) "With Him are the keys of the unseen.</li>
+  <li><strong>What is he knows what?</strong><br>He knows what is in the land and the sea.</li>
+  <li><strong>What is this?</strong><br>This is part of our faith, that we must believe that everything is from Allāh.</li>
+  <li><strong>What is there?</strong><br>There is nothing like Him • (neither in quality, nor in reality).</li>
+  <li><strong>What is every claim to prophethood • after him?</strong><br>Every claim to prophethood • after him is false and deceitful.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="akhl-q-guide">
+<h2>Akhlāq</h2>
+<div class="lesson-card" id="akhl-q-mashwarah-g">
+<h3>Mashwarah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Consult them in the matter and, once you have taken a decision, place your trust in Allāh. Surely, Allāh loves those who place their trust in Him." (Qur'ān 3:159) "And those who have responded to their Lord (in submission to Him), and have established ṣalāh, and whose affairs are (settled) with mutual consultation between them, and who spend out of what We have given to them.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>"Consult them in the matter and, once you have taken a decision, place your trust in Allāh.</li>
+  <li>It was the practice of our Beloved Messenger , the Ṣa#ābah, and those that followed them.</li>
+  <li>Through asking other people's opinion, we gain a better understanding of the task that is to be undertaken.</li>
+  <li>Allāh  places more blessings in a decision or action when we make mashwarah, as hearts become united and togetherness is created.</li>
+  <li>Remember: giving mashwarah is giving advice and an opinion - it is not an order or command.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What is remember: giving mashwarah?</li>
+  <li>What does Mashwarah mean and why is it important?</li>
+  <li>Give an example of how you can practice Mashwarah at home or school.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must make mashwarah with those people who have experience.</li>
+  <li><strong>What is remember: giving mashwarah?</strong><br>Remember: giving mashwarah is giving advice and an opinion - it is not an order or command.</li>
+  <li><strong>What does Mashwarah mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Mashwarah at home or school.</strong><br>Think of a real situation.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q--abr-g">
+<h3>Ṣabr</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Do not lose heart and do not grieve, and you are the upper-most if you are believers."  (Qur'ān 3:139) "O you who believe, be patient, compete with each other in patience, and guard your frontiers, and fear Allāh so that you may be successful." (Qur'ān 3:200) "Certainly those who observe patience will be given their reward in full, without measure." (Qur'ān 39:10) "...and be patient. Surely, Allāh is with the patient.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Here is an example: It is ṣalāh time and we don't feel like waking up from our bed.</li>
+  <li>Another example is that it is time to pay zakāh.</li>
+  <li>We have made ṣabr in the form of obedience! Ṣabr with abstinence means being patient in staying away from sins.</li>
+  <li>Our desires invite us to look at something we are not supposed to, however we control ourselves: therefore we have made ṣabr.</li>
+  <li>Another example would be: people around us are engaged in doing ghībah.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is here?</li>
+  <li>What is another example?</li>
+  <li>What is one minute someone?</li>
+  <li>What is the next minute he?</li>
+  <li>What is this?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is here?</strong><br>Here is an example: It is ṣalāh time and we don't feel like waking up from our bed.</li>
+  <li><strong>What is another example?</strong><br>Another example is that it is time to pay zakāh.</li>
+  <li><strong>What is one minute someone?</strong><br>One minute someone is your best friend.</li>
+  <li><strong>What is the next minute he?</strong><br>The next minute he is your worst enemy.</li>
+  <li><strong>What is this?</strong><br>This is the world where things are different.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-there-are-a-few-etiquettes-of-giving-gifts-such-as-g">
+<h3>There are a few etiquettes of giving gifts such as</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>ensuring you don't broadcast that you gave such and such a gift. Once a gift is given, one should not ask for it back as it defeats the purpose of gifts. Also, bear in mind not to give such gifts that a person will ﬁnd difﬁculty in accepting. The second aspect mentioned is honouring the guest.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Once a gift is given, one should not ask for it back as it defeats the purpose of gifts.</li>
+  <li>The second aspect mentioned is honouring the guest.</li>
+  <li>This guest may visit again, and if he/she is a close relative, then the ties of kinship shall be strengthened.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is once a gift?</li>
+  <li>What is the second aspect mentioned?</li>
+  <li>What is this guest may visit again, and if he/she?</li>
+  <li>What does There are a few etiquettes of giving gifts such as mean and why is it important?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is once a gift?</strong><br>Once a gift is given, one should not ask for it back as it defeats the purpose of gifts.</li>
+  <li><strong>What is the second aspect mentioned?</strong><br>The second aspect mentioned is honouring the guest.</li>
+  <li><strong>What is this guest may visit again, and if he/she?</strong><br>This guest may visit again, and if he/she is a close relative, then the ties of kinship shall be strengthened.</li>
+  <li><strong>What does There are a few etiquettes of giving gifts such as mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-dhikr-g">
+<h3>Dhikr</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"O you who believe, remember Allah abundantly, And proclaim His purity morning and evening." (Qur'ān 33:41-42) "Listen! By the remembrance of Allāh the hearts will ﬁnd peace." (Qur'ān 13:28) "...Those men and women who engage much in Allāh's praise, for them Allāh has prepared forgiveness and a Great Reward." (Qur'ān 33:35) "When any group of people remember Allāh, angels surround them and mercy covers them, tranquillity descends upon them, and Allāh mentions them to those who are with Him.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>In the same way, the heart rusts with worldly desires: to purify it dhikr is necessary.</li>
+  <li>"O you who believe, remember Allah abundantly, And proclaim His purity morning and evening." (Qur'ān 33:41-42) "Listen!</li>
+  <li>It has been mentioned in the ḥadīth that everything rusts according to its nature.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Dhikr mean and why is it important?</li>
+  <li>Give an example of how you can practice Dhikr at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about Dhikr?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Dhikr mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Dhikr at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about Dhikr?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="-d-b-guide">
+<h2>Ādāb</h2>
+<div class="lesson-card" id="-d-b--d-b-of-ghusl-g">
+<h3>Ādāb of Ghusl</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"And (He) sent down upon you water from the heavens, so that He may purify you with it." (Qur'ān 8:11) "We have sent down purifying water from the heavens." (Qur'ān 25:48) "It is Allāh's said, Water is a gift from Allāh: it is a way of purifying ourselves. The Prophet right on every Muslim that he should take a bath  (Ṣaḥīḥ al-Bukhārī) (at least) once in seven days." Ādāb of Ghusl: Wash both hands including the wrists. Remove any impurities from the body. Wash the private parts.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Do not forget the main parts of ghusl and the obligatory acts: rinsing the mouth and nose.</li>
+  <li>For example, if you are talking to an elder, speak with words that suit an elder. ĀdābDo not prolong your speech: keep to the point.</li>
+  <li>Remove any impurities from the body.</li>
+  <li>Wash the private parts.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Ādāb of Ghusl?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Ghusl?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Ādāb of Ghusl?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Ghusl?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b--d-b-of-social-g">
+<h3>Ādāb of Social</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Interaction Do not isolate a person in a gathering. Do not engage in idle talk. Talk about those things which will beneﬁt you and others. Remember to mention the name of Allāh .</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Remember to mention the name of Allāh .</li>
+  <li>Do not quarrel or argue even if you feel you are right.</li>
+  <li>Interaction Do not isolate a person in a gathering.</li>
+  <li>Do not engage in idle talk.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Ādāb of Social?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Social?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Ādāb of Social?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Social?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b--d-b-of-writing-g">
+<h3>Ādāb of Writing</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>When writing to someone for the ﬁrst time, clearly state the purpose. Always have your name and address clearly visible. If you have requested a reply, it is a good gesture to provide a stamped envelope with your address written on it. Do not prolong the message unnecessarily.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>If you have requested a reply, it is a good gesture to provide a stamped envelope with your address written on it.</li>
+  <li>When writing to someone for the ﬁrst time, clearly state the purpose.</li>
+  <li>Always have your name and address clearly visible.</li>
+  <li>Do not prolong the message unnecessarily.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is if you have requested a reply, it?</li>
+  <li>What are the main manners related to Ādāb of Writing?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Writing?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is if you have requested a reply, it?</strong><br>If you have requested a reply, it is a good gesture to provide a stamped envelope with your address written on it.</li>
+  <li><strong>What are the main manners related to Ādāb of Writing?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Writing?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b--d-b-of-misw-k-g">
+<h3>Ādāb of Miswāk</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Say (O Prophet), 'If you really love Allāh ,then follow me, and Allāh shall love you and forgive you your sins. Allāh is Most-Forgiving, Very Merciful.'" (Qur'ān 3:31) 'Ā'ishah narrates that the Beloved Messenger said, "The miswāk is a means of purifying the mouth and pleasing the Rabb." (Nasa'|) 'Ā'ishah narrates that whenever the Beloved Messenger slept in the night or day, as he awoke, he would brush his teeth with miswāk before performing wuḍū'.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>"Say (O Prophet), 'If you really love Allāh ,then follow me, and Allāh shall love you and forgive you your sins.</li>
+  <li>It is a means of dying with īmān.</li>
+  <li>When the signs of death are apparent on a person.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Ādāb of Miswāk?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Miswāk?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Ādāb of Miswāk?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Miswāk?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b--d-b-of-visiting-g">
+<h3>Ādāb of Visiting</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>the Sick In a Ḥadīth Qudsi, our Beloved Messenger will say said that Allāh Muḥammad on the Day of Judgement: '"O son of Ādam I was sick and you did not visit Me." He will say: "O Lord how can I visit You? You are the Lord of the worlds.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>You are the Lord of the worlds." He will say: "Did you not know that My servant so-and-so was sick yet you did not visit him?</li>
+  <li>Our intention should be to gain . the pleasure of Allāh Do not force the sick person to eat or drink.</li>
+  <li>Convey your salām, ask the sick how they are feeling, pray for their recovery, and then leave. the Sick Do not ask too many questions.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Ādāb of Visiting?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Visiting?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Ādāb of Visiting?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Visiting?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+</section>
+
+</main>
+<footer>
+  Parent Guide for An Nasihah Islamic Curriculum &middot; For home learning support
+</footer>
+</body>
+</html>

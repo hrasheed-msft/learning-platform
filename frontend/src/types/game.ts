@@ -2,20 +2,20 @@
 
 export type GameType =
   | 'TERM_MATCH'
-  | 'AYAH_COMPLETION'
-  | 'FIQH_SCENARIO'
-  | 'HADITH_CHAIN'
-  | 'WORD_SEARCH'
   | 'SPEED_QUIZ'
   | 'FLASHCARD_FLIP'
-  | 'DAILY_CHALLENGE'
-  | 'KNOWLEDGE_EXPEDITION'
-  | 'TRIVIA_BATTLE'
-  | 'MOSQUE_BUILDER'
-  | 'PATTERN_CREATOR'
-  | 'SEERAH_TIMELINE'
+  | 'WORD_SCRAMBLE'
+  | 'FILL_IN_BLANK'
+  | 'MEMORY_MATCH'
+  | 'TRUE_FALSE'
+  | 'MULTIPLE_CHOICE'
+  | 'SENTENCE_BUILD'
+  | 'LISTENING_QUIZ'
+  | 'CALLIGRAPHY_TRACE'
+  | 'SPELLING_BEE'
+  | 'STORY_PUZZLE'
   | 'ESCAPE_ROOM'
-  | 'MAZE_NAVIGATOR';
+  | 'MAZE_RUNNER';
 
 export type GameCategory = 'COURSE_INTEGRATED' | 'STANDALONE';
 export type GameDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
@@ -38,6 +38,7 @@ export interface Game {
   template: GameTemplate;
   difficulty: GameDifficulty;
   courseId?: string;
+  courseName?: string;
   unitId?: string;
   contentCount: number;
   suggestedDifficulty: GameDifficulty;
@@ -259,19 +260,19 @@ export interface ScoreHistoryParams {
 
 // Game metadata for UI display
 export const GAME_META: Record<GameType, { name: string; emoji: string; color: string; description: string }> = {
-  TERM_MATCH: { name: 'Term Match', emoji: '🃏', color: 'bg-purple-500', description: 'Match Arabic terms to their translations' },
-  AYAH_COMPLETION: { name: 'Ayah Completion', emoji: '📖', color: 'bg-emerald-500', description: 'Complete Quranic verses with missing words' },
-  FIQH_SCENARIO: { name: 'Fiqh Scenario', emoji: '⚖️', color: 'bg-amber-500', description: 'Navigate Islamic jurisprudence scenarios' },
-  HADITH_CHAIN: { name: 'Hadith Chain', emoji: '🔗', color: 'bg-blue-500', description: 'Arrange hadith segments in correct order' },
-  WORD_SEARCH: { name: 'Word Search', emoji: '🔍', color: 'bg-teal-500', description: 'Find Arabic terms hidden in a letter grid' },
+  TERM_MATCH: { name: 'Term Match', emoji: '🃏', color: 'bg-purple-500', description: 'Match Arabic terms to their definitions' },
   SPEED_QUIZ: { name: 'Speed Quiz', emoji: '⚡', color: 'bg-red-500', description: 'Answer rapid-fire questions against the clock' },
-  FLASHCARD_FLIP: { name: 'Flashcard Flip', emoji: '🔄', color: 'bg-indigo-500', description: 'Review flashcards with swipe-based rating' },
-  DAILY_CHALLENGE: { name: 'Daily Challenge', emoji: '🌟', color: 'bg-yellow-500', description: 'Complete today\'s challenge from all your courses' },
-  KNOWLEDGE_EXPEDITION: { name: 'Knowledge Expedition', emoji: '🗺️', color: 'bg-orange-500', description: 'Build cities through knowledge challenges' },
-  TRIVIA_BATTLE: { name: 'Trivia Battle', emoji: '⚔️', color: 'bg-rose-500', description: 'Compete against AI scholars in trivia' },
-  MOSQUE_BUILDER: { name: 'Mosque Builder', emoji: '🕌', color: 'bg-green-500', description: 'Build a mosque by answering correctly' },
-  PATTERN_CREATOR: { name: 'Pattern Creator', emoji: '🎨', color: 'bg-cyan-500', description: 'Create Islamic patterns through knowledge' },
-  SEERAH_TIMELINE: { name: 'Seerah Timeline', emoji: '📅', color: 'bg-violet-500', description: 'Place Islamic history events on a timeline' },
-  ESCAPE_ROOM: { name: 'Escape Room', emoji: '🔐', color: 'bg-fuchsia-500', description: 'Solve knowledge challenges to escape themed rooms' },
-  MAZE_NAVIGATOR: { name: 'Maze Navigator', emoji: '🧭', color: 'bg-lime-500', description: 'Navigate mazes by answering questions at gates' },
+  FLASHCARD_FLIP: { name: 'Flashcard Flip', emoji: '🔄', color: 'bg-indigo-500', description: 'Flip cards to reveal definitions and rate yourself' },
+  WORD_SCRAMBLE: { name: 'Word Scramble', emoji: '🔤', color: 'bg-amber-500', description: 'Unscramble letters to spell the correct word' },
+  FILL_IN_BLANK: { name: 'Fill in the Blank', emoji: '✏️', color: 'bg-teal-500', description: 'Complete sentences with the missing word' },
+  MEMORY_MATCH: { name: 'Memory Match', emoji: '🧠', color: 'bg-blue-500', description: 'Flip cards to find matching pairs' },
+  TRUE_FALSE: { name: 'True or False', emoji: '✅', color: 'bg-emerald-500', description: 'Decide if statements are true or false' },
+  MULTIPLE_CHOICE: { name: 'Multiple Choice', emoji: '📝', color: 'bg-orange-500', description: 'Pick the correct answer from four options' },
+  SENTENCE_BUILD: { name: 'Sentence Builder', emoji: '🧩', color: 'bg-cyan-500', description: 'Arrange words in the correct order' },
+  LISTENING_QUIZ: { name: 'Listening Quiz', emoji: '🎧', color: 'bg-rose-500', description: 'Listen and answer questions about what you hear' },
+  CALLIGRAPHY_TRACE: { name: 'Calligraphy Trace', emoji: '🖌️', color: 'bg-violet-500', description: 'Trace Arabic letters with your finger or mouse' },
+  SPELLING_BEE: { name: 'Spelling Bee', emoji: '🐝', color: 'bg-yellow-500', description: 'Read the definition and spell the word correctly' },
+  STORY_PUZZLE: { name: 'Story Puzzle', emoji: '📚', color: 'bg-green-500', description: 'Arrange story segments in the right order' },
+  ESCAPE_ROOM: { name: 'Escape Room', emoji: '🔐', color: 'bg-fuchsia-500', description: 'Solve challenges to escape themed rooms' },
+  MAZE_RUNNER: { name: 'Maze Runner', emoji: '🧭', color: 'bg-lime-500', description: 'Navigate mazes by answering questions at gates' },
 };

@@ -150,3 +150,39 @@ Status: COMPLETED - 34 files, 3667 LOC
 - All three service methods now handle both expected and actual backend response shapes
 
 **Lesson:** Never trust `as T` type assertions in service layers — they hide runtime shape mismatches that only surface as blank-page crashes in production. Always validate/transform API responses explicitly.
+
+### 2026-05-17 — All 15 Game Types Fully Implemented
+
+**Status:** COMPLETED
+
+Built playable game components for all 15 game types, replacing the old 6-component set that left 9 games showing "not implemented." Also updated the GameType enum, GAME_META, and GamesHub to show course labels.
+
+**GameType enum updated to:**
+TERM_MATCH, SPEED_QUIZ, FLASHCARD_FLIP, WORD_SCRAMBLE, FILL_IN_BLANK, MEMORY_MATCH, TRUE_FALSE, MULTIPLE_CHOICE, SENTENCE_BUILD, LISTENING_QUIZ, CALLIGRAPHY_TRACE, SPELLING_BEE, STORY_PUZZLE, ESCAPE_ROOM, MAZE_RUNNER
+
+**New game components created (11 files):**
+- **WordScrambleGame** — Clickable letter tiles, build area, auto-submit on correct spelling, hint reveals next letter
+- **FillInBlankGame** — Sentence with blank, multiple-choice fill, immediate green/red feedback
+- **MemoryMatchGame** — CSS 3D card flip, 4×4/4×5/5×6 grids by difficulty, pair matching
+- **TrueFalseGame** — Large ✅/❌ buttons, animated feedback, explanation after answer
+- **MultipleChoiceGame** — 2×2 colored option grid, hint eliminates wrong answer, explanation
+- **SentenceBuildGame** — Shuffled word tiles → sentence area, tap to place/remove, check button
+- **ListeningQuizGame** — Speaker icon reveals Arabic text with "Now playing..." animation, then MCQ
+- **CalligraphyTraceGame** — HTML5 Canvas with Arabic watermark guide, smooth green stroke, clear/submit
+- **SpellingBeeGame** — Text input with auto-focus, Enter key submit, hint via transliteration
+- **StoryPuzzleGame** — All segments shown at once, tap-to-select + tap-to-swap reordering
+- **MazeRunnerGame** — Recursive backtracker maze, WASD+arrows+d-pad, gate questions as modal
+
+**Modified files:**
+- `types/game.ts` — New GameType enum (15 types), updated GAME_META, added `courseName` to Game interface
+- `pages/games/GamePlay.tsx` — Router now maps all 15 types + daily-challenge to components
+- `pages/games/GamesHub.tsx` — Shows course name as subtitle under game title for disambiguation
+- `pages/games/index.ts` — Barrel exports for all new components
+- `services/gameService.ts` — Passes `courseName` through from API response
+
+**Architecture decisions:**
+- Kept existing TermMatch, SpeedQuiz, FlashcardFlip, EscapeRoom, MazeNavigator (legacy) components unchanged
+- Created new MazeRunnerGame as the canonical MAZE_RUNNER component (MazeNavigator left for backward compat)
+- DailyChallengeGame kept in router as special meta-game (not in GameType enum)
+- All games follow same 3-screen pattern: pre-game → active → game over (via shared GameOverScreen)
+- Course names displayed in GamesHub cards to distinguish duplicate-looking games (e.g., 5 Term Match games for different courses)

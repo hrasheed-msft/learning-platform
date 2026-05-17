@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 7 — Parent Guide</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --quiz-bg: #fff8e1;
+    --summary-bg: #e3f2fd;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle { color: #666; font-size: 1rem; }
+  .intro {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+  }
+  .intro p { margin-bottom: 0.5rem; }
+  .subject-guide {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject-guide > h2 {
+    color: var(--primary);
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .lesson-card {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lesson-card h3 {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.15rem;
+  }
+  .summary {
+    background: var(--summary-bg);
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  .summary p { margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .summary ul {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  .quiz {
+    background: var(--quiz-bg);
+    padding: 1.2rem;
+  }
+  .quiz h4 {
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+  }
+  .quiz ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .quiz li {
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+  }
+  .quiz .answer {
+    display: none;
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+  .quiz details {
+    margin-top: 0.8rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.8rem;
+  }
+  .quiz details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quiz details p {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .discussion {
+    padding: 1rem 1.2rem;
+    background: #f3e5f5;
+    border-top: 1px solid var(--border);
+  }
+  .discussion h4 {
+    color: #6a1b9a;
+    margin-bottom: 0.5rem;
+  }
+  .discussion ul {
+    margin-left: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .toc h2 { color: var(--primary); margin-bottom: 1rem; }
+  .toc h3 { color: var(--accent); margin: 0.8rem 0 0.3rem; font-size: 1.05rem; }
+  .toc ul { list-style: none; padding-left: 1.2rem; }
+  .toc a { color: var(--primary); text-decoration: none; border-bottom: 1px dotted var(--primary); }
+  .toc a:hover { border-bottom-style: solid; }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  @media print {
+    body { max-width: 100%; }
+    .quiz details { display: block; }
+    .quiz details[open] summary { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>📖 Coursebook 7 — Parent Guide</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 12–13 years</div>
+</header>
+<div class="intro">
+  <p><strong>How to use this guide:</strong> Each lesson has three parts:</p>
+  <ul style="margin-left:1.5rem">
+    <li><strong>Summary</strong> — Key points to review with your child</li>
+    <li><strong>Quiz</strong> — Questions to test understanding (answers are hidden — click to reveal)</li>
+    <li><strong>Discussion</strong> — Conversation starters to deepen learning</li>
+  </ul>
+  <p>Work through one topic at a time. Read the summary together, then try the quiz orally or in writing.</p>
+</div>
+<nav class="toc"><h2>Contents</h2>
+<h3><a href="#fiqh-guide">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-makr-h-t-of--al-h-g">Makrūhāt of Ṣalāh</a></li>
+  <li><a href="#fiqh-sutrah-g">Sutrah</a></li>
+  <li><a href="#fiqh-sajdah-til-wah-g">Sajdah Tilāwah</a></li>
+  <li><a href="#fiqh--al-tul-kus-f-g">Ṣalātul Kusūf</a></li>
+  <li><a href="#fiqh-ta-arr--g">Taḥarr|</a></li>
+  <li><a href="#fiqh-qa-r--al-h-g">Qaṣr Ṣalāh</a></li>
+  <li><a href="#fiqh--al-tul-mar---g">Ṣalātul Marīḍ</a></li>
+  <li><a href="#fiqh--al-tul-ma-dh-r-g">Ṣalātul Ma'dhūr</a></li>
+  <li><a href="#fiqh-zak-h-g">Zakāh</a></li>
+  <li><a href="#fiqh-inheritance-g">Inheritance</a></li>
+  <li><a href="#fiqh-i-tik-f-g">I'tikāf</a></li>
+  <li><a href="#fiqh-laylatul-qadr-g">Laylatul Qadr</a></li>
+  <li><a href="#fiqh--al-l-foods-g">Ḥalāl Foods</a></li>
+  <li><a href="#fiqh-u--iyah-g">Uḍḥiyah</a></li>
+</ul>
+<h3><a href="#a--d-th-guide">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-a-ad-th-g">Aḥadīth</a></li>
+</ul>
+<h3><a href="#s-rah-guide">Sīrah</a></h3>
+<ul>
+  <li><a href="#s-rah-sham--il-g">Shamā'il</a></li>
+  <li><a href="#s-rah--umar-ibn-g">'Umar ibn</a></li>
+</ul>
+<h3><a href="#t-r-kh-guide">Tārīkh</a></h3>
+<ul>
+</ul>
+<h3><a href="#aq--id-guide">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-divine-decree-g">Divine Decree</a></li>
+  <li><a href="#aq--id-life-after-death-g">Life after Death</a></li>
+  <li><a href="#aq--id-life-of-barzakh-g">Life of Barzakh</a></li>
+</ul>
+<h3><a href="#akhl-q-guide">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-spreading-rumours-g">Spreading Rumours</a></li>
+  <li><a href="#akhl-q-value-of-time-g">Value of Time</a></li>
+  <li><a href="#akhl-q-virtues-of-knowledge-g">Virtues of Knowledge</a></li>
+  <li><a href="#akhl-q--al-t--alan-nabiy-g">Ṣalāt 'alan Nabiy</a></li>
+</ul>
+<h3><a href="#-d-b-guide">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b-social-manners-g">Social Manners</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject-guide" id="fiqh-guide">
+<h2>Fiqh</h2>
+<div class="lesson-card" id="fiqh-makr-h-t-of--al-h-g">
+<h3>Makrūhāt of Ṣalāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>1.To miss out a sunnah intentionally. 2.Playing with one's clothes. 3.Cracking one's joints. 4.For a male to have his sleeves rolled up above the elbows. 5.Making the second rak'ah longer than the ﬁrst in a manner whereby you recite more Qur'ān in the second than the ﬁrst rak'ah. 6.After Sūrah Fātiḥah, to recite the same sūrah in every rak'ah. 7.To recite sūrahs in a manner which are against the order in the Qur'ān. 8.To perform ṣalāh whilst in need of answering the call of nature. 9.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Moving the head and chest It is disliked to turn one's neck in ṣalāh.</li>
+  <li>If a person turns his chest 45 degrees or more from the Qiblah, then the ṣalāh will become invalid.</li>
+  <li>If a person turns less than 45 degrees, his ṣalāh will not be invalid.</li>
+  <li>Also note, during sajdah, the feet should be touching the ground.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is moving the head and chest it?</li>
+  <li>What are the key rules or steps of Makrūhāt of Ṣalāh?</li>
+  <li>Why is Makrūhāt of Ṣalāh important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Makrūhāt of Ṣalāh?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is moving the head and chest it?</strong><br>Moving the head and chest It is disliked to turn one's neck in ṣalāh.</li>
+  <li><strong>What are the key rules or steps of Makrūhāt of Ṣalāh?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Makrūhāt of Ṣalāh important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Makrūhāt of Ṣalāh?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do makrūhāt of ṣalāh step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-sutrah-g">
+<h3>Sutrah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>We should never walk directly across a person performing ṣalāh, i.e. between that person and the direction of Qiblah. The Prophet  said: "If the one crossing in front of a praying person knew what sin is upon him, it would be better for him to wait for forty than walk across." Abū An-Naḍr (one of the narrators of the ḥadīth) said: "I don't know whether he said forty days, months, or years.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Using or placing such an item for this purpose is called 'sutrah'.</li>
+  <li>The sutrah of an imām is sufﬁcient for the congregation.</li>
+  <li>We should never walk directly across a person performing ṣalāh, i.e. between that person and the direction of Qiblah.</li>
+  <li>He would do this so people could pass by in front of him without passing directly across him whilst he was busy in ṣalāh.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the sutrah of an imām?</li>
+  <li>What are the key rules or steps of Sutrah?</li>
+  <li>Why is Sutrah important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Sutrah?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the sutrah of an imām?</strong><br>The sutrah of an imām is sufﬁcient for the congregation.</li>
+  <li><strong>What are the key rules or steps of Sutrah?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Sutrah important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Sutrah?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do sutrah step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-sajdah-til-wah-g">
+<h3>Sajdah Tilāwah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>There are some verses in the Qur'ān which require you to do sajdah upon reciting or hearing them. This sajdah is called 'Sajdah Tilāwah' and it is wājib to do so. There are 14 such verses in the Qur'ān in the following sūrahs: Sūrah al-A'rāf (7:206) Sūrah ar-Ra'd (13:15) Sūrah an-Naḥl (16:50) Sūrah Ban| Isrā'|l (17:109) Sūrah Maryam (19:58) Sūrah al-Ḥajj (22:18) Sūrah al-Furqān (25:60) Sūrah an-Naml (27:26) Sūrah as-Sajdah (32:15) Sūrah %ād (38:24) Sūrah *\ Mīm as-Sajdah (41:38) Sūrah an-Najm (5...</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>There are some verses in the Qur'ān which require you to do sajdah upon reciting or hearing them.</li>
+  <li>This sajdah is called 'Sajdah Tilāwah' and it is wājib to do so.</li>
+  <li>In addition, the sajdah word is also marked to make you aware that this is a sajdah verse.</li>
+  <li>If the verse is recited either in or out of ṣalāh, then it is compulsory to do sajdah.</li>
+  <li>If you are in ṣalāh and recite a verse of Sajdah Tilāwah, simply go into sajdah and recite the tasb|# as usual.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this sajdah?</li>
+  <li>What is in addition, the sajdah word?</li>
+  <li>What is if the verse?</li>
+  <li>What are the key rules or steps of Sajdah Tilāwah?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this sajdah?</strong><br>This sajdah is called 'Sajdah Tilāwah' and it is wājib to do so.</li>
+  <li><strong>What is in addition, the sajdah word?</strong><br>In addition, the sajdah word is also marked to make you aware that this is a sajdah verse.</li>
+  <li><strong>What is if the verse?</strong><br>If the verse is recited either in or out of ṣalāh, then it is compulsory to do sajdah.</li>
+  <li><strong>What are the key rules or steps of Sajdah Tilāwah?</strong><br>List the main rules from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do sajdah tilāwah step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-tul-kus-f-g">
+<h3>Ṣalātul Kusūf</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>and Khusūf Ṣalāh at the time of solar eclipse Ṣalātul Kusūf The Prophet  said, "The sun and the moon do not eclipse because of the death of someone from the people but they are two signs amongst the signs of Allāh. When you see them, stand up and pray" (Ṣaḥīḥ al-Bukhārī) It is sunnah to perform two rak'āt ṣalāh at the time of a solar eclipse until the eclipse is ﬁnished. There is no adhān or iqāmah for Ṣalātul Kusūf. It will be performed in congregation in the masjid.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>There is no adhān or iqāmah for Ṣalātul Kusūf.</li>
+  <li>It is sunnah to lengthen the recitation in both the rak'āt and to lengthen the rukū' and sajdah.</li>
+  <li>It will be performed in congregation in the masjid.</li>
+  <li>Two rak'āt ṣalāh will be performed individually. Ṣalātul Khusūf will be performed like normal ṣalāh.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is there?</li>
+  <li>What are the key rules or steps of Ṣalātul Kusūf?</li>
+  <li>Why is Ṣalātul Kusūf important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Ṣalātul Kusūf?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is there?</strong><br>There is no adhān or iqāmah for Ṣalātul Kusūf.</li>
+  <li><strong>What are the key rules or steps of Ṣalātul Kusūf?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ṣalātul Kusūf important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Ṣalātul Kusūf?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ṣalātul kusūf step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-ta-arr--g">
+<h3>Taḥarr|</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>It is one of the conditions of ṣalāh to face the Qiblah. A person should carry a compass or download a mobile app to help determine the direction of the Qiblah when travelling. A person should be able to name the point of the compass for Qiblah. For example, the Qiblah for those residing in the UK is 119 degrees from North (which is south-east but more towards the East).</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>It is one of the conditions of ṣalāh to face the Qiblah.</li>
+  <li>For example, the Qiblah for those residing in the UK is 119 degrees from North (which is south-east but more towards the East).</li>
+  <li>A person should ﬁrst ask any Muslims if Muslims are around.</li>
+  <li>If Muslims are not around, he should try his best to see which way is the Qiblah.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Taḥarr|?</li>
+  <li>Why is Taḥarr| important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Taḥarr|?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Taḥarr|?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Taḥarr| important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Taḥarr|?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do taḥarr| step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-qa-r--al-h-g">
+<h3>Qaṣr Ṣalāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>If a person has an intention of travelling more than 54 miles (87 km), they will be regarded as a traveller (mus\ﬁr) in Islām. A traveller can shorten their ṣalāh, performing it as what is called 'qaṣr'. Qaṣr is to perform two rak'āt far} for Ḍhuhr, 'Aṣr and 'Ishā' instead of four. A person will be eligible to perform qaṣr the moment they leave the boundaries of their home town up until they reach back to the boundaries of their home town.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>A traveller can shorten their ṣalāh, performing it as what is called 'qaṣr'.</li>
+  <li>Qaṣr is to perform two rak'āt far} for Ḍhuhr, 'Aṣr and 'Ishā' instead of four.</li>
+  <li>If a person has an intention of travelling more than 54 miles (87 km), they will be regarded as a traveller (mus\ﬁr) in Islām.</li>
+  <li>Furthermore if a person intends to stay at a place for less than 15 days, they too will perform qaṣr at the destination.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is qaṣr?</li>
+  <li>What are the key rules or steps of Qaṣr Ṣalāh?</li>
+  <li>Why is Qaṣr Ṣalāh important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Qaṣr Ṣalāh?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is qaṣr?</strong><br>Qaṣr is to perform two rak'āt far} for Ḍhuhr, 'Aṣr and 'Ishā' instead of four.</li>
+  <li><strong>What are the key rules or steps of Qaṣr Ṣalāh?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Qaṣr Ṣalāh important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Qaṣr Ṣalāh?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do qaṣr ṣalāh step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-tul-mar---g">
+<h3>Ṣalātul Marīḍ</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>If a person cannot stand up for ṣalāh due to an injury, he should sit on the ﬂoor and perform ṣalāh. If a person cannot perform sajdah, he may also sit on the ﬂoor and perform ṣalāh with gestures. He will incline his head towards the ground for rukū' and sajdah. The inclination of the head for sajdah should be lower than that of rukū'.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>If a person cannot sit down and pray ṣalāh, it is permissible to lie down on his back or side and perform ṣalāh by gestures and indication.</li>
+  <li>If a person cannot stand up for ṣalāh due to an injury, he should sit on the ﬂoor and perform ṣalāh.</li>
+  <li>If a person cannot perform sajdah, he may also sit on the ﬂoor and perform ṣalāh with gestures.</li>
+  <li>He will incline his head towards the ground for rukū' and sajdah.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Ṣalātul Marīḍ?</li>
+  <li>Why is Ṣalātul Marīḍ important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Ṣalātul Marīḍ?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Ṣalātul Marīḍ?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ṣalātul Marīḍ important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Ṣalātul Marīḍ?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ṣalātul marīḍ step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-tul-ma-dh-r-g">
+<h3>Ṣalātul Ma'dhūr</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>At times, people suffer from illnesses whereby they cannot keep their wuḍū' at all. For example, a bleeding wound which doesn't stop bleeding at all during an entire ṣalāh time. If a person experiences the problem from the entry time of any far} ṣalāh until the expiry time of the ṣalāh in such a way that they are unable to ﬁnd enough time required to make wuḍū' and perform the far} ṣalāh without the problem occurring, they will then be regarded as a ma'dhūr.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Once a person is regarded as a ma'dhūr, the illness must continue at least once in every ṣalāh time for this condition to remain in place.</li>
+  <li>Once a person is regarded as a ma'dhūr, the occurrence of the illness will not break the wuḍū'.</li>
+  <li>At times, people suffer from illnesses whereby they cannot keep their wuḍū' at all.</li>
+  <li>For example, a bleeding wound which doesn't stop bleeding at all during an entire ṣalāh time.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is once a person?</li>
+  <li>What are the key rules or steps of Ṣalātul Ma'dhūr?</li>
+  <li>Why is Ṣalātul Ma'dhūr important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Ṣalātul Ma'dhūr?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is once a person?</strong><br>Once a person is regarded as a ma'dhūr, the occurrence of the illness will not break the wuḍū'.</li>
+  <li><strong>What are the key rules or steps of Ṣalātul Ma'dhūr?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ṣalātul Ma'dhūr important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Ṣalātul Ma'dhūr?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ṣalātul ma'dhūr step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-zak-h-g">
+<h3>Zakāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Zakāh is a monetary act of worship that has been ordained in the shar|'ah. It is one of the ﬁve pillars of Islām. Zakāh literally means 'to increase' and it also means 'to purify'. Both of these meanings are found through the action of zakāh.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Zakāh is a monetary act of worship that has been ordained in the shar|'ah.</li>
+  <li>It is one of the ﬁve pillars of Islām.</li>
+  <li>Zakāh literally means 'to increase' and it also means 'to purify'.</li>
+  <li>Both of these meanings are found through the action of zakāh.</li>
+  <li>Allāh  puriﬁes us and our wealth and furthermore grants barakah in our wealth and increases our reward.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is zakāh?</li>
+  <li>What is the amount?</li>
+  <li>What is niāb the niāb?</li>
+  <li>What is niāb?</li>
+  <li>What is however, the niāb?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is zakāh?</strong><br>Zakāh is a monetary act of worship that has been ordained in the shar|'ah.</li>
+  <li><strong>What is the amount?</strong><br>The amount is called 'niāb'. 4)Own the 'niāb' amount after the passing of one lunar year.</li>
+  <li><strong>What is niāb the niāb?</strong><br>Niāb The niāb is the amount of money which you must have before zakāh becomes compulsory.</li>
+  <li><strong>What is niāb?</strong><br>Niāb is calculated after adding up all the zakātable items that you have in hand.</li>
+  <li><strong>What is however, the niāb?</strong><br>However, the niāb is always calculated according to the lowest of the two prices (gold or silver).</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do zakāh step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-inheritance-g">
+<h3>Inheritance</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>What happens to a person’s wealth after they die? Islām is a complete way of life. Our Beloved Messenger Muḥammad  has informed us in regards to matters of life, death and what happens after death. When a person dies their wealth will be used and distributed in the following manner: 1.Burial and shrouding - The expense to pay for burial and shrouding will be taken from the deceased person’s wealth (unless another party takes this responsibility).</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Islām is a complete way of life.</li>
+  <li>Our Beloved Messenger Muḥammad  has informed us in regards to matters of life, death and what happens after death.</li>
+  <li>What happens to a person’s wealth after they die?</li>
+  <li>If any money remains after this then move onto stage 2. 2.All debts - The deceased person’s wealth will be used to pay off any outstanding debts.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is islām?</li>
+  <li>What are the key rules or steps of Inheritance?</li>
+  <li>Why is Inheritance important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Inheritance?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is islām?</strong><br>Islām is a complete way of life.</li>
+  <li><strong>What are the key rules or steps of Inheritance?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Inheritance important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Inheritance?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do inheritance step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-i-tik-f-g">
+<h3>I'tikāf</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>I'tikāf means to seclude oneself and stay in the Masjid. 'Ā'ishah  narrates that the Beloved Messen- ger Muḥammad  would perform I'tikāf during the last ten days of Ramaḍān until Allāh took him away, then his wives performed I'tikāf after him. (Ṣaḥīḥ al-Bukhārī) Abū Hurayrah  narrates that the Qur'an would be recited to the Beloved Messenger once every year. It was recited to him twice the year he passed away.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>I'tikāf means to seclude oneself and stay in the Masjid.</li>
+  <li>He is not allowed to leave the masjid without a valid excuse.</li>
+  <li>If a person exits the masjid for any other reason, their Sunnah Mu'akkadah I'tikāf will be broken and they will have to make up (qaḍā') for that day.</li>
+  <li>The following are disliked in the masjid: •Talking about worldly things •To sell things in the Masjid.</li>
+  <li>This is simply making intention of I'tikaf when entering a Masjid.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this?</li>
+  <li>What are the key rules or steps of I'tikāf?</li>
+  <li>Why is I'tikāf important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in I'tikāf?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this?</strong><br>This is simply making intention of I'tikaf when entering a Masjid.</li>
+  <li><strong>What are the key rules or steps of I'tikāf?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is I'tikāf important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in I'tikāf?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do i'tikāf step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-laylatul-qadr-g">
+<h3>Laylatul Qadr</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Indeed, We have sent it (the Qur’ān) down in the Night of Power. And what may let you know what the Night of Power is? The Night of Power is much better than one thousand months." (Qur'ān 97:1-3) "The Messenger  was shown the lifespans of the people (who had gone) before him, and it was as if the lives of the people of his Ummah were short for them to be able to do as many good actions as those before them, so Allāh gave him Laylatul Qadr, which is better than a thousand months.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Allāh in His inﬁnite mercy granted us this special night which is equal to a thousand months.</li>
+  <li>One thousand months is equal to 83 years.</li>
+  <li>If we are able to worship Allāh for just ten of these blessed nights we will have over 830 years of worship credited to our account.</li>
+  <li>How merciful is our creator.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is one thousand months?</li>
+  <li>What is how merciful?</li>
+  <li>What are the key rules or steps of Laylatul Qadr?</li>
+  <li>Why is Laylatul Qadr important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is one thousand months?</strong><br>One thousand months is equal to 83 years.</li>
+  <li><strong>What is how merciful?</strong><br>How merciful is our creator.</li>
+  <li><strong>What are the key rules or steps of Laylatul Qadr?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Laylatul Qadr important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do laylatul qadr step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-l-foods-g">
+<h3>Ḥalāl Foods</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Allāh  says in the Noble Qur'ān: "O Believers! Eat of the good and pure (lawful) that We have provided you with and be grateful to Allāh , if you truly worship Him." (Qur'ān 2:172) The Prophet  said, "A body nourished by ḥarām will not enter Paradise."(Ṭabarān|) The above shows how important it is to eat ḥalāl. Ḥarām will have an impact on your soul, remove blessings from your life and leave your prayers unanswered.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Food purchased using money that is earned unlawfully will also result in the food being ḥarām.</li>
+  <li>This is called 'Tasmiyah'.</li>
+  <li>Once a Muslim cuts the vessels of a live animal whilst reciting the Tasmiyah, the animal will be ḥalāl.</li>
+  <li>There are many conventional methods to slaughter animals.</li>
+  <li>The following highlights the value and rights that animals have: It is severely disliked to cause any undue pain to the animal.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is food purchased using money that?</li>
+  <li>What is this?</li>
+  <li>What are the key rules or steps of Ḥalāl Foods?</li>
+  <li>Why is Ḥalāl Foods important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is food purchased using money that?</strong><br>Food purchased using money that is earned unlawfully will also result in the food being ḥarām.</li>
+  <li><strong>What is this?</strong><br>This is called 'Tasmiyah'.</li>
+  <li><strong>What are the key rules or steps of Ḥalāl Foods?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ḥalāl Foods important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ḥalāl foods step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-u--iyah-g">
+<h3>Uḍḥiyah</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Zayd ibn Arqam  reports that the Companions of Rasūlullāh  asked him: "Ya Rasūlallāh, what is this sacriﬁce?" He said: "It is the way of your forefather Ibrāhīm ." They asked: "What (reward) is for us therein?" He replied: "There is a reward for every hair." They asked: "For the wool, Ya Rasūlallāh ?" He replied: "There is one reward for every strand of wool." (Aḥmad) Uḍḥiyah refers to the animal sacriﬁce offered in the days of Ḥajj. This is also commonly called 'qurbān|'.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>This is also commonly called 'qurbān|'.</li>
+  <li>The time of slaughtering depends where the slaughtering is taking place.</li>
+  <li>If the slaughtering is taking place in a city, then the slaughtering of qurbān| can only begin after 'Īd Ṣalāh.</li>
+  <li>If the slaughtering takes place in a village, provided there is no 'Īd Ṣalāh, slaughtering can begin after the break of dawn (Sub# a-]ādiq).</li>
+  <li>The animals which can be sacriﬁced are the following: 1)Sheep 2)Goats 3)Cattle 4)Camels The animals can be male or female.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this?</li>
+  <li>What is if the slaughtering?</li>
+  <li>What are the key rules or steps of Uḍḥiyah?</li>
+  <li>Why is Uḍḥiyah important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this?</strong><br>This is also commonly called 'qurbān|'.</li>
+  <li><strong>What is if the slaughtering?</strong><br>If the slaughtering is taking place in a city, then the slaughtering of qurbān| can only begin after 'Īd Ṣalāh.</li>
+  <li><strong>What are the key rules or steps of Uḍḥiyah?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Uḍḥiyah important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do uḍḥiyah step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="a--d-th-guide">
+<h2>Aḥādīth</h2>
+<div class="lesson-card" id="a--d-th-a-ad-th-g">
+<h3>Aḥadīth</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Jannah and Jahannam *ārithah ibn Wahb narrated that I heard the Beloved Messenger Muḥammad  saying: 'Shall I not tell you who the inhabitants of Jannah are? (They are) Every weak and humble person. If he was to take an oath in the name of Allāh, He would fulﬁl it. And the people of Jahannam are those who are proud, arrogant and stubborn.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>If he was to take an oath in the name of Allāh, He would fulﬁl it.</li>
+  <li>'Backbiting is to say anything about your brother which he would not like.' he explained.</li>
+  <li>Someone asked, 'But what if he has what I say?' The Prophet  replied.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="s-rah-guide">
+<h2>Sīrah</h2>
+<div class="lesson-card" id="s-rah-sham--il-g">
+<h3>Shamā'il</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The Prophet Muḥammad  preferred wearing a qamīs. A qamīs is a long and loose Sīrah garment which reaches the lower legs in length. From all colours, the Prophet  encouraged us to wear white coloured clothing as it is the purest of colours. The Prophet  had shoes which had two straps on them.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>The Prophet Muḥammad  preferred wearing a qamīs.</li>
+  <li>A qamīs is a long and loose Sīrah garment which reaches the lower legs in length.</li>
+  <li>From all colours, the Prophet  encouraged us to wear white coloured clothing as it is the purest of colours.</li>
+  <li>The Prophet  had shoes which had two straps on them.</li>
+  <li>The Prophet  would wear an 'Imāmah (turban) with a topi (hat) underneath.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is a qamīs?</li>
+  <li>What happened during Shamā'il?</li>
+  <li>What lesson can we learn from this event?</li>
+  <li>Why is this event important in Islamic history?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is a qamīs?</strong><br>A qamīs is a long and loose Sīrah garment which reaches the lower legs in length.</li>
+  <li><strong>What happened during Shamā'il?</strong><br>Retell the key events in your own words.</li>
+  <li><strong>What lesson can we learn from this event?</strong><br>Think about what it teaches us about character and faith.</li>
+  <li><strong>Why is this event important in Islamic history?</strong><br>Explain its significance.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>If you were there, what would you have done?</li>
+  <li>What quality of the Prophet ﷺ do you admire most from this story?</li>
+  <li>How does this event connect to our life today?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="s-rah--umar-ibn-g">
+<h3>'Umar ibn</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>al-Kha{{āb Before Islām Over 1400 years ago, there was a young boy who lived and worked in the hot desert of Arabia. His father gave him the job of looking after a large ﬂock of camels, making sure they were well fed and looked after. His father, who was known as al-Kha{{āb, was a strict man and would sometimes beat his young son to make him work even harder. The boy had a very difﬁcult and tiring job and would come home every day feeling exhausted.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>And now here I am, with no one between me and Allāh ." 'Umar , who was now a grown man, was remembering the time when he was not yet a Muslim.</li>
+  <li>He now had Islām and had Allāh  as his Lord and that is all that he needed.</li>
+  <li>So 'Umar decided that he would not support the Prophet Muḥammad  and would ﬁght against the Muslims so that he could protect the Quraysh in Makkah.</li>
+  <li>He was very harsh on the new Muslim converts.</li>
+  <li>It prompted Abū Bakr  to purchase her freedom so that she would be relieved of the punishment.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this?</li>
+  <li>What is but allāh?</li>
+  <li>What is but this?</li>
+  <li>What is if he dies or?</li>
+  <li>What is he replied, "by allāh, he?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this?</strong><br>This is just what Abū Bakr  did. al-Kha{{āb 'Umar  was not a small man.</li>
+  <li><strong>What is but allāh?</strong><br>But Allāh is protecting me from Sīrahyou." At that moment, 'Umayr recited the shahādah and accepted Islām.</li>
+  <li><strong>What is but this?</strong><br>But this is a matter in which nobody else was present except Ṣafwān and me.</li>
+  <li><strong>What is if he dies or?</strong><br>If he dies or is killed, will you then turn back on your heels?.</li>
+  <li><strong>What is he replied, "by allāh, he?</strong><br>He replied, "By Allāh, he is better than you think he is." Another Companion was al-Kha{{āb asked the same question.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>If you were there, what would you have done?</li>
+  <li>What quality of the Prophet ﷺ do you admire most from this story?</li>
+  <li>How does this event connect to our life today?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="t-r-kh-guide">
+<h2>Tārīkh</h2>
+</section>
+
+<section class="subject-guide" id="aq--id-guide">
+<h2>Aqā'id</h2>
+<div class="lesson-card" id="aq--id-divine-decree-g">
+<h3>Divine Decree</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Divine Decree (al-Qaḍā') Qaḍā' refers to Allāh 's foreknowledge of events prior to them taking place. Qadr refers to His bringing into existence those events. It is compulsory to believe in Qaḍā' and Qadr. It is from the six elements of īmān mentioned by the Prophet  in the following ḥadīth: "(īmān is) That you afﬁrm your faith in Allāh , in His Angels, in His Books, in His Prophets, in the Day of Judgement, and you afﬁrm your faith in the Divine Decree about good and evil.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Divine Decree (al-Qaḍā') Qaḍā' refers to Allāh 's foreknowledge of events prior to them taking place.</li>
+  <li>Qadr refers to His bringing into existence those events.</li>
+  <li>It is compulsory to believe in Qaḍā' and Qadr.</li>
+  <li>Every action we will do, everything we will eat, all that we will earn, the time of our death, the place of our death: these too are written down.</li>
+  <li>Does this mean we are forced to do the actions we do and we have no choice?</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the piercing glance of a jealous person?</li>
+  <li>What is the evil eye?</li>
+  <li>What should we do?</li>
+  <li>What is the world the world?</li>
+  <li>What is every created being?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the piercing glance of a jealous person?</strong><br>The piercing glance of a jealous person is a means of inﬂicting harm upon another by the leave of Allāh.</li>
+  <li><strong>What is the evil eye?</strong><br>The Evil Eye is like an arrow which comes from the soul of the one who envies.</li>
+  <li><strong>What should we do?</strong><br>We must recite Sūrah al-Ikhl\], al-Falaq and an-Nās thrice morning and evening.</li>
+  <li><strong>What is the world the world?</strong><br>The World The world is a place of means.</li>
+  <li><strong>What is every created being?</strong><br>Every created being is in need of Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-life-after-death-g">
+<h3>Life after Death</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The moment a person passes away, it is not the end of their life: rather their real and eternal life has just begun. We, the Ahlus Sunnah, believe every human being and creature has a soul. Allāh  states: 'And they ask you, O Muḥammad, about the soul. Say, "The soul is of the affair of my Lord.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>The moment a person passes away, it is not the end of their life: rather their real and eternal life has just begun.</li>
+  <li>We, the Ahlus Sunnah, believe every human being and creature has a soul.</li>
+  <li>Say, "The soul is of the affair of my Lord.</li>
+  <li>This is a station where all the souls stay before a person is born.</li>
+  <li>The Prophet  said: "The souls were gathered together.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the moment a person passes away, it?</li>
+  <li>What is say, "the soul?</li>
+  <li>What is this?</li>
+  <li>What is then allāh sends an angel who?</li>
+  <li>What is then the soul?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the moment a person passes away, it?</strong><br>The moment a person passes away, it is not the end of their life: rather their real and eternal life has just begun.</li>
+  <li><strong>What is say, "the soul?</strong><br>Say, "The soul is of the affair of my Lord.</li>
+  <li><strong>What is this?</strong><br>This is a station where all the souls stay before a person is born.</li>
+  <li><strong>What is then allāh sends an angel who?</strong><br>Then Allāh sends an angel who is ordered to write four things.</li>
+  <li><strong>What is then the soul?</strong><br>Then the soul is breathed into him…" (Ṣaḥīḥ al-Bukhārī).</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-life-of-barzakh-g">
+<h3>Life of Barzakh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>It is our belief that the human body and soul both experience pleasure or pain in the life of Barzakh. If a person is entitled to enter Paradise, Allāh  grants his body and soul blessings. If the person is destined for Hell, his body and soul experience punishment. Even if his body was in pieces, he will be punished.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>It is our belief that the human body and soul both experience pleasure or pain in the life of Barzakh.</li>
+  <li>If a person is entitled to enter Paradise, Allāh  grants his body and soul blessings.</li>
+  <li>If the person is destined for Hell, his body and soul experience punishment.</li>
+  <li>Even if his body was in pieces, he will be punished.</li>
+  <li>Allāh  is All- Powerful.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is if a person?</li>
+  <li>What is if the person?</li>
+  <li>What is allāh?</li>
+  <li>What is nothing?</li>
+  <li>What is this?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is if a person?</strong><br>If a person is entitled to enter Paradise, Allāh  grants his body and soul blessings.</li>
+  <li><strong>What is if the person?</strong><br>If the person is destined for Hell, his body and soul experience punishment.</li>
+  <li><strong>What is allāh?</strong><br>Allāh is All- Powerful.</li>
+  <li><strong>What is nothing?</strong><br>Nothing is difﬁcult for Him.</li>
+  <li><strong>What is this?</strong><br>This is a fundamental belief.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="akhl-q-guide">
+<h2>Akhlāq</h2>
+<div class="lesson-card" id="akhl-q-spreading-rumours-g">
+<h3>Spreading Rumours</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"O you who believe, if a sinful person brings you a report, verify its correctness, lest you should harm a people out of ignorance, and then become remorseful on what you did." (Qur'ān 49:6) Anas ibn Mālik  narrates that the Messenger Muḥammad  said: "News of something is not like seeing it." (Ṭabarāni) What is meant by a false rumour? A rumour is some kind of news or information, generally about one or more people, that is spread without thought for its authenticity or accuracy.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>A rumour is some kind of news or information, generally about one or more people, that is spread without thought for its authenticity or accuracy.</li>
+  <li>Starting or spreading a rumour is to fabricate news that is not true, and that may lead to misunderstanding between brothers, sisters or spouses.</li>
+  <li>The end result is usually regret and sorrow.</li>
+  <li>How many families are left broken due to the evil of false words ﬂoating around?</li>
+  <li>This is a major cause of disunity!</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What is the end result?</li>
+  <li>What is this?</li>
+  <li>What is in this way we can be absolutely sure who?</li>
+  <li>What is the act of spreading incorrect news?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must ﬁrst of all substantiate it, check and verify if it is really true.</li>
+  <li><strong>What is the end result?</strong><br>The end result is usually regret and sorrow.</li>
+  <li><strong>What is this?</strong><br>This is a major cause of disunity!.</li>
+  <li><strong>What is in this way we can be absolutely sure who?</strong><br>In this way we can be absolutely sure who is speaking the truth and who has been lying to us.</li>
+  <li><strong>What is the act of spreading incorrect news?</strong><br>The act of spreading incorrect news is becoming much more commonplace nowadays.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-value-of-time-g">
+<h3>Value of Time</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>The Prophet   said, "There are two blessings which are wasted by many people: health and free time." (Ṣaḥīḥ al-Bukhārī) The Prophet  said in another ḥadīth: "Take advantage of ﬁve conditions before ﬁve others: 1) Youth before old age. 2) Good health before sickness. 3) Free time before you become occupied. 4) Wealth before poverty. 5) Life before death." (Musnad Aḥmad) Many of the successful people in this world become successful because they use their time correctly.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Once it is lost, it is lost forever.</li>
+  <li>Time is like an ice cube.</li>
+  <li>The best way to make use of time is to have a timetable.</li>
+  <li>Have a daily timetable where you divide your time between 'ibādah (worshipping Allāh ), rest time, learning time and family time.</li>
+  <li>Sleeping late is not from the Sunnah of the Prophet .</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is once it?</li>
+  <li>What is time?</li>
+  <li>What is the best way to make use of time?</li>
+  <li>What is sleeping late?</li>
+  <li>What is the morning time?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is once it?</strong><br>Once it is lost, it is lost forever.</li>
+  <li><strong>What is time?</strong><br>Time is like an ice cube.</li>
+  <li><strong>What is the best way to make use of time?</strong><br>The best way to make use of time is to have a timetable.</li>
+  <li><strong>What is sleeping late?</strong><br>Sleeping late is not from the Sunnah of the Prophet.</li>
+  <li><strong>What is the morning time?</strong><br>The morning time is the best time of the day and contains a lot of barakah.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-virtues-of-knowledge-g">
+<h3>Virtues of Knowledge</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"And say: My Lord increase me in knowledge." (Qur'ān 20:114) "Allāh will raise up, to (suitable) ranks (and degrees), those of you who believe and who have been granted knowledge. And Allāh is well-acquainted with all you do.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>The superiority of the learned man over the worshipper is like that of the moon, on the night when it is full, over the rest of the stars.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Virtues of Knowledge mean and why is it important?</li>
+  <li>Give an example of how you can practice Virtues of Knowledge at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about Virtues of Knowledge?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Virtues of Knowledge mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Virtues of Knowledge at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about Virtues of Knowledge?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q--al-t--alan-nabiy-g">
+<h3>Ṣalāt 'alan Nabiy</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>ُVirtues Of ṣalāt 'alan nabiy 'Surely, Allāh and His angels send blessings to the Prophet. O you who believe, pray to Allāh to bless him, and send your salām (prayer for his being in peace) to him in abundance. (Qur'ān 33:56) Abū Hurayrah  relates that the Messenger of Allāh  said, "Whoever sends one blessing upon me, Allāh sends ten blessings upon him.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>ُVirtues Of ṣalāt 'alan nabiy 'Surely, Allāh and His angels send blessings to the Prophet.</li>
+  <li>How can we send blessings upon the Beloved Messenger Muḥammad ?</li>
+  <li>The fact is that Allāh  has ordered us to repay a benefactor for his favours, and there is no greater benefactor than our Beloved Messenger Muḥammad .</li>
+  <li>Those are the disbelievers, the evil doers. (Qur'ān 80:34-42) In another verse Allāh  states: "O mankind, fear your Lord.</li>
+  <li>Indeed the quake of the (destined) Hour is something terrible.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is indeed the quake of the (destined) hour?</li>
+  <li>What does Ṣalāt 'alan Nabiy mean and why is it important?</li>
+  <li>Give an example of how you can practice Ṣalāt 'alan Nabiy at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about Ṣalāt 'alan Nabiy?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is indeed the quake of the (destined) hour?</strong><br>Indeed the quake of the (destined) Hour is something terrible.</li>
+  <li><strong>What does Ṣalāt 'alan Nabiy mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Ṣalāt 'alan Nabiy at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about Ṣalāt 'alan Nabiy?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="-d-b-guide">
+<h2>Ādāb</h2>
+<div class="lesson-card" id="-d-b-social-manners-g">
+<h3>Social Manners</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Islām has ﬁve branches: 1.Īmān - Beliefs (aqā'id) 2.'Ibādāt- Worship 3.Akhlāq- Character 4.Mu'āmalāt- Dealings with one another 5.Mu'āsharāt - Social interactions Many a time we reduce Islām to being merely about praying ﬁve times a day and visiting the blessed lands. Rather Islām has ﬁve branches and 'Ibādāt is just one branch of these. It is important for us to follow the ways shown to us by our Beloved Messenger Muḥammad in all these matters too.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Rather Islām has ﬁve branches and 'Ibādāt is just one branch of these.</li>
+  <li>It is important for us to follow the ways shown to us by our Beloved Messenger Muḥammad in all these matters too.</li>
+  <li>Swearing by Allāh To conﬁrm a statement, many people resort to using the name of Allāh  in the act of making or taking an oath.</li>
+  <li>This is a bad habit and should be avoided.</li>
+  <li>To make an oath in Allāh 's name is a very serious matter and should not be taken so casually.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is rather islām has ﬁve branches and 'ibādāt?</li>
+  <li>What is this?</li>
+  <li>What is to make an oath in allāh 's name?</li>
+  <li>What is if there?</li>
+  <li>What is when you call, ask if it?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is rather islām has ﬁve branches and 'ibādāt?</strong><br>Rather Islām has ﬁve branches and 'Ibādāt is just one branch of these.</li>
+  <li><strong>What is this?</strong><br>This is a bad habit and should be avoided.</li>
+  <li><strong>What is to make an oath in allāh 's name?</strong><br>To make an oath in Allāh 's name is a very serious matter and should not be taken so casually.</li>
+  <li><strong>What is if there?</strong><br>If there is no answer, do not keep calling the same number again and again.</li>
+  <li><strong>What is when you call, ask if it?</strong><br>When you call, ask if it is an appropriate time to speak.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+</section>
+
+</main>
+<footer>
+  Parent Guide for An Nasihah Islamic Curriculum &middot; For home learning support
+</footer>
+</body>
+</html>

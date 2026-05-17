@@ -1,0 +1,18 @@
+Scribe: Archive decisions and update team history after games sprint
+
+Summary:
+- Merged 3 inbox decision files into decisions.md (Khwarizmi backend, Ibn Sina frontend, Khaldun design summary)
+- Archived khaldun-games-detailed-design.md (2960 lines, 130480 bytes) with full doc reference in decisions #7
+- Updated decisions.md: entries #5-7 now document backend implementation, frontend implementation, and design blueprint
+- Summarized khaldun/history.md (reduced from 20922→1523 bytes) and created history-archive.md for full context
+- Updated khwarizmi/history.md and ibn-sina/history.md with games session completion summary
+
+Games Sprint Outcomes (2026-05-17):
+- Phase 1 locked: 5 core game types (Term Match, Speed Quiz, Flashcard Flip, Daily Challenge, Word Search)
+- Backend: 14 Prisma models, 8 enums, game service (1095 LOC), achievement system (11 triggers), 15 API endpoints
+- Frontend: 6 game components, 10 shared UI components, Games Hub page, dual-layout routing
+- Total: 52 files, 9347 lines across all layers; all builds clean
+
+All orchestration logs and session logs created in ignored directories (.squad/orchestration-log/, .squad/log/).
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

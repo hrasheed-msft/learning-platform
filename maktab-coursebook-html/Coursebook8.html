@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 8 — Islamic Curriculum</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2.2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle {
+    color: #666;
+    font-size: 1rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .toc h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+  .toc h3 {
+    color: var(--accent);
+    margin: 0.8rem 0 0.3rem;
+    font-size: 1.1rem;
+  }
+  .toc ul {
+    list-style: none;
+    padding-left: 1.2rem;
+  }
+  .toc li { margin: 0.2rem 0; }
+  .toc a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--primary);
+  }
+  .toc a:hover { border-bottom-style: solid; }
+  .subject {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject > h2 {
+    color: var(--primary);
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .topic {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--accent);
+  }
+  .topic h3 {
+    color: var(--accent);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  .topic p {
+    margin-bottom: 0.6rem;
+    text-align: justify;
+    line-height: 1.65;
+  }
+  .topic p + p {
+    margin-top: 0;
+  }
+  .topic ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+  }
+  .topic li {
+    margin-bottom: 0.3rem;
+  }
+  .arabic {
+    font-family: 'Traditional Arabic', 'Scheherazade New', 'Amiri', serif;
+    font-size: 1.4rem;
+    text-align: right;
+    direction: rtl;
+    background: #f9f9f0;
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    margin: 0.8rem 0;
+    line-height: 2;
+    color: #333;
+  }
+  .page {
+    margin-bottom: 0.5rem;
+  }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+
+  .diagram {
+    text-align: center;
+    margin: 1rem 0 1.5rem;
+    padding: 0.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+  }
+  .diagram img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  @media print {
+    body { max-width: 100%; padding: 1rem; }
+    .topic { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Coursebook 8 — Islamic Curriculum</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 13–14 years</div>
+</header>
+<nav class="toc"><h2>Table of Contents</h2>
+<h3><a href="#fiqh">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#fiqh-naw--l">Naw\ﬁl</a></li>
+  <li><a href="#fiqh-khush--">Khushū'</a></li>
+  <li><a href="#fiqh-jam--ah--al-h">Jamā'ah Ṣalāh</a></li>
+  <li><a href="#fiqh-nik--">Nikāḥ</a></li>
+  <li><a href="#fiqh--al-q">Ṭalāq</a></li>
+  <li><a href="#fiqh-buy--">Buyū'</a></li>
+  <li><a href="#fiqh-ij-rah">Ijārah</a></li>
+  <li><a href="#fiqh-rib-">Ribā</a></li>
+  <li><a href="#fiqh-gambling">Gambling</a></li>
+</ul>
+<h3><a href="#a--d-th">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-clean-heart">Clean Heart</a></li>
+  <li><a href="#a--d-th--adaqah">Ṣadaqah</a></li>
+  <li><a href="#a--d-th-sal-m">Salām</a></li>
+  <li><a href="#a--d-th-rights-of-a-muslim">Rights of a Muslim</a></li>
+  <li><a href="#a--d-th-reward-of-patience">Reward of Patience</a></li>
+  <li><a href="#a--d-th-true-wealth">True Wealth</a></li>
+  <li><a href="#a--d-th-sweetness-of--m-n">Sweetness of Īmān</a></li>
+  <li><a href="#a--d-th-closeness-to-all-h">Closeness to Allāh</a></li>
+  <li><a href="#a--d-th-being-self-suf-cient">Being Self-Sufﬁcient</a></li>
+</ul>
+<h3><a href="#s-rah">Sīrah</a></h3>
+<ul>
+  <li><a href="#s-rah-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#s-rah-sham--il">Shamā'il</a></li>
+  <li><a href="#s-rah--uthm-n-ibn--aff-n">'Uthmān Ibn 'Affān</a></li>
+  <li><a href="#s-rah--al-">'Al|</a></li>
+</ul>
+<h3><a href="#t-r-kh">Tārīkh</a></h3>
+<ul>
+  <li><a href="#t-r-kh-learning-objectives">Learning Objectives</a></li>
+</ul>
+<h3><a href="#aq--id">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#aq--id-istiw--">Istiwā'</a></li>
+  <li><a href="#aq--id--m-n">Īmān</a></li>
+  <li><a href="#aq--id-consulting-the--ulam--">Consulting the 'Ulamā'</a></li>
+</ul>
+<h3><a href="#akhl-q">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#akhl-q-taqw-">Taqwā</a></li>
+  <li><a href="#akhl-q-tawakkul">Tawakkul</a></li>
+  <li><a href="#akhl-q-tawbah">Tawbah</a></li>
+  <li><a href="#akhl-q-modesty-in-gaze">Modesty in Gaze</a></li>
+</ul>
+<h3><a href="#-d-b">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#-d-b-nik--">Nikāḥ</a></li>
+  <li><a href="#-d-b-transactions">Transactions</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject" id="fiqh">
+<h2>Fiqh</h2>
+<article class="topic" id="fiqh-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>Distinguish between the different types of naﬂ ṣalāh, the times they should be performed and their virtues.</p>
+<p>Explain the signiﬁcance of nikāḥ: the reasons for marrying and the qualities to look for in a spouse. understand that nikāḥ cannot take place with a maḥram.</p>
+<p>Recognise what mahr is and the different types of mahr.</p>
+<p>Describe, in detail, the different types of ṭalāq and deﬁne the rulings for a woman sitting in ‘iddah.</p>
+<p>Summarise the rulings in regards to transactions, identifying the conditions and examples for each.</p>
+<p>Explain the importance of taqlīd.</p>
+<p>Recognise the four imāms, their backgrounds and achievements.</p>
+</article>
+<article class="topic" id="fiqh-naw--l">
+<h3>Naw\ﬁl</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-naw--l.png" alt="Diagram: Naw\ﬁl" loading="lazy"></div>
+<p>Ṣalāh Allāh  has made the ﬁve daily ṣalāh compulsory upon us. Ṣalāh can be thought of as 'meetings and conversations' with the King of the universe. It is a time when we get a chance to talk to our Creator and Provider.</p>
+<p>Ṣalāh is a chance to seek the mercy and help of Allāh . Ṣalāh is a chance to become a friend of the Ruler of the universe. The Beloved Messenger  had the most love for Allāh . He showed and taught us how to get even closer to Allāh  and how to be Allāh 's closest friends. From among the ways to become much closer to Allāh  is by performing extra ṣalāh. The Messenger of Allāh  said, "Allāh, the Exalted, has said: 'I will declare war against he who harms my pious worshippers. And the most beloved thing by which My slave comes nearer to Me, is what I have made compulsory upon him; and My slave keeps on coming closer to Me by performing Naw\ﬁl." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Ishrāq Ṣalātul Ishrāq is the name of a naﬂ ṣalāh that the Prophet  would perform after sunrise.</p>
+<p>Ṣalātul Ishrāq is best performed ﬁfteen minutes after sunrise, but it is acceptable to perform it anytime between then and just before midday.</p>
+<p>One can perform two rak'āt or four rak'āt for Ishrāq. The Prophet  said, "Whosoever performs the Morning Prayer (Fajr) with jamā'ah then remains seated and makes dhikr until sunrise, thereafter he performs two rak'āt, he will gain a reward similar to performing Ḥajj and 'Umrah." Our Beloved Messenger  said, "A complete (Ḥajj and 'Umrah), complete, complete!" (Tirmidhī)</p>
+<p>Ḍu#\ Another ṣalāh which the our Beloved Messenger Muḥammad  would perform is called Ḍu#\. This would be performed in the second half of the morning, towards midday.</p>
+<p>Nu'aym ibn Hammar  said: "I heard the Messenger  say: 'Allāh, the Exalted, says:</p>
+<p>"O Son of Ādam, do not be weak in performing four rak'āt for Me at the beginning of the day: I will supply what you need till the end of the day."'"</p>
+<p>(Abū Dāwūd) The minimum number of rak'āt of Ḍu#\ is 2 and the maximum is 12.</p>
+<p>Tahajjud Tahajjud is the ṣalāh performed at night after waking up from one's sleep.</p>
+<p>Tahajjud is the most rewarding naﬂ ṣalāh. The Prophet  said regarding Tahajjud:</p>
+<p>"Hold fast to the night prayer, indeed it is the trait of the pious predecessors, it is a means of nearness to your Lord, and it is an expiation for sins and a barrier from sins." (Tirmidhī) The best time to perform tahajjud is in the last portion of the night. However, if one feels that they will be unable to wake up at that time, then they may perform tahajjud after 'ishā' before witr ṣalāh. When half of the night or two thirds are over then Allāh calls out:</p>
+<p>"Is there anyone asking, so that he be given? Is there anyone to make du'ā' so that he be answered? Is there any beggar of forgiveness so that he be forgiven? (And Allāh  continues saying it) until the beginning of day (Fajr time)."</p>
+<p>(Ṣaḥīḥ Muslim)</p>
+<p>Taḥiyyatul Wuḍū'</p>
+<p>'Taḥiyyatul Wuḍū'' refers to the two rak'āt a person is encouraged to perform after doing wuḍū'.</p>
+<p>Abū Hurayrah  narrates that the Messenger said to Bilāl :  "O Bilāl, Tell me of the best deed you did after embracing Islam, for I heard your footsteps in front of me in Paradise." Bilāl  replied, "I did not do anything worth mentioning except that whenever I performed wuḍū' during the day or night that I prayed after that wuḍū' as much ṣalāh as was written for me."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Taḥiyyatul Masjid 'Taḥiyyatul Masjid' refers to the two rak'āt which should be performed upon entering a masjid. This is offered as a means of expressing respect when entering the house of Allāh . The Beloved Messenger Muḥammad said, "Anyone performs wuḍū' and performs it perfectly and then offers two rak'ahs of prayers with devotion, then (entry into) Paradise becomes assured." (Abū Dāwūd)</p>
+<p>One should offer two rak'āt whenever entering the masjid unless it is a time when it is makrūh to perform ṣalāh.</p>
+<p>Breaking the ṣalāh It is compulsory to break one's ṣalāh even if it is a far} ṣalāh if somebody nearby is in desperate need or calls for urgent help. For example, if a person nearby has an epileptic ﬁt, a heart attack or something just as serious, one must break his ṣalāh and help that person. If a person is stealing your belongings or somebody else's belongings whilst you are in ṣalāh, it is wājib to break your ṣalāh and retrieve your belongings.</p>
+</article>
+<article class="topic" id="fiqh-khush--">
+<h3>Khushū'</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-khush--.png" alt="Diagram: Khushū'" loading="lazy"></div>
+<p>Another important point to remember with regard to ṣalāh is Khushū'.</p>
+<p>Khushū' is humility and devotion in ṣalāh.</p>
+<p>Allāh states in the Qur'ān when mentioning the traits of those that shall enter Jannah al-Firdaws.</p>
+<p>"Success is really attained by the believers. Who concentrate their attention in humbleness when offering ṣalāh ….Those are the inheritors. Who will inherit Firdaws (the Paradise). They will be there forever."</p>
+<p>(Qur'ān 23:1-11)</p>
+<p>There are many ways a person can attain Khushū' in ṣalāh. A few are mentioned below:</p>
+<ul><li>Prepare yourself properly for ṣalāh.</li><li>Pray ṣalāh at a measured pace.</li><li>Remember Allāh  throughout your ṣalāh and the</li></ul>
+<p>moments when you will stand before him on the day of Judgement.</p>
+<ul><li>Pause at the end of each verse.</li><li>Recite the verses in a slow and calm manner.</li><li>Vary the sūrahs that are recited.</li><li>Know that Allāh is listening to you and</li></ul>
+<p>responding to your words.</p>
+<p>Some of the things that should be avoided in order to develop Khushū':</p>
+<ul><li>Do not pray ṣalāh when a meal is ready (unless</li></ul>
+<p>ṣalāh time will lapse) as then the focus in your ṣalāh will be the food that is waiting.</p>
+<ul><li>Do not pray ṣalāh when there is a need for</li></ul>
+<p>answering the call of nature.</p>
+<ul><li>Do not pray ṣalāh with clothes that may distract</li></ul>
+<p>yourself and others that are praying.</p>
+<ul><li>Do not pray ṣalāh in a lazy manner.</li><li>Do not ﬁdget.</li></ul>
+</article>
+<article class="topic" id="fiqh-jam--ah--al-h">
+<h3>Jamā'ah Ṣalāh</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-jam--ah--al-h.png" alt="Diagram: Jamā'ah Ṣalāh" loading="lazy"></div>
+<p>Ṣalāh with Jamā'ah is of great importance. To perform ṣalāh with jamā'ah is greatly emphasised for men. A person that leaves ṣalāh with jamā'ah without a valid reason will be sinful. The Prophet said: "A man's ṣalāh in congregation is twenty-ﬁve times more rewarding than his ṣalāh at home or in his shop, and that is because when he performs his wuḍū' properly and proceeds towards the masjid with the purpose of performing ṣalāh in congregation, he does not take a step without being raised a degree (in rank) for it and having a sin remitted for it, till he enters the masjid. When he is performing ṣalāh, the angels continue to invoke the Blessings of Allāh on him as long as he is in his place of worship in a state of wuḍū'. They say: 'O Allāh! Have mercy on him! O Allāh! Forgive him.' He is deemed to be engaged in ṣalāh as long as he waits for it.''</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>'Abdullāh ibn Mas'ūd  reported that the Beloved Prophet  said: "It is more excellent for a woman to pray in her house than in her courtyard, and more excellent for her to pray in the inner part of her house than in that portion of the house where it is open."</p>
+<p>(Abū Dāwūd)</p>
+<p>"By Him in Whose Hand my life is, I sometimes thought of giving orders for ﬁrewood to be collected, then for proclaiming the adhān for ṣalāh. Then I would appoint an imām to lead ṣalāh, and then go to the houses of those who do not come to perform ṣalāh in congregation, and set ﬁre to these houses.'' (Ṣaḥīḥ al-Bukhārī) It is very important to make sure the rows are straight. The Prophet would remind people before ṣalāh to straighten the rows. He would check himself if the rows were straight. The Prophet said, "Make the rows straight and do not differ, lest your hearts differ."</p>
+<p>(Ṣaḥīḥ Muslim)</p>
+</article>
+<article class="topic" id="fiqh-nik--">
+<h3>Nikāḥ</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-nik--.png" alt="Diagram: Nikāḥ" loading="lazy"></div>
+<p>Nikāḥ (marriage) is a great sunnah in Islām. When a man and a woman marry, love, peace and companionship is created between them. The Prophet  equated marriage to half of one's faith. He said: "Whoever marries has completed (by protecting) half of his faith: let him fear violating the other half." (Ṭabarān|)</p>
+<p>The purpose of marriage A Muslim should marry because:</p>
+<p>1)Marriage is a form of worshipping Allāh .</p>
+<p>2)It is the sunnah (way) of the Prophets .</p>
+<p>3)A human being naturally needs to marry.</p>
+<p>4)Marriage is a means of having children.</p>
+<p>5)Marriage is a source of happiness.</p>
+<p>6)Marriage will protect you from many sins.</p>
+<p>7)Marriage gives you a partner to protect you and help you.</p>
+<p>What qualities to look for in a spouse? The Prophet  said: "Women are (usually) married for four reasons: for their wealth, ancestry, beauty and piety. Marry the pious one and you will be successful." (Ṣahīh al-Bukhārī) From all the different qualities in a person, piety is the most desirable quality. A pious spouse will respect you, listen to you, help you, fear Allāh when in a disagreement with you, will not oppress you and will try their best to fulﬁl your rights. A pious person will try their best to  cultivate good character. This is because they fear the displeasure of Allāh . That same person will be truthful, honest and trustworthy. These are the greatest qualities you need in a husband or wife.</p>
+<p>Beauty and handsomeness should also be thought of when accepting a proposal. It is important one is attracted to one's spouse to help protect one's gaze.</p>
+<p>Ad'iyah (supplications) for ﬁnding the right spouse "Our Lord, give us good in this world and good in the Hereafter, and save us from the punishment of Fire." (Qur'ān 2:201)</p>
+<p>"O My Lord! I am in need of whatever good you send down to me." (Qur'ān 28:24)</p>
+<p>"Our Lord, grant us from our spouses and children comfort to our eyes and make us a leader for the righteous." (Qur'ān 25:74)</p>
+<p>Before Marriage It is ḥarām (totally impermissible) to have any relationship before marriage. Even after a couple are engaged, it is not permissible for them to have contact with one another. Before marrying a person, it is permissible to see them. This should be done in the most modest and appropriate manner.</p>
+<p>Who can't I marry?</p>
+<p>There are certain people one cannot marry. They are known as maḥram (plural ma#ārim). They consist of the following:</p>
+<p>Forbidden forever due to blood relations:</p>
+<ul><li>Parents, grandparents</li><li>Children, grandchildren</li><li>Brothers, sisters</li><li>Father's brothers or sisters</li><li>Mother's brothers or sisters</li><li>Nephews and nieces</li></ul>
+<p>Permanently forbidden due to marriage</p>
+<ul><li>Parents of spouse</li><li>Spouse of one's children</li><li>Step-parents</li><li>Step-children if your marriage is consummated</li></ul>
+<p>Permanently forbidden due to foster relations</p>
+<ul><li>A woman who breastfed you before the age of two.</li><li>The husband of the woman who breastfed you</li></ul>
+<p>before the age of two.</p>
+<ul><li>Anybody who was breastfed by the same woman</li></ul>
+<p>before the age of two.</p>
+<ul><li>Any person which your wife breastfed before the age of</li></ul>
+<p>two.</p>
+<ul><li>Those who are forbidden due to blood relations will be</li></ul>
+<p>forbidden through foster relations too.</p>
+<p>Offer and Acceptance + Witnesses = Nikāḥ A nikāḥ is simply done with a valid offer and acceptance in the presence of witnesses. The offer is known as |jāb. The acceptance is known as qabūl. The |jāb and qabūl must be verbal, said in the past or present tense and must take place in the same gathering.</p>
+<p>There must be at least two male witnesses or one male and two female witnesses who are:</p>
+<p>1)Muslim 2) Mature 3) Sane If the above is found, nikāḥ will take place.</p>
+<p>Note: A person may be represented if they are unable to attend the gathering of nika# in-person. This representation is known as wakālah.</p>
+<p>Mahr (Dower) When getting married, it is necessary for the groom to give mahr to the bride.</p>
+<p>Mahr is wājib so that the husband appreciates his wife. It is not necessary to give the mahr at the time of nikāḥ. If there is mutual agreement, the mahr can even be deferred until after the marriage ceremony.</p>
+<p>Anything of monetary value can be given as mahr. It is not necessary to give cash only.</p>
+<p>However, the amount of mahr must be mutually agreed between the bride and groom. The mahr is solely the property of the wife. She may do with it as she pleases.</p>
+<p>Different types of Mahr Although one may give any amount above the minimum, there are certain famous amounts of mahr.</p>
+<p>Minimum Mahr The minimum amount of mahr is the value of 10 dirhams (30.618 grams of silver).</p>
+<p>Mahr azwāj an-Nab| The Prophet  commonly gave 500 dirhams (1530.9 grams of silver).</p>
+<p>Mahr F\ṭim| This is the amount of mahr given by 'Al| to Fāṭimah  upon their marriage.</p>
+<p>Although there is a difference of opinion on the precise amount, many scholars state that this was 480 dirhams (1469.66 grams of silver).</p>
+<p>The recommended method of nikāḥ 1)To have the nikāḥ ceremony on a Friday.</p>
+<p>2)To have the nikāḥ ceremony in the masjid.</p>
+<p>3)Scholars and the pious should be invited.</p>
+<p>4)Have the nikāḥ performed by a pious person.</p>
+<p>5)To give a feast after the nikāḥ is consummated is sunnah. The feast is called 'walīmah'.</p>
+<p>Du'ā' when greeting the bride or groom:َََُٰ</p>
+<p class="arabic" dir="rtl" lang="ar">ريخ يف امكنيب عمجو ،كيلع كرابو ،كل هللا كراب</p>
+<p>"May Allāh bless you and have His blessing descend upon you and unite you both in goodness." (Abū Dāwūd)</p>
+</article>
+<article class="topic" id="fiqh--al-q">
+<h3>Ṭalāq</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh--al-q.png" alt="Diagram: Ṭalāq" loading="lazy"></div>
+<p>FiqhFiqh Everybody has ups and downs. Brothers and sisters have good days and bad days together. Likewise, a husband and wife may experience some good days and some bad days.</p>
+<p>Anytime you experience anger in your marriage, extinguish the anger by:</p>
+<ul><li>Drinking a glass of water</li><li>Changing your position to a lower state: If you</li></ul>
+<p>are standing, sit down. If you are sitting, lie down.</p>
+<ul><li>Recite Ta'awwudh</li></ul>
+<p>FiqhFiqh The Qur'ān has given us clear guidance on how to resolve a difference.</p>
+<p>1)Discuss the fear of Allāh and accountability in the court of Allāh for wrongdoings.</p>
+<p>2)If the above does not solve the problem, temporarily separate from each other. Give each other space to cool down and think things over. Sleep in separate rooms and give each other time.</p>
+<p>3)Relatives or senior people known to both husband and wife could be called upon to help resolve the differences.</p>
+<p>If all avenues and efforts to resolve the dispute between husband and wife have been exhausted, yet irreconcilable differences remain, Islām has given a way to terminate the marriage. This is known as ṭalāq (divorce).</p>
+<p>Different types of Ṭalāq There are two types of Ṭalāq:</p>
+<p>1)Ṭalāq Raj'| (revocable divorce)</p>
+<p>2)Ṭalāq Bā'in (irrevocable divorce)</p>
+<p>Ṭalāq Raj'| (Revocable divorce) This refers to a ṭalāq where a husband and wife can get back together later on.</p>
+<p>Ṭalāq raj'| will take place when the husband says:"I give you ṭalāq." If the husband says it once, one ṭalāq raj'| will occur. If the husband says it twice, two ṭalāq raj'| will occur.</p>
+<p>Once a husband gives one ṭalāq, he will only have two left. If he were to give two ṭalāqs, he would only have one left. If he gives three ṭalāqs, he will not be allowed to return to his wife thereafter. If by chance she gets married to another person and then gets divorced, she may re-marry her ﬁrst husband after the waiting period (iddah) is over.</p>
+<p>After a ṭalāq raj'|, if the 'iddah (waiting period) has not ended then a new marriage is not required to get back together. Simply making up and getting back together is sufﬁcient within the 'iddah.</p>
+<p>Ṭalāq will occur when a person says to his wife that he is giving her ṭalāq. If he says this when angry, then ṭalāq will still take place. The intention does not make a difference either. If a man were to say "I give you ṭalāq" to his wife thinking simply to scare or threaten her, then ṭalāq would still take place. Even by writing "I divorce my wife," ṭalāq will take place. Ṭalāq will occur regardless of it being written or spoken.</p>
+<p>Different number of Ṭalāq If a husband says to his wife "I give you ṭalāq," this will result in one ṭalāq raj'|. If a husband says, "I give you ṭalāq, ṭalāq," This will be regarded as two ṭalāq raj'|.</p>
+<p>Ṭalāq Bā'in (Irrevocable divorce) This refers to a ṭalāq where-after a person will have to perform a new nikāḥ with his wife in order to be with her again.</p>
+<p>Ṭalāq Bā'in will take place when a husband intends to give ṭalāq with words which have a meaning of ṭalāq or are used to give ṭalāq. For example, if the husband says to the wife, "It's over," intending to give ṭalāq, one ṭalāq bā'in will take place. If the husband says it twice, two Ṭalāq Bā'in will take place. If he gives three Ṭalāq Bā'in, he will not be allowed to return thereafter. If by chance she gets married to another person and then gets divorced, she may re-marry her ﬁrst husband after the waiting period (iddah) is over.</p>
+<p>'Iddah (Waiting period) A woman has been ordained to observe 'iddah after a divorce or upon the demise of her husband. In the waiting period, a woman is not permitted to marry anyone besides the husband who gave her ṭalāq bā'in. After the 'iddah is complete, she is free to marry whomever she wishes. A woman must abstain from the following during 'iddah:</p>
+<p>1)Going out of the house without necessity.</p>
+<p>2)Wearing cosmetics.</p>
+<p>3)Dressing up in an appealing manner. The duration of the 'iddah is three menstrual cycles. If a woman is not menstruating, then she will observe 'iddah for 90 days (3 months). The 'iddah of pregnant woman is until she gives birth. In the scenario of the husband passing away, the wife will have to observe 'iddah for 4 months and 10 days (130 days). The woman will spend the 'iddah at her house and the husband will be responsible for all her needs during the 'iddah.</p>
+</article>
+<article class="topic" id="fiqh-buy--">
+<h3>Buyū'</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-buy--.png" alt="Diagram: Buyū'" loading="lazy"></div>
+<p>"The truthful merchant is rewarded by being ranked on the Day of Resurrection with the prophets, the truthful elite and the martyrs." (Tirmidhī)</p>
+<p>There are some conditions which must be present at the time of buying and selling items:</p>
+<p>1)The product must be ḥalāl. It is not permissible to sell ḥarām items. For example, it is not permissible to sell alcohol, stolen goods, pork etc.</p>
+<p>2)The price and the item for sale must be clearly speciﬁed at the time of the transaction.</p>
+<p>3)There should not be any ambiguity in any aspect of the transaction. For example, at the time of selling a mobile phone, the make, model, condition and colour should all be clearly advertised and described to a customer.</p>
+<p>4)The transaction should be unconditional. For example, Mūsā sells a watch to Idrīs on the condition that Idrīs gives Mūsā the watch to wear once a week. This will not be permissible.</p>
+</article>
+<article class="topic" id="fiqh-ij-rah">
+<h3>Ijārah</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-ij-rah.png" alt="Diagram: Ijārah" loading="lazy"></div>
+<p>"O you who believe, when you transact a debt payable at a speciﬁed time, put it in writing..."</p>
+<p>(Qur'ān 2:282)</p>
+<p>Allāh teaches us to write things down when we conduct any transaction to avoid any confusion and misunderstanding between the two parties.</p>
+<p>Remember the Arabic proverb:</p>
+<p>"Live like brothers and deal like strangers."</p>
+<p>Ijārah refers to employment and leasing.</p>
+<p>'Ā'ishah  reports that the Prophet said:</p>
+<p>"Verily Allāh loves perfection in one's work."</p>
+<p>(Abū Ya'l\)</p>
+<p>Keeping the above ḥadīth in mind, when you work for somebody, do your best to fulﬁl your duties in the best possible manner.</p>
+<p>Before taking any job or employing someone, the following must be clearly agreed:</p>
+<p>1)Job description 2)Hours and days of work 3)Contract length 4)Wages 5)Date of payment of wages 6)Holidays Ijārah also refers to renting. When renting or hiring anything, it is important that the following is clear:</p>
+<p>1)The item which will be rented.</p>
+<p>2)The rent a person has to pay.</p>
+<p>3)The duration for which rent is payable.</p>
+<p>4)The contract length.</p>
+</article>
+<article class="topic" id="fiqh-rib-">
+<h3>Ribā</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-rib-.png" alt="Diagram: Ribā" loading="lazy"></div>
+<p>Ribā means interest.</p>
+<p>Interest is charging money for giving someone a loan.</p>
+<p>ĪFor example, if Yūsuf wanted a loan of 10,000, the bank only gives it to him on condition that Yūsuf ĪĪpays back 12,000. The extra 2,000 is interest and is ḥarām to give and take. Through interest, the rich become richer and the poor become poorer.</p>
+<p>Allāh  states in the Qur'ān:</p>
+<p>"Those who consume interest shall not stand up on the Day of Resurrection except like him who Shayṭān has driven mad by his touch. That is because they say: "Trade is just like interest." But Allāh has permitted trade and has forbidden interest. So whoever has received an admonition from his Lord and desists may have that (amount) which has passed, and his affair rests with Allāh. But whoever returns to dealing in interest - they are the companions of the Fire; they will abide eternally therein." (Qur'ān 2:275)</p>
+<p>In another verse, Allāh  states:</p>
+<p>"Allāh destroys interest and increases charity. And Allāh does not like every sinning disbeliever."</p>
+<p>(Qur'ān 2:276) A question arises that by giving charity one's wealth decreases and by receiving interest, one's wealth Īseems to increase. For example, Zayd had 100, ĪĪhe gave 20 in charity, so he is now left with 80.</p>
+<p>ĪĪĀdam also had a 100, he received 20 in interest, Īso he now has a balance of 120. So then what does this verse mean?</p>
+<p>What is meant by 'destroys interest' is that Allāh  deprives the money generated by interest of all blessings. Despite owning hundreds and thousands, his needs will not be fulﬁlled. He will be forced to pay where he doesn't desire to do so. On top of that, the calamities of this world will be let loose upon him. Most terrifying of all is the punishment that awaits him in the Hereafter.</p>
+<p>With regards to charity, Allāh  showers His blessing on the one who spends in charity. Thus with little provision and means, Allāh will fulﬁl all his needs. In addition to that, Allāh  will avert from him the calamities of this world. Finally, and most importantly, the charity will be a means of salvation in the Hereafter. In another verse, Allāh  announces, "O you, who have believed, fear Allāh and give up what remains due to you of interest, if you are believers. And if you do not, then be warned of war against you from Allāh and His Messenger. But if you repent, you may have your principal amount - thus oppress not and you shall not be oppressed."</p>
+<p>(Qur'ān 2:278-279)</p>
+<p>Jābir  narrates that the Beloved Messenger Muḥammad  said, "Cursed is the receiver of interest, the payer of interest, the one who records it and the two witnesses to the transaction and said: "They are all alike in guilt." (Ṣaḥīḥ Muslim)</p>
+<p>Therefore, dealing in interest, charging interest, giving interest: are all Ḥarām.</p>
+</article>
+<article class="topic" id="fiqh-gambling">
+<h3>Gambling</h3>
+<div class="diagram"><img src="images/Coursebook8-fiqh-gambling.png" alt="Diagram: Gambling" loading="lazy"></div>
+<p>"O you who believe! Eat of the lawful things that We have provided you." (Qur'ān 2:172)</p>
+<p>"O those who believe, verily wine, gambling, altar- stones and divining arrows are ﬁlth, a work of Shayṭān.</p>
+<p>Therefore, refrain from it, so that you may be successful. The Shayṭān wants nothing but to plant enmity and malice between you through wine and gambling, and to prevent you from the remembrance of Allāh and from the ṣalāh. Would you, then, abstain?" (Qur'ān 5:90-91)</p>
+<p>Gambling, betting, lotteries and similar activities are all ḥarām. Many people become addicted to such activities which in turn causes great harm in this world as well as the hereafter. Many people have become bankrupt through an addiction to gambling.</p>
+<p>Any money gained through such activities will be classed as ḥarām and hence the food purchased with such money will also be ḥarām. Our Beloved Messenger Muḥammad mentioned a man who, having journeyed far, is disheveled and dusty, who spreads out his hands to the sky saying “O Lord!</p>
+<p>O Lord!,” while his food is ḥarām, his drink is ḥarām, his clothing is ḥarām, and he has been nourished with ḥarām, so how can his supplication be answered?</p>
+<p>(Ṣaḥīḥ Muslim)</p>
+<p>The Different Schools of Fiqh Fiqh is the deduction and codiﬁcation of the laws of the Qur'ān and a#ādīth. A person who follows rulings mentioned in the books of Fiqh is in reality following the Qur'ān and a#ādīth as those very rulings have been juristically deduced from the Qur'ān and a#ādīth. The scholars who codiﬁed Fiqh were known as Mujtahidūn. They were expert jurists who had mastered all the various sciences related to the Arabic language, Qur'ān, Aḥādīth and Fiqh.</p>
+<p>There were many such scholars in the ﬁrst three hundred years of Islām. They codiﬁed the laws of the Qur'ān and Aḥādīth to the best of their ability.</p>
+<p>Each mujtahid (master jurist) exercised his insight, understanding and juristic skills to deduce various laws from the Qur'ān and Aḥādīth. This obviously resulted in differences from jurist to jurist.</p>
+<p>The Different Schools of Fiqh The four most famous jurists were:</p>
+<p>1)Imām Abū Ḥanīfah (80AH-150AH)</p>
+<p>Imām Abū Ḥanīfah  was born in 80 AH in Kūfa, Iraq. He was a Tābi'| (someone who has met a Ṣa#āb|) as he had met Anas . He was a merchant and thereafter devoted his time in the pursuit of knowledge. His main teacher was Ḥammād . He studied under him for nearly two decades. After the demise of his teacher, Imām Abū Ḥanīfah  was appointed as the head lecturer. For approximately thirty years, he lectured and had great scholars under his tutelage with whom he established the Ḥanaf| school of Fiqh. His most famous students were Imām Abū Yūsuf  and Imām Muḥammad .</p>
+<p>The Different Schools of Fiqh 2)Imām Mālik ibn Anas (93AH-179AH)</p>
+<p>Imām Mālik  was born in Madīnah and lived there for his entire life. At a very young age, he memorised the Qur'ān and studied under the great scholar Imām N\ﬁ' . He also studied under another great scholar Ibn Hurmuz  for some time.</p>
+<p>Imām Mālik  began to lecture and teach in Masjid an-Nabaw| only after seventy scholars of Madīnah testiﬁed to his capability. He was extremely respectful of the ḥadīth of our Beloved Messenger . He would apply perfume, wear nice clothing and sit humbly in his place out of respect for the words of our Beloved Messenger Muḥammad . His most famous work was al-Muwa{ṭa', one of the earliest compilations of Ḥadīth. After his demise, he was buried in the famous graveyard in Madīnah, Jannatul Baq|'.</p>
+<p>The Different Schools of Fiqh 3)Imām Sh\ﬁ'| (150AH-204AH) His name was Muḥammad ibn Idrīs ash-Sh\ﬁ'| . He was born in 150 AH in Gaza, Palestine. At an early age he moved to Makkah with his mother after the demise of his father. He studied under many great scholars in Makkah. He later went to Madīnah and studied under the great Imām Mālik . It is stated that Imām Sh\ﬁ'|  memorised the Qur'ān at the age of seven and the whole of Imām Mālik 's famous books al-Muwa{ṭa' at the tender age of ten. He also studied under Imām Muḥammad .</p>
+<p>Imām Sh\ﬁ'|  went on to complete further studies in Baghdad. He later moved to Egypt. His famous students were al-Muzan| and Imām Aḥmad ibn Ḥanbal .</p>
+<p>The Different Schools of Fiqh 4)Imām Aḥmad ibn Ḥanbal (164AH-241AH)</p>
+<p>Imām Aḥmad  was born in Baghdad. He began his studies in Baghdad. Thereafter, he travelled to the different parts of the Islamic Empire in search of knowledge. He further studied under Imām Sh\ﬁ'| .</p>
+<p>Imām Aḥmad  became a renowned lecturer of the Islamic sciences. He passed away on a Friday in Baghdad and was buried there.</p>
+<p>The Different Schools of Fiqh These four great scholars codiﬁed the laws of the Qur'ān and Aḥādīth along with their students and they became widely accepted across the whole Muslim world. They laid the foundations to the Madhāhib (schools) of Fiqh. Hence, the founder of the Ḥanaf| madh'hab (school) is Imām Abū Ḥanīfah  and his students. The founder of the Sh\ﬁ'| madh'hab is Imām Sh\ﬁ'|  and his students. And so on and so forth.</p>
+<p>Since then, for over a thousand years, the dīn of Islām has been blessed by a great many scholars. They each practised and complemented one of these four schools. In codifying the laws of the Qur'ān and Ahādīth for all those who came after, the four great jurists and their schools have made practising Islām easier for the Muslims.</p>
+<p>Hence, if you see people performing ṣalāh differently to you, do not get confused! They are following a different school of Fiqh.</p>
+<p>References from Ḥadīth for the Ḥanaf| School of Fiqh Ḥanaf| evidences for ṣalāh 1)Reading du'ā' al-istiftāḥ When the Prophet  started to pray he would say: "Glory and praise be to You, O Allāh. Blessed be Your name and exalted be Your majesty, there is none worthy of worship except You."</p>
+<p>(Sunan an-Nasa'|)</p>
+<p>References from Ḥadīth for the Ḥanaf| School of Fiqh 2)Hands below the navel 'Al| said, "It is a sunnah to place one hand on the other in prayer below the navel." (Abū Dāwūd)</p>
+<p>3)Reciting Bismillāh quietly</p>
+<p class="arabic" dir="rtl" lang="ar">ميحرلا نمحرلا هللا مسبب{ رهجي مهنم ادحأ عمسأ ملفِِِ</p>
+<p>Anas  said: "I prayed behind the Beloved Messenger , Abū Bakr, 'Umar and 'Uthmān , and I did not hear any of them say out loud 'Bismillah'." (Sunan an-Nasa'|)</p>
+<p>References from Ḥadīth for the Ḥanaf| School of Fiqh 4)Remain quiet behind the Imām "When the imām recites, remain quiet." (Aḥmad)</p>
+<p>5)Reciting āmīn quietly</p>
+<p class="arabic" dir="rtl" lang="ar">لاقف )نيلآضلا الو مهيلع بوضغملا ريغ(أرقِِ هتوص اهب ضفخو "نيمآ "ِ</p>
+<p>"He  recited  and then said āmīn softly." (Tirmidhī)</p>
+<p>References from Ḥadīth for the Ḥanaf| School of Fiqh 6)Not raising the hands when going into rukū'</p>
+<p>"The Prophet  did not raise his hands except in the beginning." (Tirmidhī)</p>
+<p>7)Gesturing with index ﬁnger</p>
+<p class="arabic" dir="rtl" lang="ar">اهكرحي الو ،اعد اذإ هعبصأب ريشي ناكِِِ</p>
+<p>"The Prophet  would point with his ﬁnger when he supplicated and he did not move it around." (Sunan an-Nasa'|)</p>
+</article>
+</section>
+
+<section class="subject" id="a--d-th">
+<h2>Aḥādīth</h2>
+<article class="topic" id="a--d-th-clean-heart">
+<h3>Clean Heart</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-clean-heart.png" alt="Diagram: Clean Heart" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">نمنم كلذو ينب اي   لاق مث لعفاف دحالِبحأ و ، يتنس ِِ نمةنجلا يف يعم ناك ينبحأ و ، ينبحأ دقف يتنس</p>
+<p>Anas  relates "Allāh's Messenger  said to me, 'O my son, if you can spend each morning and evening with a heart free of hatred or deception against anyone, then do so.' Then he  said 'My dear son, this is my practice (sunnah) and whoever loves my sunnah loves me and whoever loves me will be with me in Jannah.'" (Tirmidhī)</p>
+<p>Disliked Actions</p>
+<p class="arabic" dir="rtl" lang="ar">نعلاق ، هنع هللا يضر ةريره يبأ ِ ملسو هيلع هللا ىلص  هللا لوسر لاقAḥādīthِِ</p>
+<p>Abū Hurayrah  narrates that the Beloved Messenger Muḥammad  said: "Allāh is displeased with three things: meaningless chatter, wasting money, and asking too many questions." (Ṣaḥīḥ Muslim)</p>
+</article>
+<article class="topic" id="a--d-th--adaqah">
+<h3>Ṣadaqah</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th--adaqah.png" alt="Diagram: Ṣadaqah" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">نم،نالزني ناكلم الإ ،هيف دابعلا حبصي موي ِ ام لوقيو ،افلخ اقفنم طعأ مهللا  امهدحأ لوقيفِِ</p>
+<p>Abū Hurayrah  narrates that the Beloved Messenger Muḥammad  said: "Every morning at dawn, two angels descend and one of them says, 'O Allāh, give more to the person who spends in charity!' while the other one says, 'O Allāh, destroy the wealth of the one who withholds his wealth from giving in charity!'" (Ṣaḥīḥ al-Bukhārī)</p>
+</article>
+<article class="topic" id="a--d-th-sal-m">
+<h3>Salām</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-sal-m.png" alt="Diagram: Salām" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">لاق ، هنع هللا يضر كلام ٍِِ ملسو هيلع هللا ىلص هللا لوسر يل لاقِِAḥādīth</p>
+<p>Anas ibn Mālik narrates that the Beloved Messenger Muḥammad  said to me: "O my dear son, whenever you enter a home greet your family members by saying: 'Assalāmu 'alaykum,': it will be a blessing for you and the people of your household."</p>
+<p>(Tirmidhī)</p>
+</article>
+<article class="topic" id="a--d-th-rights-of-a-muslim">
+<h3>Rights of a Muslim</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-rights-of-a-muslim.png" alt="Diagram: Rights of a Muslim" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">،عبسب ملسو هيلع هللا ىلص هللا لوسر انرمأِِ مسقملا راربإو ، مولظملا رصنو مالسلا در و  يعادلا ةباجإ وِِِِِ</p>
+<p>Barā' ibn 'Āzib  narrates: "The Beloved Messenger instructed us upon seven things: to visit the sick; to follow funeral processions; to pray for Allāh's mercy for someone who sneezes (by saying Yarḥamukallāh); to accept invitations, to return greetings; to help those who are wronged; and to help others fulﬁl their oaths."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Status of a Mu'min</p>
+<p class="arabic" dir="rtl" lang="ar">نعلاق ، هنع هللا يضر بيهص ِ</p>
+<p>ََُْْAḥādīthَ</p>
+<p class="arabic" dir="rtl" lang="ar">نمنمِؤملل الإ دحأل كاذ سيلو ،ريخ هلهلك هرمأ نإ ،ِؤملا رمأل ابجعِ هل اريخ ناكف ،ركش ءارس هتباصأ نإ هل اريخ ناكف ،ربص ءارض هتباصأ نإو</p>
+<p>Ṣuhayb  narrates that the Messenger said: "How wonderful is the situation of a believer:</p>
+<p>Everything is good for him, and this is true only for a believer. For if he encounters good, he is grateful to Allāh and that is good for him; and if he is afﬂicted with hardship, he is patient and that is good for him." (Ṣaḥīḥ Muslim)</p>
+</article>
+<article class="topic" id="a--d-th-reward-of-patience">
+<h3>Reward of Patience</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-reward-of-patience.png" alt="Diagram: Reward of Patience" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">نإ لاق ،ملسو هيلع هللا ىلص يبنلا ِ ،مهالتبا اموق بحأ اذإ هللا نإو ، ءالبلا مظع عم ءازجلا مظعِِِِ نمطخسلا هلف طخس و ،اضرلا هلف يضر نمفِ</p>
+<p>Anas  narrates that the Messenger  said:</p>
+<p>"Great rewards are given for great trials, and when Allāh loves a people, He tests them. Whoever accepts the trial cheerfully earns His good pleasure, and whoever resents it earns His wrath." (Tirmidhī)</p>
+<p>Forgiving Others َُُّّAḥādīthَََُْ Abud Dardā'  narrates that I heard the Messenger  saying: "Whoever suffers an injury done to him and forgives (the person responsible), Allāh will raise his status to a higher degree and remove one of his sins."</p>
+<p>(Tirmidhī)</p>
+</article>
+<article class="topic" id="a--d-th-true-wealth">
+<h3>True Wealth</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-true-wealth.png" alt="Diagram: True Wealth" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">نعنع ، هنع هللا يضر ةريره يبأ ِ نعسفنلا ىنغ ىنغلا نكلو ،ضرعلا ةرثك  ىنغلا سيل   لاق</p>
+<p>Abū Hurayrah  narrates that the Messenger said: "Wealth is not in having great riches: (true) wealth is contentment of the soul." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Islām is Easy</p>
+<p class="arabic" dir="rtl" lang="ar">نعAḥādīthلاق ملسو هيلع هللا ىلص يبنلا ِ نينلنيهبلغ الإ دحأ دلا داشي و ،رسي دلا نإ ةودغلاب اونيعتساو ،اورشبأو اوبراقو اوددسفِِ</p>
+<p>Abū Hurayrah  narrates that the Messenger said: "The religion of Islām is easy. No one ever made it difﬁcult without it becoming too much for him. So avoid extremes and strike a balance; do the best you can (in carrying out your religious observations) and receive the glad tidings (that you will be rewarded) and seek Allāh's help (through prayer) in the morning and evening and part of the night."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+</article>
+<article class="topic" id="a--d-th-sweetness-of--m-n">
+<h3>Sweetness of Īmān</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-sweetness-of--m-n.png" alt="Diagram: Sweetness of Īmān" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">يف دوعي نأ هركي نأو ،هلل الإ هبحي ال ءرملا بحي نأوِِِِ</p>
+<p>Anas ibn Mālik  narrates that the Messenger said: "Whoever has three qualities will taste the sweetness of īmān: To love Allāh and His Messenger more than anything else; to love someone for Allāh's sake alone, and to hate to return to unbelief just as much as one would hate to be thrown into the Fire."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Ṣalāh</p>
+<p class="arabic" dir="rtl" lang="ar">لوقي ملسو هيلع هللا ىلص هللا لوسر تعمسِAḥādīthِِ حجنأو حلفأ دقف تحلص نإف ،هتالص</p>
+<p>Abū Hurayrah  narrates that the Beloved Messenger  said: "The ﬁrst deed that a person will be called to account for on the Day of Judgement will be his prayers. If they are in order he will be successful and prosper, but if they are not then he will be ruined and lost." (Tirmidhī)</p>
+</article>
+<article class="topic" id="a--d-th-closeness-to-all-h">
+<h3>Closeness to Allāh</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-closeness-to-all-h.png" alt="Diagram: Closeness to Allāh" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">نعلاق ،هنع هللا يضر ةريره يبأ ِ نظ دنع انأهتركذ هسفن يف ينركذ نإف ،ينركذ اذإ هعم انأو ،يب يدبع ِ يلإ برقت نإو ،مهنم ريخ إلم يف هتركذ إلم يف ينركذ نإو ،يسفن يفِ نإو ،اعاب هيلإ تبرقت اعارذ يلإ برقت نإو ،اعارذ هيلإ تبرقت ربشبِِِِِ</p>
+<p>Abū Hurayrah  narrates that the Beloved Messenger  said that Allāh says: "I am as My servant thinks I am. I am with him when he mentions Me. If he makes mention of Me to himself, I make mention of him to Myself. And if he makes mention of Me in an assembly, I make mention of him in an assembly that is better. And if he comes one span nearer to Me, I go one arm's length nearer to him; and if he draws near to Me an arm's length, I go a distance of two outstretched arms nearer to him. And if he comes to Me walking, I go to him running."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Power of Allāh َAḥādīthًََََُُْْ</p>
+<p class="arabic" dir="rtl" lang="ar">تاملك كملعأ ينإ ، مالغ اي  لاقف اموي ملسو هيلعٍِِِ هللا لأساف تلأس اذإ ، كهاجت هدجت هللا ظفحا ، كظفحي هللا ظفحاِِِِ ىلع تعمتجا ول ةمألا نأ ملعاو ، هللاب نعتساف تنعتسا اذإوِِ ولو ، كل هللا هبتك دق ءٍيشب الإ كوعفني مل ، ءٍيشب كوـعفني نأ هللا هبتك دق ءيشب الإ كورضي مل ، ءيشب كورضي نأ ىلع اوعمتجاٍٍ فحصلا تفجو مالقألا تعفر ،كيلعِِِ</p>
+<p>Ibn 'Abbās  says: "One day I was behind the Beloved Messenger  (riding on the same mount) and he said:</p>
+<p>'O young man, I shall teach you some words of advice:</p>
+<p>"Be mindful of Allāh and Allāh will protect you. "Be mindful of Allāh and you will ﬁnd Him in front of you. If you ask, then ask Allāh (alone). And if you seek help, then seek help from Allāh (alone). And know that if the nation were to gather together to beneﬁt you with anything, they would not beneﬁt you except with what Allāh had already prescribed for you. And if they were to gather together to harm you with anything, they would not harm you except with what Allāh had already prescribed against you. The pens have been lifted and the pages have dried.'" (Tirmidhī)</p>
+</article>
+<article class="topic" id="a--d-th-being-self-suf-cient">
+<h3>Being Self-Sufﬁcient</h3>
+<div class="diagram"><img src="images/Coursebook8-a--d-th-being-self-suf-cient.png" alt="Diagram: Being Self-Sufﬁcient" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">نعلاق ،ملسو هيلع هللا ىلص هللا لوسر ِ نمنم لكأي نأ ِ اريخ ،طق اماعط دحأ لكأ ام مالسلا هيلع دواد هللا يبن نإو ،هديِِِ</p>
+<p>Miqdām  narrates that the Beloved Messenger  said: "No one eats better food than what he earns with his own hands. The Prophet Dāwūd  used to eat from what he earned by the work of his own hands." (Ṣaḥīḥ al-Bukhārī)</p>
+</article>
+</section>
+
+<section class="subject" id="s-rah">
+<h2>Sīrah</h2>
+<article class="topic" id="s-rah-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>Describe the Beloved Prophet     ’s exceptional character and the simplistic life he lived.</p>
+<p>Outline the background and lifestyle of ‘Uthmān relating to his characteristics and his accomplishments.</p>
+<p>Recall the persecution faced by ‘Uthmān         and his subsequent migration to Abyssinia.</p>
+<p>Explain the campaigns that ‘Uthmān         took part in and the advice given to ‘Uthmān    before he became khalīfah.</p>
+<p>Summarise the background of ‘Al|     and how he accepted Islām.</p>
+<p>Tell the story of how ‘Al|       assisted the Beloved Prophet    on the night of hijrah.</p>
+<p>Explain how ‘Al|   restored law and order between the people after the demise of ‘Uthmān       .</p>
+<p>Come to a conclusion about the battle of Ṣiffīn and how it led to the martyrdom of ‘Al|    .</p>
+</article>
+<article class="topic" id="s-rah-sham--il">
+<h3>Shamā'il</h3>
+<div class="diagram"><img src="images/Coursebook8-s-rah-sham--il.png" alt="Diagram: Shamā'il" loading="lazy"></div>
+<p>'And you are surely on an excellent standard of character' (Qur'ān 68:4) Our Beloved Messenger Muḥammad  had the best manners and character. We can see some examples from his noble life. His consideration Once a bird came ﬂapping over the blessed head of the Prophet . On seeing the bird ﬂap its wings frantically, the Prophet  asked his Ṣa#ābah if any one of them had taken an egg from this bird's nest. One Ṣa#āb| replied he had taken an egg.  The Prophet  ordered that the egg be returned, out of compassion for the bird.</p>
+<p>His gentleness Anas  said: 'While we were in the masjid with our Beloved Messenger Muḥammad , a desert Arab came and began to urinate inside the masjid. The Ṣa#ābah said, "Stop! Stop!" but our Beloved Messenger said, "Don't interrupt him. Leave him alone." They left him alone, and when he had ﬁnished, the Messenger  called him and said to him, "These masājid are not suitable places for urine and ﬁlth, but are only for remembrance of Allāh , prayer and recitation of the Qur'ān,"' Anas  said that he then instructed one of the people who brought a bucket and poured water over it.</p>
+<p>Anas  narrated: 'I served the Messenger for ten years. He never once said, "uff" (a word to show displeasure similar to 'humph') to me. And he did not say about anything that I did, "Why did you do it?" and about that which I neglected, "Why did you neglect it?" He possessed the best of manners amongst people. And, I never touched any cloth, silk or anything softer than his hands and I never smelt musk or perfume more fragrant than his sweat.' This was how kind the Prophet  was.</p>
+<p>His tolerance Once the Prophet  was walking when a villager approached him and roughly pulled his clothes. He pulled the clothes of the Prophet  in such a manner that it left marks on his blessed skin. He asked the Prophet  for money. The Prophet smiled and ordered that money be given to him. He was the bravest of men One night, a very loud sound reverberated around the outskirts of Madīnah. The people of Madīnah felt disturbed and set forth in the direction. On the way to the source of the sound, they bumped into our Beloved Messenger . He was on the horse of Abū Ṭalḥa  which had no saddle over it, and a sword was slung around his neck. He assured everyone that there was nothing to be afraid of.</p>
+<p>His humility Our Beloved Messenger Muḥammad  was the most humble of people. He would accept the invitation of slaves. He would personally go to visit the sick people and ride on a donkey.</p>
+<p>'Ā'ishah  reports that whenever the people he knew called the Prophet , he would immediately respond with 'Labbayk' (I am at your service).</p>
+<p>Despite having the greatest responsibility in prophethood, he would still serve his family and friends more than anybody. He was never arrogant or so busy in his personal affairs that he became unmindful of others.</p>
+<p>His loyalty and adherence to promises In the sixth year of Hijrah, when the Muslims signed a peace treaty at Hudaybiyah with the Quraysh, Muslims who were stuck in Makkah escaped to Madīnah. Under the agreement the Prophet  had made with the Quraysh, he was not allowed to shelter these Muslim fugitives. Even though they faced persecution in Makkah, the Prophet insisted that they return, so that the treaty could be respected.</p>
+<p>Despite his love for Muslims and especially his Ṣa#ābah, the Prophet  never broke his word. He would keep a promise perfectly. We should follow his example to the letter.</p>
+<p>The simple life of the Prophet 'Ā'ishah  said, "We would sight three new moons Sīrah without lighting a ﬁre (to cook a meal) in the Prophet 's houses." Her nephew asked, "O aunt, what sustained you?" She said, "Aswadayn, dates and water, however the Prophet  had some neighbours who had milk-giving she-camels and they used to send some of their milk." The Prophet  did not see bread made from ﬁne wheat ﬂour from the time Allāh  sent him (as a prophet) until he passed away. The mattress of the Prophet on which he slept was made of coarse leather stuffed with the ﬁbre of the date-palm tree. When the Prophet  passed away, he left neither money nor anything else except his white riding mule, his arms, and a piece of land which he left to charity. This was the simplicity of the life that our Beloved Messenger Muḥammad  lived. He was not concerned with riches nor with luxurious living. His concern was for the next life. He sacriﬁced the comforts of this world to attain maximum comfort in the next life.</p>
+</article>
+<article class="topic" id="s-rah--uthm-n-ibn--aff-n">
+<h3>'Uthmān Ibn 'Affān</h3>
+<div class="diagram"><img src="images/Coursebook8-s-rah--uthm-n-ibn--aff-n.png" alt="Diagram: 'Uthmān Ibn 'Affān" loading="lazy"></div>
+<p>The Early life of 'Uthmān 'Uthmān  belonged to the inﬂuential Ban[ Umayyah clan of the Quraysh tribe. He was born in the year 576 CE, six years after the birth of the Prophet Muḥammad . His lineage coincides with that of the Beloved Messenger  as 'Uthmān 's grandmother was the sister of our Beloved Messenger 's father 'Abdullāh. The mother of 'Uthmān , Arw\ became a Muslim and died during the khilāfah of 'Uthmān .</p>
+<p>'Uthmān 's father passed away during the period of Jāhiliyyah (ignorance). His physical attributes are quite striking; he was not short or tall, and was soft-skinned. He had a huge bulky beard which he would dye in the colour of saffron. Big-boned, broad shouldered, with thick hair that fell below his ears, he was extremely handsome.</p>
+<p>'Uthmān 's most renowned characteristic was his modesty. It was as if he was overpowered by the glory of Allāh  and viewed in himself some faults and imperfections! Indeed these are the elevated qualities of those who are close to Allāh , and Allāh  in turn, raises them in status.</p>
+<p>'Uthmān  came from a rich business family and as he grew older he himself also became a successful businessman. He was a kind and generous individual. He contributed muniﬁcently in every way he could to Sīrahhelp the Messenger , the Muslims and those in need. He also played a part in society as he supported many Islamic and social projects. Due to his continuous donations of wealth in the path of Allāh , he was given the title of '`Uthmān Al-Ganiy' or '`Uthmān the rich'. On one occasion when the Messenger  wanted to expand his masjid in Madīnah, he asked some of the Ṣa#ābah to buy the land next to the masjid. 'Uthmān bought the land for 25,000 dirhams. On another occasion when the Messenger entered Madīnah it became apparent to him that there was very little fresh water apart from the well of Bi'r Rūmah. Our Beloved Messenger  was moved to ask 'who will buy Bi'r Rūmah and share it with the Muslims in return for reward in Paradise?' It was 'Uthmān  who subsequently bought the well for 20,000 dirhams and designated it for the use of all, so that wayfarers could also drink from it. It was through this that 'Uthmān  was to be counted among the 'al-'Asharah al-Mubasharah' or 'The Ten Recipients of Good News' who were promised the reward of Paradise by the Messenger Muḥammad  himself.</p>
+<p>All the Khulaf\ ar-Rashidūn are amongst these ten.</p>
+<p>He was also known as 'Dhun Nūrayn' which means 'The Person with Two Lights.' The ﬁrst reason he was given this title was because he was the only person who married two daughters of the Prophet ; He married Ruqayyah . People would say they were the most beautiful couple in the whole of Makkah. After Ruqayyah  passed away, 'Uthmān married the other daughter of the Messenger Umm Kulthūm . The second reason he was given this auspicious title was because he would recite a great deal of Qur'ān in his ṣalāh every night. He had nine sons and seven daughters. 'Uthmān had three brothers, Walīd ibn 'Uqbah ibn Ab| Mu'|{ whose father died during the Battle of Badr when Walīd was made a prisoner. Walīd then accepted Islām on the day of the conquest of Makkah.</p>
+<p>'Uthmān 's two other brothers were 'Umārah ibn 'Uqbah and Khalid ibn 'Uqbah. His sisters were Aminah bint 'Affān, Umm Kulthūm bint 'Uqbah, Umm Hakīm bint 'Uqbah and Hind bint 'Uqbah. All these sisters along with their mother, also accepted Islām on the day of the conquest of Makkah.</p>
+<p>His status during Jāhiliyyah During the period of Jāhiliyyah, 'Uthmān  was amongst the greatest people; he had a high status and was extremely modest. He was also eloquent in his speech. He was loved by his people dearly and they all showed a great deal of respect towards him. He never prostrated to any idol during this period nor did he carry out any immoral deed i.e. he did not drink alcohol before Islām, he was not attracted to songs or entertainment.</p>
+<p>'Uthmān  was well practiced in the knowledge that was available to the Arabs during the period of Jāhiliyyah, which included proverbs, lineages, and the history of important affairs. He displayed great moral character as he travelled to Syria and Abyssinia and mixed with non-Arabs, learning things about their lives and traditions that no one else knew.</p>
+<p>'Uthmān 's coming to Islām Without hesitation 'Uthmān  accepted Islām at the age of 34 through Abū Bakr 's invitation. He was one of the earliest Muslims after Abū Bakr , 'Al|   and Zayd ibn *ārithah .</p>
+<p>Thus he was the fourth man to accept Islām. His early acceptance was possibly due to the outcome of his journey from Syria, when Abū Bakr approached him and Talḥah ibn Ubaydullāh and recited the Qur'ān to them, telling them about the duties of Islām and also promising them that they would be digniﬁed by Allāh . Both 'Uthmān  and Talḥah believed Abū Bakr . 'Uthmān said: 'O Messenger of Allāh, I have come recently from Syria, and when we were between Ma'ān and az-Zarqā', I was about to sleep when I heard a voice calling: "O sleepers get up, for Aḥmad has emerged in Makkah." Then we came here and heard about you.'</p>
+<p>This event made things very clear in the eyes of 'Uthmān , His swift acceptance and ﬁrm belief came from an understanding that the call to Islām was a call to righteousness, Taw#|d, and a caution against Shirk. Looking at his people it became apparent to him that they were in the wrong. He would see people worshipping idols, eating dead meat, and mistreating others around them. But our Beloved Messenger Muḥammad  was sincere and trustworthy. With 'Uthmān  hearing nothing but good of the Prophet  he accepted the call to Islām and persevered in faith, inviting others to Islām in a gracious and tolerant manner. 'Uthmān  was content, sympathetic, kind-hearted and generous. He would help the weak and the helpless.</p>
+<p>Persecution and Migration to Abyssinia 'Uthmān  was tortured for the sake of Islām by his uncle Al Hakīm ibn Abil 'Aa who caught him and tied him up. He told 'Uthmān  to renounce Islām or he would not let him go, 'Uthmān 's response was 'By Allāh, I will never give it up or leave it.' When his uncle saw his commitment towards Islām, he set him free. The torture and persecution of the Muslims intensiﬁed, our Beloved Messenger suggested that some of the Muslims should migrate to Abyssinia as there was a righteous king in whose land no one was helpless. 'Uthmān  was amongst these Muslims and he was accompanied by his wife Ruqayyah . They arrived in Abyssinia in Rajab in the 5th year after the Prophet 's mission began. Here they found security and freedom. Within a short time, 'Uthmān  returned to Makkah as he had heard that the Muslims had reached a settlement with the Quraysh to live in peace and harmony. But this information was incorrect. When 'Uthmān found out about this he decided against returning to Abyssinia, instead he elected to wait in Makkah until he was given the ﬁnal command to migrate to Madīnah.</p>
+<p>'Uthmān  beneﬁted from the migration deeply Sīrahas he gained experience and learnt lessons that would come into use in his blessed life. Amongst these lessons the most important ones were:</p>
+<ul><li>The dedicated commitment of the Muslims in</li></ul>
+<p>practising their faith in spite of the torture and persecution of the non-believers was a symbol of sincere faith and hope for the pleasure of Allāh .</p>
+<ul><li>Our Beloved Messenger had a deep-</li></ul>
+<p>seated and passionate sympathy for the Ummah.</p>
+<p>'Uthmān  and the Holy Qur'ān 'Uthmān  was sincerely attached to the Qur'ān.</p>
+<p>Abū 'Abdur Raḥmān as-Sulam| narrated how 'Uthmān  learnt it from the Messenger of Allāh , and how he showed his love for the Book of Allāh. When the Ṣa#ābah learnt 10 verses of the Qur'ān from the Beloved Messenger they would not go further until they had learnt the pearls of knowledge that dwelt within them and how this knowledge could be applied.</p>
+<p>'Uthmān was a #\ﬁ~ of the Qur'ān, reciting it in it's entirety to our Beloved Messenger before the Beloved Messenger  passed away. 'Uthmān  was a great student, who came to clear understandings of Taw#|d, Divine Will, Allāh 's faultless judgement, and the reality of the Ākhirah. He devoted an astonishing amount of time and effort to the Qur'ān, and tried his best to be in the company of the Beloved Prophet Muḥammad , as we will now see.</p>
+<p>'Uthmān 's closeness to the Prophet  in Madīnah SīrahThe preliminary stage in 'Uthmān 's learning came when he met the Prophet  and experienced a sudden and amazing transformation from obscurity to luminosity, acquiring faith and coming to despise kufr. The way in which 'Uthmān 's good character became apparent was through the company of our Beloved Messenger . 'Uthmān  was trained in accordance to the Qur'ānic method by his teacher; Muḥammad . He was also taught the Sunnah, the rules of tilāwah and the way in which souls are cleansed (Tazkiyah).</p>
+<p>'Uthmān and the Battle of Badr Once our Beloved Messenger  had established the foundations in Madīnah, he then moved onto creating chains of brotherhood between the Anār and Muhājirūn. 'Uthmān who was a Muhājir created a bond with his 'brother'</p>
+<p>Aws ibn Thābit. The Messenger Muḥammad then went onto stabilising his masjid, sending out expeditions, making a treaty with the Jewish tribes, and focussing his attention on laying down the ﬁnancial and educational fundaments of the new society. 'Uthmān  was one of the key ﬁgures and he did not hold back any suggestions, judgments or wealth. He was present at every major event apart from the Battle of Badr as he had to nurse his wife Ruqayyah  in her sickness.</p>
+<p>Ruqayyah  passed away reciting the Shahādah, however, she did not get to say her ﬁnal farewell to her beloved father; Muḥammad  as he was at the Battle of Badr with his Ṣa#ābah, determined to make the word of Allāh absolute, thus he could not attend her burial.</p>
+<p>The Campaigns The Campaign of Ghaṭafān Our Beloved Messenger  prepared the Muslims and then set off with four hundred men and a number of horses. He left 'Uthmān  in charge of Madīnah. A polytheist member of the Ban[ Tha'laba tribe, by the name of Jābir was caught at Dhul Qaṣah. He was then taken to the Messenger  and told him information about his people: "They will never meet you in battle: when they heard you were coming they ﬂed to the mountain tops. I will go with you." Hearing this, our Beloved Messenger hastened in inviting him to Islām, and Jābir accepted. For the remainder of the eleven day excursion from Madīnah, there were no further encounters with any enemies, and therefore no further hostilities.</p>
+<p>Campaign of Dhāt ar-riqā' The Beloved Messenger  came to learn that the two tribes Tha'laba and Anmār were going to attack Madīnah. He therefore decided to set off with four hundred men. He appointed 'Uthmān  in charge of Madīnah once again. The Muslims came across a large group of people at Ghaṭafan but no ﬁghting was witnessed. This time he was absent from Madīnah for ﬁfteen days.</p>
+<p>Bay'ah ar-Riḍwān When the Muslims were on their way to perform Umrah, they were stopped from entering into Makkah, so they stopped at Hudaybiyyah. Kharash Ibn Umayyah Al Khuzā'| was then elected to represent the Muslims. So he went into Makkah by camel.</p>
+<p>The Quraysh killed the camel as soon as he passed the city walls, and they also wanted to kill Kharash but the A#ābīsh stopped them. Kharash then returned to the Messenger and told him what had happened, so the Messenger elected a second representative:</p>
+<p>'Umar . However 'Umar  suggested that 'Uthmān would be the preferred nominee since he had the added advantage of tribal protection. And so it was that 'Uthmān  went into Makkah to inform the Quraysh that the Muslims were not here to ﬁght but to perform 'Umrah. As he was approaching Makkah he was stopped by some Quraysh at a place called Baldah. They asked him where he was going, and 'Uthmān  replied that the Messenger  had sent him to speak to the Quraysh.</p>
+<p>'Uthmān  then entered Makkah and went to each leader. A suggestion was made that 'Uthmān  should carry out 'Umrah by himself but he refused. As he had been gone a while, a rumour spread amongst the Muslims that 'Uthmān  had been killed. This angered the Muslims greatly and they began planning revenge. The Messenger called his Ṣa#ābah and made them swear allegiance, pledging to ﬁght the Quraysh, and this oath was made under a tree. This pledge is known as Bay'ah ar-Riḍwān.</p>
+<p>'Uthmān 's generosity in the Campaign of Tabūk In the year 9 AH, Heraclius began planning an attack on Arabia. The Muslims prepared for battle, but they lacked resources and equipment.</p>
+<p>'Uthmān  was known to be a very generous man, and he supplied the army with 940 camels and 60 horses; he also put forward 10,000 dinars in order to equip the army. 'Uthmān  was the one who spent the most on the campaign. He did not take anything back.</p>
+<p>'Uthmān  at the time of Abū Bakr 'Uthmān  was one of the Ahl ash-Shūr\, those whose views were required regarding the most solemn issues during the khilāfah of Abū Bakr . He was very close to Abū Bakr , to the point where he was the keeper of secrets and a senior scribe. His views held great sway in the court of Abū Bakr , for when Abū Bakr  was in the midst of a tough decision he would always turn to 'Uthmān and act according with what he had to say. On one occasion when Abū Bakr  became very ill, he asked the people who should take his place as the next khalīfah. They all suggested 'Umar . Then Abū Bakr  turned to ask 'Uthmān , who was in full agreement.</p>
+<p>During Abū Bakr 's Khilāfah, there was a drought, so the Amīr al-Mu'minīn told his people to have ṣabr as Allāh the Most Merciful would grant them food by evening. The workers of 'Uthmān had just returned from Syria, bringing him one hundred camels laden with wheat. The people gathered at 'Uthmān 's door. 'Uthmān gave all the food as charity for the poor Muslims.</p>
+<p>During the Khilāfah of 'Umar People knew that 'Umar  admired 'Uthmān deeply, to the extent that when they thought to ask 'Umar  about some matter they would ﬁrst go to 'Uthmān  and 'Abdur Raḥmān ibn 'Awf .</p>
+<p>'Uthmān  was known as 'ar-Radīf': the word 'Radīf' in Arabic means the one who rides behind another man and can play his part. The people would use this title to refer to a man who would one day, inevitably, be a leader. When 'Umar  became a khalīfah, he discussed with the Ṣa#ābah his salary from the Bayt al-Māl (the Muslim Treasury) and 'Uthmān 's opinion was: "Eat and feed others". During the Khilāfah of 'Umar , 'Uthmān  was known as the advisor, just as during Abū Bakr 's Khilāfah 'Umar  was his advisor.</p>
+<p>The Keeping of Records (Dīwān)</p>
+<p>Once the conquests had advanced, and the Muslim Empire started to grow, there was the issue of the accumulation of wealth. 'Uthmān  worried that there was no proper method of accounting.</p>
+<p>'Umar  readily agreed to this, and so they set up the dīwān. The Hijr| Calendar 'Uthmān  was one of the Companions who suggested that the Islamic calendar should commence with the hijrah. The hijrah was a pivotal point in the history of Islām so it was only fair that the Islamic calendar begins from this great event.</p>
+<p>'Umar  appoints 'Uthmān as his successor 'Umar 's concern always remained as the well- being and on the solidarity of the Ummah. This was even the case when he was on his death bed. He was conscious that our Beloved Messenger passed away without selecting a successor, and he was well aware that Abū bakr  had consulted with the senior Ṣa#ābah before he had passed away. However, when 'Umar  was experiencing his last moments, he thought of a different method for selecting the next Khalīfah. His chosen method was known as 'Shūrā', whereby a number of men of varying credentials would be gathered together to make a decision by consensus. On this occasion 'Umar  selected six; 'Al| ibn Ab| Ṭālib, 'Uthmān ibn 'Affān, 'Abdur Raḥmān ibn 'Awf, Sa'd ibn Ab| Waqqās, Zubayr ibn al-'Awwām and Ṭalḥah ibn Ubaydullāh . He took the precautionary measure of not inviting a family member, so that he could at no time be accused of favouritism.</p>
+<p>'Umar  told the six nominees to gather in one of their houses and carry out a consultation amongst themselves. This consultation lasted for three days. 'Abdullāh ibn 'Umar was present amongst them but only as an advisor. Two people Sīrahwere selected to watch over them, and another was selected to lead the prayers.</p>
+<p>'Umar  said that if there was some disagreement with regards to the ﬁnal decision between a few of the nominees then they would be referred to Abdur Raḥmān ibn 'Awf , as he was wise and a man of excellent counsel. After much deliberation, it was ﬁnally decided that 'Uthmān ibn Affān  would be selected as the third khalīfah of Islām.</p>
+<p>The advice that was given to 'Uthmān the      as next Khalīfah:</p>
+<p>• To fear Allāh in secrecy and in public, in both word Sīrah and action.</p>
+<p>• To deal with relatives and strangers alike without any favouritism.</p>
+<p>• Observing justice would be the best means of establishing power and respect as well as introducing social and political stability.</p>
+<p>• To take care of the ﬁrst Muslims from amongst the Muhājirūn and Anār, as a way of acknowledging their high status in Islām, due to their striving.</p>
+<p>• To guarantee that wealth is given out in a fair and proper way amongst all the inhabitants of the Empire.</p>
+<p>• To avoid over-burdening Ahl Adh-Dhimmah (the Jews and Christians living in Muslims lands under the government's protection).</p>
+<p>• Make sure that people's ﬁnancial rights are protected.</p>
+<p>• Ensure that people of all races and tribes are protected, their needs met and their rights are not compromised or neglected.</p>
+<p>• Abstain from egoism and corruption.</p>
+<p>• Respect the young and old.</p>
+<p>• Listen to people with a sympathetic ear, and without prejudice.</p>
+<p>• Uphold the truth and inculcate it at all levels of society.</p>
+</article>
+<article class="topic" id="s-rah--al-">
+<h3>'Al|</h3>
+<div class="diagram"><img src="images/Coursebook8-s-rah--al-.png" alt="Diagram: 'Al|" loading="lazy"></div>
+<p>'Al|  was the son of Abū Ṭālib. Abū Ṭālib was the famous uncle and aide of the Prophet .</p>
+<p>Thus, 'Al|  was the cousin of the Beloved Prophet .</p>
+<p>'Al| was born ten years before the Beloved Prophet  received Prophethood.</p>
+<p>Abū Ṭālib was struggling ﬁnancially and a famine had hit Makkah. The Prophet wanted to help his uncle. Therefore, he offered to help by raising one of the children of Abū Ṭālib. The Prophet took 'Al|  under his roof and cared for him from a very young age.</p>
+<p>Accepting Islām When the Prophet  ﬁrst received revelation, 'Al| was ten years old. In the very ﬁrst couple of days, 'Al| saw the Beloved Prophet and Khadījah worshipping Allāh . He was curious and asked what they were doing. The Beloved Prophet told him about Islām and the revelation he had received. Not long after, 'Al|  accepted Islām.</p>
+<p>'Al|  was the ﬁrst child to accept Islām.</p>
+<p>Life in Makkah For thirteen years in Makkah, 'Al|  lived with the Prophet .  He was fortunate to sit, learn and observe the Beloved Messenger very closely every day.</p>
+<p>'Al| would accompany the Prophet  at times when he would call the people of Makkah to Islām. The night of Hijrah When the persecution of the Muslims was intense in Makkah, the Prophet gave permission to the Muslims to migrate to Madīnah.</p>
+<p>Whilst most of the Muslims took this permission on board and migrated, Abū Bakr  and 'Al| remained behind with the Messenger 's consent. The people of Quraysh planned to assassinate the Beloved Prophet . The night the Quraysh surrounded his house was the same night Allāh instructed him to leave and migrate to Madīnah.</p>
+<p>The Prophet  instructed 'Al|  to stay in his house and particularly requested that he sleep in his bed the very same night. He had guaranteed 'Al| that Allāh would protect him and no harm would come to him.</p>
+<p>Thus, 'Al|  slept the entire night peacefully in the bed of the Prophet  whilst the house of the Prophet was surrounded by the Quraysh. The Quraysh were furious when they realised the Prophet  had slipped from their grasp. For a couple of days, 'Al|  stayed in Makkah and distributed the belongings of Quraysh which had been entrusted to the Prophet .  Thereafter, 'Al| also left for Madīnah.</p>
+<p>Building Masjid an-Nabaw| 'Al| enthusiastically took part in building the historic Masjid in Madīnah. He would pick up heavy bricks and mud and transport them. We cannot underestimate the immense legacy of the help that the Ṣa#ābah so willingly gave.</p>
+<p>Battle of Badr The ﬁrst and greatest battle in the history of Islām, Badr, took place in the second year after the migration to Madīnah.</p>
+<p>'Al|  was among the fortunate ones to take part in this great victory for Islām. In the very beginning, the Quraysh asked the Muslims to duel. 'Al|  was among three Ṣa#ābah chosen to duel in the battle of Badr. He was very strong and excellent at duelling. His opponent was Walīd. 'Al|  ﬁnished Walīd off with one strike. Upon seeing 'Al| triumph and succeed, all the Muslims shouted, "Allāhu Akbar!"</p>
+<p>'Al|  not only took part, he was a strong example of a soldier who fought with much courage and bravery.</p>
+<p>Nikāḥ In the second year of Hijrah, 'Al|  proposed to Fāṭimah , the beloved daughter of the Sīrah Prophet . The Prophet  accepted the proposal and asked 'Al|  to provide mahr payment. 'Al|  went and sold some of his belongings, returning to the Prophet  with 480 Dirhams as mahr. The walīmah was extremely frugal. It consisted of the most basic of meals in the simplest of fashions.</p>
+<p>Battle of Uḥud 'Al| stayed with the Prophet  during the difﬁculties in the battle of Uḥud. He displayed his bravery and courage whilst being surrounded by the enemies.</p>
+<p>'Al| was among those Ṣa#ābah who helped the Prophet  climb the mountain of Uḥud.</p>
+<p>The conquest of Khaybar Khaybar was the stronghold of the Jews. It was a township to the north of Madīnah that was full of strong forts. The Beloved Messenger  selected Abū Bakr as the leader of the army.</p>
+<p>Thereafter he selected 'Umar as the leader.</p>
+<p>However, the forts were still not conquered.</p>
+<p>Thus the Prophet  said, "I will give the ﬂag to such a person tomorrow that Allāh and His Messenger loves and he loves Allāh and His Messenger. Allāh will grant conquest at his hands." The Ṣa#ābah became very curious: who was going to have this great honour? Every Ṣa#āb| had the same sincere desire and feeling: to be able to receive the ﬂag from the Messenger knowing Allāh and His Messenger  loved him.</p>
+<p>Everybody spent the night with hope and desire. In the morning, their curiosity and excitement increased. Later, 'Umar  expressed his excitement and sincere desire by saying, "I had never wanted to be the commander so much as I wanted it at the time of Khaybar."</p>
+<p>All of the Ṣahābah were waiting with the same intense anticipation. The Beloved Messenger ordered the ﬂag to be fetched after the morning prayer. The ﬂag was brought. Everybody was looking at the ﬂag in the blessed hand of the Prophet .</p>
+<p>Amongst this curiosity and excitement, the Beloved Messenger  asked, "Where is 'Al|?"</p>
+<p>'Al|  had pain in his eyes at that time. They said, "O Messenger of Allāh! He has pain in his eyes." The Messenger  said, "Call him here." When 'Al| was informed about it, he duly approached the Prophet . The pain in his eyes was cured through the blessed prayer of the Messenger of Allāh . With the ﬂag of the Prophet  in his hand, Allāh  granted victory to the Muslims under the leadership of 'Al| .</p>
+<p>The Ḥajj message In the ninth year of hijrah, the Prophet sent Abū Bakr with a group of Muslims to perform Ḥajj. Sūrah Tawbah was revealed at the time, with a message for the Makkan idol worshippers. The Prophet  ordered 'Al|  to go and deliver this message to everybody in Makkah during the days of Ḥajj. The journey to Yemen In the tenth year of hijrah, the Prophet  sent 'Al|  to Yemen to give da'wah and spread the message of Islām.</p>
+<p>'Al| joined the Prophet  in Ḥajj on his return from Yemen.</p>
+<p>The passing away of the Beloved Prophet When the Prophet  departed from this Sīrah world, 'Al| took the foremost role in the whole janāzah by virtue of being a relative of the Beloved Prophet . He washed and shrouded the body of the Beloved Messenger . The Khilāfah of Abū Bakr Abū Bakr was selected as the amīr and leader of the Muslims after the passing away of the Prophet .</p>
+<p>Fāṭimah was extremely upset after her father's demise. She was also ill. During the months that followed, 'Al| looked after Fāṭimah and focused all his efforts on domestic chores. After six months, Fāṭimah  left this world.</p>
+<p>'Al| supported Abū Bakr  during his khilāfah.</p>
+<p>The Khilāfah of 'Umar and Sīrah'Uthmān During the Khilāfah of 'Umar and 'Uthmān , 'Al|  offered his unconditional support and would be among those to give advice to them. When 'Uthmān was experiencing some unrest from the people, 'Al|  tried his utmost to settle the unrest. He supported 'Uthmān with all that he had. When the house of 'Uthmān  was under siege, 'Al|  came to the people and tried his utmost to calm the people down.</p>
+<p>Some people broke into the house of 'Uthmān and martyred him. When 'Al|  found out, he was extremely distressed.</p>
+<p>Becoming the Khalīfah After the martyrdom of 'Uthmān , the situation was such that there was no khalīfah for three days.</p>
+<p>People began coming to 'Al|  and urging him to become the next khalīfah. He rejected the people's call. When the Muhājirūn and Anār came in great numbers and requested 'Al| to become the khalīfah, he found it impossible to refuse.</p>
+<p>One of the ﬁrst tasks 'Al|  attended to was to avenge the martyrdom of 'Uthmān and bring the guilty to justice.</p>
+<p>Due to the commotion and sheer number of people, the exact people who martyred 'Uthmān could not be identiﬁed. It was difﬁcult to pinpoint a murderer without concrete evidence.</p>
+<p>Thereafter, 'Al|  changed all the governors across the Islamic Empire as a great number of complaints had built up against the previous ones.</p>
+<p>Some Ṣa#ābah wanted the Khalīfah to exhaust all efforts in avenging the martyrdom of 'Uthmān .</p>
+<p>In Makkah Many people in Makkah were upset that the murderers of 'Uthmān  weren't brought to justice. 'Ā'ishah , Zubayr  and Ṭalḥah  were all in Makkah.</p>
+<p>Many people joined in the calls of seeking justice for the martyrdom of 'Uthmān . Some of them were from the family of 'Uthmān , the Ban[ Umayyah. A movement began. This movement demanded that the people be brought to justice. They decided to go to Irāq and secure funds, raising awareness and support for their movement. 'Al|  heard about the movement and decided himself to go to Irāq to try and restore law and order.</p>
+<p>'Al|  told the people of Madīnah to come along to Iraq. Besides a few Ṣa#ābah, most people accompanied 'Al| .</p>
+<p>In Irāq The people of Baṣrah had already sided with those demanding justice for 'Uthmān .</p>
+<p>'Al|  sent Ḥasan to Kufa to win support and help the Khalīfah. The people of Kufa accepted the invitation and rose up in arms to support 'Al| .</p>
+<p>'Al| , along with the people of Kufa, decided to go to Baṣrah.</p>
+<p>Baṣrah had three groups:</p>
+<p>1)Supporters of 'Al| .</p>
+<p>2)Supporters of 'Ā'ishah  who was leading the calls for justice on behalf of 'Uthmān .</p>
+<p>3)Neutral people, 'Al|  and 'Ā'ishah  did not want a confrontation, let alone further blood to spill.</p>
+<p>Both wanted to calm the situation and talk things through. Before the evening, all thoughts of battle had gone and things were very positive. An agreement was almost made. They decided to conclude the agreement the next day.</p>
+<p>The murderers of 'Uthmān  were present. They were aware that if the agreement was allowed to consolidate, they would be exposed and taken to task. Likewise, there were some people with 'Ā'ishah who wanted revenge at all costs. At night time, the murderers of 'Uthmān attacked 'Ā'ishah 's camp causing confusion and havoc in the dark. Each group thought they had been attacked ﬁrst by the other. A full blown battle began to rage. 'Ā'ishah mounted her camel and raced to the battleﬁeld to try and calm the matter down and stop those in her camp.</p>
+<p>'Al|  tried his best to calm things down as he entered into the fray.</p>
+<p>Some senior Ṣa#ābah left the battleﬁeld knowing that the whole situation was unjustiﬁed.</p>
+<p>Many people passed away defending the camel of 'Ā'ishah .</p>
+<p>'Al|  saw that both parties would not stop the battle until the camel of 'Ā'ishah  was felled down. He gestured to somebody to attack the camel. It was struck, and it duly fell to ground. Upon seeing the camel drop to the ground, those defending it ran and left their positions. The battle was all but over.</p>
+<p>'Al|  ordered that nobody should be pursued, no spoils of war should be taken and whoever had surrendered should be dealt with peacefully. This battle is famously remembered as:</p>
+<p>'The Battle of the Camel.'</p>
+<p>Transferring the capital city of the SīrahIslamic Empire After the battle, 'Al|  visited Kufa. He decided to reside in Kufa. Thus the capital of the Islamic Empire moved from Madīnah to Kufa.</p>
+<p>One of the reasons why 'Al| moved to Kufa was to protect and safeguard the sanctity of Madīnah. He did not want any repetition of what had happened to 'Uthmān .</p>
+<p>Therefore, he moved the political hub away from the sacred city of Madīnah. The people of Kufa offered 'Al|  an abode in a white palace they had. He refused in the same way that 'Umar  had declined the excessive comforts offered to him.</p>
+<p>Invitation to people to give bay'ah To unite everybody and bring calm to the Islamic Empire, 'Al|  sent envoys to those who had not yet pledged allegiance to him to tell them to pledge allegiance to him as the rightful Khalīfah. He sent an envoy to Mu'āwiyah , but he refrained from giving bay'ah. He wanted those responsible for the martyrdom of 'Uthmān  to be brought to justice.</p>
+<p>Since Mu'āwiyah 's followers refused to give bay'ah, Al|  decided to make a personal visit to the region of Shām, where they resided. Upon hearing of the impending visit, Mu'āwiyah prepared to march out to meet them.</p>
+<p>The Battle of Ṣiffīn With the prospect of a confrontation between the people of Irāq and Shām, 'Al| ordered that none of the people with him should start any military engagement with the people of Shām.</p>
+<p>Instead, they should keep explaining to them to give allegiance to 'Al| . He further instructed them that if Mu'āwiyah 's people didn't agree and instead rejected then no ﬁghting should take place unless initiated by the other side. When the two armies were facing each other, for a few days they were locked in a stand-off. Some of the people of Irāq tried to call the people of Shām to give bay'ah. The people of Irāq were thirsty and tried to access water in the area, but the people of Shām prevented them. This was the spark that caused ﬁghting to erupt.</p>
+<p>Battle continued between the two armies for some time. Both armies were looking for a way to end the bloodshed and bring about a peaceful solution as both groups identiﬁed themselves as Muslims. Many ideas and opinions were raised in an attempt to end the battle. In the end, both parties agreed to have a man from each side negotiate a truce.</p>
+<p>The Khawārij A group of people from 'Al| 's camp disliked this action and regarded such an action as kufr. These people were known as Khawārij. The Khawārij would kill any Muslim who disagreed with them and would declare Muslims disbelievers on small issues.</p>
+<p>'Al| perceived the threat from the Khawārij and fought them.</p>
+<p>Many of them ﬂed and the rest were killed at Nahrawān.</p>
+<p>The personal qualities of 'Al| His trustworthiness 'Al| was extremely reliable and trustworthy. The Prophet  entrusted him with the belongings of people at the time of hijrah. His humility He was really humble. He would be busy farming, tending to livestock and engaging in other chores and people would approach him to ask him questions.</p>
+<p>Once the Prophet  walked into the masjid and found 'Al|  sleeping on sand in a very simple and humble manner. His justice After 'Al|  became the leader, he was still humble to the law and authorities. Once, he had a court case with a Jewish person about the ownership of an armour. The judge ruled in favour of the Jewish person because 'Al|  did not have sufﬁcient proof.</p>
+<p>His helping people 'Al|  would walk in the markets and help anyone that was lost. Likewise, he would help carry the load of the weak and old. His humbleness After becoming the leader, he would still go and buy food himself from the shops. One day, he went to the market and bought dates for one dirham. A person saw 'Al|  - the leader of the Muslims – carrying a bag of dates.  He rushed and said, “let me carry that bag for you.” 'Al|  replied:</p>
+<p>“The one who buys for his family is most worthy to carry the belongings for his family.” Martyrdom The Khawārij plotted to assassinate 'Al| . In Ramaḍān of 40 AH, during the Fajr prayer, a person called ibn Muljim attacked 'Al|  with a poison- tipped sword whilst he was leading the prayer. Not long after, 'Al|  passed away.</p>
+</article>
+</section>
+
+<section class="subject" id="t-r-kh">
+<h2>Tārīkh</h2>
+<article class="topic" id="t-r-kh-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>Relate the story of Ayyūb          through the verses of the Qur’ān.</p>
+<p>Recall how he was praised by Allāh          because of his patience.</p>
+<p>TārĪkh effects of disunity caused division amongst the Muslims.</p>
+<p>List the contributions made by the Ottomans.</p>
+<p>Outline the general lessons from the history of Islām.</p>
+<p>Ayyūb "Surely We will test you with a bit of fear and hunger, and loss in wealth and lives and fruits, and give good tidings to the patient who, when a suffering visits them, say: 'We certainly belong to Allāh, and to Him we are bound to return.' Those are the ones upon whom there are blessings from TārĪkh their Lord, and mercy as well, and those are the ones who are on the right path." (Qur'ān 2:155-157) In the life of Ayyūb  there is a great lesson for us all. His patience when he was tested and his gratitude in that situation too are exemplary.</p>
+<p>Allāh  praised His worshipper Ayyūb  in the Glorious Qur'ān: "Truly! We found him patient.</p>
+<p>How excellent a slave! Verily, he was ever oft- returning in repentance to Us" (Qur'ān 38:44)</p>
+<p>Ayyūb  was blessed in a great many ways.</p>
+<p>Ibn 'Asākir narrated: "Ayyūb  was a man having much wealth of all kinds and many children.</p>
+<p>All those favours were taken from him and he was physically afﬂicted as well. Not a single organ remained sound except for his heart and tongue, both of which gloriﬁed Allāh  all day and night. His disease was long and drawn out, alienating visitors and driving his friends away.</p>
+<p>Ayyūb Only his wife felt sympathy for him. She took good care of him, knowing his former charity and tenderness towards her."</p>
+<p>Iblīs went to Ayyūb 's wife in the form of a man.</p>
+<p>"Where is your husband?" he asked her. She said: "There he is, suspended between life and death."</p>
+<p>TārĪkh Shayṭān reminded her of the days when Ayyūb was blessed with good health, wealth and children.</p>
+<p>Suddenly, the painful memory of years of hardship overcame her, and she burst into tears. She said to Ayyūb :</p>
+<p>"How long will this trial continue from our Lord? Are we to remain without wealth, children or friends forever? Why don't you call upon Allāh  to remove this suffering?"</p>
+<p>Ayyūb Ayyūb sighed, and in a soft voice replied:</p>
+<p>"Iblīs must have whispered to you and made you dissatisﬁed. Tell me, for how long did I enjoy good health and riches?" She replied, "For eighty years."</p>
+<p>TārĪkh Then Ayyūb  asked, "For how long have I been suffering like this?" She said, "For seven years." Then Ayyūb  told her:</p>
+<p>"In that case I am ashamed to call on my Lord to remove the hardship, for I have not suffered longer than the years of good health and abundance. It seems your faith has weakened and you are dissatisﬁed with the fate of Allāh . If I ever return to health, I swear I will punish you with a hundred strokes! From this day onward, I forbid myself to eat or drink anything from your hand.</p>
+<p>Leave me alone and let my Lord do with me as He pleases."</p>
+<p>Crying bitterly and with a heavy heart, she had no choice but to leave him and seek shelter elsewhere.</p>
+<p>Ayyūb In his helpless state, Ayyūb  turned to Allāh , not to complain but to seek His mercy:</p>
+<p>"'Verily, distress has touched me, and You are the most Merciful of all those who show Mercy.' So We answered his call, and We removed the distress that was on him, and We restored his family to him (that he had lost) and the like thereof along with them TārĪkh</p>
+<ul><li>as a mercy from Ourselves and a reminder for all who</li></ul>
+<p>worship Us." (Qur'ān 21:83-84) When Ayyūb  cried to his Lord: "The Evil One has afﬂicted me with distress and suffering!" Allāh gave him the command to strike the ﬂoor with his foot. He struck the ground and there appeared some water. Ayyūb  was ordered to wash with the water and  drink it. This was a miracle from the most Merciful, a cure for Ayyūb  from his illnesses had been presented to him. His family came back to him and Allāh so gracefully doubled their numbers because of the patience Ayyūb  endured so beautifully.</p>
+<p>Ayyūb Ayyūb  obeyed, and almost immediately his good health was restored. Meanwhile, his faithful wife could no longer bear to be parted from her husband and returned to beg his forgiveness, desiring to serve him. On entering the house, she was amazed at the sudden change: Ayyūb  was again TārĪkh healthy! She embraced him and thanked Allāh for His mercy.</p>
+<p>Ayyūb  was now worried, for he had taken an oath to punish her with a hundred strokes if he regained health, but he had no desire to hurt her. He knew if he did not fulﬁl the oath, he would be guilty of breaking a promise to Allāh . Therefore, in His wisdom and mercy, Allāh  came to the assistance of His faithful servant, and advised him:</p>
+<p>"And take in your hand a bundle of thin grass and strike therewith (your wife), and break not your oath.</p>
+<p>Truly we found him patient. How excellent a slave!</p>
+<p>Verily, he was ever oft-returning in repentance to Us"</p>
+<p>(Qur'ān 38:44) Through this, the oath was fulﬁlled.</p>
+<p>Ayyūb Abū Hurayrah  narrated that the Prophet Muḥammad  said:</p>
+<p>"While Ayyūb was taking a bath, a swarm of gold locusts fell on him, and he started collecting them in his garment. His Lord called him: 'O Ayyūb! Have I not made you too rich to need what you see?' He said:</p>
+<p>'Yes, O Lord! But I cannot shun Your Blessings"</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>TārĪkh The story of Ayyūb  should be a constant reminder for us all. We should read this story often just to remind ourselves. Many of us complain about the little things in life. Allāh  tested Ayyūb in ways that we can really relate to. His faith and patience were things that we as Muslims should try and implement in our lives, in order that we can call ourselves true believers. When Allāh  tests us in these situations we should be ready to practise on this level of patience.</p>
+<p>Ayyūb In the twenty-ﬁrst century, with all the advances and comforts that make life more bearable, we must remember Allāh  more often, pray harder, and be more thankful instead of being dissatisﬁed with our condition. We should praise TārĪkh and thank Allāh  for every condition that He tests us with. As we know, these are the times when Shayṭān tries to work on our weaknesses to trick our minds, and play with our emotions. Allāh will never forget to reward a servant for remaining grateful and shunning Shayṭān. May Allāh  give us faith and patience when we are tested. Āmīn.</p>
+<p>Andalusia (Muslim Spain)</p>
+<p>(711-1492 AD/92-897 AH) It was in 711 AD that a young brave Muslim soldier by the name of ^āriq ibn Ziyād made history by crossing the sea from North Africa and landing in Gibraltar, Spain. Christians known as Visigoths controlled Spain at that time. The Muslim Army defeated the Visigoths and the local people readily accepted Islamic rule after witnessing the justice that Muslims had offered.</p>
+<p>TārĪkh Within a short period of time, Allāh  gifted Spain to the Muslims. They swept through Spain without defeat.</p>
+<p>Andalusia became part of the Umayyad Khilāfah. However, after the Umayyad Khilāfah ﬁnished and was replaced by the Abbāsid Khilāfah, a prince of the Umayyads known as 'Abdur Raḥmān moved to Andalusia and set up an independent Umayyad state.</p>
+<p>Andalusia (Muslim Spain)</p>
+<p>(711-1492 AD/92-897 AH) The glory days of Islamic Spain By the tenth century, most of the indigenous people had accepted Islām. The Arabs were migrating to Spain in numbers. Even Jews came to live in Muslim Spain as the Europeans had been persecuting them.</p>
+<p>TārĪkh Under Islamic rule, the Jews were given freedom to practice their religion and were not treated harshly. The Great Mosque of Cordoba was built over a period of 200 years. It had 856 pillars made of jasper, onyx, marble and granite. It was a building unlike anything on the planet at that time.</p>
+<p>'Abdur Raḥmān III, who ruled from 912-961 AD claimed Khilāfah in Muslim Spain. The Abbasid Khilāfah at that time was in decline and was facing attacks from different groups in the Muslim world.</p>
+<p>During the years of his leadership, Cordoba, the capital of the Umayyad State developed into one of the leading cities of the world.</p>
+<p>Cordoba had over 600 libraries. Its largest library had 600,000 books in different languages. Shops selling different goods from across the world could be found in the city.</p>
+<p>Leather, silk, paper, wool and crystal were all produced in Cordoba and exported throughout Europe.</p>
+<p>Andalusia (Muslim Spain)</p>
+<p>(711-1492 AD/92-897 AH) If Europeans and non-Muslims wanted to be well educated, they would travel to Andalusia. The tenth century leader of the Catholic Church, Pope Sylvester, studied in Andalusia with Muslims during his youth too. The decline and end of Islamic Spain The wealth and luxuries became distracting TārĪkh inﬂuences. Muslims stopped wanting to make sacriﬁces or to ﬁght oppression for the sake of Islām. They were comfortable and happy to stay at home.</p>
+<p>Different Muslim leaders in Spain began to ﬁght and create their own little states so that Islamic Spain began to divide into different zones.</p>
+<p>Cordoba, Seville, Toledo, Granada and Zaragoza all became separate entities due to the actions of different Muslim leaders. In 1085 AD, Toledo was conquered. The Christian armies began attacking other Muslim areas but a Muslim group called the Murābi{ūn from North Africa came to help the Muslims in Spain and defeated the Christian armies. In 1212 AD, whilst the Muslims were divided, the Christian armies under a Crusade came and attacked the Muslims. Over 100,000 Muslims were martyred in the Battle of Las Navas de Tolosa.</p>
+<p>Andalusia (Muslim Spain)</p>
+<p>(711-1492 AD/92-897 AH)</p>
+<p>Other Muslim cities fell to the Christians one by one. In 1236, the capital of Islamic Spain, Granada, was taken over by the Christians. The mosque was used as a cathedral with a giant chapel built in the centre. Between 1450 and 1620, Muslims were persecuted and TārĪkh forced to become Christians. Women were banned from wearing veils, slaughtering animals in the Islamic way was banned, weddings had to be performed in church and speaking Arabic was not allowed. By 1614, all remaining Muslims were forcefully expelled from Spain and sent to North Africa.</p>
+<p>Lesson The greatest lesson Muslims can learn from Islamic Spain is the danger of division and disunity. When Muslims ﬁght among themselves and are not united, they will have no strength and power and will become slaves to others. We should always work to unite people and ensure the love of this world does not enter our hearts.</p>
+<p>The Crusades The Crusades were holy wars by Christians against Muslims and Muslim Lands. In 1095 AD, Pope Urban raised a huge army of 30,000 to march onto the Holy Land. The Crusaders marched through Anatolia, the mass of land that forms most of modern day Turkey.</p>
+<p>TārĪkh In 1097 AD, the Crusaders reached the city of Antioch. They conquered the city simply because of Muslim disunity and treachery. In 1099 AD, the Crusaders took over the city of Jerusalem from the F\ṭimids. The Christian Crusaders killed 70,000 Muslims and Jews living in Jerusalem. Muslims were killed within Masjid al-Aq\. The European Christians, as they lived in Muslim Lands, witnessed Muslim medicine, language, agriculture, engineering and similar great inventions. The Crusaders began copying the Muslims and sent inventions and reports to the rest of Europe.</p>
+<p>The Zanghids With Jerusalem captured by the Crusaders and the Muslim lands in trouble, Allāh  guided 'Imāduddīn Zengi to restore hope in the Muslim lands.</p>
+<p>'Imāddudīn was made the ruler of Mosul in 1127 AD by the Seljuks. In the next ten years, he began ﬁghting TārĪkh the Crusaders until he defeated a Crusader army at Urfa. When 'Imāduddīn entered Urfa, he treated the Christians very respectfully. It wasn't long before 'Imāduddīn was assassinated and martyred. His son Nūruddīn took over. The Crusader army surrounded Damascus. Nūruddīn chased them out of the area and successfully took over many lands which had previously fallen to the Crusaders. In 1154 AD (549 AH), the Muslims of Damascus were being oppressed severely by their leaders and requested Nūruddīn to help. Nūruddīn promised the oppressive leaders that he would not harm them and rather wanted to help. The people of Damascus opened the doors of the city to Nūruddīn and welcomed him. Nūruddīn was now in control of Damascus.</p>
+<p>The Zanghids 1155 AD (550 AH) is known as the 'year of unity', wherein the entire region of Muslims united under Nūruddīn to ﬁght the Crusaders.</p>
+<p>Thereafter in 1156 AD (551 AH), he conquered one of the greatest forts of the Crusaders. In 1169 AD (565 AH), the town of Dimyāt was surrounded by the Crusaders. Nūruddīn TārĪkh was very upset on hearing this. He stopped smiling and laughing due to his personal worry for the Muslims of Dimyāt. His students and friends tried to make him happy but he could not smile. He said to them thereafter:</p>
+<p>"By Allāh, I am embarrassed knowing that Allāh  can see me smiling whilst the Muslims are surrounded by the Crusaders in Dimyāt."</p>
+<p>The Zanghids Contributions of Nūruddīn Clinic Nūruddīn was very caring for the people. He opened a TārĪkh large medical dispensary in Damascus, called Nūriya. It served as a hospital for both in-patients and out-patients.</p>
+<p>Generosity of Nūruddīn Nūruddīn paid people to teach orphans how to read and write. He would spend money on orphans and ensure they had food and clothing. He would also fund the welfare of widows and the elderly. He ﬁxed a certain amount to be spent on widows and the elderly regularly. He also donated money regularly to the people who lived in Makkah and Madīnah.</p>
+<p>The Ayyūbids Leadership of Ṣal\#uddīn After Nūruddīn passed away, problems and evil began to arise in the Muslim lands. However, a man known as Ṣal\#uddīn, who was the governor of Egypt, came to Shām to help the Muslims and restore justice and peace.</p>
+<p>Ṣal\#uddīn was a man of knowledge who spent TārĪkh his early years immersed in studies. It was in his time that the al-Azhar University in Cairo become a Sunni university.</p>
+<p>Ṣal\#uddīn would stay in the company of the 'ulamā'. He would consult them on all matters. Great scholars like Ibn Qudāmah accompanied Ṣal\#uddīn in the conquest of Jerusalem.</p>
+<p>Ṣal\#uddīn uniﬁed the Muslim lands and removed all threats within them before attacking the invading and occupying Crusaders.</p>
+<p>The Ayyūbids Love of Masjid al-Aq\ Ṣal\#uddīn loved Masjid al-Aq\ and Palestine. He would constantly be sad and say, "How can I be happy, how can I enjoy food and sleep, whilst Masjid al-Aq\ is occupied by the Crusaders?"</p>
+<p>TārĪkh He began to march to free Jerusalem and Masjid al-Aq\ from the Crusaders. He conquered city after city as he marched towards Jerusalem. In 1187 AD, the Battle of Hi{{|n occurred. The Crusader army was heavily defeated in this battle. A couple of months later, the victorious Ṣal\#uddīn made a humble entrance into Jerusalem. Ṣal\#uddīn did not do what the Crusaders did when they entered Jerusalem by killing all its inhabitants. Instead, he allowed the Christians to leave with their belongings.</p>
+<p>Ṣal\#uddīn did not destroy the churches either.</p>
+<p>The Ottomans (1299-1923 AD/698-1342 AH) The Beginning The thirteenth century had witnessed huge changes in the Islamic world. The Mongols had attacked the Abbasid khilāfah and destroyed the city of Baghdad. Hundreds and thousands of people were killed. Many people had ﬂed for their lives away from Abbasid lands.</p>
+<p>TārĪkh A race of people known as Turks had taken up residence in Anatolia and setup a small home for themselves, away from the Mongol threat.</p>
+<p>One of their soldiers, known as 'Uthmān, welcomed the Muslims running away from Abbasid lands. Together, they attacked the weak Byzantine Empire and began to take city after city from the Byzantines. In the mid 1300s, this group of people were known as the Ottomans and had made the city of Bursa the capital of their state. They started to expand, and their growth saw them become a strong state, with territory on the borders of Europe. They did not kill or attack the Christians living in the lands conquered by them so long as the Christians did not attack. They let them live as Christians in Ottoman lands.</p>
+<p>The Ottomans (1299-1923 AD/698-1342 AH)</p>
+<p>Growth of the Ottomans Under the rule of Bāyazīd, the Ottoman Empire grew even further. Serbia, Greece and Bulgaria were all under the Muslims.</p>
+<p>TārĪkh Until now, the city of Constantinople (Istanbul) had never been conquered by the Muslims. The Prophet  made the following statement 800 years ago when the Muslims were only in Arabian lands:</p>
+<p>"Constantinople will be conquered: what an excellent leader is its leader and what an excellent army is its army." (Aḥmad) It was in 1453 AD, under Meḥmet II, that the Muslims conquered Constantinople. He had the world's biggest cannons built, employing gunpowder to great effect. Indeed, they had the most advanced weapons in the whole world. The cannons were over 8 metres in length and could launch a 250-kilogram ball a distance of 1.5 kilometres! To conquer Constantinople, Meḥmet II used a tactic never tried before. He ordered seventy ships to be moved on land, shifting them for over two kilometres, and getting them in the optimum position to attack Constantinople!</p>
+<p>The Ottomans (1299-1923 AD/698-1342 AH) The End of the Ottomans As time passed, the Ottomans weakened. They were no longer advanced in terms of weapons. They had lost many battles and were forced to sign treaties with different nations. Europe was advancing as a whole. The love of Islām, which had formed the basis for TārĪkh the growth of Ottoman Khilāfah and made it so strong, was no longer to be found.</p>
+<p>The Ottomans (1299-1923 AD/698-1342 AH) The contributions of the Ottomans Smallpox vaccinations The Ottomans developed the treatment for TārĪkhsmallpox. The vaccine made its way to England through the wife of an English ambassador who observed the practice in Istanbul.</p>
+<p>University In 1908, 'Abdul Ḥamīd II established an Islamic university in Beijing, China, to serve the China's Hui Muslims.</p>
+<p>Aiding other countries In 1847, Ireland was suffering from the Great Famine. There was a shortage of food. The ĪOttomans sent 1000 as a donation to help the Irish people.</p>
+<p>Lessons</p>
+<ul><li>Whenever Muslims have left their dīn and</li></ul>
+<p>chosen other ways, they have always been disgraced.</p>
+<ul><li>Success and honour will only come by</li></ul>
+<p>following the way of the Prophet .</p>
+<p>Islām, the last and universal religion of Allāh , has a unique history of internal revival and reform from which we can learn so much TārĪkh about our faith. By looking at the history of Islām, we learn the causes for the rise and fall of many of the Muslim empires and dynasties. What was it that made the Muslims reach the pinnacle of glory and what did they neglect that caused their fall? When we look at the history of Islām, we look at the impact Islām made on the lives of its people. We ﬁnd that when the Muslims practiced their religion as they ought to, then not only did they enjoy justice, peace, tranquillity, tolerance and prosperity but so too did other people living alongside them.</p>
+<p>How true are the words of the Islamic thinker and scholar Muḥammad As'ad, "It was not the Muslims that made Islām great: it was Islām that made the Muslims great."</p>
+<p>Lessons On the other hand, when the Muslims moved away from the blessed teachings of Islām and their Beloved Prophet Muḥammad , then not only did they bring destruction on themselves but they brought it on all those people who lived with them, traded with them or who were affected by their TārĪkh presence. After the period of Prophethood, the period of the Khulafā' ar-Rāshidūn was the most prominent period of human history. Without doubt, this was the golden period of Islām: humankind saw for the ﬁrst time such leaders who lived the simplest lives, who spent the day taking care of the affairs of the people and who spent the night standing in prayer. They did not live like rulers but as leaders and example citizens. They believed the position of Khalīfah was not in place so that people serve them, but rather for them to serve the people. There was no ostentation or display of the vanity of rulers. Before becoming the Khalīfah, Abū Bakr  used to milk the cow of a poor girl. She asked him after he became the Khalīfah, "Who will milk our cow now that you have become the Khalīfah?" He replied, "The position of Khalīfah cannot stop me from my personal services to the people."</p>
+<p>Lessons The lifestyle of 'Umar  is well known: he preferred humble dress and simple food. While giving khuṭbah he wore a shirt with patches. Even after becoming the Khalīfah, he used to wear the same kind of clothes, live in the same kind of house, and eat the same kind of food that he had during the time of the Beloved Prophet Muḥammad . When a Roman ambassador came to meet him, he enquired from the people TārĪkh of Madīnah the whereabouts of the palace of the Khalīfah. They said the Khalīfah had no such palace and showed him to a man sleeping under a tree without bodyguards or soldiers. He was amazed to learn that this man was none other than 'Umar . The Khulafā' ar-Rāshidūn and those who followed in their footsteps did not desire positions of authority: only with great reluctance did they accept ofﬁcial positions. When they accepted, they believed that it was not because they were worthy of it but felt that it was a trust from Allāh , for which they would have to give an account on the Day of Qiyāmah.</p>
+<p>Lessons The successors to the Khulafā' ar-Rāshidūn, unfortunately, did not have the same level of moral and spiritual capabilities a Khalīfah was expected to have. They played an active part in the political and administrative matters of the state but they disregarded their religious responsibilities.</p>
+<p>TārĪkh The Khulafā' ar-Rāshidūn treated the Bayt al-Māl (National Treasury) as a trust of the people and not their personal wealth. They were cautious in its dispensation and they took the bare minimum for their needs. It was for this very reason that the Muslim rulers used to stay hungry but the public lived in ease. Those who strayed from their path treated Bayt al-Māl as their personal property and spent extravagantly. They wanted to live like the Roman and Persian rulers, in huge palaces and pomp and glory. Due to this, the Bayt al-Māl became depleted. The rulers then resorted to oppression by imposing unlawful and unjust taxes on the newly converted Muslims. This Jizyah tax became the curse of many a household.</p>
+<p>Lessons When a governor complained to 'Umar ibn 'Abdul 'Azīz about the loss of treasury funds due to the abolition of a certain type of Jizyah tax, one that had previously been levied on people reverting to Islām, 'Umar ibn 'Abdul 'Azīz gave a beautiful answer: "Allāh  sent Muḥammad as a caller to Islām; he did not send him as a tax collector."</p>
+<p>TārĪkh The Khulafā' ar-Rāshidūn possessed many qualities, and a few of the best of these qualities that every Muslim should try to acquire are:</p>
+<p>1.To take the world as a temporary resting place for preparation for the everlasting hereafter 2.To make oneself a servant of the people and a guardian 3.To observe and uphold the commandments of Allāh 4.To treat everyone equally, with justice and mercy 5.To keep the company of pious and truthful people: those who may support and assist you sincerely in all matters.</p>
+</article>
+</section>
+
+<section class="subject" id="aq--id">
+<h2>Aqā'id</h2>
+<article class="topic" id="aq--id-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>‘Aq\’id Mention some of the attributes of Allāh     and how the ‘ulam\’ categorised mutashābihāt.</p>
+<p>Explain the importance of having full conviction in reciting the shahādah. importance of isnād.</p>
+<p>The Attributes (Ṣifāt) of Allāh The Qur'ān is the speech of Allāh . It was revealed to us to recognise Allāh  and understand what pleases and displeases Him.</p>
+<p>Majority of the verses of the Qur'ān have a clear and a decisive meaning. Some verses are unclear and have an indecisive meaning.</p>
+<p>Allāh  tells us Himself:</p>
+<p>"It is He Who has sent down to you the Book (this Qur'ān). In it are verses that are entirely clear, they are the foundations of the Book and others (verses) unclear. So as for those in whose hearts there is a deviation (from the truth) go after such part of it as is mutashābih, seeking (to create) discord, and searching for its interpretation (that meets their desires), but none knows its hidden meanings save Allāh. And those who are ﬁrmly grounded in knowledge say:</p>
+<p>'We believe in it, the whole of it (clear and unclear verses) are from our Lord.' And none receive admonition except men of understanding."</p>
+<p>(Qur'ān 3:7)</p>
+<p>The Attributes (Ṣifāt) of Allāh The clear verses are regarded as 'Ummul Kitāb.' They are those which are easily understood, or those that discuss events of the past, rulings and similar issues such as: 'Establish ṣalāh' and 'Give zakāh'.</p>
+<p>However, there are some verses where the meaning is not so clear. They tend to be the ones where the ﬁrst or most obvious meaning seems to contradict other clear verses elsewhere in the Qur'ān.</p>
+<p>Allāh  has mentioned His attributes in different places of the Qur'ān. At times, when Allāh mentions His attributes, He has used words which 'Aqā'id are used for humans like 'hand,' 'face,' 'shin,' 'eyes,' etc. It is the 'aqīdah of the Ahlus Sunnah wal Jamā'ah that there is nothing which resembles Allāh .</p>
+<p>Allāh  is free from all deﬁciencies and conﬁnements such as being given a ﬁgure, limbs, or being physically within a deﬁned space or boundaries.</p>
+<p>Allāh  states:</p>
+<p>"There is nothing like unto Him, and He is the Hearing, the Seeing." (Qur'ān 42:11)</p>
+<p>The Attributes (Ṣifāt) of Allāh Therefore, when words such as hand, face, shin, eyes are used for Allāh , and we know that Allāh is free of limbs and nothing resembles Allāh , what do we say about such words the meanings of which are unclear? The unclear verses are known as mutashābihāt. They are those verses for which the apparent meaning can never be meant. Some examples are:</p>
+<p>"Say, 'Indeed, all bounty is in the yadd (literally translated as 'hand') of Allāh - He grants it to whom He wills. And Allāh is all-Encompassing and Wise.'"</p>
+<p>(Qur'ān 3:73)</p>
+<p>"And construct the ship bi a'yunin\ (literally translated as 'under our eyes') and with Our Inspiration, and address Me not on behalf of those who did wrong: they are surely to be drowned."</p>
+<p>(Qur'ān 11:37)</p>
+<p>"And to Allāh belongs the east and the west. So wherever you might turn, there is the wajh (literally translated as 'face') of Allāh. Indeed, Allāh is all- Encompassing and Knowing." (Qur'ān 2:115) The words 'yadd,' 'a'yun' and 'wajh' are examples of mutashābihāt. The literal meanings are human attributes.</p>
+<p>The Attributes (Ṣifāt) of Allāh How did the scholars interpret the mutashābihāt? The 'Ulamā' have dealt with such verses in the following ways:</p>
+<p>1)Tafw|} (handing over)</p>
+<p>2)Ta'wīl (interpretation)</p>
+<p>3)Ithbāt (afﬁrming)</p>
+<p>The Attributes (Ṣifāt) of Allāh Tafw|} (handing over) The mainstream opinion of the early Muslims, which includes the majority of the companions, their followers (tābi'ūn), the majority of the scholars of ḥadīth, the four Imāms and the major scholars of their schools was of Tafw|}.</p>
+<p>'Tafw|}' means to believe in and leave any 'Aqā'id statement revealed about Allāh  as it was revealed, without explaining, commentating or interpreting it, and handing over its intended explanation to Allāh .</p>
+<p>Tafw|} does not mean negating the word or saying it is without meaning. Tafw|} is to say 'Allāh knows best what is meant by this word.'</p>
+<p>Tafw|} does not mean to afﬁrm the literal meaning. The majority of the scholars of the Ahlus Sunnah wal Jamā'ah practised tafw|}.</p>
+<p>The Attributes (Ṣifāt) of Allāh So we:</p>
+<p>1)Believe in the verse and the attribute Allāh mentions about Himself.</p>
+<p>2)Acknowledge that we cannot understand what is meant by such words and believe that only Allāh knows the true meaning of such an attribute.</p>
+<p>3)Negate the literal meaning and any meaning that attaches any resemblance of Allāh  to His creation of any of the deﬁciencies that His created beings can show. So for the words 'yadd,' 'a'yun' and 'wajh' we say that we believe in the words and afﬁrm them to be attributes of Allāh , while we acknowledge we do not know the meaning of them and leave that to Allāh .</p>
+<p>The Attributes (Ṣifāt) of Allāh Ta'wīl (interpretation) As time passed, the knowledge of the people faded and different challenges came. People began questioning these attributes of Allāh . Some started believing that Allāh  literally has a hand, face and eyes – Ma'ādhallah (We seek Allāh 's refuge from such deviant beliefs).</p>
+<p>Hence, the 'Ulamā' of the Ahlus Sunnah wal Jamā'ah 'Aqā'id practiced 'Ta'wīl' which was another accepted practice to deal with such verses. The attributes of Allāh  were interpreted in a manner beﬁtting the grandeur of Allāh .</p>
+<p>Hence, the word 'eyes' means 'in front.' The word 'face' in the verse means 'direction.' The word 'hand' means 'possession'.</p>
+<p>The Attributes (Ṣifāt) of Allāh Ithbāt (afﬁrming) A few scholars held a different approach to such verses. They afﬁrmed the literal meaning of the words but at the same time negated that they could be referring to a limb or that Allāh could resemble the creation. A Muslim should believe in everything Allāh has mentioned about Himself and leave the realities of the mutashābihāt to Allāh . The similarity in all the above approaches is that all three schools agree that nothing of the Creation of Allāh  resembles Allāh .</p>
+</article>
+<article class="topic" id="aq--id-istiw--">
+<h3>Istiwā'</h3>
+<div class="diagram"><img src="images/Coursebook8-aq--id-istiw--.png" alt="Diagram: Istiwā'" loading="lazy"></div>
+<p>There are different verses and a#ādīth which have a location attributed to Allāh. For example: a) "The All-Merciful istaw\ (literal meaning: positioned Himself) upon the Throne." (Qur'ān 20:5) b) "Have you become fearless of Him who is in the sky if He makes you sink into the earth, and it starts trembling at once?" (Qur'ān 67:17) c) "Indeed, We have created man, and We know whatever thoughts his inner self develops, and We are closer to him than his jugular vein."</p>
+<p>(Qur'ān 50:16) d) "Allāh encompasses everything." (Qur'ān 4:126) e) "He is with you wherever you are…" (Qur'ān 57:4) The above verses are also regarded as mutashābihāt. The meaning is unknown. The outward meanings suggest that Allāh  is in a place and result in a resemblance between Allāh  and His Creation.</p>
+<p>Such an outward meaning goes against the universally accepted principle of Allāh  being totally free from any resemblance to His Creation.</p>
+<p>This is understood from the verses:</p>
+<p>"There is nothing like unto Him, and He is the Hearing, the Seeing." (Qur'ān 42:11)</p>
+<p>"Allāh is Independent of (all) creatures."</p>
+<p>(Qur'ān 3:97)</p>
+<p>"And none is like Him." (Qur'ān 112:4) To believe in any of the following regarding 'where is Allāh?' is totally incorrect and can take one out of Islām: a) Believing that Allāh is 'physically' in the Heavens or 'physically sitting' on His Throne like a created being would. This is known as anthropomorphism (tashbīh).</p>
+<p>Sitting, standing, coming into contact, separation, moving from one place to another, etc. are all characteristics of created bodies from which Allāh  is free. b) Believing that Allāh  is 'physically' everywhere and 'physically' with His Creation and in every space. c) Rejecting and denying the mutashābihāt texts concerning the attributes of Allāh altogether.</p>
+<p>What is the correct belief? The Ahlus Sunnah wal Jamā'ah deal with verses where there is a location attributed to Allāh  with tafw|} and ta'wīl in the following way. The early scholars who practiced tafw|} believed that the outward meaning was not intended at all and that only Allāh  knows the real meaning of these texts. They completely handed over the meaning to Allāh 's knowledge without interpreting it literally or ﬁguratively.</p>
+<p>Thus, tafw|} is to fully believe in the texts, but due to their meaning not being established strongly and their apparent meaning contradicting other strong texts, the knowledge and the reality of these texts are consigned to Allāh  and interpretation and trying to understand them is abandoned. We understand that they have meanings beﬁtting Allāh , but it is impossible that they would have physical meanings, since they do not beﬁt Allāh . These 'physical meanings' include resemblance of any deﬁciencies found in the Creation. Before we make our ﬁnal conclusion, we restate that it is impermissible to attribute any of these anthropomorphic terms to Allāh .</p>
+<p>We afﬁrm the words indicating location and Throne for Allāh , and also those which indicate that He is everywhere. However, we cannot comprehend the reality of such words.</p>
+<p>Other scholars from the latter generations practiced another acceptable method known as ta'wīl. They interpreted all verses which indicate or apportion a location to Allāh . Thus, the following āyah was interpreted to mean 'Allāh 's knowledge is with you and you cannot hide from Him':</p>
+<p>"He is with you wherever you are…" (Qur'ān 57:4) The following verse was interpreted to refer to Allāh  making orders and administrating over the affairs of Creation:</p>
+<p>"The All-Merciful istaw\ upon the Throne."</p>
+<p>(Qur'ān 20:5) The simple answer to the question 'where is Allāh ?' would be: The word 'where' cannot apply to Allāh  as Allāh  exists beyond time, space, location and 'physical' direction.</p>
+<p>The great Imām, Imām Malik  would scold a person asking about the meaning of "The All- Merciful istaw\ upon the Throne."</p>
+<p>Allāh  has also warned us that only deviant people discuss and keep trying to ﬁnd out the meaning of such texts. Allāh  says:</p>
+<p>"So as for those in whose hearts there is a deviation (from the truth) go after such part of it as is mutashābih, seeking (to create) discord, and searching for its interpretation (that meets their desires), but none knows its hidden meanings save Allāh." (Qur'ān 3:7)</p>
+<p>Allāh  has praised the Believers who simply believe in such verses and submit and surrender that they do not know the reality and only Allāh  knows.</p>
+<p>"And those who are ﬁrmly grounded in knowledge say: 'We believe in it, the whole of it (clear and unclear verses) are from our Lord.' And none receive admonition except men of understanding." (Qur'ān 3:7)</p>
+</article>
+<article class="topic" id="aq--id--m-n">
+<h3>Īmān</h3>
+<div class="diagram"><img src="images/Coursebook8-aq--id--m-n.png" alt="Diagram: Īmān" loading="lazy"></div>
+<p>Īmān refers to being convinced about everything the Prophet Muḥammad  has presented to us from Allāh . It is not necessary for a person to be regarded as a Believer to know everything about Islām in detail. To simply have the belief in one's heart that 'everything the Prophet  has presented to us, is from Allāh  and is true' is sufﬁcient to make one a Muslim. So whoever believes in Allāh  and whatever has come from Allāh , and believes in the Messenger Muḥammad  and whatever has come from him is a Believer. The recitation of the shahādah is to declare oneself a Muslim in this world so that they may be treated as a Muslim. A person who says the shahādah will be treated as Muslim, will be deemed permissible to marry, and their slaughtering of animals will be valid. Furthermore, inheritance laws will apply to them and when death comes to them they will be privileged with Janāzah Ṣalāh and burial alongside other Muslims. A person who has conviction in the heart encompassing all that would make them a Muslim, yet fails to utter the shahādah, cannot be treated as a Muslim.</p>
+<p>A person who has the conviction in his heart and recites the shahādah will be treated as a Muslim by fellow Muslims and be regarded as a believer in the sight of Allāh . A person who does not have conviction in his heart but merely recites the shahādah will be treated as a Muslim by fellow Muslims but will not be regarded as a Believer in the sight of Allāh . Such a person will be a Mun\ﬁq (Hypocrite).</p>
+<p>Īmān is an entity which in itself doesn't multiply or decrease. Īmān doesn't have units which can multiply or diminish. Rather, īmān is one unit which 'Aqā'id strengthens or weakens.</p>
+<p>Therefore, if a person does many good actions, his īmān will strengthen. If a person performs sins, his īmān will weaken. It is similar to a man who works out in a gym. The more he works out, the stronger he will become. His muscles will get bigger. If he does not work out, he will become weak and his muscles will disappear. Īmān is like such a man: it gets stronger by working out with good actions. It becomes weak when a person stops working.</p>
+</article>
+<article class="topic" id="aq--id-consulting-the--ulam--">
+<h3>Consulting the 'Ulamā'</h3>
+<div class="diagram"><img src="images/Coursebook8-aq--id-consulting-the--ulam--.png" alt="Diagram: Consulting the 'Ulamā'" loading="lazy"></div>
+<p>Islām and one's own logic The Islām revealed by Allāh  to the Prophet and practised by the Ṣa#ābah is the Islām upon which our success is guaranteed in this World and the Hereafter. Any other form or version of Islām is not the Islām of success.</p>
+<p>Allāh  and the Prophet  want us to practice Islām the way it was revealed and practised in the time of the Ṣa#ābah. The way they practised Islām was approved by Allāh and the Prophet . Allāh  declared His happiness and satisfaction with them whilst they were alive, when He said:</p>
+<p>"And the ﬁrst forerunners in Faith among the Muhājirūn and the Anṣar and those who followed them with good conduct - Allāh is pleased with them and they are pleased with Him, and He has prepared for them gardens beneath which rivers ﬂow, wherein they will abide forever. That is the great attainment." (Qur'ān 9:100)</p>
+<p>The Prophet  said: "My Companions are like the stars. Whichever of them you follow, you will be rightly guided." (al-Bayhaq|) If we practice and understand Islām differently to the way they practised and understood Islām, then such an Islām will not bring success for us in this world nor the Hereafter.</p>
+<p>Abū Bakr  said: "Which sky will shade me and which land will harbour me if I were to speak about the Book of Allāh  without sound knowledge?"</p>
+<p>'Umar  said: "Beware of (using) logic in your 'Aqā'id dīn."</p>
+<p>Abdullah ibn Mas'ūd  said: "Your 'ulamā' will pass away. Thereafter, people will begin to take ignorant people as leaders who will use their logic to come to solutions (in matters of dīn)."</p>
+<p>'Al|  said: "If Islām was based upon intellect alone, the bottom of a leather sock should have been wiped instead of the upper portion."</p>
+<p>Abū Mūsā al-Ash'ar|  said: "If somebody has knowledge, he should teach the people. If he does not have knowledge, then he must not speak on matters which he does not possess knowledge of, or else he will be among the pretenders and will leave the dīn."</p>
+<p>Islām doesn't come with things which contradict the intellect. But it sometimes comes with things which the intellect alone cannot understand without the aid of waḥy. When Abū Bakr  became the leader, he would never make his own conclusions and rulings from his own logic. He would ﬁrst look for an answer in the Qur'ān, thereafter, he would look in the a#ādīth. If he still could not ﬁnd the answer, he would ask other Ṣa#ābah if they had heard anything from the Prophet  about the issue he was researching. If nobody knew even then, he would gather all the learned people and come to a conclusion with all the learned Ṣa#ābah.</p>
+<p>'Umar  when he became leader, would do exactly as Abū Bakr  had, except that he would look after the Qur'ān and a#ādīth in the judgements made by Abū Bakr  before asking the rest of the Ṣa#ābah.</p>
+<p>'Abdullāh ibn Mas'ūd , 'Abdullāh ibn 'Abbās , Ubayy ibn Ka'b  and other Ṣa#ābah also would never use their own logic to come to solutions. They would always refer to higher authorities and more learned people.</p>
+<p>Refraining from trying to understand Islām from one's own logic has always been the practice of 'Aqā'id the Ṣa#ābah and all the great 'ulamā' until today. For centuries, Islām has always been learned from authentic 'ulamā' who have not only studied under reliable authorities, but who have practiced Islām under that same watchful eye.</p>
+<p>Referring to authentic 'ulamā' In today's advanced era, with information available at the touch of a button, seeking knowledge from 'ulamā' in the near locality has become rare. In the past, people would travel for months in search of a scholar, whilst today we fail even to travel for a few hours or minutes to seek knowledge from a scholar.</p>
+<p>There is no harm in reading, learning and asking 'ulamā' over the internet. However, one must ﬁrst be sure that the website and scholars are authorised, authentic and reliable.</p>
+<p>Many people put forward opinions on Islām without any authorisation and without sound knowledge.</p>
+<p>Allāh  has ordered us to refer to 'ulamā' who possess both these qualities.</p>
+<p>Allāh  says: "O you who believe, obey Allāh and obey the Messenger, and those with authority among you. If you differ in anything among yourselves refer it to Allāh and His Messenger if you believe in Allāh and the Last Day: that is best, and most suitable for the ﬁnal determination."</p>
+<p>(Qur'ān 4:59)</p>
+<p>"So ask the people of knowledge if you do not know." (Qur'ān 16:43)</p>
+<p>"Had they referred it back to the Messenger or to those of authority among them, then the ones who can draw correct conclusions from it would have 'Aqā'id known about it. And if not for the favour of Allāh upon you and His mercy, you would have followed Shayṭān, except for a few." (Qur'ān 4:83) Who are the 'ulam\? They most certainly are not those who self-study and learn a bit of Arabic and a few a#ādīth. The Beloved Messenger himself described the 'ulamā' saying:</p>
+<p>"The 'ulamā' are the inheritors of the prophets"</p>
+<p>Thus, authentic 'ulamā' are those who have been granted authorisation by senior 'ulamā' who themselves were granted authorisation. Every authentic and reliable scholar has a link and chain of transmission from himself to the Prophet . This is why the 'ulamā' are the rightful inheritors of the knowledge of the prophets, inheritors of the real understanding of the dīn and inheritors of the legacy of the prophets. This is why a normal person who doesn't have this chain, ijāzah (authorisation) and inheritance can never be the same as an 'ālim who does. The Beloved Messenger  said: "Indeed the example of the 'ulama is like that of stars in the sky by which guidance is obtained in the darkness of the land and water. When stars lose their radiance, it is likely that travellers will go astray." (Aḥmad) The Beloved Messenger said: "Behold!</p>
+<p>Indeed the World is accursed, and all that it contains is accursed except the remembrance of Allāh and that which brings one closer to Allāh, an 'ālīm or a seeker of the knowledge of dīn."</p>
+<p>(Tirmidhī)</p>
+<p>The importance of isnād (Chain of transmission)</p>
+<p>One of the special features of this Ummah is the tradition of isnād.</p>
+<p>Everything that has reached us has a chain of narrators. We know every person in that chain linking us with the Prophet . This is a miracle of this Ummah which Allāh  has granted us. Everything is recorded. It prevents anybody else coming with new statements and new things as they would have no chain of narration for them.</p>
+<p>'Abdullāh ibn al-Mubarak said: "Isnād (having a chain of narration) is part of the dīn. If there were no such thing, anybody would say as they pleased."</p>
+<p>'Isnād' means 'to rest upon' or 'to support'. A person who has an isnād/chain of narration, is supported by a number of scholars who came before him. His views are more likely to be identical to the views of those that came before him. There is a shared commonality with the previous generations. A person without isnād has no support from the previous generations. Very likely, he will be 'supporting himself' and have his own views and ideas. He may be identical in some issues to the earlier scholars and Ṣa#ābah, but very possibly he will be in serious error.</p>
+<p>Hence, people who do not have isnād and have not studied under scholars can very possibly create their own understandings and conclusions and can be different to the Ṣa#ābah and earlier scholars. That is why we should always refer to or consult with scholars who have been educated in the classical mode and who therefore beneﬁt from a sound isnād. This will save us from the negative inﬂuences of all the different and strange things people are saying in the name of Islām. We need to follow the Islām practised by the Ṣa#ābah. Those scholars who can call on an isnād have 'Aqā'id a connection with the Ṣa#ābah. Between them and the Ṣa#ābah, there are a number of great scholars with whom they are soundly connected.</p>
+</article>
+</section>
+
+<section class="subject" id="akhl-q">
+<h2>Akhlāq</h2>
+<article class="topic" id="akhl-q-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>Appreciate the shortness of this worldly life.</p>
+<p>Highlight the importance of taqwā in a person’s life and the fruits of leading a life full of taqwā.</p>
+<p>Recognise the meaning of tawakkul and its merits.</p>
+<p>Utilise the beautiful gift of tawbah and understand its beneﬁts.</p>
+<p>Apply modesty in gaze and acknowledge the wisdom behind modesty in a person’s life.</p>
+<p>Shortness of this Life "Know well that the worldly life is but a play and an amusement, a show of beauty, an exchange of boastful claims between you, and a competition of increase in riches and children. (All this is) like a rain, the growth of which attracts the farmers, then it withers, and you see it turning yellow, then it becomes straw. And in the Hereafter there is a severe punishment (for the disbelievers), and forgiveness from Allāh and (Allāh's) pleasure (for the believers and the righteous). The worldly life is nothing but a material of delusion." (Qur'ān 57:20) The Prophet  said: "The life of this world compared to the Hereafter is as if one of you were to put his ﬁnger in the ocean and take it out again then compare the water that remains on his ﬁnger to the water that remains in the ocean." (Ṣaḥīḥ Muslim) The life of this world is explained most beautifully in this āyah of Sūrah Ḥadīd, where Allāh shows us the stages of our life.</p>
+<p>Shortness of this Life First we have 'lahw,' an Arabic term which means a play without any motive. When we were younger we played with toys without any purpose. This is the stage of 'lahw.' Thereafter a child grows up and now his or her play is 'la'ib': purposeful play motivated by aspirations to win and to rise to a challenge. The games are for a trophy, medal or to stay at the top of the league. Can you remember the times when you used to play with your toys? Look how fast that time has gone. Similarly we will pass through the life of this world with great speed. After the child's days of play comes  adolescence, the teenage years, the days of winks, nods and of butterﬂies in the stomach. Youngsters now feel the need to dress and behave to impress: in this brave new world, peer pressure is the main driving factor. The years move quickly into the days of early adulthood and marriage. Now the rivalry steps up another level... Who's driving the latest car? Who has the best job? How many children has she got?</p>
+<p>Shortness of this Life The Qur'ānic verse mentioned contains a metaphor which should inspire us to reﬂect on all these stages in our short lives. Allāh  invites us to reﬂect on our surroundings. He tells us to look at the crops, plants and trees. Like the farmer is joyous to see the rain come down to feed his crops, so when a child is born the happiness of the parents knows no bounds. This child (nurtured plant) then grows into the 'summer' of life, giving the appearance of health and vitality. By using the metaphor of crops, Allāh wants us to see just how quickly this verdant pasture turns into the yellows of autumn. 'Autumn' in terms of the life cycle of humans is that time when they lose the strength and vitality that came to them in their young adult years. Just as the plants and crops wither and bend quickly, similarly we humans become of the people who have passed away and been forgotten. To use another comparison, we are but words on a page in the pages of the history of mankind. These pages are turning quickly, the story is moving deceptively fast. One moment we are taking our turn amongst our peers, living in brick houses, and driving in metal cars that ﬂash and glimmer in the sunlight, the next moment our houses are made of simple wooden caskets that ﬁt six feet under the ground. All that we aspired for will be left here in this world, if we forget our real purpose.</p>
+<p>Shortness of this Life Dear students, Allāh  wants us to remember our real abode! He says clearly: 'And in the Hereafter there is a severe punishment (for the disbelievers), and forgiveness from Allāh  and (Allāh 's) pleasure (for the believers and the righteous)'. Depending on how we spent our short time in this world we will be rewarded or punished. The worldly life is nothing but a material of delusion. In such a short life, one that is becoming shorter as we read each sentence, what are we doing to guarantee ourselves a pleasurable ﬁnal home? As each second passes by, are we working hard for the toy cars and the brick houses, and are we preferring them over the houses made of gold, encrusted with ﬁne rubies and precious stones, such as those Allāh has promised to the inhabitants of Jannah? A saint once said that he understood the shortness of this life by understanding the image of watching a man selling a block of ice on a hot day. The ice melts, because of which the seller is in great anguish: as each minute goes by, the value of his ice block decreases.</p>
+<p>Shortness of this Life Imām Ghazāli  narrates a story about a man who takes a walk in the jungle. The man realises that there is a lion behind him, and begins to run in fear, with the lion running after him. Sometimes the lion comes extremely close to him, and sometimes there is a distance between the two, but the lion is always there. As he is running, the man spots a well. He turns and runs towards it. Jumping into the well, he hangs on to the rope used for drawing up the bucket, thinking he will be safe from the lion. The prowling lion waits at the top of the well, knowing that the man can't hang from the rope forever. Sooner or later, he will be able to sink his teeth into the man. The man looks down into the well and is shocked to see a serpent with its mouth wide open and ready to bite, waiting for the man to fall so it can devour him. In horror the man turns to one side, still clinging onto the rope. Close to him, on the rope, are two mice, one black and one white, both nibbling away at the ﬁbres of the rope he is clinging to.</p>
+<p>Shortness of this Life Above the man is the lion, below him the serpent, and near him on the rope are the mice. All three are the enemies of the man. All three are bringing him closer to an inevitable end. There is no way out. He twists his neck to look behind him and sees a bees nest attached to the wall of the well. It has been abandoned and the bees have left the honeycomb laden with pure, sweet honey. The honey begins to drip and the sweetness takes away all thoughts of the lion, the serpent, and the mice. His pressing reality remains the same, though, as none of the animals will disappear. The lion is death. It is always there, always waiting for the moment at which to take our life. The white mouse is the day, and the black mouse is the night, both eating away at our time. We can't bring back seconds, minutes, hours or days. What the mice have eaten is gone for good. Yet every second that we cling on to that rope is necessary. Clinging on to the rope is the only thing that can save us temporarily until the mornings and the nights come to an end and our fall arrives.</p>
+<p>Shortness of this Life The serpent is our grave, the place of rest if we fall or let go of the rope eaten away by the mice. The honeycomb and the sweetness brought by its taste, is this World, this worldly life. It is temporary and its pleasures are there only for a small amount of time. Soon enough the sweetness is gone. When the sweetness disappears, we realise exactly how much time we have left before the mice ﬁnish eating and we fall prey to the serpent. The world can bring joy and happiness, but for an extremely limited period of time. It will never last long. Why? Because we have the lion above us, the mice by our side, and the serpent beneath us. And no matter how long we may close our eyes, dear students, they will always be there.</p>
+<p>Each of us is that individual trapped in the well. We each need to remember that the sweetness will only last momentarily, and in reality, there is far more to think about and do before the rope is cut. And above all, death is inescapable, and the ﬁnal return is to Allāh  alone.</p>
+<p>Shortness of this Life All the nations that came before us have all been wiped out. Many of them thought they were invincible, or even immortal. Yet death came to them in the end. A day will come when we too will have to leave this world. We need to prepare for that day.</p>
+<p>Let's look at the shortness of this life through another example. Imagine a person lives for 60 years and sleeps an average of 8 hours per day. That means he spends 20 years of his life sleeping. If he prayed 'Ishā' and Fajr Ṣalāh at their correct times then:</p>
+<p>'Uthmān  said: "I heard the Messenger say: 'Whoever prays 'Ishā' in congregation, it is as if he spent half the night in prayer, and whoever prays Fajr in congregation, it is as if he spent the whole night in prayer.' (Ṣaḥīḥ Muslim)</p>
+<p>That's 20 years of worship credited to his account.</p>
+<p>What about the remaining 40 years, the time when this person was awake? For what share of those years would he have been engaged in eating, drinking and answering the call of nature?</p>
+<p>Shortness of this Life A good estimate would be about ﬁve years in total. Now, if that person ate, drank and went to the bathroom with the correct intention and du'ā's before and after, then all would be considered as 'Ibādah! That leaves thirty-ﬁve years. For the ﬁrst ten or twelve years a person is not fully accountable for his deeds, so let us be generous and disregard those twelve. That leaves us with twenty-three years. You have about twenty-three years in this life to make a difference, to prepare for the everlasting life of the Ākhirah. If a person were to be offered centuries of happiness and his heart's desire in return for one hour of obedience, and he turned it down, then he would be considered a fool. His friends and family would scratch their heads at his poor judgement.</p>
+<p>Let us look at the life of this world in comparison to the life of the Ākhirah.</p>
+<p>Allāh  says:</p>
+<p>"One day with your Lord is like one thousand years according to your calculation."(Qur'ān 22:47)</p>
+<p>Shortness of this Life So if one day of the Ākhirah is a thousand of our years, one hour from the days of the Ākhirah is approximately 41 years of our life. A person living for sixty years is literally spending one and a half hours of one day of the Ākhirah! How short does our life seem now?</p>
+<p>Imām Ghazāli  explains the length of the life of the Ākhirah by giving a beautiful parable. He said that if the entire Earth's contents were to be emptied out and ﬁlled with mustard seeds and every thousand years a bird were to come and take one mustard seed, a time would come when all the seeds would cease to exist, even though the process would be exceedingly slow. However, the life of the Ākhirah is not even slow like this. It will simply never end! It is totally eternal. The great jurist, Imām Idrīs ash-Sh\ﬁ'| said:</p>
+<p>"The worldly life is but a moment: so make it a moment of obedience."</p>
+</article>
+<article class="topic" id="akhl-q-taqw-">
+<h3>Taqwā</h3>
+<div class="diagram"><img src="images/Coursebook8-akhl-q-taqw-.png" alt="Diagram: Taqwā" loading="lazy"></div>
+<p>The literal meaning of 'taqwā' is to abstain. When it is used in conjunction with Allāh , taqwā means to abstain for the fear of Allāh , to have the awareness that Allāh  is watching us at all times which inevitably will result in one abstaining from sins.</p>
+<p>Taqwā is one of the greatest qualities a believer can have and has been mentioned in the Qur'ān numerous times. The believers have been commanded to have taqwā in all aspects of their lives.</p>
+<p>Taqwā is to abstain from everything that Allāh has forbidden for us. When a person abandons a life of sin he adopts a certain level of taqwā and therefore becomes conscious that there is an upper authority to which he will have to answer. A person who leads a life of taqwā and abandons a life of sin will truly experience a wholesome life in this world and true happiness in the Ākhirah. A person who craves the fulﬁlment of all his desires may seem to be happy outwardly, they may experience the thrill or the pleasures of one sin or another, but the inner happiness is removed from their life.</p>
+<p>The cost of leading a life of sin is much greater than the quick temporary pleasure felt at the time of indulgence. A great many people have spent their lives following their desires, thinking that they will eventually be satisﬁed, but the end result is that they become engulfed in a miserable web. As we know, a web is a sticky, tangling trap. The greatest harm a person does when they commit a sin is that they break the connection with their Creator. They should ask themselves if the materialistic pleasure is really worth it. The owner of happiness and success is Allāh . A person may purchase the most expensive bed but he cannot buy the sleep that he supposes he will be able to have with that bed. Indeed, the gift of sleep comes from the Owner of peace and rest: Allāh .</p>
+<p>You can have the most good-looking, intelligent spouse but you cannot have the love from that person unless the Owner of love places love between you. When the Owner of everything is none other than Allāh  then ask yourself why are you watching those things you watch? Why are you listening to those tracks you listen to? Is it for a pleasure that truly lasts? Taqwā teaches us that Allāh 's displeasure is something that we should be careful to avoid.</p>
+<p>If and when a sin does occur we must not sit and 'stew' on it, rather we should repent to Allāh immediately and start anew. When a person tries their best to stay away from sins and leads a life of taqwā, Allāh  blesses them immensely.</p>
+<p>"Whoever fears Allāh, He brings forth a way out for him, and provides him (with what he needs) from where he cannot even imagine." (Qur'ān 65:2-3)</p>
+<p>Many a time we get into situations where we see no practical way out or no solution. Allāh  promises a person who has taqwā that He will bring a way out from every difﬁcult situation. Sub#ānallāh!</p>
+<p>Today many people are worried about their provision and sustenance. Often we make a great fuss about household budgets and what earnings we feel we 'need' to sustain our quality of life. By leading a life of taqwā, Allāh  will grant us the comforts and provisions from where we least expect them.</p>
+<p>Allāh  says:</p>
+<p>"O you who believe, if you fear Allāh, He will provide you with a Criterion (to distinguish between right and wrong) and will write off your evil deeds and will forgive you. Allāh is the Lord of great bounty." (Qur'ān 8:29)</p>
+<p>Allāh  will grant a special gift for those who abstain from sins: the ability to distinguish between good and evil.</p>
+<p>Taqwā, then, is something that is needed to guide us through life, to give us conﬁdence, and to make the many decisions which will affect our families and communities. If we lead a life of taqwā, Allāh will grant us that distinct ability to choose right from wrong in all matters.</p>
+<p>There are many ways to gain taqwā.</p>
+<p>One of the easiest ways, the Qur'ān tells us:</p>
+<p>"O you who believe, the fasts have been enjoined upon you as they were enjoined upon those before you, so that you may be God-fearing." (Qur'ān 2:183)</p>
+<p>Fasting is a great way to create that self restraint in the body. The food is there but the fasting person will abstain. They are learning to control their desires.</p>
+<p>Practice of this will allow them to control the 'nafs' when invited to temptation. Our Beloved Messenger Muḥammad  said:</p>
+<p>"Whosoever leaves something for the sake of Allāh, then Allāh will grant that person something better." (Aḥmad) So anytime you abandon a sin and you reject the invitation to engage in the disobedience of Allāh , then remember you are making yourself eligible for all the above blessings. How long will the temptation last for? Steer clear of it and control yourself, and you'll see the blessings ﬂood into your life. You will become the happiest person.</p>
+<p>Our Beloved Messenger Muḥammad  said:</p>
+<p>"Three persons of a people who came before you were on a journey when they were overtaken by a storm and therefore they took shelter in a cave. A rock slipped down from the mountain and blocked the exit from the cave.</p>
+<p>One of them said: 'The only way for deliverance left is to beseech Allāh  in the name of some virtuous deed.' Thereupon one of them supplicated, 'O Lord, I had a cousin whom I loved more passionately than any man loves a woman. I tried to seduce her but she would have none of me, till a season of great hardship due to famine, she approached me (for help) and I gave her one hundred and twenty dinars on condition that she would engage in sin with me. She agreed, and when we got together, she pleaded: 'Fear Allāh, and do not break the seal unlawfully'. At this point I moved away from her, despite the fact that I desired her most passionately, and I let her keep the money I had given her.</p>
+<p>O Lord, if I did this thing seeking only your pleasure, then please relieve us of the distress in which we ﬁnd ourselves.' (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Together with the other two people's prayers, the rock moved enough for them to exit. May Allāh allow us to protect our desires and lead a life of taqwā.</p>
+<p>Tawakkul Tawakkul means reliance upon Allāh .</p>
+<p>Everything that happens in the world happens with the will of Allāh . Therefore, a Muslim should place his trust in Allāh  and rely solely upon Him in all matters.</p>
+<p>"He is the Lord of the East and the West; there is no deity except Him, so take Him as Disposer of your affairs." (Qur'ān, 73:9)</p>
+<p>"…And whoever relies upon Allāh – then He is sufﬁcient for him." (Qur'ān, 65:3)</p>
+<p>"And He will provide him from (sources) he never could imagine. And whosoever puts his trust in AkhlāqAllāh, then He will sufﬁce him. Verily, Allāh will accomplish his purpose. Indeed Allāh has set a measure for all things." (Qur'ān 65:3)</p>
+<p>"If Allāh helps you, none can overcome you. If He forsakes you, who is there, after that, that can help you? In Allāh, then, let believers put their trust." (Qur'ān 3:160)</p>
+<p>"Say: 'Nothing will happen to us except what Allāh has decreed for us. He is our protector.' And on Allāh let the believers put their trust." (Qur'ān 9:51)</p>
+</article>
+<article class="topic" id="akhl-q-tawakkul">
+<h3>Tawakkul</h3>
+<div class="diagram"><img src="images/Coursebook8-akhl-q-tawakkul.png" alt="Diagram: Tawakkul" loading="lazy"></div>
+<p>The Prophet said: "If you truly put your trust in Allāh, He would provide you (sustenance) as He provides the birds: where they leave in the morning with empty stomachs and return with full stomachs." (Tirmidhī)</p>
+<p>Umm Salamah  narrated that the Prophet said:</p>
+<p>"There is no Muslim that is afﬂicted with a calamity, and he says what Allāh  has commanded him to say: 'To Allāh we belong and to Him we will return! O Allāh! Give me the rewards (of being patient over) this calamity, and grant me something better than it to replace it,' except that Allāh will give him something better to replace it."</p>
+<p>Umm Salamah  said "So when (my husband)</p>
+<p>Abū Salamah  passed away, I said this du'ā', but could not help thinking, 'Who is better than Abū Salamah  (i.e. no one can replace Abū Salamah )?' Then the Prophet  himself sent a message of proposal to me, so Allāh blessed me with someone better than Abū Salamah " (Ṣaḥīḥ Muslim)</p>
+<p>The famous Prophet Ibrāhīm  was about to be thrown in the ﬁre. A huge ﬁre was burning in front of his eyes. However, he was not scared of the ﬁre. He had full tawakkul and trust in Allāh . He knew Allāh  controls everything and Allāh  controls the ﬁre also. He placed his trust in Allāh alone to save him. When Ibrāhīm  was thrown into the ﬁre, instead of allowing it burn him, Allāh  changed the ﬁre and made it cool and comforting!</p>
+<p>When the Prophet  was about to leave Makkah and make hijrah to Madīnah, his house was surrounded by the Quraysh. They all wanted to assassinate the Prophet . The Beloved Prophet  placed his trust in Allāh and left his home. He recited the Qur'ān as he left, and walked right past the Quraysh. Not a single person saw the Prophet ! This is tawakkul! After seeking the means and doing whatever we can, leaving everything to Allāh and placing our full trust in Him. Despite it appearing impossible, when full trust is placed in Allāh , He can make it entirely possible. In everything we do, we should ask Allāh  and seek His help. He can make everything easy and achievable.</p>
+</article>
+<article class="topic" id="akhl-q-tawbah">
+<h3>Tawbah</h3>
+<div class="diagram"><img src="images/Coursebook8-akhl-q-tawbah.png" alt="Diagram: Tawbah" loading="lazy"></div>
+<p>"Truly, Allāh loves those who turn unto Him in repentance and loves those who purify themselves"</p>
+<p>(Qur'ān 2:222)</p>
+<p>"O you who believe, turn to Allāh with a faithful repentance. It is hoped from your Lord that He will write off your faults, and will admit you to the Gardens beneath which rivers ﬂow." (Qur'ān 66:8)</p>
+<p>"Except the one who repents and believes and does good deeds, then Allāh will replace the evils of such people with good deeds, and Allāh is Most-Forgiving, Very-Merciful"</p>
+<p>(Qur'ān 25:70)</p>
+<p>Anas  narrates that the Beloved Messenger Muḥammad  said: "Every son of Ādam is a sinner and the best of sinners are those who repent."</p>
+<p>(Tirmidhī)</p>
+<p>There are three conditions of Tawbah:</p>
+<ul><li>Regret</li><li>Abandoning that particular sin immediately</li><li>Making a ﬁrm promise never to return to that</li></ul>
+<p>particular sin again.</p>
+<p>Once these three conditions are present, no matter how large the sin may be, or how many sins a person may have committed, Allāh will forgive.</p>
+<p>Anas  who said: I heard the Messenger say, “Allāh the Almighty has said: ‘O Son of Ādam, as long as you invoke Me and ask of Me, I shall forgive you for what you have done, and I shall not mind. O Son of Ādam, were your sins to reach the heights of the sky and you then asked forgiveness from Me, I would forgive you. O Son of Ādam, If you were to come to Me with sins as great as the Earth, and you were then to face Me, ascribing no partner to Me, I would bring you forgiveness as great as it too.’ ” (Tirmidhī)</p>
+<p>Abū Sa'|d al-Khudr|  reported that the Beloved Messenger  said: 'There was a person before you who had killed ninety-nine persons and then made an inquiry about the learned persons of the world (who could show him the way to salvation). He was directed to a monk. He came to him and told him that he had killed ninety-nine persons and asked him whether there was any scope for his repentance to be accepted. He said: "No." He killed him also and thus completed one hundred. He then asked about the learned persons of the earth and he was directed to a scholar, and he told him that he had killed one hundred persons and asked him whether there was any scope for his repentance to be accepted. He said: "Yes. What stands between you and the repentance? You had better go to such and such land: there you will ﬁnd people devoted to prayer and worship and you will be able to worship along with them. Do not come back to this land of yours since it has been an evil land (for you)."</p>
+<p>So he went away and he had hardly covered half the distance when death came to him. Immediately, there was a dispute between the angels of mercy and the angels of punishment. The angels of mercy said: "This man has come to Allāh as a repentant and remorseful man." The angels of punishment said: "He has done no good at all." Then there came another angel in the form of a human being in order to decide between them. He said: "You measure the land to which he has drawn near." They measured it and found him nearer to the land where he intended to go (the land of piety), and so the angels of mercy took possession of his soul.'</p>
+<p>Qatada said that Ḥasan told him that it was said to them that as Death approached him, he crawled upon his chest (and managed) to slip nearer to the land of mercy.</p>
+<p>One way to do tawbah is to recite istighfār which means to say "Astaghﬁrullāh" (I seek forgiveness from Allāh)</p>
+<p>One of the beneﬁts of istighfār is:</p>
+<p>Allāh is extremely happy when a servant turns to Him in repentance. A ḥadīth states:</p>
+<p>Anas ibn Mālik  reported that the Messenger said: "Allāh is more pleased with the repentance of His servant when he turns towards Him than one of you would be on ﬁnding the lost camel." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Imagine when the camel, the best and often only means of transport in those times, is lost and then found. Suba#ānallah! Allāh  does not need us. He is independent. We are in need of Him at all times, yet He is so merciful that He is happy at the repentance of His slave.</p>
+<p>Say: "O My slaves who have transgressed against themselves (by committing evil deeds and sins)!</p>
+<p>Despair not of the Mercy of Allāh, verily Allāh forgives all sins. Truly, He is Oft-Forgiving, Most Merciful. (Qur'ān 39:53)</p>
+<p>We must never despair of the mercy of Allāh . We should try to cultivate a habit of repenting to Allāh  every night before we sleep. In this way we can hope to sleep with a clean record, and our sins can be sent far away! Just like when an infection is left untreated it begins to cause more harm to other parts of the body, similarly when we fail to do tawbah immediately then the effect of the sin begins to spread to other parts of our life. The darkness overtakes the nur and our heart is ﬁlled with black dots which in turn move our heart away from wanting to pray or to do good actions. Many a time a person leaves good deeds because he does not feel inclined towards them and the reason for not feeling this inclination is the darkness that is within a person.</p>
+<p>Don't leave a single sin unaccounted for.</p>
+<p>Take the time to repent. On the other hand, a person should never commit a sin thinking to themselves that Allāh 's All-Forgiving nature will allow it to be wiped away with a little repentant prayer! That would be a foolish attempt to take advantage of the kindness of Allāh .</p>
+<p>Allāh  reminds us: "Inform my servants I am the Most-Forgiving, the Most Merciful and My punishment is the most painful." (Qur'ān 15:49-50) Just as Allāh forgives, He also has the power to take hold of us and punish us for the sins we commit. May Allāh  protect us. Āmīn.</p>
+<p>َAllāh ٰ reminds us in Sūrah Yāsīnَََََ "If We so will, We would wipe out their eyes (in this world) and they would be racing towards the way but how would they see?" (Qur'ān 36:66)</p>
+<p>Imagine if we were to wake one day and the faculties we used to sin against Allāh  the previous day were no longer with us: Those eyes that we used to sin are no longer functioning; those ears which we drummed with the latest tracks are no longer able to sense any noise through the headphones.</p>
+<p>What will we do? Who will we run to? Think, dear students! We are reading these words today, and that is a gift in itself. Allāh  has blessed us with many things: let us use them in the proper way and not abuse them.</p>
+<p>Let us all repent to the King of all kings from all sins including music. Our Beloved Messenger  has said: "Music cultivates hypocrisy in the heart just as water grows crops." (Abū Dāwūd) We live in an era where music has spread to such an extent that nobody can be free from it.</p>
+<p>Nothing in this world has been prohibited by the Almighty Creator except those things which are harmful to mankind and Allāh  only allows those things which are beneﬁcial for us.</p>
+<p>One of the reasons music is prohibited is because it plays around and affects one's emotions. It creates passion and excitement leading to various changes in a person which distract a person from the remembrance of Allāh .</p>
+<p>We have been created for a purpose. Allāh says in the Qur'ān:</p>
+<p>"I did not create the Jinns and the humans except for the purpose that they should worship Me." (Qur'ān 51:56) The messages of today's music follow a general theme of love, fornication, drugs and the freedom to do exactly as you please.</p>
+<p>N\ﬁ'  narrates: "Once when 'Abdullāh ibn 'Umar heard the sound of a shepherd's ﬂute he placed his ﬁngers in both his ears (to block the sound of the music) and he diverted his mount from that path. As Akhlāq we rode on he would say 'O N\ﬁ', can you still hear the sound?' I would say 'Yes.' He continued to ride, and only when I said 'I can no longer hear the sound' did he remove his ﬁngers from his ears. Then he returned to the road and said 'I saw the Messenger of Allāh  doing this when he heard the ﬂute of a shepherd.'" (Abū Dāwūd)</p>
+<p>As this chapter closes, let us begin a new chapter in our lives from today. A chapter of love for Allāh and His Messenger Muḥammad . This new approach will ﬁll us with care and compassion for others, and deliver to us a life full of piety. With the intention to change, we can always remember that the sins that we sometimes fall into can be erased with a little sincere tawbah. May Allāh  forgive us all. Āmīn.</p>
+</article>
+<article class="topic" id="akhl-q-modesty-in-gaze">
+<h3>Modesty in Gaze</h3>
+<div class="diagram"><img src="images/Coursebook8-akhl-q-modesty-in-gaze.png" alt="Diagram: Modesty in Gaze" loading="lazy"></div>
+<p>Modesty is a very important quality in Islām.</p>
+<p>Modesty should be in all our actions. The Prophet  said: "Īmān (faith) consists of more than sixty branches. And #ayā' (modesty) is a part of faith."</p>
+<p>(Ṣaḥīḥ al-Bukhārī) The eyes are a great blessing of Allāh . We use our eyes in everything we do in our day. These are given to us by Allāh .</p>
+<p>Allāh  reminds us by saying: Have We not made for him a pair of eyes?</p>
+<p>(Qur'ān 90:8)</p>
+<p>"Say it is He Who has created you, and endowed you with hearing (ears), seeing (eyes), and hearts. Little thanks you give."</p>
+<p>(Qur'ān 67:23)</p>
+<p>"He knows the treachery of the eyes, and all that the hearts conceal." (Qur'ān 40:19)</p>
+<p>Allāh  has ordered us to lower our gazes from certain things. We should not look at the opposite gender without need. This is known as the modesty of the eyes. We should feel ashamed if we use the eyes that Allāh  has given us in disobeying Him.</p>
+<p>Allāh  tells us: "Tell the believing men to lower their gaze and guard their private parts. That is purer for them. Indeed! Allāh is aware of what they do." (Qur'ān 24:30)</p>
+<p>"And tell the believing women to lower their gaze and guard their private parts."</p>
+<p>(Qur'ān 24:31) The Prophet  said: "Guarantee me six things from yourselves and I will guarantee you Paradise. Speak the truth, make good your promises, fulﬁl your trusts, guard your private parts, lower your gazes, and restrain your hands."</p>
+<p>(Aḥmad)</p>
+<p>"Three eyes will not see Hellﬁre. An eye that kept guard in the cause of Allāh; an eye that wept out of fear of Allāh; and an eye that abstained from looking at forbidden things." (Ṭabarān|)</p>
+<p>"The (ḥarām) glance is an arrow from the arrows of Iblīs. For He who abandons it, fearing Me, I shall replace it with īmān, the sweetness of which he will experience in his heart." (al-Mustadrak)</p>
+<p>"Whosoever leaves something for the sake of Allāh, then Allāh, the Mighty and Magniﬁcent, will replace it with something better than it." (Aḥmad) The Prophet  would make the following du'ā':</p>
+<p>O Allāh! I seek your refuge from the evil of my ears, from the evil of my eyes, from the evil of my tongue and from the evil of my heart. (Abū Dāwūd) We should respect other people's privacy. We should not look inside the houses of people when walking past. We should not look through the information on people's phones and other personal items without their permission.</p>
+<p>Anas ibn Mālik  narrated that he heard the Messenger of Allāh say: "The eye commits 'zina'"</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Abū Umāmah  narrated that the Beloved Messenger  said: "No Muslim gazes at a woman's beauty for the ﬁrst time and thereafter lowers his gaze except that Allāh creates within him the ability to perform worship, the sweetness of which he himself can taste." (Aḥmad)</p>
+<p>"Do not even go close to fornication. It is indeed a shameful act, and an evil way to follow." (Qur'ān 17:32)</p>
+<p>The human eye can distinguish about 10 million different colours. Our eyes are the windows to the mind and the heart. After having read all the above verses and a#ādīth it becomes clear to a person the stance Islām has taken on gazing at the opposite gender. Our Lord knows how our bodies function better than we do. This is why He has told us to protect the direction, the gaze of our eyes. Once we allow the images of strange women and men to be the centre of our gaze, then the space that we have in our hearts for the love of Allāh , His worship and good deeds will be taken.</p>
+<p>The greatest loss a person faces when he indulges in the lustful gaze is that he loses the connection he has with his Creator and Sustainer. There can be no greater loss than this.</p>
+<p>Ask yourself: would you like it if someone looked at members of your immediate family with the same lust that you gaze with? The person you are looking at is a member of someone's family! A person that falls prey to the habit of lustful gazes is never satisﬁed and craves for more. The next person seems much more appealing than the former and in this way they become obsessed with the lustful eye. If they are already married they become upset as they don't see the appeal in their spouse anymore. There is a saying that everything new is very alluring.</p>
+<p>How long does a person experience pleasure when gazing at the opposite gender? A few minutes? And then: what are the consequences? The immediate consequence is that happiness is taken away from this person's life. They may experience temporary thrills and quick pleasures but the wholesome experience in life is taken away for he is in the disobedience of his Creator. Just like a ﬁsh taken out of the water cannot rest until it is placed back in its comfort zone, similarly a Mu'min cannot rest when he has disobeyed his Creator. A sense of unrest overcomes the heart and then sadness overcomes. To relieve these symptoms, unfortunately many indulge further in sin, thinking this will make the happiness return, but it plunges them deeper into the abyss of loneliness.</p>
+<p>Remember the owner of the hearts is Allāh : He is the only one that can give the gift of peace and true happiness. Getting close to Him so that you can take delivery of this contentment and satisfaction is achieved by obeying Him.</p>
+<p>"There is no creature but He holds it by the forelock."</p>
+<p>(Qur'ān 11:56)</p>
+<p>The hearts of humanity are in His control.</p>
+<p>Allāh  can turn them whichever way He wishes. A famous saint once said that whenever he sinned, he and those around him always felt an immediate aftershock, to such a level that his horse, camel or donkey would rebel too.</p>
+<p>Let us taste the sweetness of īmān that Allāh has kept aside for those who are obedient to Him.</p>
+<p>Let us lead pure lives and lower our gaze when members of the opposite gender come in front of us. If we do so, if we give up that which we crave, that which we desire, then we will become the beloved of Allāh .</p>
+<p>Abū Hurayrah reports that the Beloved Prophet  said, "When Allāh loves a slave, He calls to Jibrā'īl and says: 'I love so-and-so, so love him.' Then Jibrā'īl loves him. After that he (Jibrā'īl) announces to the inhabitants of the Heavens that Allāh loves so-and-so, so love him. In turn, the inhabitants of the heavens (the angels) also love him and then acceptance is placed on the Earth for him."(Ṣaḥīḥ al-Bukhārī).</p>
+<p>Give up our pleasures for the sake of Allāh and see how Allāh  will reward us.</p>
+<p>Our Beloved Messenger Muḥammad said:</p>
+<p>"Whoever leaves something for the sake of Allāh, Allāh will replace it for them with something better." (Aḥmad) This is a simple rule: if we leave a thing for the sake of Allāh , Allāh will grant us something or someone better.</p>
+<p>Sub#ānallah.</p>
+<p>Let us not be deceived by Shayṭān, who whispers into our hearts "You're only speaking to her", "You're only looking at him brieﬂy", "Your heart is clean." These are the favourite deceptions of Shayṭān. He takes us into the realms of sins through the doors of righteousness: "I am tutoring this sister in the ways of Islām, I am trying to persuade him to accept the religion" etc.</p>
+<p>Ibn Kathīr  has mentioned of a very pious young man in the Ban[ Isrā'|l whose piety was known by all.</p>
+<p>Look how Shayṭān deceived him and pulled him down from the highest ranks of piety to the lowest ranks of shirk and kufr!</p>
+<p>The story of Barṣ|]\ During the time of the Ban[ Isrā'|l, there was a pious man who lived in a small village. His name was Barṣ|]\ and he worshipped Allāh a lot.</p>
+<p>One day, three brothers in the village had to go on a journey. But they had a sister and they did not want to leave her alone. So they went looking for someone to take care of her. The town people suggested that they leave her with Barṣ|]\, because of his piety. So they went to him and when they asked him, he said, "I seek refuge from the cursed Shayṭān. No, I cannot do this!"  This was because he was scared of falling into sin. But Shayṭān redoubled his efforts, coming to Barṣ|]\ in the form of waswasah (whisperings). As always, Shayṭān was  very smart and knew Barṣ|]\ had a soft heart. So he told Barṣ|]\, "What if they can't ﬁnd someone good and are forced to leave her with someone bad: wouldn't that be your fault?" Now Barṣ|]\ did not realise this was Shayṭān whispering in his heart, and because of his compassion for others, he decided to accept their request and help the woman.</p>
+<p>The story of Barṣ|]\ He let her stay in a house opposite the church. He did this so that it would be easy for him to leave her food outside the church and she could come and collect  it herself. But after sometime, Shayṭān returned. This time he told Barṣ|]\, "Why don't you leave the food closer for her, so that people don't see her moving back and forth alone?" Barṣ|]\ agreed and started leaving the food outside the house. But Shayṭān wasn't happy with this either, so sometime later, he returned and asked Barṣ|]\, "Why don't you go in and leave it on the table, so that no one sees her coming out and going in alone all the time?" Again, Barṣ|]\ agreed and he started leaving the food on the table.</p>
+<p>The story of Barṣ|]\ Then as time went by, Shayṭān returned and said to him, "Why don't you talk to her, she is all alone and has no one to talk to!" Barṣ|]\ agreed and started talking to her from behind a door (so as to screen himself). But this would lead them to almost shouting so that they could hear each other. Knowing this, Shayṭān asked Barṣ|]\ to just go in and talk to her, and ﬁnally, Shayṭān had got them alone together in a room. Shayṭān had completed the difﬁcult part. It wasn't long after that Barṣ|]\ and the woman went and committed fornication. And to make things worse, she also became pregnant. As soon as the baby was born, Shayṭān returned, and said to Barṣ|]\, "What have you done? Look at the result of your evil (i.e. the child)! Get rid of the evidence otherwise the brothers will kill you!"</p>
+<p>Barṣ|]\ killed the baby and buried it in the same room the woman was in. Shayṭān then told Barṣ|]\, "Do you think you can kill the child of a woman and expect her not to tell anyone?" and so Barṣ|]\ killed her and buried her alongside the baby! He then made a false grave in the grounds of the courtyard and when her brothers returned, he informed them that she had died of an illness. After seeing the grave and making du'ā' for her, they returned home and accepted Allāh 's decree.</p>
+<p>The story of Barṣ|]\ Later that night, Shayṭān came to one of them in a dream and informed him about what Barṣ|]\ had done and where the child and his sister could be found. The brother became upset and confused, and informed his brothers of the dream, and to their collective amazement, they realised that they had all had the same dream. Taking this as a sign of truth, they went and dug up the false grave to ﬁnd it empty. They then dug in the place that Shayṭān had shown them in the dream and found the bodies of the child and their sister!</p>
+<p>Furious, the brothers took Barṣ|]\ to the village leader to give out some suitable punishment. Barṣ|]\ knew that he would be given the death penalty.</p>
+<p>Shayṭān came to Barṣ|]\ again, for the ﬁnal time. This time he revealed himself and told him he was the one whispering the thoughts to him. And he said that he could save Barṣ|]\, only as  long as Barṣ|]\ would be willing to make sujūd to him! Barṣ|]\, out of desperation, placed his head, hands, knees and feet on the ground in front of the avowed enemy of mankind, thus  conﬁrming his kufr (disbelief). Shayṭān immediately said to him: "I am free of you, I fear Allāh, the Lord of the 'Ālamīn (mankind, jinns and all that exists)!" and disappeared. Barṣ|]\ was stoned to death and on the Day of Judgement he will be resurrected making sujūd to Shayṭān!</p>
+<p>The story of Barṣ|]\ Look how Shayṭān tricked him. He came to him as a friend, but displayed the behaviour of one who can only be described as  the  biggest enemy!</p>
+<p>(Their allies deceived them) like Shayṭān, when he says to man: "Disbelieve in Allāh." But when (man) disbelieves in Allāh, Shayṭān says: "I am free of you, I fear Allāh, the Lord of the 'Ālamīn (mankind, jinns and all that exists)!" (Qur'ān 59:16)</p>
+<p>Shayṭān will never make you sin directly, he will always trick you using the power of evil whisperings (waswasah) and he is more patient than any of us. So we should always seek refuge in Allāh  from Shayṭān. Never think you have enough knowledge or are strong enough to take on Shayṭān. This is why the scholars of Islām are the ones who have to strive to equip themselves with the most taqwā, (fear of Allāh ).</p>
+<p>Reﬂecting on the story, if Shayṭān had told Barṣ|]\ to make sujūd to him in the very beginning, Barṣ|]\ would have refused straight away, but Shayṭān has a plan in hand. In a step by step fashion, he ﬁnally managed to break Barṣ|]\ into committing kufr.</p>
+</article>
+</section>
+
+<section class="subject" id="-d-b">
+<h2>Ādāb</h2>
+<article class="topic" id="-d-b-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>Understand the etiquettes of debate and discussions.</p>
+<p>Highlight the simplicity of nikāḥ in Islām.</p>
+<p>List the Ādāb for the seller and the buyer.</p>
+<p>Outline a few general shopping Ādāb.</p>
+<p>Debates and Discussions "And indeed We have put forth every kind of example in this Qur'ān, for mankind. But, man is evermore quarrelsome." (Qur'ān 18:54)</p>
+<p>"The Most Gracious (Allāh). He has taught the Qur'ān; He has created man; He has taught him speech."(Qur'ān 55:1-4)</p>
+<p>"Not a word does he (or she) utter, but there is a watcher by him ready (to record it).'' (50:18)</p>
+<p>Abū Hurayrah  reported that the Beloved Prophet  said, "He who believes in Allāh and the Last Day must either speak good or remain silent.'' (Ṣaḥīḥ Muslim)</p>
+<p>Abū Hurayrah  reported that the Beloved Prophet  said, "A man utters a word pleasing to Allāh without considering it of any signiﬁcance Ādābfor which Allāh exalts his ranks (in Jannah).</p>
+<p>Another one speaks a word displeasing to Allāh without considering it of any importance, and for this reason he will sink down into Jahannam.''</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>Debates and Discussions The intention of debate should be to reach the correct conclusion and understanding.</p>
+<p>One should never debate to prove how clever one is. A person should debate issues after researching them thoroughly. To debate on a subject without having knowledge of it is foolishness.</p>
+<p>Before, during and after, one should check the intention for debating.</p>
+<p>One should not get angry whilst debating.</p>
+<p>One should not use any foul language when debating.</p>
+<p>One should not try to overcome the other person by raising one's voice.</p>
+<p>One should discuss things calmly and present strong proofs for one's point.</p>
+<p>One should always listen to what the other person Ādābhas to say clearly and properly before reacting. It is not necessary that the other person accepts your point.</p>
+<p>One's goal when debating should be to defend one's stance and get the message across.</p>
+<p>Debates and Discussions Look at how beautifully Ibrāhīm  debated with the tyrant ruler of his time:</p>
+<p>"Have you not considered the one who argued with Ibrāhīm about his Lord merely because Allāh had given him kingship? When Ibrāhīm said, 'My Lord is the one who gives life and causes death,' he said, 'I give life and cause death.' Ibrāhīm said, 'Indeed, Allāh brings up the sun from the east, so bring it up from the west.' So the disbeliever was overwhelmed by astonishment, and Allāh does not guide the wrongdoing people." (Qur'ān 2:258)</p>
+<p>Debates and Discussions Do not interrupt the other party If you have trouble understanding some of what has been said, hold your questions until the speaker has ﬁnished. Gently, politely ask for clariﬁcation.</p>
+<p>Never raise your voice with the questions. We end this chapter on two sayings:</p>
+<p>Al Ma'mūn used to say that discussions strengthens knowledge much more than mere agreement.</p>
+<p>Al Haytham ibn 'Ad|, a well-known scholar and historian said: "It is ill mannered to overwhelm someone while speaking and to interrupt him before he ends his talk."</p>
+</article>
+<article class="topic" id="-d-b-nik--">
+<h3>Nikāḥ</h3>
+<div class="diagram"><img src="images/Coursebook8--d-b-nik--.png" alt="Diagram: Nikāḥ" loading="lazy"></div>
+<p>"It is He who created you from a single person, and made his partner from him, in order that he may ﬁnd comfort in her"  (Qur'ān 7:189)</p>
+<p>"And among His signs is this: that He created for you mates from among yourselves that you may dwell in tranquillity with them, and He has put love and mercy between your (hearts): verily in that are signs for those who reﬂect." (Qur'ān 30:21) Our Beloved Prophet Muḥammad said: "A woman is normally married due to four things; for her wealth, beauty, nobility, or religiousness, so choose a religious woman and you will prosper."</p>
+<p>(Ṣaḥīḥ al-Bukhārī) Our Beloved Prophet Muḥammad  said:</p>
+<p>"When someone with whose religion and character you are satisﬁed asks to marry your daughter, comply with his request. If you do not do so, Ādāb there will be corruption and great evil on Earth."</p>
+<p>(Tirmidhī)</p>
+<p>Ādāb of Nikāḥ As much as possible, people wishing to marry should seek the help and guidance of parents.</p>
+<p>One should see the boy/girl being considered for marriage. A person should not lie about him or herself to please and attract others.</p>
+<p>Nikāḥ should be performed as soon as one is engaged.</p>
+<p>Having a wedding-style engagement is totally against the teachings of our Beloved Messenger Muḥammad and should never be done.</p>
+<p>There should be no communication, texting or calling between the ﬁancé and ﬁancée.</p>
+<p>Ādāb of Nikāḥ One should avoid spending unnecessarily and extravagantly in nikāḥ preparations.</p>
+<p>One should wear one's ﬁnest clothes on the day of nikāḥ.</p>
+<p>One should stay away from music, photography, intermingling with non-maḥrams and other such actions.</p>
+<p>Nikāḥ should be performed in the masjid.</p>
+<p>One should invite the pious and scholars to attend the nikāḥ.</p>
+<p>One's family should be invited to the nikāḥ.</p>
+<p>Ādāb of Nikāḥ When meeting your spouse for the ﬁrst time, one should show kindness and present something to her.</p>
+<p>One may perform two rak'āt naﬂ ṣalāh with one's spouse upon meeting one another. It is an emphasised Sunnah to hold a feast known as a walīmah after the spouses have met. The righteous and pious people should be invited to the walīmah. The poor should also be invited to the walīmah.</p>
+</article>
+<article class="topic" id="-d-b-transactions">
+<h3>Transactions</h3>
+<div class="diagram"><img src="images/Coursebook8--d-b-transactions.png" alt="Diagram: Transactions" loading="lazy"></div>
+<p>"O you who believe! when you deal with each other in contracting a debt for a ﬁxed time, then write it down." (Qur'ān 2:282)</p>
+<p>"Verily, the best one you can hire is the competent, the trustworthy." (Al-Qur'ān 28:26)</p>
+<p>R\ﬁ' ibn Khadīj  narrates 'The Beloved Prophet  was asked: "Which is the purest form of earning a livelihood?" He replied, "Working with your own two hands and every acceptable transaction."' (Aḥmad)</p>
+<p>"The truthful merchant is rewarded by being ranked on the Day of Resurrection with the prophets, the truthful elite and martyrs." (Tirmidhī)</p>
+<p>Ādāb of the seller The seller should always speak the truth when asked about any item. The seller should speak gently to the customers. The seller should not force customers into buying the products he is selling. The seller should give the customer space to consider whether he wants to buy. The seller should not surround or hassle him at every juncture. A businessperson should make sure he has prices clearly marked on the items for sale. A businessperson should refrain from selling out-of-date products. A businessperson should make sure his shop is clean and in line with hygiene requirements. A businessperson should have a habit of counting all the money given by the customer in front of him to avoid any confusion.</p>
+<p>The seller should not deceive the buyer in anyway. If any item being sold has a fault which the seller is aware of, he should not sell the item without telling the buyer of the fault. The shopkeeper should always close his shop when it is time for ṣalāh and go to the masjid for ṣalāh. In Ramaḍān, a Muslim shopkeeper should try to spend more time in worship. A Muslim shopkeeper should never play music in his shop. A Muslim shopkeeper should perform his ﬁve ṣalāh to get barakah and blessings in his shop.Ādāb A Muslim shopkeeper should control his gaze and limit his speech to what is necessary when serving a non-maḥram customer.</p>
+<p>Ādāb of the buyer The buyer should not pretend to want to buy things. The buyer should not ask unnecessary questions to the seller. The buyer should not annoy the seller to give him a discount. The buyer should try his utmost best to pay the full price of an item at the time of buying the item, once that price is agreed upon. The buyer may ask the seller to give credit. The buyer should not lie when returning an item for a refund. When browsing different items in a store, the buyer should place the item back in its original place if they do not want to purchase it.</p>
+<p>If, whilst browsing a store, a person breaks an item, they should inform the store.</p>
+<p>General Ādāb for shopping A Muslim consumer should avoid spending unnecessary time wandering.</p>
+<p>Abū Hurayrah reports that the Beloved Prophet Muḥammad  said: "The most beloved parts of the Earth to Allāh are the masājid. The most hated parts of the Earth to Allāh are the markets." (Ṣaḥīḥ Muslim)</p>
+<p>Shopping centres are the worst places, as they can cause negligence from the remembrance of Allāh . The following du'ā' should be recited when entering the shopping centres and malls:</p>
+<p class="arabic" dir="rtl" lang="ar">تيميو ييحي دمحلا هلو كلملا هل ،  هل كيرش ال هدحو هللا  الا هلا الِِِ</p>
+<p>Ādābٌََََُُُٰ Our Beloved Messenger Muḥammad  said that for whoever reads this du'ā', Allāh will decree one million rewards, erase one million sins and elevate his status by one million. (Tirmidhī)</p>
+<p>Bibliography Fiqh Section 'al-Sughdi (d.461AH), ''al-Nutaf ﬁ 'al-Fatāwā', Dar 'al-Furqān, 1984 'al-Samarqandi(d.540AH), 'Tuḥfat 'al-Fuqahā'', Dār 'al-Kutub 'al-'ilmiyyah, 1994 'al-Kāsān| (d.587AH), 'Badā'i' 'al-ṣanā'i' f| al-Tartīb al-Sharā'ī'', Dār 'al-Ku- tub 'al-ilmiyyah, 1986 'al-Marghinān| (d.593AH), ''al-Hidāyah f| sharh bidāyah 'al-mubtad|', Mak- tabah 'al-Bushra, 2007 'al-Ṣaḥīḥ al-Bukhārī, Burhān 'al-Dīn (d.616AH), ''al-Mu#|{ 'al-Burhān| ﬁ 'al- Fiqh 'al-Nu'mān|', Idārah 'al-Qur'ān, 2004 'al-Mawṣil| (d.683AH), ''al-ikhtiyār li ta'līl 'al-Mukhtār', 'al-Halab|, 1937 Khusr[ (d.885AH), 'Durar 'al-Ḥukkām Sharh Gurar 'al-Aḥkām', Dar 'ihyā'</p>
+<p>'al-Kutub Ibn Nujaym (970AH), ''al-Baḥr 'al-Rā'iq Sharh Kanz 'al-Daqā'iq', Dār 'al- Kitāb 'al-Islām| A-Qudūr| (d.428 AH), 'Mukhtasar 'al-Qudūr|', Dār Qubā', 2003 'al-Ṭa#{āw| (d.1321 AH), '*āshiyah 'al-Ṭa#{āw| 'al\ Marāq| 'al-Fal\#', Dār 'al-Kutub 'al-'ilmiyyah, 1997 Ibn 'Ābidīn (d.1252 AH), 'Radd 'al-Muḥtār', H.M.Saeed Ḥaydar, Al| (d.1353 AH), 'Durar 'al-Ḥukkām F| Sharh Majallah 'al-Aḥkām', Dār 'al-Jiyal, 1991 Ni~ām 'al-Dīn et al, ''al-Fatāw\ 'al-Hindiyyah', Maktabah 'al-Rashīdiyyah Ludhyānwi, Mufti Rashīd Aḥmad (d.2002 CE), 'Aḥsan 'al-Fatāwā', H.M Saeed, 1979 Gangohi, Mufti Maḥmūd 'al-Ḥasan (d.1996 CE), 'Fatāw\ 'al-Mahmudiyyah', Idārah 'al-Farūq, 2008 Mufti Raḍā 'al-Haq et al, 'Fatāw\ Dār 'al-Ulūm 'al-Zakariyyā', Zamzam Publishers, 2007 'al-Tatw|, Muḥammad Hāshim (d.1174 AH), 'Fākihat 'al-Bustān', Dār 'al-Ku- tub 'al-'ilmiyyah, 2012 Bibliography</p>
+<p>Bibliography Aqā'id Section 'al-Taftāzān|, Sa'd 'al-Dīn (791 AH), 'Sharh 'al-Aqā'id 'al-Nasaﬁyyah', Dār 'al-Bayrūt|, 2007 'al-Ghaznaw| (d.773 AH), 'Sharh 'al-Aqīdah 'al-Ṭa#āwiyyah', Dār 'al-Kuraz, 2009 'al-Māturīd| (d.333 AH), 'Kitāb 'al-Tawhīd', Dār ]ādir, 'al-Maydān| (d.1298 AH), 'Sharh 'al-Aqīdah 'al-Ṭa#āwiyyah', Dār 'al-Fikr, 1995 'al-Bayjūr| (d.1276 AH) , 'Tuḥfat 'al-Murīd 'al\ Jawharah 'al-Tawhīd', Dār 'al-Salām, 2002 'al-Qār|, Mulla 'Al| (d.1014 AH), 'Mina# 'al-Rawdh 'al-Azhar F| Sharh 'al- Fiqh 'al-Akbar', Dār a;-Bashā'ir 'al-islāmiyyah, 1998 'al-Qār|, Mulla 'Al| (d.1014 AH), 'Dhaw' 'al-Ma'āl| 'al\ Man~ūmah Bad'a 'al- amāl|', Dār 'al-Bayrūt|, 2006 'al-Bayhaq| (d.458 AH), 'Kitāb 'al-Asmā' wa 'al-ṣifāt', 'al-Maktabah 'al-Azhariyyah li 'al-Turāth 'al-Shahrastān| (d.548 AH), ''al-Milal wa 'al-Niḥal', Dār 'al-Kutub 'al-'ilmi- yyah, 1992 'al-'Āṣr|, Saif ibn 'Al|, ''al-Qawl 'al-Tamām bi Ithbāt 'al-Tafw|} Madhaban li 'al-Salaf 'al-Kirām', Dār 'al-Fath, 2010 Kan'ān, Muḥammad Aḥmad, 'Jāmi' 'al-La'āl| Sharh Bad'a 'al-'Amāli', Dār al-Bashā'ir al-Islāmiyyah', 2010 'Al-Nawaw| (d.676 AH), ' 'al-Mināj Sharh Ṣaḥīḥ Muslim ibn al-Ḥajjāj', Dār 'Ihyā' al-Turāth Hadīth Section Bibliography'al-Bukhārī, Muḥammad ibn Ismā'īl (d.256AH), 'Ṣaḥīḥ al-Bukhārī', Dar ^ūq al-Najāh, 2001 Muslim, Muslim ibn al-Ḥajjāj (d.261AH), 'Ṣaḥīḥ Muslim', Dār 'iḥy\ al-Turāth al-'Arab|, Nasa'|, Aḥmad ibn Shu'ayb (d.303AH), 'Sunan al-Nasa'|', al-Risālah, 2001 Abū Dāwūd, Sulaymān ibn al-'Ash'ath (d.275AH), 'Sunan Ab| Dāwūd, Dār al-Risālah al-'ālamiyyah, 2009</p>
+<p>Bibliography 'al-Tirmidhī, Muḥammad ibn '|s\ (d.279AH), 'Sunan al-Tirmidhī', Dār al- Gharb al-'islām|,  1996 'Ibn Mājah, Muḥammad ibn Yazīd (d.273AH), 'Sunan Ibn Mājah', Dār al- Risālah al-'ālamiyyah, 2009 Ibn Ḥanbal, Aḥmad (d.241AH), 'Musnad Aḥmad, Mu'assah al-Risālah, 2001 Al-Ṭabarān|, Sulaymān ibn Aḥmad  (360AH), 'al-Mu'jam al-Kabīr', Makta- bah ibn Taymiyyah, Al-Ṭabarān|, Sulaymān ibn Aḥmad  (360AH), 'al-Mu'jam al-Awṣa{', Dār al-Ḥaramayn 'al-Bazzār, Aḥmad ibn 'Amr (d.292 AH), Musnad al-Bazzār', Maktabah al- 'Ulūm wa al-Ḥikam, 2009 Ibn Ḥibbān, Muḥammad ibn Ḥibbān (d.354 AH), 'Ṣaḥīḥ Ibn Ḥibbān', Mu'assah al-Risālah, 1988 Al-*ākim, Muḥammad ibn Abdullah (d.405 AH), 'al-Mustadrak al\ al- Ṣaḥīḥayn', Dār al-Kutub al-'ilmiyyah, 1990 Al-Bayhaq|, Aḥmad ibn al-Ḥusain (d.458 AH), 'al-Sunan al-Kubrā', Dār al-Kutub al-'ilmiyyah, 2003 Tārīkh Section Ibn Kathīr (d.774 AH), ' 'al-Bidāyah wa al-Nihāyah', Dār 'Ihy\ al-Turath', 1988 Al-Dhahab| (d.748 AH), 'Siyar al-'A'lām al-Nubalā'', Mu'assah al-Risālah, 1985 'al-Sarjān| et al, 'al-Mawsū'ah al-Muyassarah f| al-Tārīkh al-'islām|', Mu'as- sasah Iqra', 2014 Alkhateeb, Firas, 'Lost Islamic History', Hurst Publishers, 2014 'Al-Hassani, Salim et al, '1001 inventions: Muslim Heritage in Our World', Foundation for Science Technology and Civilisation, 2006 Bibliography</p>
+<p>Credits Mawlān\ Muḥammad Yaḥy\ ibn Fārūq Director Mawlān\ Muḥammad Qāsim Manjra Project Manager Mawlān\ Harūn Makda, Mawlān\ Isḥāq Boodi and Mawlān\ Ḍhahīr Sidat Consultation Panel 'Irfān Chhatbar Design &amp; Artwork Shakīl Zikr Illustration 'Ābid Russell, Rachel Larson &amp; Khadījah Vania Editing Bakh Sumira Sul{ān Workbooks &amp; Extension Activities Media Jamshidi Vectorisation Rest of the team at An Nasihah Publications May Allāh  reward them all abundantly in this world with blessings and grant them all Jannat al-Firdaws with His everlasting pleasure in the next.</p>
+<p>Credits Āmīn.</p>
+</article>
+</section>
+
+</main>
+<footer>
+  Content from An Nasihah Publications Ltd. &middot; Organized for reference
+</footer>
+</body>
+</html>

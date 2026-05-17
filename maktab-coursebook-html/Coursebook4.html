@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 4 — Islamic Curriculum</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2.2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle {
+    color: #666;
+    font-size: 1rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .toc h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+  .toc h3 {
+    color: var(--accent);
+    margin: 0.8rem 0 0.3rem;
+    font-size: 1.1rem;
+  }
+  .toc ul {
+    list-style: none;
+    padding-left: 1.2rem;
+  }
+  .toc li { margin: 0.2rem 0; }
+  .toc a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--primary);
+  }
+  .toc a:hover { border-bottom-style: solid; }
+  .subject {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject > h2 {
+    color: var(--primary);
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .topic {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--accent);
+  }
+  .topic h3 {
+    color: var(--accent);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  .topic p {
+    margin-bottom: 0.6rem;
+    text-align: justify;
+    line-height: 1.65;
+  }
+  .topic p + p {
+    margin-top: 0;
+  }
+  .topic ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+  }
+  .topic li {
+    margin-bottom: 0.3rem;
+  }
+  .arabic {
+    font-family: 'Traditional Arabic', 'Scheherazade New', 'Amiri', serif;
+    font-size: 1.4rem;
+    text-align: right;
+    direction: rtl;
+    background: #f9f9f0;
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    margin: 0.8rem 0;
+    line-height: 2;
+    color: #333;
+  }
+  .page {
+    margin-bottom: 0.5rem;
+  }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+
+  .diagram {
+    text-align: center;
+    margin: 1rem 0 1.5rem;
+    padding: 0.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+  }
+  .diagram img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  @media print {
+    body { max-width: 100%; padding: 1rem; }
+    .topic { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Coursebook 4 — Islamic Curriculum</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 9–10 years</div>
+</header>
+<nav class="toc"><h2>Table of Contents</h2>
+<h3><a href="#fiqh">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#fiqh-masa---alal-khuffayn">Masa# 'alal Khuffayn</a></li>
+  <li><a href="#fiqh-naw-qi--of-masa-">Nawāqiḍ of Masa#</a></li>
+  <li><a href="#fiqh-masa--on-wounds">Masa# on Wounds</a></li>
+  <li><a href="#fiqh-w-jib-acts-in--al-h">Wājib acts in Ṣalāh</a></li>
+  <li><a href="#fiqh-sajdah-as-sahw">Sajdah as-Sahw</a></li>
+  <li><a href="#fiqh--awm">Ṣawm</a></li>
+  <li><a href="#fiqh-breaking-of-the-fast">Breaking of the Fast</a></li>
+  <li><a href="#fiqh--awm">Ṣawm</a></li>
+  <li><a href="#fiqh-tar-w----al-h">Tarāwīḥ Ṣalāh</a></li>
+</ul>
+<h3><a href="#a--d-th">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-a--d-th">Aḥādīth</a></li>
+  <li><a href="#a--d-th-feeding-others">Feeding Others</a></li>
+  <li><a href="#a--d-th-good-character">Good Character</a></li>
+  <li><a href="#a--d-th-friends">Friends</a></li>
+  <li><a href="#a--d-th-trust">Trust</a></li>
+  <li><a href="#a--d-th-keys-to-paradise">Keys to Paradise</a></li>
+  <li><a href="#a--d-th-dhikr">Dhikr</a></li>
+  <li><a href="#a--d-th-du---">Du'ā'</a></li>
+</ul>
+<h3><a href="#s-rah">Sīrah</a></h3>
+<ul>
+  <li><a href="#s-rah-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#s-rah-hijrah">Hijrah</a></li>
+  <li><a href="#s-rah-arrival-in-mad-nah">Arrival in Madīnah</a></li>
+  <li><a href="#s-rah-islamic-brotherhood">Islamic Brotherhood</a></li>
+  <li><a href="#s-rah-treaties-with-the-jews">Treaties with the Jews</a></li>
+  <li><a href="#s-rah-battle-of-a-z-b">Battle of Aḥzāb</a></li>
+</ul>
+<h3><a href="#t-r-kh">Tārīkh</a></h3>
+<ul>
+  <li><a href="#t-r-kh-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#t-r-kh-y-suf">Yūsuf</a></li>
+</ul>
+<h3><a href="#aq--id">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#aq--id-major-signs">Major Signs</a></li>
+  <li><a href="#aq--id-protection-against">Protection Against</a></li>
+  <li><a href="#aq--id---s-">'Īs\</a></li>
+  <li><a href="#aq--id-ya-j-j---ma-j-j">Ya'jūj & Ma'jūj</a></li>
+  <li><a href="#aq--id-rising-of-the-sun">Rising of the Sun</a></li>
+  <li><a href="#aq--id-qiy-mah">Qiyāmah</a></li>
+</ul>
+<h3><a href="#akhl-q">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#akhl-q-trust">Trust</a></li>
+  <li><a href="#akhl-q-seeking-permission">Seeking Permission</a></li>
+  <li><a href="#akhl-q-removing-harm">Removing Harm</a></li>
+  <li><a href="#akhl-q-being-a-good">Being a Good</a></li>
+</ul>
+<h3><a href="#-d-b">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b-learning-objectives">Learning Objectives</a></li>
+  <li><a href="#-d-b--d-b-of-du---">Ādāb of Du'ā'</a></li>
+  <li><a href="#-d-b--d-b-of-dressing">Ādāb of Dressing</a></li>
+  <li><a href="#-d-b--d-b-of-guests---hosts">Ādāb of Guests & Hosts</a></li>
+  <li><a href="#-d-b--d-b-of-a-gathering">Ādāb of a Gathering</a></li>
+  <li><a href="#-d-b--d-b-of-istinj--">Ādāb of Istinjā'</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject" id="fiqh">
+<h2>Fiqh</h2>
+<article class="topic" id="fiqh-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>State the conditions and method of using the khuff.</p>
+<p>Indicate the method of doing masa# on wounds.</p>
+<p>Identify the wājib acts of ṣalāh.</p>
+<p>Demonstrate the method of Sajdah as-Sahw.</p>
+<p>Distinguish between the two types of actions that break the fast and explain kaffārah and qa}\’.</p>
+<p>Recognise actions that don't break the fast.</p>
+<p>Discuss the people excused from fasting.</p>
+<p>Explain what is Tarāwīḥ Ṣalāh.</p>
+</article>
+<article class="topic" id="fiqh-masa---alal-khuffayn">
+<h3>Masa# 'alal Khuffayn</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-masa---alal-khuffayn.png" alt="Diagram: Masa# 'alal Khuffayn" loading="lazy"></div>
+<p>Khuffayn are a special type of socks upon which one can do masa# (wipe wet hands) rather than wash the feet in wuḍū'.</p>
+<p>Conditions for the Khuff In order to do masa# upon a khuff, the following conditions must be met:</p>
+<p>1.The khuff must be worn after washing the feet in wuḍū' before wuḍū' is broken again.</p>
+<p>2.The khuff must cover the feet up to (and including) the ankles.</p>
+<p>3.If the socks are not leather, they should be strong enough that a person can walk wearing them for three miles without being torn apart.</p>
+<p>4.Each khuff must be free from any tear that is of a size equal to three of the smallest toe.</p>
+<p>5.The khuff must be waterproof. Water must not be able to seep through.</p>
+<p>6.The khuff should remain in position (covering the foreleg) without being tied.</p>
+<p>7.The material of the khuff should not be transparent (see through).</p>
+<p>Different Types of Khuff It is permissible to perform masa# over full leather socks and those socks which are not leather but have all the conditions needed for masa# to be correct. It is permissible to do masa# over mujalladayn (leather on top and bottom of the socks). It is also permissible to do masa# over muna'alayn (leather only on the bottom and thick on top). With regards to non-leather socks that do not have any of the qualities of the modern range of waterproof socks, they must meet the requirements of thickness in order for masa# to be valid. It is impermissible to perform masa# on non-leather thin socks like the cotton and nylon socks we commonly wear.</p>
+<p>Important Points to Remember about Masa#</p>
+<ul><li>The time for masa# begins when the wuḍū' breaks.</li></ul>
+<p>For example: Zayd performs wuḍū' at 6pm thereafter puts on the khuffayn. He then breaks his wuḍū' at 7pm. His time shall begin at 7pm when he broke his wuḍū'. Therefore the maximum time he can keep his khuffayn on is until 7pm the next day if he is a muqīm.</p>
+<ul><li>The duration of masa# for a muqīm is 24 hours.</li><li>The duration of masa# for a mus\ﬁr is 72 hours.</li><li>It is far} to make masa# equal to the area of three</li></ul>
+<p>ﬁngers on each leather sock.</p>
+<ul><li>The method of masa# on the khuff is to draw the</li></ul>
+<p>ﬁngers on the upper surface of the khuff, starting from the toes and ending the masa# at the foreleg (just above the ankle).</p>
+<ul><li>The masa# should be done once on each sock.</li></ul>
+<p>Mus\ﬁr: Someone who Muqīm: Someone who is travelling more than is in his hometown, or 54 miles or plans to someone who plans stay less than 15 days to stay at a place for at the destination.15 days or more.</p>
+</article>
+<article class="topic" id="fiqh-naw-qi--of-masa-">
+<h3>Nawāqiḍ of Masa#</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-naw-qi--of-masa-.png" alt="Diagram: Nawāqiḍ of Masa#" loading="lazy"></div>
+<p>1.By doing an action which breaks wuḍū', one will have to perform wuḍū' again and make masa# over the khuff.</p>
+<p>2.Removal of the khuff will cancel the masa#. One will have to wash their feet again as long as wuḍū' has not Nawāqiḍ of been broken.</p>
+<p>Masa# 3.The expiry of the time permitted for masa#. One will have to wash their feet again as long as wuḍū' has not been broken.</p>
+</article>
+<article class="topic" id="fiqh-masa--on-wounds">
+<h3>Masa# on Wounds</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-masa--on-wounds.png" alt="Diagram: Masa# on Wounds" loading="lazy"></div>
+<p>Even when a person is wounded, he still has to perform ṣalāh. Islām has given us ways to perform wuḍū' and ghusl despite being injured. If a wound can be washed without any harm by removing the bandage or plaster, then a person must wash the wound and perform wuḍū' or ghusl as normal. If the wound cannot be washed but can be wiped without any harm then one should wipe the wound.</p>
+<p>However, if a wound cannot be washed or wiped thoroughly due to the problem increasing or it is not possible to remove the cast, bandage or plaster, then one should do masa# over the wound, cast, bandage or plaster and complete wuḍū' normally.</p>
+</article>
+<article class="topic" id="fiqh-w-jib-acts-in--al-h">
+<h3>Wājib acts in Ṣalāh</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-w-jib-acts-in--al-h.png" alt="Diagram: Wājib acts in Ṣalāh" loading="lazy"></div>
+<p>Wājib actions are those actions which must be done in ṣalāh. If a person misses any of these actions, ṣalāh will be incomplete. The wājib actions can be divided into four categories:</p>
+<p>Wājibāt for the whole of ṣalāh Wājibāt of qirā'ah Wājibāt from qawmah to salām Wājibāt only for speciﬁc ṣalāh</p>
+<p>2 wājibāt for the whole of ṣalāh</p>
+<ul><li>To perform every action in order.</li><li>To perform every action calmly.</li></ul>
+<p>5 wājibāt of qirā'ah</p>
+<ul><li>To recite sūrah al-Fātiḥah.</li><li>To recite sūrah al-Fātiḥah before any other sūrah.</li><li>To recite a sūrah or at least one long āyah or three</li></ul>
+<p>short āyāt in the ﬁrst two rak'āt of far} ṣalāh.</p>
+<ul><li>To recite a sūrah or at least one long āyah or three</li></ul>
+<p>short āyāt in all rak'āt of wājib, sunnah and naﬂ ṣalāh.</p>
+<ul><li>For the imām, to recite aloud in Fajr, Jumu'ah,</li></ul>
+<p>Tarāwīḥ, Witr in Ramaḍān, '|d ṣalāh and the ﬁrst two rak'āt of Maghrib and 'Ishā'. To recite quietly in Ḍhuhr, 'Aṣr, the last rak'ah of Maghrib and the last two rak'āt of 'Ishā' ṣalāh.</p>
+<p>5 wājibāt from qawmah to salām</p>
+<ul><li>To stand in qawmah (the position after rukū').</li><li>To sit in jalsah (the position between two sajdahs).</li><li>To recite tashahhud in the two qa'dahs.</li><li>To sit in Qa'dah ūl\.</li><li>To end the ṣalāh with salām.</li></ul>
+<p>2 wājibāt only for speciﬁc ṣalāh</p>
+<ul><li>To do an extra takbīr after the sūrah in the third</li></ul>
+<p>rak'ah of witr ṣalāh and to recite du'ā' qunūt after it.</p>
+<ul><li>To make six extra takbīrāt in both the '|d ṣalāh.</li></ul>
+</article>
+<article class="topic" id="fiqh-sajdah-as-sahw">
+<h3>Sajdah as-Sahw</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-sajdah-as-sahw.png" alt="Diagram: Sajdah as-Sahw" loading="lazy"></div>
+<p>(Prostration due to a mistake) We should try our best to concentrate in ṣalāh and not make mistakes. If a far} action is missed, ṣalāh must be repeated. If we miss a wājib action in ṣalāh or delay a rukn (position in ṣalāh), we must make up for it by doing Sajdah as-Sahw before completing ṣalāh.</p>
+<p>Sajdah as-Sahw are extra sajdahs to cover the mistake.</p>
+<p>How to perform Sajdah as-Sahw:</p>
+<p>Perform the whole ṣalāh as usual. When sitting in the last rak'ah and after reciting tashahhud, make one salām to your right.</p>
+<p>Thereafter, make two sajdahs After the two sajdahs, reciting the complete the ṣalāh as tasb|# of sajdah. you usually do by reciting tashahhud, durūd and du'ā'.</p>
+<p>Finally, make two salām as normal.</p>
+</article>
+<article class="topic" id="fiqh--awm">
+<h3>Ṣawm</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh--awm.png" alt="Diagram: Ṣawm" loading="lazy"></div>
+<p>Fasting in the month of Ramaḍān is one of the ﬁve pillars of Islām. The Beloved Prophet  said, "Whoever fasts during Ramaḍān out of sincere faith and hoping to attain rewards, then all his past sins will be forgiven." (Ṣaḥīḥ al-Bukhārī).</p>
+<p>There are different types of fasts.</p>
+<p>Sunnah – Those fasts Far} – fasting which our Beloved each day for the Messenger Muḥammad whole month of kept and Ramaḍān every encouraged others to year. keep. Some examples:</p>
+<p>10th of Muḥarram combined with either Mustaḥabb – the 9th or 11th. all other fasts besides the far} and sunnah hold some reward. For Ḥarām – Five example, 9th of Dhul days of the Ḥijjah and the 13th, year:  'Īd al-Fiṭr, 14th &amp; 15th of every 'Īd al-A}#\ and Islamic month.the three days after 'Īd al-Aḍh\ (11, 12 &amp; 13th of Dhul Ḥijjah).</p>
+</article>
+<article class="topic" id="fiqh-breaking-of-the-fast">
+<h3>Breaking of the Fast</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-breaking-of-the-fast.png" alt="Diagram: Breaking of the Fast" loading="lazy"></div>
+<p>"Whoever breaks the fast during Ramaḍān without any reason or illness, fasting for a lifetime will not make up for that." (Tirmidhī) This ḥadīth shows that the reward of a fast for a single day in Ramaḍān cannot be gained outside of this blessed month.</p>
+<p>Actions that break the fast are of two types:</p>
+<p>Actions that break the Actions that break the fast but only make fast making qaḍā' and qaḍā' necessary.kaffārah necessary.</p>
+<p>Kaffārah is a penalty 'Qaḍā'' means to to make up for the fast repeat or do again.that was broken.</p>
+<p>Qaḍā' is to keep one Kaffārah is to keep 60 fast in place of the fasts one after another. broken or missed fast. If one cannot fast 60 fasts continuously, then there are three alternatives: To give sixty OROR To feed one poor people To feed poor person 1.662kg of sixty poor two meals a wheat, ﬂour, people two day for sixty ﬁne ﬂour or full meals days its value in cash.</p>
+</article>
+<article class="topic" id="fiqh--awm">
+<h3>Ṣawm</h3>
+<p>Actions that break the fast but only make qaḍā' wājib: To eat and drink after Vomiting a mouthful ṣub# ]ādiq or to break intentionally or the fast before sunset and swallowing vomit. then realise one's fault.</p>
+<p>Breaking the fast due to a genuine reason, like illness. To ACCIDENTALLY eat or drink something. To intentionally swallow something people don't eat.</p>
+<p>Inhaling substances into the nostrils.</p>
+<p>Actions that make kaffārah and qaḍā' necessary: To carry out those actions which break the fast intentionally, eg. to eat or drink intentionally without a valid reason.</p>
+<p>What is the difference between forgetful and accidental? Let's look at it through an example:</p>
+<p>Aḥmad knew he was fasting, whilst gargling accidentally the water went down his throat: this will break the fast.</p>
+<p>Zayd totally forgot he was fasting and ate a chocolate. His fast will not break. As soon as he remembers he should stop, if he doesn't his fast will break.</p>
+<p>Using siwāk.</p>
+<p>Eating or Applying 'iṭr. drinking, forgetting that one is fasting.</p>
+<p>Actions Water ears. entering that do not break the fast:</p>
+<p>Swallowing one's saliva.</p>
+<p>Vomiting or less than a mouthful unintentionally intentionally.</p>
+<p>Taking an Using eye injection.drops.</p>
+<p>People excused from fasting:</p>
+<ul><li>An ill person whose illness</li></ul>
+<p>will increase if he fasts will give ﬁdyah.</p>
+<ul><li>A mus\ﬁr (traveller) will</li></ul>
+<p>make qaḍā'.</p>
+<ul><li>Someone who fears that</li></ul>
+<p>they will die out of hunger or thirst will also make qaḍā'.</p>
+<p>(Fidyah)</p>
+<p>Fidyah (compensation) A person who cannot fast due to a chronic or terminal illness may give ﬁdyah. As long as a person's condition remains such that they cannot fast, they will keep giving ﬁdyah for each fast. If there is improvement to such a degree that they can fast, they will have to do qaḍā' of all the previous fasts. The value of ﬁdyah for a fast is the same as that of Ṣadaqah al-Fiṭr (1.662 kg).</p>
+</article>
+<article class="topic" id="fiqh-tar-w----al-h">
+<h3>Tarāwīḥ Ṣalāh</h3>
+<div class="diagram"><img src="images/Coursebook4-fiqh-tar-w----al-h.png" alt="Diagram: Tarāwīḥ Ṣalāh" loading="lazy"></div>
+<p>Tarāwīḥ is an emphasised sunnah and an extra ṣalāh which Allāh has blessed us with for the month of Ramaḍān.</p>
+<ul><li>There are twenty rak'āt of Tarāwīḥ.</li><li>Ibn 'Abbās  narrated that the</li></ul>
+<p>Prophet  used to pray twenty rak'āt followed by Witr in the month of Ramaḍān. (Muṣannaf ibn Ab| Shaybah)</p>
+<ul><li>'Umar  made everybody perform</li></ul>
+<p>20 rak'āt in a jamā'ah with 'Ubay ibn Ka'b  being the imām. (al-Bayhaq|)</p>
+<ul><li>Imām Shāf'| said that he found people</li></ul>
+<p>in Makkah offering twenty rak'āt.</p>
+<p>(Tirmidhī)</p>
+<p>Sunnah to recite emphasised It is an the entire Tarāwīḥ Ṣalāh.</p>
+<p>Qur'ān in</p>
+<p>Tarāwīḥ should be A person should ﬁrst performed in two perform 'Ishā' before It is Mustaḥabb units. After every Tarāwīḥ. to perform four rak'āt, it is Tarāwīḥ cannot be Witr after performing Mustaḥabb to have performed before Tarāwīḥ. a short break. 'Ishā'. If a person missed his 'Ishā' Ṣalāh and found the jamā'ah in the masjid in Tarāwīḥ, he should If he missed any units because of ﬁrst perform 'Ishā' and coming late, he then join the Tarāwīḥ. should perform them after the Witr Ṣalāh.</p>
+<p>Sunnah to recite emphasised It is an the entire Tarāwīḥ Ṣalāh.</p>
+<p>Qur'ān in "Bismillāhir It is a Sunnah to Raḥmānir Rahīm" perform Tarāwīḥ should be recited throughout the loudly for any one entire month even surah as  "Bismillāh" if the Qur'ān is is an āyah of the completed early.</p>
+<p>Qur'ān in itself.</p>
+</article>
+</section>
+
+<section class="subject" id="a--d-th">
+<h2>Aḥādīth</h2>
+<article class="topic" id="a--d-th-a--d-th">
+<h3>Aḥādīth</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-a--d-th.png" alt="Diagram: Aḥādīth" loading="lazy"></div>
+<p class="arabic" dir="rtl" lang="ar">Aḥādīthاعئاج ادبك عبشت نةقدصلا لضفا</p>
+</article>
+<article class="topic" id="a--d-th-feeding-others">
+<h3>Feeding Others</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-feeding-others.png" alt="Diagram: Feeding Others" loading="lazy"></div>
+<p>Rasūlullāh  said:</p>
+<p>"The most virtuous charity is feeding a hungry creature."</p>
+<p>(Bayhaq|)</p>
+<p>Charity in Arabic is known as ṣadaqah. In another ḥadīth Rasūlullāh  said, "Hasten towards giving ṣadaqah for calamities cannot come to a person who gives ṣadaqah." Here Rasūlullāh is telling us that to feed the hungry is the best type of ṣadaqah a person can do. The word 'creature' includes all those that are alive, which means that even if you feed a hungry animal you will get this reward. Feeding anyone is a great deed in itself, but when someone is in need of food, at such a time it will be more rewarding. We should always try our best to help those who are in need, even if it may be little. We don't know which of our actions is liked by Allāh  the most.</p>
+<p>No to Racism َََََّْRasūlullāh َ said:ََُْْ</p>
+<p class="arabic" dir="rtl" lang="ar">نمAḥādīthىوقتب هلضفت نا الا دوسا الو رمحا ريخب تسل كناِِِ</p>
+<p>"You are neither better than a red person or a black person unless you surpass him in piety."</p>
+<p>(Aḥmad)</p>
+<p>Every single person is part of the Creation of Allāh , and they are all equal in the eyes of Allāh , regardless of colour or race. We must never think we are better than anyone just because they look different to us. The only thing that can make a person better than another is good actions. In another ḥadīth Rasūlullāh  said, "Allāh does not look at your forms or your bodies, but He looks at your heart and your actions." (Ṣaḥīḥ Muslim) This means if our actions are good then truly we are beautiful.</p>
+<p>Look at the Ṣa#āba's lives: they never treated anyone differently because of their colour or race. The ﬁrst mu'adhin (caller to prayer) was Bilāl , a dark-skinned person from Abyssinia.</p>
+</article>
+<article class="topic" id="a--d-th-good-character">
+<h3>Good Character</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-good-character.png" alt="Diagram: Good Character" loading="lazy"></div>
+<p>ُRasūlullāh  said:َّ "Deal with people with good manners."</p>
+<p>(Tirmidhī)</p>
+<p>Rasūlullāh  had the best manners and he encouraged us, his followers, to observe good manners.</p>
+<p>Muslim manners are different in two ways, as they are not just for the elite or upper class. All Muslims, whether they be rich or poor, black or white, must show good manners. Secondly these manners do not change with time.</p>
+<p>Manners are learnt through observing other people.</p>
+<p>Examples of good manners are:</p>
+<p>Knocking  before entering a place; not looking into someone's house without permission; eating what is in front of us; moving something harmful away from the road; helping someone in need; making space for a person arriving late at a gathering, etc.</p>
+<p>See if you can think of different manners we can show each other.</p>
+<p>Thanking Others ََّRasūlullāh  said:ّْْ</p>
+<p class="arabic" dir="rtl" lang="ar">Aḥādīthنمهللا ركشي مل سانلا ركشي مل</p>
+<p>"One who is not grateful to people is not grateful to Allāh."</p>
+<p>(Tirmidhī) In this ḥadīth, our Beloved Messenger Muḥammad is telling us the importance of being thankful. Always thank someone who shows good to you even if it may be something small. Thanking people is also a way of thanking Allāh . Some people take things but never show gratitude or thank the person who gave something to them, whilst others take a little and thank in abundance. When we thank someone we should say "Jazākallāhu khayr\" which means "May Allāh reward you with goodness." It does not cost anything to say Jazākallāhu khayr\ or to thank someone, but the person whom it is said to feels happy and Allāh  loves it when we make another person happy. Sub#ānallāh, what a beautiful way of life Islām is.</p>
+</article>
+<article class="topic" id="a--d-th-friends">
+<h3>Friends</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-friends.png" alt="Diagram: Friends" loading="lazy"></div>
+<p>َََْRasūlullāh  said:</p>
+<p>"A person will be with whom he loves."</p>
+<p>(Ṣaḥīḥ al-Bukhārī) We all know that a person stays with only those people they like. In this ḥadīth, we are learning that the company we keep in this world will be the same company we will have in the Ākhirah. If the person with whom we are staying and spending our time does not fear Allāh  and does not repent, then his abode may be Jahannam. May Allāh protect us all.</p>
+<p>Friendship is very important, as a person usually begins to follow their friends. That is why we must always try to stay with good friends: those who remind us to pray our ṣalāh. If we keep good company then - In sh\ Allāh - we will be with such people in Jannah. Allāh  mentions in the Qur'ān about the person who has been sent to Jahannam because of his friendship:</p>
+<p>"The day when the wrongdoer shall bite his hand, he will say: 'O, if only I had taken the path with the Messenger. Woe to me, if only I had not made that person my friend. He led me astray from the reminder…'" (Qur'ān 25:27-29)</p>
+<p>Kindness ٌََْRasūlullāh  said:ْ</p>
+<p class="arabic" dir="rtl" lang="ar">نمAḥādīthفلأم ؤملاِ</p>
+<p>"A believer is a treasure of love."</p>
+<p>(Bayhaq|) A Muslim is full of love: wherever he goes he is kind, caring, and loving. Just like a treasure box has so much wealth inside it, similarly a Muslim has so much love to give. Love is an act of kindness, to be merciful to Allāh 's Creation, not to be stern and hard-hearted. The Companions are ideal role models for us to follow. They were always looking for ways to be kind to others.</p>
+</article>
+<article class="topic" id="a--d-th-trust">
+<h3>Trust</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-trust.png" alt="Diagram: Trust" loading="lazy"></div>
+<p>Rasūlullāh ْ said:ََََََُٰ "Hand over the trust to the one who entrusts you, and do not betray the one who betrays you."</p>
+<p>(Abū Dāwūd)</p>
+<p>Trust is like a paper, once scrunched up it can never be the same again. Trust will be one of the ﬁrst things that will be taken away from people before the Day of Judgement. Rasūlullāh  was so trustworthy that he was given the title of Al-Amīn (the Trustworthy).  This title was given to him even before he became a prophet. The people of Makkah would leave their valuable items with him knowing that he would keep them safe. After he became a messenger, many people became his enemies, but did he breach the trust he was given? Did he keep their valuable items for himself? Did they stop trusting him? No, absolutely not. Our Beloved Messenger  kept them all safe. When he migrated to Madīnah Munawwarah he made sure all the items were returned to their rightful owners.</p>
+<p>"Indeed there is a beautiful example for you in the Messenger of Allāh." (Qur'ān 33:21)</p>
+</article>
+<article class="topic" id="a--d-th-keys-to-paradise">
+<h3>Keys to Paradise</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-keys-to-paradise.png" alt="Diagram: Keys to Paradise" loading="lazy"></div>
+<p>ََُّّRasūlullāh َ said:ٰ "The keys to Paradise are to testify that there is no god but Allāh."</p>
+<p>(Aḥmad) We cannot enter a locked door without a key.</p>
+<p>Rasūlullāh  told us that the key to Jannah is to testify that there is no god but Allāh . If we hold onto this statement by listening to and obeying Allāh , we will have gardens under which rivers ﬂow, palaces made out of pearls, and pleasures beyond our imagination. Allāh  has made it so easy for us. May Allāh  make us of those who live and die with this kalimah.</p>
+</article>
+<article class="topic" id="a--d-th-dhikr">
+<h3>Dhikr</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-dhikr.png" alt="Diagram: Dhikr" loading="lazy"></div>
+<p>ََُُRasūlullāh  said:ْْ "The example of the one who remembers his Lord and the one who does not, is like the example of the living and the dead." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Allāh  has said: "Remember Me and I will remember you." (Qur'ān 2:152) Sub#ānallāh, what a great privilege: the Lord of the Worlds remembers His servants. If we were told, "a king said your name in his royal palace," we would tell everyone. Allāh  is the King of all kings. If He remembers us, we will be in His protection, so we should always remember Him. Just like the physical body needs food, without food it becomes weak, feeble, and then dies. Similarly the spiritual body has needs and its food and nourishment is the dhikr of Allāh . Without that it becomes weak and a person begins to feel sad and upset. If we look in the world today, everyone is searching for this peace. Allāh  has kept this peace only in His remembrance.</p>
+<p>"Verily through the remembrance of Allāh  the hearts ﬁnd contentment." (Qur'ān 13:28) We can have all the money and riches of this world but if we don't have peace then what use is it?</p>
+</article>
+<article class="topic" id="a--d-th-du---">
+<h3>Du'ā'</h3>
+<div class="diagram"><img src="images/Coursebook4-a--d-th-du---.png" alt="Diagram: Du'ā'" loading="lazy"></div>
+<p>Rasūlullāh  said:َٰ ََْْAḥādīth "Allāh is angry with the person who does not ask Him for anything."</p>
+<p>(Tirmidhī) If we ask our best friend for something once, they will give it to us. If we ask them again, they might give it to us again, but if we keep asking them, they will soon get irritated, refuse, and maybe rebuke us.</p>
+<p>Allāh  is totally different: He wants us to ask Him; he loves it and rewards us when we ask Him. We need to take advantage of this and make a habit in our lives to always ask Him for our needs, even if it may be something small, for Allāh 's treasures have no limit.</p>
+<p>Allāh  says, "To Allāh  belongs the treasures of the Heavens and the Earth." He is the owner of everything, so let us raise our hands every day and cry to him for our needs and we shall see His help and mercy coming down for us.</p>
+</article>
+</section>
+
+<section class="subject" id="s-rah">
+<h2>Sīrah</h2>
+<article class="topic" id="s-rah-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>Describe how the Pledge of ‘Aqabah began and the promises that were made in the pledge.</p>
+<p>Recognise how Allāh            ’s plan always succeeds, using the event of Hijrah as an example.</p>
+<p>Outline the construction of the ﬁrst masjid in Madīnah.</p>
+<p>Summarise the importance of brotherhood in Islām using examples from the Anār Show tolerance to other faiths using examples of our Beloved Messenger               ’s treaties with the various Jewish tribes of Madīnah.</p>
+<p>Distinguish the key events that led to the battles of Badr, Uḥud and Aḥzāb, paying close attention to the historic details.</p>
+<p>Sīrah so far... When the persecutions and tortures increased, our Beloved Messenger  granted permission for some Companions to migrate to Abyssinia. The ﬁrst migration consisted of twelve men and four women. Thereafter, a second migration took place, consisting of eighty-three men and eighteen women.</p>
+<p>Opponents of Islām amongst the Quraysh sent a delegation to the King of Abyssinia with the intention of putting fear and hatred of Muslims in the hearts of Abyssinians. Against their will, the King of Abyssinia respected the Muslims after hearing the message of Islām from Ja'far and the enemies returned unsuccessful.</p>
+<p>Following this, they tried a different approach and boycotted the tribes of Ban[ Hāshim and Ban[ Muṭṭalib for three years. Six months after the end of this boycott, the wife of our Beloved Messenger Muḥammad , Khadījah , and his uncle, Abū Ṭālib both passed away.</p>
+<p>The Messenger  went to Ṭā'if to invite the tribes to Islām. In their ignorant desire to be rid of the Prophet , the townsfolk stoned him.</p>
+<p>Allāh  took Rasūlullāh  on a special journey. The two parts of that miraculous journey are known as Isrā' and Mi'rāj, where he  was taken to 'the farthest masjid', Masjid al-Aq\, and then up into the Heavens to see many great things and meet other messengers. In the eleventh year of Prophethood the message of Islām began to spread in the city of Yathrib, about 450 kilometres to the north of Makkah.</p>
+<p>The First Pledge Of 'Aqabah In the year following Al-Isrā' and Al-Mi'rāj, the twelfth year of Prophethood, a group of twelve people came from Yathrib (Madīnah). They pledged (promised) to believe in one Allāh and that Muḥammad  is His Messenger. They promised not to steal, kill, or to do any other acts of evil. This pledge was taken near a hillock (small hill). A hillock in Arabic is called 'aqabah, therefore it is known as the Pledge of 'Aqabah. After this promise, the Messenger sent Mu'ab ibn 'Umayr  to Madīnah Munawwarah as the ﬁrst Muslim teacher.</p>
+<p>Mu'ab  fulﬁlled his duties preparing the ground for the arrival of the Messenger .</p>
+<p>Every house in Madīnah Munawwarah echoed with the call of Taw#|d (belief in the Oneness of Allāh).</p>
+<p>The Second Pledge Of 'Aqabah The next year during the pilgrimage season, Mu'ab ibn 'Umayr  returned to Makkah along with seventy new Muslims. Shortly after arriving, they made contact with the Beloved Messenger  and agreed to meet in secret. They met at night near the hillock where the ﬁrst meeting had taken place. There the people of Madīnah Munawwarah promised to protect the Messenger  from that which they would protect their women and children. They also promised him ﬁve other things:</p>
+<p>1.To listen and obey in difﬁculty and ease.</p>
+<p>2.To spend in the way of Allāh  at all times.</p>
+<p>3.To tell others to do good and stop them from evil.</p>
+<p>4.Not to fear the harsh words of anyone whilst in the service of Allāh .</p>
+<p>5.To aid the Messenger  when he made the journey to Madīnah Munawwarah. The Messenger  then asked the group to choose twelve people to represent their people in matters regarding the pledge. The people of Madīnah Munawwarah kept to their word and never broke their promise. We must also try and be like the people of Madīnah Munawwarah.</p>
+<p>The Plot After the second pledge of 'Aqabah, the Messenger  announced that the Muslims of Makkah Mukarramah were to migrate (move) to Madīnah Munawwarah. The Muslims left everything in Makkah and slowly, one at a time, or in small groups, began to migrate to Madīnah. When the Quraysh realised that all those who had accepted Islām as their way of life were moving to Madīnah, they became very angry. They decided the only way to put an end to this was to kill the Messenger . He was to be killed by a group of young men: a man would be selected from each of the main tribes so that the Ban[ Hāshim would not be able to seek revenge against all the tribes of Makkah. While they plotted, Abū Bakr  hired two camels and a guide for the journey. The Makkans knew the Messenger  was going to leave Makkah soon. The young men assigned to murder the Messenger  surrounded the house during the darkest hour and settled to wait for dawn when they would carry out their evil plan.</p>
+</article>
+<article class="topic" id="s-rah-hijrah">
+<h3>Hijrah</h3>
+<div class="diagram"><img src="images/Coursebook4-s-rah-hijrah.png" alt="Diagram: Hijrah" loading="lazy"></div>
+<p>The Beloved Messenger  was ordered by Allāh  to leave for Madīnah that very night. His cousin 'Al| was asked to remain in the Prophet 's bed as a decoy. Before leaving, he was to return all the possessions that various people of Makkah had entrusted to the Beloved Messenger  for safe keeping. That night, as the Messenger  left his house, Allāh  blinded the men for a few minutes so the Prophet  could slip straight past them unnoticed. In the morning when they rushed into the house, they found 'Al|  in the Prophet 's bed. They were amazed: they could not understand how the Messenger  had escaped. By this time the Prophet  and Abū Bakr had reached the outskirts of Makkah. They sought refuge in the Cave of Thawr for three days, whilst the Makkans searched for Muḥammad and his companion. The cave was covered by a spider that had spun its web once they had entered and a pigeon that had built its nest at the entrance. The Makkans passed the cave but when they saw the web and the pigeon's nest they felt certain no one could have entered it recently.</p>
+<p>Asmā' , the daughter of Abū Bakr , would bring food to them daily and a servant would set his goats grazing near the cave and supply Rasūlullāh  and Abū Bakr with milk. After three days in the cave, the camels were brought there to transport them to Madīnah. The Makkans offered a reward of a hundred camels for anyone who could kill or capture Rasūlullāh  or Abū Bakr . A Makkan by the name of Surāqah ibn Ju'shum went in search of the Prophet . He came upon the Messenger  and as he got closer, the legs of his horse sank into the ground. He begged the Messenger  to pray that Allāh  release him, saying that he would no longer pursue them.</p>
+<p>The horse was freed but the hundred-camel reward seemed too great to resist: again he came after the Messenger  and for a second time the horse's legs sank into the ground. This time he promised he would Sīrah not go after the Messenger . He came closer to the Messenger  and offered them provisions but the Messenger refused, asking only that he hide their whereabouts. He promised to do so and returned to Makkah. The people plot a plan and Allāh  makes a plan and it is Allāh 'splan that always succeeds.</p>
+</article>
+<article class="topic" id="s-rah-arrival-in-mad-nah">
+<h3>Arrival in Madīnah</h3>
+<div class="diagram"><img src="images/Coursebook4-s-rah-arrival-in-mad-nah.png" alt="Diagram: Arrival in Madīnah" loading="lazy"></div>
+<p>News that the Messenger  had left Makkah spread throughout Madīnah. The people eagerly awaited the arrival of the Messenger .</p>
+<p>Each day they gathered outside the city. On Monday the 8th of Rabī' al-Awwal, the Messenger  arrived in a place called Qubā' on the outskirts of Madīnah. A Jew was working at the top of a fort when he saw the newcomers in the distance and shouted, "O people, here is the one you have been waiting for!" The Muslims quickly came out to see the Prophet . As they drew closer, their joy knew no end and the young girls broke out in verse. Madīnah was full of</p>
+<p class="arabic" dir="rtl" lang="ar">نمdelight. عادولا تاينث  انيلع ردبلا علطِ</p>
+<p>The Beloved Messenger  stayed in Qubā' for a few days and built the ﬁrst masjid. On Friday 12th Rabī' al-Awwal, the Prophet and Abū Bakr set out for Madīnah. They offered the Jumu'ah prayer at Ban[ Sālim.</p>
+<p>Everybody wanted to have the honour of receiving the Messenger  at his house, but the Messenger  said, "The camel is guided by Allāh. Let her go: where she stops is where I shall stay." The camel stopped at the homes of Ban[ al-Najjār, the tribe to which the Prophet 's mother belonged. The full moon rose over us from the valley of wadā'; It is necessary for us to show gratitude for as long as a caller calls out to Allāh; O Messenger amongst us, you have brought such matters which need to be obeyed; You brought to the city, honour. Welcome O you who calls us to a good way.</p>
+<p>The Masjid of Madīnah The Messenger  wanted to build a masjid in Madīnah where the Muslims could meet and learn Sīrah about their religion. The Messenger  wished to purchase a piece of land which belonged to two orphan boys, Sahl and Suhayl . The two boys wanted to give the land as a gift to the Messenger but the Messenger  refused to take it without payment and instead he bought the land. The Messenger  helped to build the masjid. The walls were of mud and stone and the pillars of palm tree trunks. Rooms were built on the side for the Messenger  and his family.</p>
+<p>Until the masjid and the rooms were ready, the Messenger  was a guest at the house of Abū Ayyūb al-Anār| .</p>
+</article>
+<article class="topic" id="s-rah-islamic-brotherhood">
+<h3>Islamic Brotherhood</h3>
+<div class="diagram"><img src="images/Coursebook4-s-rah-islamic-brotherhood.png" alt="Diagram: Islamic Brotherhood" loading="lazy"></div>
+<p>The Messenger  now turned his attention to the affairs of the Muslim community. Many Muslims had migrated to Madīnah. The new community was therefore made up of the Muhājirūn (Emigrants) and the Anār (Helpers). The Muhājirūn had left all their possessions and needed to be able to earn a living so they could settle down. The Messenger  gathered the Muhājirūn and Anār and proposed that each Anār| take a Muhājir in his care and treat him like he would treat his brother.</p>
+<p>The Anār were so eager to serve Islām, that each of them accepted a Muhājir as his brother, took him to his house, and offered him half of all his worldly belongings. This is known as Mu'ākhāt (Islāmic brotherhood).</p>
+<p>Look how the people of Madīnah supported their fellow Muslims who had come from Makkah by taking them to be their own brothers. Sub#ānallāh. Dear children, we must also live like this, taking each Muslim as our own brother and we must not create groups that leave people out. We need to be friends and welcome everyone. The Messenger taught us that all the Muslims are like one body: if one part of the body feels pain then the other also feels that pain.</p>
+</article>
+<article class="topic" id="s-rah-treaties-with-the-jews">
+<h3>Treaties with the Jews</h3>
+<div class="diagram"><img src="images/Coursebook4-s-rah-treaties-with-the-jews.png" alt="Diagram: Treaties with the Jews" loading="lazy"></div>
+<p>Madīnah had three main Jewish tribes: the Ban[ Na}|r, the Ban[ Qaynuqā', and the Ban[ Quray~ah. The Prophet 's main concern was that the Muslims and Jews live in peace. The Messenger  made an agreement with them that both Muslims and Jews should be free to practise their own religion and that they would treat each other with respect. Each group would help the other if it was to come under attack by an outside aggressor. It was also agreed that in any dispute, the Prophet 's decision would be ﬁnal.</p>
+<p>All three of the tribes agreed to the pact.</p>
+<p>Look how the Messenger  lived with his fellow neighbours, even though they were not Muslims. Islām is a peace-loving religion that wants peace to be spread everywhere.</p>
+<p>The Hypocrites Before the arrival of the Messenger in Madīnah, the tribes of Aws and Khazraj had decided to appoint a king agreed upon by both tribes. The man chosen was an intelligent individual by the name of 'Abdullāh ibn Ubayy ibn Salūl. However, since accepting Islām, both tribes would now have none but the Messenger as a leader.</p>
+<p>'Abdullāh ibn Ubayy ibn Salūl was bitter about this. Realising that power had now shifted to Rasūlullāh , he and a group of his supporters professed that they too had embraced Islām but were privately planning the downfall of the Muslims at the hands of the Jews and the Quraysh. These people were known as the Mun\ﬁqūn (Hypocrites). They were people who acted like Muslims from the outside, but they were really disbelievers.</p>
+<p>The Battles The Quraysh were angry that the Prophet and his Companions were able to escape to safety and establish themselves in Madīnah. The Muslims left behind in Makkah were mercilessly hurt and Sīrahmistreated. On seeing the power of the Muslims grow, the Quraysh decided to attack the Muslims and be done with them once and for all. For this reason the Quraysh placed a tax on all Makkans. The money gathered was then invested in trade and the proﬁts were then used to fund a battle against the Muslims.</p>
+<p>The Battle of Badr Ramaḍān 2 AH. The Disbelievers were looking for a chance to attack the Muslims and ﬁnish them once and for all. For this they were making big business in Syria and were using the money to buy weapons to attack the Muslims.</p>
+<p>One of the caravans that was on its way from Syria, and was passing by Madīnah Munawwarah, was carrying these goods. The Messenger , and 313 of his Ṣa#ābah left Madīnah, so they could stop this caravan from reaching Makkah Mukarramah. News reached the leaders of the caravan and they sent a message to the Disbelievers who immediately left with 1000 men under the command of Abū Jahl. The night before the battle was spent by the Messenger  in prayer and supplication asking Allāh for victory. He prayed and asked, "O Allāh, if this band of men was to perish tomorrow, there will be none till the Last Day to worship You."</p>
+<p>The Battle of Badr Ramaḍān 2 AH The battle commenced on the 17th of Ramaḍān, two years after the Hijrah (2 AH). The Muslims were given help from Allāh .</p>
+<p>Allāh  gave them courage and conﬁdence Sīrahand sent angels to help them. The Muslims fought bravely and were granted victory. The Makkan army was faced with a heavy defeat. Seventy Disbelievers were killed, including some of the greatest enemies of Islām and leaders of Quraysh like Abū Jahl, Shaybah, and Umayyah ibn Khalaf, and seventy others were taken as prisoners. In the battle, thirteen Muslim soldiers died and achieved martyrdom. The prisoners were taken back to Madīnah. If their families were able to pay the ransom, they were released. Those who were not able to pay the ransom, but knew how to read and write, were told they would be released if they were able to teach a group of Muslims to read and write. The Makkan army returned disheartened but vowed to avenge the deaths of their leaders. They elected Abū Sufyān as the new leader and immediately began preparing for another attack.</p>
+<p>Remember: to Allāh  belongs the armies of the Heavens and the Earth.</p>
+<p>The Battle of Uḥud Shawwāl 3 AH The Battle of Badr dealt a heavy blow to the Disbelievers and they searched for a chance to take revenge.</p>
+<p>Preparations were underway and the Disbelievers chose the very next year to launch a huge attack with 3000 men. The Messenger  discussed the matter with his Companions and decided to meet the Disbelievers with 1000 men outside Madīnah near a mountain called Uḥud.</p>
+<p>'Abdullāh Ibn Ubayy ibn Salūl, who was the leader of the Hypocrites, left the army with his 300 hypocrite friends. So the Muslims were left with only 700 men.</p>
+<p>The Battle of Uḥud Shawwāl 3 AH The Messenger  appointed ﬁfty men upon a small hill to guard the rear side and were told not to move. The battle began. It was a ﬁerce battle which the Muslims started to win, and the Disbelievers started to run away. When the ﬁfty archers saw this, some of them decided to come down and enjoy the victory, as they had misunderstood the order of the Beloved Messenger .</p>
+<p>Seeing that the rear side was left unguarded, the Disbelievers decided to launch another attack from the back. Many Muslims were killed and the Messenger  was also injured. A group of nine Companions gathered around the Prophet  and fought bravely until seven were martyred and only two remained between the Messenger  and the attacking Makkan army. They were 'Umārah ibn Yazīd  and Sa'd ibn Ab| Waqq\] . Soon 'Umārah was also martyred whilst protecting the Beloved Messenger .</p>
+<p>The Battle of Uḥud Shawwāl 3 AH The Prophet  was left with only two people from the Muslim army: Sa'd and Sīrah Ṭalḥah ibn 'Ubaydillāh , who had joined up with the Prophet . They fought bravely and protected the Messenger . The Companions of the Messenger  once again got together and chased the Disbelievers out.</p>
+<p>Abū Sufyān expressed great joy at the death of so many Muslims and declared joyously, "Now we have equalled the score for our soldiers killed at Badr!"</p>
+<p>"Never!" replied a deﬁant 'Umar, "Our dead are in Jannah, while your dead are in Jahannam!"</p>
+<p>The Battle of Uḥud Shawwāl 3 AH Some of the bodies of the Muslim martyrs were mutilated. Among them was the beloved uncle of the Messenger , Ḥamzah , killed by the slave Waḥsh| ibn Ḥarb who had been promised his freedom by Hind, the wife of Abū Sufyān, if he was able to kill Ḥamzah .</p>
+<p>Hind then chewed the liver of Ḥamzah . Only a few Makkans were killed in the battle, although seventy Muslims were martyred.</p>
+<p>Amongst them were Ḥamzah  and Mu'ab ibn 'Umayr .</p>
+<p>The Jewish Tribes The agreement that the Messenger  had made with the Jews when he arrived in Madīnah meant that they would help the Muslims defend the city. They also agreed to live with the Muslims in peace and friendship. However, the Jews did not keep to their agreement, but tried at every opportunity to cause the Muslims harm. The Ban[ Qaynuqā' was the ﬁrst Jewish tribe that the Messenger  dealt with. They had conspired against the Muslims on numerous occasions and even went as far as to declare war against them. The Messenger led an army to their fort and surrounded it. After a siege of ﬁfteen days, Ban[ Qaynuqā' surrendered: they moved out to Syria.</p>
+<p>The Jewish Tribes The Ban[ Na}|r plotted against the Muslims by informing the Quraysh about the activities of the Muslims. They had even made an attempt on the life of the Messenger  when he visited them. The Messenger  returned Sīrah to Madīnah and later besieged them for two weeks. They eventually surrendered and migrated, taking their possessions with them on six hundred camels.</p>
+</article>
+<article class="topic" id="s-rah-battle-of-a-z-b">
+<h3>Battle of Aḥzāb</h3>
+<div class="diagram"><img src="images/Coursebook4-s-rah-battle-of-a-z-b.png" alt="Diagram: Battle of Aḥzāb" loading="lazy"></div>
+<p>Dhul Qa'dah 5 AH Though the Quraysh had killed many Muslims in the Battle of Uḥud, they had not been able to destroy the Muslims. So in the ﬁfth year after the Prophet 's migration, they once again prepared for war. The leader of the Makkans, Abū Sufyān, was able to gather 4,000 men. From the East, the tribe of Ghaṭfān and the Ban[ Sulaym came along with the Jewish tribe of Banu Quray~ah. In total, 10,000 men marched towards Madīnah. The Messenger of Allāh  was informed that a huge army was heading towards Madīnah. The Messenger  discussed the matter with his Companions on how best to protect Madīnah and repel such a great army.</p>
+<p>Salmān al-Fārs|  said, "O Messenger of Allāh, whenever we were attacked in Persia, we would dig trenches to protect ourselves." This idea was unique and unheard of in the Arabian Peninsula. The Messenger  gave orders for the trenches to be dug.  Forty yards was allocated to a group of ten to dig.</p>
+<p>Dhul Qa'dah 5 AH When the army under the command of Abū Sufyān reached Madīnah, they were amazed to see a massive trench blocking their way. They made many attempts to cross the trench but were unsuccessful. They stayed there outside Madīnah for a month and decided they would starve the Muslims. The siege lasted for twenty seven days, but during this time they were unable to break the resolve of the Muslims.</p>
+<p>There was no hand-to-hand combat since the trench was ﬁve metres wide. However, arrows were ﬁred from both sides. The siege ended unexpectedly on the twenty seventh night when a severe storm approached Madīnah. The effect of the storm was devastating. The tents and goods of the Makkan army were uprooted and blown away. The whole army was left shocked and in fear. Abū Sufyān returned to Makkah. This was the last time an army attacked Madīnah in the lifetime of the Prophet .</p>
+</article>
+</section>
+
+<section class="subject" id="t-r-kh">
+<h2>Tārīkh</h2>
+<article class="topic" id="t-r-kh-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>Outline the story of Yūsuf           paying attention to:</p>
+<ul><li>The dream that Yūsuf           had and the</li></ul>
+<p>events that followed.</p>
+<p>Describe how Yūsuf          became the guardian of the storehouses.</p>
+<p>Highlight the way in which Yūsuf           was reunited with his youngest brother and his father.</p>
+<p>Yūsuf had eleven brothers. He was very Yūsuf much loved by his father. One night Yūsuf saw a dream. He dreamt that eleven stars, the sun and the moon were all bowing down to Tārīkhhim. He was amazed at the dream and did not understand it. He told his father Ya'qūb who was a prophet. His father understood the meaning of dreams and knew this was a special dream. He told that this was a great dream, and that Yūsuf would bless him. Ya'qūb Allāh understood how people would react when they saw a blessing with someone else. He told Yūsuf not to tell any of his brothers for they might become jealous and plan to hurt him. had a brother younger than him who Yūsuf loved these was called Binyāmīn. Ya'qūb two young children more than the other elder ones. The elder brothers were jealous and would more say, "Why does our father love Yūsuf than us? We are stronger than him."</p>
+</article>
+<article class="topic" id="t-r-kh-y-suf">
+<h3>Yūsuf</h3>
+<div class="diagram"><img src="images/Coursebook4-t-r-kh-y-suf.png" alt="Diagram: Yūsuf" loading="lazy"></div>
+<p>The brothers found out about the dream and this increased their jealousy. They thought of a plan.</p>
+<p>Some of them said they should kill him, whilst others suggested that they throw him into a distant well. They all agreed on this and approached their father. They said: "O our father! Why will you not trust us with Yūsuf, when we are good friends to him? Send him with us tomorrow so that he may enjoy himself and play. We shall take good care of him." So their father replied: "It worries me that you take him with you and I fear that a wolf might eat him while you are unaware." They said: "We are a strong group. If the wolf eats him then surely we will be of the losers." So their father allowed them to take him. When they took him to the jungle and threw him into the deep well, Allāh inspired Yūsuf with the knowledge that he would tell them of this deed of theirs when they had forgotten about him. After having thrown Yūsuf in the well, they came crying to their father in the evening, saying:</p>
+<p>"O our father! We went racing with one another, and left Yūsuf by our things, and the wolf ate him, and you will not believe what we say even when we speak the truth." (Qur'ān 12:11-17)</p>
+<p>They came with false blood on his shirt. Ya'qūb was upset and said "rather your minds have persuaded you into something. (My stance is) beautiful patience. It is Allāh, Whose help is to be sought in that (difﬁculty) which you describe."</p>
+<p>(Qur'ān 12:18)</p>
+<p>Tārīkh was all alone in the well. He thought Yūsuf and about his father and his brother. Ya'qūb .</p>
+<p>Binyāmīn both thought about Yūsuf A caravan was on its way to Egypt and these travellers saw the well as they passed by. They stopped and one of them went to get some water. As he pulled the bucket up he said in surprise:</p>
+<p>"…here is a young boy, they (then) hid him as a treasure and Allāh was aware of what they did."</p>
+<p>(Qur'ān 12:19) with them to Egypt and sold They took Yūsuf him in the market:</p>
+<p>"…they sold him for a low price, a number of (few) silver coins, and they had no interest in him."</p>
+<p>(Qur'ān 12:20)</p>
+<p>The minister that bought him was called Qiṭfīr.</p>
+<p>Qiṭfīr said to his wife, Zalīkh\:</p>
+<p>"Receive him honourably. Maybe he may prove useful to us or we may adopt him as a son." (Qur'ān 12:21)</p>
+<p>Zalīkh\ wanted to betray the minister by tempting Yūsuf  into doing something evil. Yūsuf did not listen to her. She became angry and told her husband. He realised it was not the fault of Yūsuf .</p>
+<p>People began talking about Zalīkh\. She decided to show him to all the people, how handsome he really was. When the women had arrived she gave each of them a knife with which to cut their fruit. The Qur'ān tells us their reaction:</p>
+<p>'And when they saw him they exalted him in his beauty and in their astonishment cut their hands, exclaiming: "How perfect is Allāh! This is no human being. This is none other than some gracious angel."' (Qur'ān 12:31)</p>
+<p>'She said: "This is he because of who you blamed me. I asked of him for an evil act, but he denied. If he does not listen he will surely be imprisoned, and shall most deﬁnitely be of those disgraced." He said: "O my Lord! Prison is more dear to me than that which they urge me."' (Qur'ān 12:32-33)</p>
+<p>had not done anything Qiṭfīr knew Yūsuf wrong but he thought the best option was to send  arrived in prison, him to prison. When Yūsuf the inmates saw a respectful young man. They immediately saw that he was someone special.</p>
+<p>Two of the prisoners came to him and related their dreams.</p>
+<p>'One of them said: "I dreamt that I was pressing wine." The other said: "I dreamt that I was carrying upon my head bread from which the birds were eating."' (Qur'ān 12:36)</p>
+<p>for the meaning of They asked Yūsuf saw this as a good their dreams. Yūsuf opportunity to invite the people of the prison , as the towards the worship of Allāh people of the prison had ﬁxed upon many . false gods other than Allāh</p>
+<p>Yūsuf  told the prisoners that he had left the religion of those who did not believe in Allāh and those who disbelieved in the hereafter.</p>
+<p>Yūsuf  followed the religion of his fathers, Ibrāhīm , Isḥāq  and Ya'qūb . He mentioned that none of them had ever made partners with Allāh .</p>
+<p>Yūsuf  questioned the prisoners and asked them: "Are many different lords better or Allāh, The One, The Almighty?". He tried to make them understand that those whom they worshipped other than Allāh  are of no use. Worship is to be directed to Allāh  alone. He then explained the meaning of their dreams to them. He said: "One of you will pour out wine for his king to drink. The other one will be cruciﬁed and birds will eat from his head." (Qur'ān 12:41) This is the way Yūsuf  judged the dreams the prisoners spoke about.</p>
+<p>Yūsuf  knew which one would be released. He said to him: "mention me in the presence of your king." However Shayṭān made the prisoner forget to mention Yūsuf , therefore, Yūsuf ended up staying in prison for some years after.</p>
+<p>One day the king of Egypt, whose name was Rayyān ibn Walīd, saw a dream. He saw seven fat cows being eaten by seven thin cows, and seven green ears of corn and another seven dry. The ministers around him told him that these were just jumbled words and had no meaning. But the one who used to give drink to the king remembered Yūsuf , and told the king that he would be able to ﬁnd for him the meaning of this dream. He rushed to the prison and asked Yūsuf  the meaning of this dream. Yūsuf  not only gave the meaning but explained the solution too. He said: "You shall sow for seven years and that which you harvest, leave it except for a little which you need to eat. After these years seven hard years will come in which you will be able to eat that food which you had kept safe."</p>
+<p>"Finally, a year will come when the people will have plenty of crops." (Qur'ān 12:47-49)</p>
+<p>The king was so touched by the wisdom of that he wanted to meet him. When the Yūsuf asked that the royal summons came, Yūsuf king check his case ﬁrst. Zalīkh\ was called and she admitted her fault, "We know no evil of him", the witnesses said.  Zalīkh\ added, "Now the truth is out. I asked him for an evil act, and he is surely 's innocence was now of the truthful." Yūsuf known to all the people. (Qur'ān 12:51-52) went to meet the king. In Egypt there Yūsuf were a lot of storehouses. In these storehouses the food would be kept safe. But the people that were in charge of these storehouses were not honest. They would steal a lot of the food and not distribute it to the people equally.</p>
+<p>, he When Rayyān, the king, spoke to Yūsuf told him that he was trusted in his royal court and he was now a special person to him. was an honest man; he did not like Yūsuf to see people doing wrong things so he said to the king, "Put me in charge of the storehouses for I am an honest knowledgeable guardian." The the guardian of the king appointed Yūsuf storehouses. (Qur'ān 12:55)</p>
+<p>After a few years, the famine spread all over the lands. People from far away came to Egypt for food.</p>
+<p>'s brothers.</p>
+<p>Amongst those people were Yūsuf They too came to Egypt and went to the palace. saw them and recognised all of them but Yūsuf they did not recognise him. They thought Yūsuf had died. How could he be alive? Had they not left him in the wilderness? All they had come to do was buy some basic foods. did not say anything about their Yūsuf relationship. He spoke to them and asked where they were from and how many people lived with them. He asked if they had any other brothers. They replied they had one more brother whose name was asked them why he had not Binyāmīn. Yūsuf come with them. The brothers replied, "Because our father's fear is that the same may happen to him which happened to his brother." heard this but did not say anything. He Yūsuf then placed their payment back in their sacks when they were not looking and told them to bring their brother back next time, otherwise they would not receive any more provisions. When the brothers reached home they opened their sacks and were astonished to see their money returned to them. They if he would allow asked their father Ya'qūb Binyāmīn to come with them. He said, "Can I entrust him to you as I entrusted his brother to you before is better at guarding, and He is the this? Allāh Most Merciful of those who show mercy." (Qur'ān 12:64)</p>
+<p>The brothers gave their promise that they would protect him and bring him back safely. After their father was convinced, they began the journey to Egypt with their brother Binyāmīn.</p>
+<p>TārīkhBinyāmīn was ﬁnally united with Yūsuf . He told his younger brother who he was and asked him not to tell anyone. They had missed each other for a very long time. Yūsuf  could not let his brother go; after all, he had not seen him for so many years. Yūsuf  had been so lonely for all these years.</p>
+<p>Yūsuf  wanted his younger brother to stay with him. But how could he? He had to have a reason. Yūsuf  placed the king's goblet inside Binyāmīn's sack and when the brothers were set to leave, Yūsuf  made sure that one of his attendants shouted out:</p>
+<p>"O camel-riders! You are surely thieves!" They said, coming towards them, "What is it you have lost?" They said, "We have lost the king's cup, and he who brings it shall have a camel load of goods as a reward. The brothers answered, "By Allāh, you know we have not come to do evil in the land, and are not thieves."</p>
+<p>Yūsuf 's ofﬁcers asked, "And what shall be the penalty for it, if you are proven as liars?" They said, "The punishment shall be that in whoever's bag the cup is found that person will be taken as a prisoner." (Qur'ān 12:70-75)</p>
+<p>Yūsuf  began the search. He searched all their bags, leaving young Binyāmīn's until last. The king's goblet was, of course, found in Binyāmīn's bag.</p>
+<p>The brothers did not know how to face their father. Were they going to make him suffer ? The eldest again like they did for Yūsuf brother said he could not go back and so he too remained in Egypt. was put to the test again. He was Ya'qūb very patient. He told his sons, "Go, O my sons, and ﬁnd out about Yūsuf and his brother, and . No one despair not of the mercy of Allāh except the despairs of the mercy of Allāh disbelievers." (Qur'an 12:87) and They came to Egypt in front of Yūsuf put forward their condition saying:</p>
+<p>"O minister! We and our family are struck by distress, and we have brought some goods of very little value. So, give us the full measure (of will grain) and be charitable to us. Allāh reward the charitable." (Qur'ān 12:88)</p>
+<p>This was too much to bear for Yūsuf . How long could he keep his secret? How long would he see his family suffer? He said to them, "Do you know what you did to Yūsuf and his brother when you were not aware?" (Qur'ān 12:89) The brothers were shocked! No one except them knew of this secret. Could this be their very brother whom they had plotted to kill all those years ago? They said, in absolute shock, "Are you Yūsuf?"</p>
+<p>Yūsuf  replied, "I am Yūsuf and this is my brother (pointing at Binyāmīn)." (Qur'ān 12:90)</p>
+<p>has shown us favours. He who stays "Allāh away from evil and is patient (will ﬁnd favour); does not waste the efforts for verily Allāh of those who do good. They said, 'By Allāh, verily Tārīkh has preferred you above us, and we Allāh were indeed sinful.' He said, 'There shall be no revenge on you! May Allāh forgive you, and He is the Most Merciful of those who show mercy.'"</p>
+<p>(Qur'ān 12:90-92)</p>
+<p>Now there was no need The secret was revealed! asked to hide anything. Immediately Yūsuf about their dear father. They told him he had lost his eyesight because of crying so much. He told them to take his shirt and place it on their father's face; his eyesight would return. He also told them to bring his entire family to Egypt.</p>
+<p>Ya'qūb  was sitting in Kan'ān and he said to the people around him, "By Allāh I sense the scent of Yūsuf!" (Qur'ān 12:94) The people thought he must be speaking through old age.</p>
+<p>How could Yūsuf still be alive? How could he have survived all these years? When the caravan arrived and gave the glad tidings he said, "Did I not tell you I know from Allāh  that which you do not know?"</p>
+<p>(Qur'ān 12:96)</p>
+<p>Ya'qūb  and his family began the long journey to Egypt to ﬁnally be reunited with his son.</p>
+<p>Yūsuf  greeted his father with a great amount of sweetness! After forty years of separation they were ﬁnally united! What a happy day that must have been.</p>
+<p>The Qur'ān describes this day:</p>
+<p>'And when they came in before Yūsuf , he took his parents unto him, and said: "Come into Egypt safe, if Allāh so wills." He placed his parents on the throne and they fell down before him in prostration, and he said:</p>
+<p>"O my father! This is the interpretation of my dream (I had) before. My Lord has made it true, and He has shown me kindness, since He took me out of the prison and has brought you from the desert after Shayṭān had made a conﬂict between me and my brothers. Lo! My Lord is gentle unto whom He wills. He is the Knower, the Wise.</p>
+<p>O my Lord! You have given me (something) of sovereignty and have taught me (something) of the interpretation of events - Creator of the Heavens and the Earth! You are my Protecting Friend in the World and the Hereafter. Make me die (in a state) submissive (unto You), and join me with the righteous."' (Qur'ān 12:99-101)</p>
+<p>The story of Yūsuf is full of amazing lessons for life. Allāh 's plan will always come true. From the wells of Kan'ān to the palaces of Egypt!</p>
+<p>Sub#ānallāh. Nothing is impossible for Allāh .</p>
+<p>TārīkhWe must never become jealous, for in the end we will only suffer. If someone has been mean to us and then comes to ask for forgiveness we should forgive them.</p>
+<p>Look how Yūsuf forgave his brothers immediately, despite all that they had done to him.</p>
+</article>
+</section>
+
+<section class="subject" id="aq--id">
+<h2>Aqā'id</h2>
+<article class="topic" id="aq--id-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>‘Aq\’id List the major signs pointing to the Day of Judgement.</p>
+<p>Recognise who the Mahd| will be.</p>
+<p>Identify the characteristics of the Dajjāl and memorise Recall the story of Tamīm ad-Dār|.</p>
+<p>Describe the role of ‘Īs\            when he descends before The Day of Judgement.</p>
+<p>Explain the destruction of Ya’jūj and Ma’jūj after their breakthrough and the prosperity that shall follow after they will be destroyed.</p>
+<p>Discuss the events that lead to the Day of Judgement such as the Beast, The Rising of the sun from the West, The Smoke, landslides, The Fire and the destruction of the Ka'bah.</p>
+<p>Communicate the importance of the Prophet    ’s intercession on the Day of Judgement.</p>
+<p>Illustrate the bridge and its signiﬁcance.</p>
+</article>
+<article class="topic" id="aq--id-major-signs">
+<h3>Major Signs</h3>
+<div class="diagram"><img src="images/Coursebook4-aq--id-major-signs.png" alt="Diagram: Major Signs" loading="lazy"></div>
+<p>Before a great event there are always signs that point to its coming. Similarly, the Day of Judgement is one of the greatest days ever, for it is the Last Day. Our Beloved Messenger  very kindly told us of many signs that will come before the Day of Judgement. These signs are split into two, occurring in two stages. Stage one is the minor signs, and stage two is the major signs. In Coursebook 3 we looked at the minor signs, here we shall take a look at the major signs.</p>
+<ul><li>The Mahd|.</li><li>The Dajjāl.</li></ul>
+<p>returns.</p>
+<ul><li>'Īs\</li><li>Ya'jūj and Ma'jūj.</li><li>Landslides.</li><li>The Smoke.</li><li>Emergence of the Beast from the earth.</li><li>Rising of the sun from the West.</li><li>The Fire.</li><li>The Wind that will take out all the believers' souls.</li></ul>
+<p>Ḥudhayfah ibn Usayd  reported: The Beloved Messenger  suddenly came to us while we were talking. He asked, "What are you talking about?" They replied, "We were talking about the Last Hour." The Beloved Messenger  said, "It will never come until you see ten signs before it," He then mentioned the Smoke, the Dajjāl, the Beast, the rising of the sun in its place of setting, the descent of 'Īs\ son of Maryam and Ya'jūj and Ma'jūj..." (Ṣaḥīḥ Muslim)</p>
+<p>The Mahd| 'Mahd|' means 'the Guided One.' reported: "I heard the Prophet Umm Salamah ."  saying, "The Mahd| will appear from of Allāh my progeny, from the descendants of Fāṭimah (Abū Dāwūd) His name will be Muḥammad and his father's name 'Abdullāh.</p>
+<p>The Mahd| The Mahd| will be a man who will ﬁll the world with justice, just as it had been ﬁlled with oppression and injustice. The people will pledge loyalty to him near the Ka'bah. The Mahd|  will follow and rule according to the Sunnah of our Beloved Messenger Muḥammad .</p>
+<p>The Dajjāl , The Dajjāl will be a man, created by Allāh to be a test for the people at the end of time.</p>
+<p>Many will be led astray with his tricks. said, "There has never been The Prophet a prophet who did not warn his people against that one-eyed liar. Verily he is one-eyed and your Lord is not one-eyed; on his forehead will be written the letters Kāf, F\, R\ (K\ﬁr)."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)'Aqā'id reports that the Messenger Ibn 'Abbās said, "The Dajjāl is curly haired and white skinned. His head is like the branch of a tree; his left eye is blind and the other eye looks like a ﬂoating grape." (Ṭabarān|)</p>
+<p>The Dajjāl Some facts about Dajjāl which have been mentioned in a#ādīth quoted in Musnad Aḥmad:</p>
+<p>1.The Dajjāl will appear at the end of time, when religion is taken lightly.</p>
+<p>2.He will have forty days in which to travel throughout the Earth. One of these days will be like a year, another will be like a month, a third will be like a week, and the rest will be like normal days.</p>
+<p>3.He will say to the people, "I am your lord."</p>
+<p>4.On his forehead will be written the word K\ﬁr, and every believer, literate or illiterate, will be able to read it.</p>
+<p>5.He will go everywhere except Makkah and Madīnah, which Allāh has forbidden for him and are protected by angels.</p>
+<p>The Dajjāl He will have a mountain of bread, and 6. the people will face hardship, except for those who follow him. He will have two rivers. He will call 7. one 'Paradise' and one 'Hell.' Whoever enters the one he calls 'Paradise' will ﬁnd that it is Hell, and whoever enters the one he calls 'Hell' will ﬁnd that it is Paradise. will send with him devils Allāh 8. who will speak to the people. He will be a great test. He will pass by 9. a place in ruins and will order it to take out its treasure and it will. He will kill someone and bring him back 10. to life. After that he will no longer have this power.</p>
+<p>, he will When the Dajjāl sees 'Īs\ 11. will dissolve like salt in water. 'Īs\ kill him at the door of Ludd.</p>
+<p>The Dajjāl Fāṭimah bint Qays reported, "I heard the mu'adhdhin of the Messenger of Allāh calling all (for) 'Congregational Prayer'. I went to the mosque and prayed with the Beloved Messenger . When he ﬁnished his prayer, he sat upon the pulpit smiling and said, "Let every man remain seated." He then asked, "Do you know why I have called you together?" They replied, "Allāh and his Messenger know best." The Prophet said, "By Allāh, I have not called you together for hope or for fear, I have called you together because Tamīm ad-Dār| , who was a Christian, came and embraced Islām."'Aqā'id</p>
+<p>The Dajjāl "He narrated a story to me, which is the same as the account I had given to you about the Dajjāl. He informed me that he had embarked upon a boat with thirty men of Lakhm and Judhām. Then the sea waves rolled their ship for a month and threw them on to an island when the sun was about to set. They sat in a small side boat and landed on the island. A beast with very coarse hair met them. They could not tell its front from its back due to its excessive hair. They asked, 'Woe to you! Who 'Aqā'idare you?' It replied, 'I am a spy. Go to this man in the monastery, as he is eager to receive the information you bring.'"</p>
+<p>"Tamīm ad-Dār| said, 'When it named a man for us, we ﬂed away from it lest it might be the devil. Then we hurriedly went on until we entered the monastery and found a big- bodied man whom we had never seen before. He was ﬁrmly tied up, his hands tied to his neck, the place between his knees, and joints tied up with iron chains.'"</p>
+<p>"'Woe to you! What are you?' asked the travellers. The huge man replied, 'You have the power to get my information. Inform me about yourselves.'"</p>
+<p>The Dajjāl "They replied, 'We are people from Arabia, we embarked upon a sea boat, but the sea waves played with us for a month and threw us onto this island. A beast of coarse hair met us and said, "I am a spy. Go to the man in the monastery." So we approached you hurriedly. He asked, 'Tell me about the trees of Baysān. Do they bear fruit?' 'Yes' they replied. He said, 'Behold! Soon they will not yield fruit.' He continued asking, 'Inform me of the lake of Tiberias. Is there water in it?' They replied, 'It is full of water.' He informed them, 'Soon its water will disappear.' He then asked, 'Inform me of the fountain of Zugār\. Is there water in it and do its inhabitants use the water of the fountain?' They said 'Yes, it is full of water and the people use its water.' He asked, 'Inform me of the Prophet of the illiterates. What does he do?' They replied, 'He has just come out of Makkah and gone to Yathrib.' He asked, 'Have the Arabs fought with him?' 'Yes' they replied. He asked, 'How did he treat them?' They informed him that he had got the upper hand of those of the Arabs who opposed him and they obeyed him.</p>
+<p>The Dajjāl The man in chains said, 'Behold! It is better for them if they obey him. As for myself I am certainly the Dajjāl and it is near that an order will be passed for me to come out. I shall then come out and travel the world. I shall leave no village at which I shall not land within forty nights except Makkah and Ṭaybah, which will be forbidden to me. Whenever I wish to enter one of the two, an angel with a sword in his hand will encounter me and prevent me therefrom.</p>
+<p>There will be angels on every side to guard it.' The Messenger of Allāh struck his pulpit with his staff and said, "This is Taybah, meaning Madīnah. Behold! Did I not tell you?" "Yes" they replied.</p>
+<p>"Behold, he is in the Syrian sea or sea of Yemen; no, rather he is from the eastern direction. He then pointed out with his hand towards the East." (Ṣaḥīḥ Muslim)</p>
+</article>
+<article class="topic" id="aq--id-protection-against">
+<h3>Protection Against</h3>
+<div class="diagram"><img src="images/Coursebook4-aq--id-protection-against.png" alt="Diagram: Protection Against" loading="lazy"></div>
+<p>the Dajjāl</p>
+<ul><li>Seek refuge with Allāh  from his</li></ul>
+<p>tribulation. The Prophet  used to seek refuge with Allāh  from the tribulation of the Dajjāl in his prayers, and he commanded his Ummah to do likewise:</p>
+<p>"O Allāh! We seek refuge with You from the punishment of Hell, from the punishment of the 'Aqā'id grave, from the tribulations of life and death, and from the tribulation of the False Messiah (Dajjāl)." (Ṣaḥīḥ Muslim)</p>
+<p>the Dajjāl</p>
+<ul><li>Memorise certain āyāt from Sūrah al-Kahf.</li></ul>
+<p>Al-*\ﬁ~ al-Dhahab| said, "Seeking refuge with Allāh from the Dajjāl is mentioned in many a#ādīth. One way of doing this is to memorise ten āyāt from Sūrah al-Kahf." reported that the Beloved Abū Dhar said, Messenger Muḥammad "Whoever memorises the ﬁrst ten āyāt of Sūrah al-Kahf will be protected from the Dajjāl." (Abū Dāwūd)</p>
+<p>the Dajjāl Abū Bakr reported that the Beloved Messenger Muḥammad said, "The terror caused by the Dajjāl will not enter Madīnah. At that time it will have seven gates; there will be two angels guarding every gate." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Anas narrates that the Beloved Messenger Muḥammad said: "The Dajjāl will come to Madīnah, and he will ﬁnd angels guarding it.</p>
+<p>Neither plague nor the Dajjāl will enter it, In sh\ Allāh." (Ṣaḥīḥ al-Bukhārī) It has been proven from the ṣa#|# a#ādīth that the Dajjāl will not enter Makkah or Madīnah, because the angels will prevent him from entering these two places which are sanctuaries and are safe from him. When he camps at the salt-marsh (Sabkhah) of Madīnah, it will be shaken by three tremors and every hypocrite will go out to join the Dajjāl. On that day, Madīnah will be cleansed and will be reﬁned and puriﬁed; and Allāh knows best.</p>
+</article>
+<article class="topic" id="aq--id---s-">
+<h3>'Īs\</h3>
+<div class="diagram"><img src="images/Coursebook4-aq--id---s-.png" alt="Diagram: 'Īs\" loading="lazy"></div>
+<p>It is our belief that 'Īs\ was not killed nor did he die, but Allāh raised him in to the Heavens. Allāh will send him back to this world again before the Day of Judgement.</p>
+<p>"...While in fact they did neither kill him, 'Aqā'id nor crucify him, but they were deluded by resemblance. Those who disputed in this matter are certainly in doubt about it. They have no knowledge of it, but they follow whims. It is absolutely certain that they did not kill him. Rather Allāh lifted him towards Himself. Allāh is Almighty, All-Wise." (Qur'ān 4:157-158)</p>
+<p>reported that the Abū Hurayrah said: "The prophets are like Messenger brothers: they have different mothers but their religion is one. I am the closest of all the people , because there is no prophet to 'Īs\ between him and myself.</p>
+<p>"He will come again, when you see him, you will recognise him. He is of medium height and his colour is reddish white. He will be wearing two garments and his hair will look wet. He will break the cross, kill the pigs, abolish the jizyah (tax) and call people to Islām. During his time, will end every religion and sect Allāh other than Islām. He will kill the Dajjāl. Then peace and security will prevail on Earth, so that lions will graze with camels, tigers with cattle, and wolves with sheep; children will be able to play with snakes without coming to any harm. will remain for forty years then he will 'Īs\ pass away and the Muslims will pray for him."</p>
+<p>(Aḥmad)</p>
+</article>
+<article class="topic" id="aq--id-ya-j-j---ma-j-j">
+<h3>Ya'jūj & Ma'jūj</h3>
+<div class="diagram"><img src="images/Coursebook4-aq--id-ya-j-j---ma-j-j.png" alt="Diagram: Ya'jūj & Ma'jūj" loading="lazy"></div>
+<p>"Until Ya'jūj and Ma'jūj are let loose and they rush headlong down every hill." (Qur'ān 21:96) narrates that every day Abū Hurayrah Ya'jūj and Ma'jūj break (dig) through the wall erected by Dhul Qarnayn until they reach the end of it to the extent that they can actually see the light on the other side. They then return (home) saying that "We will break through causes the wall tomorrow." But Allāh to revert to its original thickness and the next day they start digging through the wall all over again: this process continues each day wills them to remain for as long as Allāh imprisoned. wishes them to be released, When Allāh at the end of that day they will say, "If wills, tomorrow we will break Allāh through." The following day they will ﬁnd the wall as they had left it the previous day (i.e. it will not have returned to its original state) and after breaking the remaining part of it they will emerge. (Aḥmad)</p>
+<p>narrates that the Nawwās ibn Sam'ān said:</p>
+<p>Beloved Messenger Muḥammad will send revelation upon "...Allāh that 'Such a creation of mine is now 'Īs\ going to emerge that no power will be able to stop them. So take my servants and climb the Mount of ^ūr.' Then Ya'jūj and Ma'jūj will emerge and go forward in all their fury. The front part of the army will pass the lake of Tiberias (in northern Palestine), they will drink up all the water and by the time that the back of the same army pass the lake, they will say, 'There used to be water here (long ago).' When they reach the Mount of Khamr in Jerusalem, they will arrogantly proclaim: 'We have conquered the people of the Earth, now we will destroy those in the sky.' Saying this, they will ﬁre their arrows towards the sky: when the arrows return to the ground they will be blood stained.</p>
+<p>"In the meantime, 'Īs\ will be on the Mount of ^ūr with the Muslims. 'Īs\ and the Muslims will make du'ā' to Allāh (to remove this calamity). As a result, Allāh will cause sores to appear on the necks of each and every individual of these people which will cause their death suddenly.</p>
+<p>"When 'Īs\  and the Muslims descend from the Mount of ^ūr there will not be a single 'Aqā'id space on the land where the dead rotting bodies of these people is not littered, giving off a bad smell. 'Īs\ and the Muslims will once more supplicate to Allāh as a result of which Allāh will send down huge birds whose necks will be as thick as the necks of camels, and they will dump these bodies in a place where Allāh wills. (According to a narration by Tirmidhī, they will be dumped at a place called Nahbal).</p>
+<p>"Allāh  will then send down heavy rain, the waters of which will ﬂow in every part of the Earth, cleansing it thoroughly. It will rain for a period of forty days."</p>
+<p>, Allāh During the time of 'Īs\ will order the Earth to grow its crops in abundance. There will be such blessing that one pomegranate will be enough for a whole group, while its peel will be large enough to cast a shadow over them. The milk of one camel will be enough for many groups while one milk- giving cow will be sufﬁcient for a whole tribe and one milk-giving goat will be sufﬁcient for a whole family.</p>
+<p>Emergence of the Beast from the Earth "When the word will come to fall upon them, We will bring forth for them a Beast from the Earth who will speak to them that the human beings did not believe in Our signs."</p>
+<p>(Qur'ān 27:82)</p>
+<p>One of the major signs of the Day of Judgement will be the emergence of a Beast from the Earth. It shall come with the ring of Sulaymān . and the Staff of Mūsā It will stamp every believer with the word 'Mu'min' and every disbeliever with the word 'K\ﬁr.' It shall speak to the people.</p>
+<p>Emergence of the Beast from the Earth said, "I memorised a 'Abdullāh ibn 'Amr ḥadīth from the Beloved Messenger which I have not forgotten since. I heard the say, 'The ﬁrst Beloved Messenger of the signs (of the Hour) to appear will be the rising of the sun from the West and the appearance of the Beast before the people in the morning. Whichever of these two events happens ﬁrst, the other will follow immediately.'" (Ṣaḥīḥ Muslim) The emergence of the Beast, whose form will be very strange, addressing the people and classifying them according to their faith or unbelief, is something truly extraordinary. This is the ﬁrst of the signs in the Earth, as the rising of the sun from the West is the ﬁrst of the signs in the sky.</p>
+</article>
+<article class="topic" id="aq--id-rising-of-the-sun">
+<h3>Rising of the Sun</h3>
+<div class="diagram"><img src="images/Coursebook4-aq--id-rising-of-the-sun.png" alt="Diagram: Rising of the Sun" loading="lazy"></div>
+<p>from the west narrates, "The Beloved Abū Hurayrah said, "The Hour will not Messenger come until the sun rises from the West. When the people see it, whoever is living on Earth will believe, but that will be the time when believing will do no good to a soul if it had not believed before." (Ṣaḥīḥ al-Bukhārī) When the sun rises from the West, the doors of repentance shall be closed because this will be a clear sign for everyone to see. said, The Messenger of Allāh extends his hand "Verily Allāh at night so that the sinners of the day may repent, and verily extends his hand during the day so that the sinners of the night may repent. (He will keep on doing this) as long as the sun does not rise from the West." (Ṣaḥīḥ Muslim)</p>
+<p>The Smoke Allāh says, ''So wait for the day when the heaven shall bring a smoke surrounding the people, this is a painful punishment.''</p>
+<p>(Qur'ān 44:10-11)</p>
+<p>Ḥudhayfah ibn Asīd narrates that the Beloved Messenger said, "The Final Hour will not come until you see ten signs." (one of the ten mentioned was the Smoke) (Ṣaḥīḥ Muslim)</p>
+<p>Landslides and the Fire reported:</p>
+<p>Ḥudhayfah ibn Asīd al-Ghifāri said "… Landslides Allāh's Messenger will occur in three places: One in the East, one in the West, and one in Arabia at the end of which a ﬁre will burn forth from Yemen, which will drive people to the place of their assembly."  (Ṣaḥīḥ Muslim) reports that the Messenger Anas said "The Hour (Qiyāmah) will not come as 's long as there is someone saying Allāh name." (Aḥmad) This means that the actual Qiyāmah will not occur whilst the Muslims are alive. When all will send a the signs are complete, Allāh wind through the world causing all the Muslims to pass away.</p>
+<p>Destruction of the Ka'bah The Ka'bah is the building structure in Makkah to which all the Muslims face ﬁve times a day in their ṣalāh. This is the house of Allāh built by Ibrāhīm .</p>
+<p>Near the Day of Judgement, a day will come when there shall be no Muslims left in the world. Only the wicked and evil shall remain. They will wish to destroy the Ka'bah and they will march to Makkah in order to destroy it. When this happens, know that the Day of Judgement is very close.</p>
+<p>'Abdullāh Ibn 'Amr said, "I heard the Prophet say, 'Dhus-Suwayqatayn from Abyssinia will destroy the Ka'bah and steal its treasure and Kiswah. It is as if I can see him now: he is bald-headed and has a distortion in his wrists. He will strike the Ka'bah with his spade and pick-axe.'" (Aḥmad)</p>
+<p>The Trumpet After all the signs have come, the disbelievers will increase their sins. One day they will be busy in their chores when suddenly they will hear a noise. This noise will get louder and louder until they will not be able to bear the terrible sound and everything will be destroyed - everything we see and everything we can touch will be no more.</p>
+<p>. Allāh No one will remain except Allāh to rise and blow the will then command Isrāfīl 'Aqā'idTrumpet a second time, through which the whole world will be recreated by the command of Allāh . But this time it will be different compared to before. will command Afterwards Allāh everyone to rise and all the bodies will come back to life to stand before the Lord of the Universe, and answer upon their actions.</p>
+<p>"And they shall be presented lined up before your Lord. (It will be said to them,) 'You have certainly come to Us just as We had created you for the ﬁrst time, while you claimed that We would not make any appointed time for you.'" (Qur'ān 18:48)</p>
+</article>
+<article class="topic" id="aq--id-qiy-mah">
+<h3>Qiyāmah</h3>
+<div class="diagram"><img src="images/Coursebook4-aq--id-qiy-mah.png" alt="Diagram: Qiyāmah" loading="lazy"></div>
+<p>On that day nothing will be hidden, everything will be presented and it will be said to a person:</p>
+<p>"Read your book. Enough are you today to take your own account." (Qur'ān 17:14) When this person shall see everything he has done in the world, written in this book, he shall say:</p>
+<p>"'Woe to us! What a book is this! It has missed nothing, minor or major, but has taken it into account.' Thus they will ﬁnd whatever they did, present before them, and your Lord will not wrong anyone." (Qur'ān 18:49)</p>
+<p>All the good and bad deeds shall then be weighed on a huge scale:</p>
+<p>"We shall place scales to do justice on the Day of Judgement. So no one shall be wronged in the least. Even if it (a deed) is to the measure of a mustard seed, We will bring it forth, and We are enough to take account." (Qur'ān 21:47) Those people whose good deeds outweigh their bad deeds will enter Jannah, and those that have more bad deeds than good will be sent to Jahannam.</p>
+<p>Before the actual accounting begins, everyone will be in a state of fear and panic, for everyone will be worried as to what will happen to them. On that day we shall see the position of our Beloved Messenger Muḥammad . Our Beloved Messenger Muḥammad said "I will be the chief of all the people on the Day of Resurrection. Do you know the reason for it? Allāh will gather all the human beings of early generations as well as late generations on one plain so that the announcer will be able to make them all hear his voice, and the watcher will be able to see all of them. The sun will come so close to the people that they will suffer much distress and trouble, since they will not be able to bear the heat.</p>
+<p>Then the people will say, "Don't you see what state you have reached? Won't you look for someone who can intercede for you with your Lord?"</p>
+<p>Some people will say to some others, ."</p>
+<p>"Go to Ādam and say to him, "You So they will go to Adam are the father of mankind: Allāh created you with His Own Hand, and breathed into you of His Soul (meaning the soul which He created for you), and ordered the angels to prostrate before you. So (please) intercede for us with your Lord.</p>
+<p>Don't you see the state we are in? Don't you see what condition we have reached?" will say, "Today my Lord has become Ādam angry as He has never become before, nor will He ever become thereafter. He forbade me (to eat of the fruit of) the tree, but I disobeyed Him.</p>
+<p>Nafs|! Nafs|! (Myself! Myself!). Go to someone else; go to Nūḥ."</p>
+<p>and say (to him), So they will go to Nūḥ 's "O Nūḥ! You are the ﬁrst (of Allāh messengers) to the people of the Earth, and Allāh has named you a thankful slave: please intercede for us with your Lord. Don't you see what state we are in?" He will say, "Today my Lord has become more 'Aqā'id angry than ever before, and more angry than He ever will be thereafter. I had (in the world) the right to make one deﬁnitely accepted invocation, and I made it against my nation. Nafs|! Nafs|!</p>
+<p>(Myself! Myself!) Go to someone else; go to Ibrāhīm."</p>
+<p>They will go to Ibrāhīm and say, "O Ibrāhīm! You are Allāh 's Messenger and His Khalīl (Allāh 's Most Beloved Friend) from among the people of the Earth; so please intercede for us with your Lord. Don't you see what state we are in?" He will say the same to them.</p>
+<p>The ḥadīth continues to explain the way the people will approach each of the many different messengers but each will say 'Nafs|' (Myself). Finally, they will arrive at our , Beloved Messenger Muḥammad who says:</p>
+<p>"So they will come to me and say, 'O 's ! You are Allāh 'Aqā'id Muḥammad Apostle and the last of the prophets, and forgave your previous and later Allāh sins. (Please) intercede for us with your Lord. Don't you see what state we are in?'</p>
+<p>added, "Then I will The Prophet 's throne and fall in go beneath Allāh prostration before my Lord. And then will guide me to such praises Allāh and gloriﬁcation to Him as He has never guided anybody else before me. Then it will be said, "O Muḥammad, raise your head. Ask, and it will be granted.</p>
+<p>Intercede, it (your intercession) will be accepted." So I will raise my head and say, O my Lord! "Ummat| (my followers), Ummat| (my followers)."</p>
+<p>Dear children, think about how much our loves us. We Beloved Messenger must try not to miss a single Sunnah instead we should follow in his footsteps and make him our true role model.</p>
+<p>The Bridge narrates that we, Abū Sa'|d Al-Khudr| said, the Companions of the Prophet "O Messenger of Allāh, what is the Bridge?" He said, "It is a slippery (bridge) on which there are clamps and (hooks like) a thorny seed, wide at one side and narrow at the other, and has thorns with bent ends. Such a thorny seed is found in Najd and is called As-Sa'dān.</p>
+<p>Some of the believers will cross the Bridge as quickly as the wink of an eye, some as quick as lightning, whilst others like a strong wind and some will cross it like fast horses or she-camels. So some will be safe without any harm; some will be safe after receiving some scratches, and some will fall down into Hell. The last person will cross by being dragged over the Bridge."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+<p>The Bridge Everyone will have to cross the Bridge. Below the Bridge lies Jahannam and at the other side is Jannah. A believer on that day will have light which will assist them on the crossing through the permission of Allāh . May Allāh  make us, our parents, our families and our teachers all from those who cross the Bridge with speed and enter into the everlasting Jannah.</p>
+<p>Āmīn.</p>
+</article>
+</section>
+
+<section class="subject" id="akhl-q">
+<h2>Akhlāq</h2>
+<article class="topic" id="akhl-q-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>Give examples of the different levels of trust.</p>
+<p>Explain the beneﬁts of seeking permission before entering.</p>
+<p>Describe the beneﬁts of removing harm from the road.</p>
+<p>Show the importance of  being a good neighbour.</p>
+</article>
+<article class="topic" id="akhl-q-trust">
+<h3>Trust</h3>
+<div class="diagram"><img src="images/Coursebook4-akhl-q-trust.png" alt="Diagram: Trust" loading="lazy"></div>
+<p>"Surely, Allāh  commands you to deliver trusts to those entitled to them, and that, when you judge between people, judge with justice. Surely, excellent is the advice Allāh gives you. Surely, Allāh  is All-Hearing, All-Seeing." (Qur'ān 4:58) Our Beloved Messenger  said: "Three qualities single out a hypocrite, even if he prays or fasts and claims to be Muslim: If he speaks, he lies. If he makes a promise, he does not keep it. If he is entrusted, he betrays the trust." (Ṣaḥīḥ al-Bukhārī) Our Beloved Messenger Muḥammad  said, "There is no faith for the one who has no trust."</p>
+<p>(Aḥmad)</p>
+<p>Trust is a very important aspect in our lives. If there is no trust between people, they will begin to feel insecure and unsafe. Our Beloved Messenger Muḥammad  was so trustworthy that he was given the title Al-Amīn (The Trustworthy). He never betrayed the trust of the one who entrusted him.</p>
+<p>When Rasūlullāh  was migrating to Madīnah Munawwarāh, he  left all the trusts with 'Al|  so he could return them back to the rightful owners. An amazing story is mentioned in Ṣaḥīḥ al-Bukhārī on the authority of Ibn 'Umar as follows:</p>
+<p>One day three men were out on a journey when a change in the weather forced them to enter a cave. As they entered, a large boulder fell and blocked the entrance. They each decided to ask Allāh through one special action which had been done only for the pleasure of Allāh .</p>
+<p>As the ﬁrst one prayed to Allāh , a third of the boulder moved; the second man's prayer caused another third to move. The third man then prayed to Allāh , "O Allāh! I hired some labourers and paid them their wages, except one of them who departed without taking his right. I kept this trust of his and invested his money, purchasing cattle. The money generated a lot of proﬁts. After a long time, he came to me and said, "O slave of Allāh! Pay me my right." I said, "All that you see is yours - camels, cattle, goats and slaves." He replied, "O slave of Allāh! Do not joke with me." I assured him I was serious. So he took everything and left nothing. The man then said, "O Allāh! If I did so seeking Your pleasure, then please relieve us of our distress." The rock slipped aside and they all left the cave, walking freely.</p>
+<p>Allāh  informs us of the qualities of the people who will enter the highest level of Jannah: 'Al Firdaws'.</p>
+<p>… 'And (success is attained) by those who honestly look after their trusts and covenant… Those are the inheritors, who will inherit al-Firdaws (the Paradise). They will be there forever.' (Qur'ān 23:8,10-11)</p>
+<p>One of the qualities is for those people to keep their trusts and return them to their rightful owners.</p>
+<p>There are many categories of trust: a person gives us an item to look after, so they have entrusted us and it is our duty to look after it, returning it once they request it. Another example is when someone comes to us to ask our advice and trusts us to give them the best advice. In a ḥadīth, our Beloved Messenger  said, "The one who is consulted is in a position of trust." (Tirmidhī) This means that we should not tell them something which is incorrect or may cause harm. In this situation we are even permitted to do ghībah. For example, Aḥmad asks Muḥammad how a certain person is because he wishes to do business with him. Now Aḥmad has entrusted Muḥammad to tell him the truth. If he has knowledge that this person is a thief or disloyal, it is necessary for him to tell Aḥmad. Muḥammad will not be sinning if he speaks bad about this person because he is trying to save Aḥmad from harm.</p>
+<p>Our Beloved Messenger Muḥammad said, "Gatherings are held in trust..."</p>
+<p>(Abū Dāwūd) When you are sitting with people whilst they are discussing something which they don't want others to know, they have now entrusted you. If you then go and inform other people about what was discussed, you have broken their trust. This aspect of trust is often forgotten and we very quickly spread other people's secrets without realising that we commit a sin as we tell others. This usually results in corruption and hatred amongst the ummah. May Allāh  protect us, Āmīn. We can now understand the broadness of the word amānah (trust), as it covers many things from physical items to actual words.</p>
+</article>
+<article class="topic" id="akhl-q-seeking-permission">
+<h3>Seeking Permission</h3>
+<div class="diagram"><img src="images/Coursebook4-akhl-q-seeking-permission.png" alt="Diagram: Seeking Permission" loading="lazy"></div>
+<p>Before Entering "O you who believe, do not enter any houses, other than your own houses unless you seek permission and greet the residents with salām. That is good for you, so that you may be heedful. Even if you do not ﬁnd anyone in them, do not enter therein until permission is given to you. And if it is said to you, 'Go back', just go back; it is more decent for you. Allāh  is All-Aware of what you do." (Qur'ān 24:27-28)</p>
+<p>Kildah ibn Al-Hanbal  reports that he visited the Prophet  and entered his house without seeking permission. So he said, "Go back and say:</p>
+<p>'Assalāmu 'alaykum. May I come in?'"</p>
+<p>(Abū  Dāwūd)</p>
+<p>Before Entering Taking permission before entering any private places such as houses, an individual room, or even a vehicle, displays high levels of manners. It protects a person from being startled and shocked by a newcomer whom they were not expecting. It protects those from seeing or hearing things which were not meant to be seen or heard. At times, people in their private areas are more relaxed in their dress than when in public. If we just walk in without asking permission, it may cause great embarrassment.</p>
+<p>Sometimes people are in their own thoughts and going about their chores. Think for a moment: imagine yourself working at home, thinking you are alone. You are too busy concentrating that you don't hear the door opening. Suddenly you look up and see someone standing in your room! Can you think of the shock?</p>
+<p>Before Entering Islām has laid down the best manners. We have been given guidance by our Beloved Messenger  on how to lead our lives in the best manner possible in order to avoid all unnecessary headache. The main reason for asking permission is to avoid seeing those things which the person inside does not wish you to see: those things which he wants to keep private. So if we are waiting outside a door for permission or maybe we are passing a house where a door has been left open, we should on no account look or peep inside.</p>
+<p>Allāh  informs us in the Qur'ān that even children in their home should ask permission at certain times, those times when a person is most likely to be in relaxed clothing.</p>
+<p>Before Entering Look at the beauty of Islām - it has taken into consideration all angles of a person's feelings and privacy. A person should feel safe in his own space; he should know that no one will intrude into his personal space without permission. This is giving everybody their own personal rights!</p>
+<p>If, per chance, we hear some noise from the house of people talking, we must not stop and try to eavesdrop. For our Beloved Messenger Muḥammad  has said, "… and he who seeks to listen to the talk of people (secretly) will have molten lead poured into his ears on the Day of Resurrection." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Before Entering It does not concern us what they are talking about, so why should we listen? Many a time we get involved in those things that have nothing to do with us. Remember Allāh  will not ask us about the matters of other people's personal lives, but He will question us about our own personal lives and time. So rather than worrying about things such as, "Let me see where my neighbour is going. What is he speaking about to that person? How and where did he get the money to buy that?  Why is he standing there? He must be up to something..." We must see that such questions have no beneﬁt and could lead a person towards sin. Our Beloved Messenger  instructed us to stay away from such things.</p>
+<p>Before Entering Abū Hurayrah  reports that the Messenger said, "From the beauty of a person's Islām is to leave those things which do not concern him." (Tirmidhī) If a nation or a community could manage to develop such great manners, the manners Islām has given us, what a peaceful life everyone in that society would have. But change begins with us! We cannot expect to change the world if we ourselves do not decide to change. If every individual thought that their actions or changes in behaviour Akhlāq meant nothing, then none of us would ever reach any goals at all!</p>
+<p>Before Entering One day a king ordered the inhabitants of a certain village to ﬁll a well with milk. Each person was to pour one cup of milk at night. One old lady came to the well thinking that if she were to add just one glass of water, then what difference would it make? What could be the harm? In the morning the whole well was full of water!</p>
+</article>
+<article class="topic" id="akhl-q-removing-harm">
+<h3>Removing Harm</h3>
+<div class="diagram"><img src="images/Coursebook4-akhl-q-removing-harm.png" alt="Diagram: Removing Harm" loading="lazy"></div>
+<p>from the Road "And whatever good you will send ahead for your own-selves, you will ﬁnd it with Allāh  much better in condition, and much greater in reward."</p>
+<p>(Qur'ān 73:20)</p>
+<p>Abū Hurayrah  reports that the Messenger of Allāh  said, "Removing harm from the road is ṣadaqah." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Removing something harmful has been called ṣadaqah. Ṣadaqah is known as charity in Islām and our Beloved Messenger Muḥammad  said, "Give ṣadaqah without delay, for it stands in the way of calamity." (Tirmidhī) It is such a simple act, so easily done, yet we are still rewarded for it. There is a story mentioned in Ṣaḥīḥ al-Bukhārī about a person who was walking one day, and saw a branch which was obstructing the pathway. He decided to move it out of the way to make it easy for people to pass. Allāh  loved this action so much that he forgave him and granted him Jannāh because of this one deed.</p>
+<p>Sub#ānallāh how merciful and kind is our Lord!</p>
+<p>from the Road Rasūlullāh  said that "Īmān has sixty or seventy branches: The least of them is to remove harm from the road…"</p>
+<p>(Muslim, Abū Dāwūd)</p>
+<p>Since it is a part of īmān, it shows how important this act is. Let us think for a moment: why is there so much importance placed on such a small action? When looking over many a#ādīth, one reason that can be understood is that Allāh loves a person helping another and detests a person who hurts another. When you remove something harmful from the road, you did not directly help a person, but you may have saved a person from getting hurt and falling into difﬁculty.</p>
+<p>from the Road What makes this action more special is that you do not know who you are helping or how many people will beneﬁt from your small efforts.</p>
+<p>Imagine you are walking and you see a banana peel in the middle of the pathway: you pick it up and place it in the bin. After carrying out this ṣadaqah, you go away.</p>
+<p>Shortly after, a child comes running down the road, followed by an elder. Then comes a person who cannot see so clearly, and thereafter a person in a wheelchair. Think if the banana peel had still been there. The child could have broken his leg, and the elder may have slipped and hurt himself. Similar things could have happened to the visually impaired person or the wheelchair user. All these people were saved through one action of yours! So in fact you helped them more than you can imagine.</p>
+<p>from the Road A small deed it may seem, but the results of carrying it out or ignoring it can be very different.</p>
+<p>Abū Barzah al-Aslam|  said, 'I said, "O Messenger of Allāh , show me an action by which I will enter Jannah!" He said, 'Remove harmful things from people's path."'</p>
+<p>(Ṣaḥīḥ Muslim)</p>
+<p>from the Road Sadly, today we see a very different picture.</p>
+<p>Many people, instead of removing harm from the road and pathways, create harm for people. We sometimes forget that others will walk after us on the road we are strolling along. If someone falls or gets hurt because of our carelessness, what will happen to us when the sigh of this person comes out - will it not be against us? Has our Beloved Messenger not warned us to be aware of the du'ā' of the oppressed one?</p>
+<p>"Beware of the supplication of the oppressed one as there is no veil between it and Allāh ." (Tirmidhī) Is it really worth it? Are we so lazy that we can't wait till we ﬁnd a dustbin? Should we be eating whilst we are walking anyway? What if it was us who slipped and fractured our bone? These are questions we need to ask ourselves before we throw rubbish.</p>
+<p>from the Road The Prophet Muḥammad  said: "Charity is prescribed for each descendant of Ādam every day the sun rises." He  was then asked, "From what do we give charity every day?" The Prophet  answered, "The doors of goodness are many...enjoining good, forbidding evil, removing harm from the road, … all of these are charity prescribed for you." (Bayhaq|)</p>
+</article>
+<article class="topic" id="akhl-q-being-a-good">
+<h3>Being a Good</h3>
+<div class="diagram"><img src="images/Coursebook4-akhl-q-being-a-good.png" alt="Diagram: Being a Good" loading="lazy"></div>
+<p>Neighbour "Worship Allāh , and do not associate anything with Him, and be good to parents and to kinsmen and orphans and the needy and the close neighbour and the distant neighbour and the companion at your side and the wayfarer and to those (slaves who are) owned by you. Surely, Allāh  does not like those who are arrogant, proud." (Qur'ān 4:36) Our Beloved Messenger Muḥammad  said, "Whoever believes in Allāh  and the Last Day should be generous to his neighbour." (Mālik) The Prophet  said: "The best friend in the sight of Allāh  is he who is the well-wisher of his companions, and the best neighbour is he who behaves best towards his neighbours." (Tirmidhī)</p>
+<p>Neighbour Allāh's Messenger  said, "Abū Dhar, when you prepare the gravy, add water to that and give that (as a present) to your neighbour."</p>
+<p>(Ṣaḥīḥ Muslim) The Messenger of Allāh  said:</p>
+<p>"He will not enter Paradise when his neighbour is not secure from his wrongful conduct."</p>
+<p>(Ṣaḥīḥ Muslim)</p>
+<p>Abū Shuray#  said that the Prophet said, "By Allāh, he does not believe! By Allāh, he does not believe! By Allāh, he does not believe!" It was said, "Who is that, O Allāh's Messenger?" He said, "That person whose neighbour does not feel safe from his evil." Akhlāq (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Neighbour What we need to understand is that the way of life that was brought down to mankind through our Beloved Messenger  from Allāh  is not restricted and limited to just acts of worship alone. To be a good Muslim you need to be a good human, a good citizen, a good friend, a good neighbour, and a good companion. The foundation can be understood from the following saying of our Beloved Messenger : "A Muslim is the one from whose hands and tongue other Muslims are safe."(Tirmidhī)</p>
+<p>Neighbour This is the starting point and the end point: we must not be a means of harm for anybody. The closest people to us after our immediate families are our neighbours. These a#ādīth are teaching us how to live with people around us. The Messenger of Allāh  said, "He is not a believer, who eats to his ﬁll, whilst his neighbour besides him goes hungry."</p>
+<p>(Ṣaḥīḥ al-Bukhārī)</p>
+</article>
+</section>
+
+<section class="subject" id="-d-b">
+<h2>Ādāb</h2>
+<article class="topic" id="-d-b-learning-objectives">
+<h3>Learning Objectives</h3>
+<p>At the end of this unit pupils should be able to:</p>
+<p>Remember the Ādāb of making du‘\’.</p>
+<p>Recognise the Ādāb of dressing on a daily basis.</p>
+<p>Distinguish between the Ādāb of guests and hosts.</p>
+<p>Practice the Ādāb of a gathering when coming to class.</p>
+<p>Highlight the importance of cleanliness and outline the Ādāb of Istinj\’.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-du---">
+<h3>Ādāb of Du'ā'</h3>
+<div class="diagram"><img src="images/Coursebook4--d-b--d-b-of-du---.png" alt="Diagram: Ādāb of Du'ā'" loading="lazy"></div>
+<p>"When My servants ask you about Me, then (tell them that) I am near. I respond to the call of one when he prays to Me: so they should respond to Me, and have faith in Me, so that they may be on the right path."</p>
+<p>(Qur'ān 2:186)</p>
+<p>"Your Lord has said, 'Call Me, I will respond to you.'"</p>
+<p>(Qur'ān 40:60)</p>
+<p>"...Or the One who responds to a helpless person when he prays to Him and removes distress." (Qur'ān 27:62)</p>
+<p>"Our Beloved Messenger Muḥammad said, "Du'ā' is the essence of worship."</p>
+<p>(Tirmidhī)</p>
+<p>wherever and whenever We can pray to Allāh we want. He is always there to listen. Below are some manners which we should try to adopt when making du'ā'.</p>
+<p>Face the Qiblāh. Be in the state of wuḍū. Do a good action before you begin.</p>
+<p>Raise your hands level with your chest. by reciting various praises Glorify Allāh such as Sub#ānallāh and Alḥamdulillāh.</p>
+<p>Recite ṣalawāt 'alan nab|.</p>
+<p>, Focus on who you are speaking to: Allāh the Creator of all. with humility.</p>
+<p>Beg Allāh Ask forgiveness for all previous sins.</p>
+<p>Try to cry whilst making du'ā'.</p>
+<p>Pray for yourself ﬁrst, thereafter make du'ā' for other members of your family. through the du'ā's mentioned in Ask Allāh the Qur'ān, as these are like registered prayers which have already been used and have been recommended.</p>
+<p>Conclude the du'ā' with the praise of Allāh and ṣalawāt then wipe the hands over the face. for every need, Remember to turn to Allāh loves it when His servants ask Him for Allāh for something. There is no limit to His treasure and there is no limit to His kindness.</p>
+<p>Times when du'ā' is readily accepted:</p>
+<ul><li>In the middle of the night.</li><li>On the day of Friday between 'Aṣr and</li></ul>
+<p>Maghrib.</p>
+<ul><li>The Night of Power.</li><li>Between adhān and iqāmah.</li><li>When drinking Zamzam.</li><li>In Sajdah.</li></ul>
+<p>Here is a concise du'ā'  taught to us in the Qur'ān: use it regularly as it covers everything we need:</p>
+<p class="arabic" dir="rtl" lang="ar">ةرخالا يف و ةنسح اينِدلا يف انِتا انبرĀdāb</p>
+<p>"Our Lord, give us good in this world and good in the Hereafter, and save us from the punishment of Fire." (Qur'ān 2:201)</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-dressing">
+<h3>Ādāb of Dressing</h3>
+<div class="diagram"><img src="images/Coursebook4--d-b--d-b-of-dressing.png" alt="Diagram: Ādāb of Dressing" loading="lazy"></div>
+<p>"O children of Ādam, We have sent down to you the dress that covers your shame and provides adornment. As for the dress of taqwā (piety), that is the best." (Qur'ān 7:26) The Messenger of Allāh said, "On the Day of Rising, Allāh the Blessed, the Exalted, will not look at a person (male) who drags his lower garment in arrogance." (Mālik)</p>
+<p>Abū Sa'|d al-Khudr| reported that when the Prophet got a new piece of clothing, he would mention it, whether a turban or a shirt or a cloak, and then would say, "O Allāh, all praise and thanks be to You.</p>
+<p>You have given me this garment. I seek from You its good and the good that it is made for and I seek Your refuge against its evil and the evil that it is made for." (Abū Dāwūd)</p>
+<p>Gold and silk are not allowed for males but are permissible for females When dressing, begin with the right hand side and when undressing, begin with the left. Do not walk with one shoe only. The Beloved Messenger cursed those men who imitate women in their clothing and those women who imitate men. (Abū Dāwūd)</p>
+<p>Modesty is very important in dress: girls should not wear any clothes that reveal their body parts.</p>
+<p>Boys and girls should also ensure their satr is covered at all times.</p>
+<p>Satr for boys is below the navel, including the knees, and for girls it is the whole body except the hands, face, and feet.</p>
+<p>Recite the following du'ā' when wearing َُّْٰclothes:َ Praise be to Allāh who clothed me and provided it to me without any ability or strength from me. (Abū Dāwūd)</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-guests---hosts">
+<h3>Ādāb of Guests & Hosts</h3>
+<div class="diagram"><img src="images/Coursebook4--d-b--d-b-of-guests---hosts.png" alt="Diagram: Ādāb of Guests & Hosts" loading="lazy"></div>
+<p>"Has there come to you the story of the honoured guests of Ibrāhīm?  When they (the angels in human form) entered unto him and said, 'We greet you with salām' He said, 'Salām on you.'</p>
+<p>(And he said to himself,) '(They are) unknown people.' Then he slipped off to his home and fetched a fattened calf. So he presented it before them (to eat, but being angels, they refrained.) He said, 'Would you not eat?' So he felt some fear in his heart. They said, 'Be not scared.' And they gave him the good news of (the birth of) a knowledgeable boy."  (Qur'ān 51:24-28) said, The Beloved Messenger and the Last "Whosoever believes in Allāh Day, should entertain his guest generously. The guest's reward is to provide him with a superior type of food for a night and a day, and a guest is to be entertained for three days, and whatever Ādāb is offered beyond that is regarded as something given in ṣadaqah. And it is not lawful for a guest to stay with his host for such a long period as to put him in difﬁculty." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Ādāb of the guest A guest should not inconvenience his host by overstaying.</p>
+<p>Inform the person you are going to visit before you arrive at his house. Do not visit too early or too late.</p>
+<p>Keep to the time you were supposed to arrive.</p>
+<p>Seek permission before entering. Do not look around the house - remember you are not an inspector. Do not sit on the host's special place. Do not bring up conversations that might offend the person of the house.</p>
+<p>Ādāb of the host We should honour the guests.</p>
+<p>Greet the guest when he arrives. Be generous with the guest.</p>
+<p>Aim to prepare special meals. Be considerate towards guests, do not force them to eat more than they can bear.</p>
+<p>Follow the guests to the door when they are departing.</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-a-gathering">
+<h3>Ādāb of a Gathering</h3>
+<div class="diagram"><img src="images/Coursebook4--d-b--d-b-of-a-gathering.png" alt="Diagram: Ādāb of a Gathering" loading="lazy"></div>
+<p>"O you who believe, when it is said to you, 'Make room (for others) in the gathering,' then make room, and Allāh  will make room for you (in the Hereafter). And when it is said, 'rise up', then rise up, and Allāh  will raise those in ranks, who have believed and are given knowledge. Allāh  is well-aware of what you do." (Qur'ān 58:11) Our Beloved Messenger Muḥammad said, "It is a right of a Muslim on another Muslim when he sees that he wants to sit that he shufﬂes to make space for him." (Bayhaq|) and aim to Always remember Allāh recite durūd (salutations) at least once.</p>
+<p>Sit in any place at the gathering: it shouldn't be a ﬁxed place or inconvenience others.</p>
+<p>Sit closely together, and not far apart.</p>
+<p>"Whenever there are three people together, two should not talk leaving the third person alone, since this may upset him."</p>
+<p>(Ṣaḥīḥ al-Bukhārī) If you see two people sitting together, do not separate them without their permission. after the gathering.</p>
+<p>Repent to Allāh Our Beloved Messenger Muḥammad taught us a du'ā' after a gathering which is a way of gaining forgiveness from any wrong which we may have carried out in the gathering:</p>
+<p class="arabic" dir="rtl" lang="ar">، كدمحب و مهللا كن احبس ، هدمحب و هللا ن احبسِٖ كيلإ بوتاو كرفغتسا ، تنا الا هلا ال نا دهشا ِِ</p>
+<p>Glory is to You, O Allāh, and praise is to You.</p>
+<p>I bear witness that there is none worthy of worship but You. I seek Your forgiveness and repent to You. (Al *ākim)</p>
+</article>
+<article class="topic" id="-d-b--d-b-of-istinj--">
+<h3>Ādāb of Istinjā'</h3>
+<div class="diagram"><img src="images/Coursebook4--d-b--d-b-of-istinj--.png" alt="Diagram: Ādāb of Istinjā'" loading="lazy"></div>
+<p>loves those who are "Surely Allāh most repenting, and loves those who keep themselves pure." (Qur'ān 2:222) said, "Whoever The Messenger goes to urinate or excrete let him seclude himself." (Bayhaq|) said: The Messenger of Allāh Abū Hurayrah stated, "Fear being cursed for doing two things: urinating and excreting in the roads where people walk, and in the shades of people"</p>
+<p>(like under trees which may be used to have a picnic or rest). (Ṣaḥīḥ Muslim) said: the Prophet 'Abdullāh Ibn 'Abbās passed by two graves and said, "Both of them are being punished but they are not being punished for something major. As for one of them, he didn't prevent urine from falling on himself, and as for the other he used to carry tales." (Ṣaḥīḥ al-Bukhārī)</p>
+<p>Enter with your left foot.</p>
+<p>Cover your hair.</p>
+<p>Recite the du'ā'.</p>
+<p>Wash your hands before collecting some water in a bucket or container.</p>
+<p>Lower the body as much as possible before removing any garments.</p>
+<p>Make sure your front or back is not facing the Qiblah. Do not talk. Do not urinate whilst standing.</p>
+<p>Use tissue paper followed by water to ensure you are thoroughly clean.</p>
+<p>Wipe and wash yourself with the left hand.</p>
+<p>Wash again with water if drops come out.</p>
+<p>Ensure no drops of urine fall onto the clothes.</p>
+<p>Leave with your right foot.</p>
+<p>Recite the du'ā'.</p>
+<p>Bibliography Fiqh Section 'al-Sughdi (d.461AH), ''al-Nutaf ﬁ 'al-Fatāwā', Dar 'al-Furqān, 1984 'al-Samarqandi(d.540AH), 'Tuḥfat 'al-Fuqahā'', Dār 'al-Kutub 'al-'ilmiyyah, 1994 'al-Kāsān| (d.587AH), 'Badā'i' 'al-ṣanā'i' f| al-Tartīb al-Sharā'ī'', Dār 'al-Ku- tub 'al-ilmiyyah, 1986 'al-Marghinān| (d.593AH), ''al-Hidāyah f| sharh bidāyah 'al-mubtad|', Mak- tabah 'al-Bushra, 2007 'al-Bukhāri, Burhān 'al-Dīn (d.616AH), ''al-Mu#|{ 'al-Burhān| ﬁ 'al-Fiqh 'al- Nu'mān|', Idārah 'al-Qur'ān, 2004 'al-Mawṣil| (d.683AH), ''al-ikhtiyār li ta'līl 'al-Mukhtār', 'al-Halab|, 1937 Khusr[ (d.885AH), 'Durar 'al-Ḥukkām Sharh Gurar 'al-Aḥkām', Dar 'ihyā'</p>
+<p>'al-Kutub Ibn Nujaym (970AH), ''al-Baḥr 'al-Rā'iq Sharh Kanz 'al-Daqā'iq', Dār 'al- Kitāb 'al-Islām| A-Qudūr| (d.428 AH), 'Mukhtasar 'al-Qudūr|', Dār Qubā', 2003 'al-Ṭa#{āw| (d.1321 AH), '*āshiyah 'al-Ṭa#{āw| 'al\ Marāq| 'al-Fal\#', Dār 'al-Kutub 'al-'ilmiyyah, 1997 Ibn 'Ābidīn (d.1252 AH), 'Radd 'al-Muḥtār', H.M.Saeed Ḥaydar, Al| (d.1353 AH), 'Durar 'al-Ḥukkām F| Sharh Majallah 'al-Aḥkām', Dār 'al-Jiyal, 1991 Ni~ām 'al-Dīn et al, ''al-Fatāw\ 'al-Hindiyyah', Maktabah 'al-Rashīdiyyah Ludhyānwi, Mufti Rashīd Ahmed (d.2002 CE), 'Aḥsan 'al-Fatāwā', H.M Saeed, 1979 Gangohi, Mufti Maḥmūd 'al-Ḥasan (d.1996 CE), 'Fatāw\ 'al-Mahmudiyyah', Idārah 'al-Farūq, 2008 Bibliography Mufti Raḍā 'al-Haq et al, 'Fatāw\ Dār 'al-Ulūm 'al-Zakariyyā', Zamzam Publishers, 2007 'al-Tatw|, Muhammad Hāshim (d.1174 AH), 'Fākihat 'al-Bustān', Dār 'al-Ku- tub 'al-'ilmiyyah, 2012</p>
+<p>Bibliography Aqīdah Section 'al-Taftāzān|, Sa'd 'al-Dīn (791 AH), 'Sharh 'al-Aqā'id 'al-Nasaﬁyyah', Dār 'al-Bayrūt|, 2007 'al-Ghaznaw| (d.773 AH), 'Sharh 'al-Aqīdah 'al-Ṭa#āwiyyah', Dār 'al-Kuraz, 2009 'al-Māturīd| (d.333 AH), 'Kitāb 'al-Tawhīd', Dār ]ādir, 'al-Maydān| (d.1298 AH), 'Sharh 'al-Aqīdah 'al-Ṭa#āwiyyah', Dār 'al-Fikr, 1995 'al-Bayjūr| (d.1276 AH) , 'Tuḥfat 'al-Murīd 'al\ Jawharah 'al-Tawhīd', Dār 'al-Salām, 2002 'al-Qār|, Mulla 'Al| (d.1014 AH), 'Mina# 'al-Rawdh 'al-Azhar F| Sharh 'al- Fiqh 'al-Akbar', Dār a;-Bashā'ir 'al-islāmiyyah, 1998 'al-Qār|, Mulla 'Al| (d.1014 AH), 'Dhaw' 'al-Ma'āl| 'al\ Man~ūmah Bad'a 'al- amāl|', Dār 'al-Bayrūt|, 2006 'al-Bayhaq| (d.458 AH), 'Kitāb 'al-Asmā' wa 'al-ṣifāt', 'al-Maktabah 'al-Azhariyyah li 'al-Turāth 'al-Shahrastān| (d.548 AH), ''al-Milal wa 'al-Niḥal', Dār 'al-Kutub 'al-'ilmi- yyah, 1992 'al-'Āṣr|, Saif ibn 'Al|, ''al-Qawl 'al-Tamām bi Ithbāt 'al-Tafwīdh Madhaban li 'al-Salaf 'al-Kirām', Dār 'al-Fath, 2010 Kan'ān, Muḥammad Aḥmad, 'Jāmi' 'al-La'āl| Sharh Bad'a 'al-'Amāli', Dār al-Bashā'ir al-Islāmiyyah', 2010 'Al-Nawaw| (d.676 AH), ' 'al-Mināj Sharh ṣa#|# Muslim ibn al-Hajjāj', Dār 'Ihyā' al-Turāth Hadīth Section 'al-Bukhārī, Muḥammad ibn Ismā'īl (d.256AH), 'ṣa#|# al-Bukhārī', Dar ^ūq al-Najāh, 2001 Muslim, Muslim ibn al-Hajjāj (d.261AH), 'ṣa#|# Muslim', Dār 'iḥy\ al-Turāth al-'Arab|, Bibliography Nasa'|, Aḥmad ibn Shu'ayb (d.303AH), 'Sunan al-Nasa'|', al-Risālah, 2001 Abū Dāwūd, Sulaymān ibn al-'Ash'ath (d.275AH), 'Sunan Ab| Dāwūd, Dār al-Risālah al-'ālamiyyah, 2009</p>
+<p>Bibliography 'al-Tirmi~|, Muḥammad ibn '|s\ (d.279AH), 'Sunan al-Tirmi~|', Dār al-Gharb al-'islām|,  1996 'Ibn Mājah, Muḥammad ibn Yazīd (d.273AH), 'Sunan Ibn Mājah', Dār al- Risālah al-'ālamiyyah, 2009 Ibn Ḥanbal, Aḥmad (d.241AH), 'Musnad Aḥmad, Mu'assah al-Risālah, 2001 Al-Ṭabarān|, Sulaymān ibn Aḥmad  (360AH), 'al-Mu'jam al-Kabīr', Makta- bah ibn Taymiyyah, Al-Ṭabarān|, Sulaymān ibn Aḥmad  (360AH), 'al-Mu'jam al-Awṣa{', Dār al-Ḥaramayn 'al-Bazzār, Aḥmad ibn 'Amr (d.292 AH), Musnad al-Bazzār', Maktabah al- 'Ulūm wa al-Ḥikam, 2009 Ibn Ḥibbān, Muḥammad ibn Ḥibbān (d.354 AH), 'Ṣaḥīḥ Ibn Ḥibbān', Mu'assah al-Risālah, 1988 Al-*ākim, Muḥammad ibn Abdullah (d.405 AH), 'al-Mustadrak al\ al- Ṣaḥīḥayn', Dār al-Kutub al-'ilmiyyah, 1990 Al-Bayhaq|, Aḥmad ibn al-Ḥusain (d.458 AH), 'al-Sunan al-Kubrā', Dār al-Kutub al-'ilmiyyah, 2003 Tārīkh Section Ibn Kathīr (d.774 AH), ' 'al-Bidāyah wa al-Nihāyah', Dār 'Ihy\ al-Turath', 1988 Al-Dhahab| (d.748 AH), 'Siyar al-'A'lām al-Nubalā'', Mu'assah al-Risālah, 1985 'al-Sarjān| et al, 'al-Mawsū'ah al-Muyassarah f| al-Tārīkh al-'islām|', Mu'as- sasah Iqra', 2014 BibliographyAlkhateeb, Firas, 'Lost Islamic History', Hurst Publishers, 2014 'Al-Hassani, Salim et al, '1001 inventions: Muslim Heritage in Our World', Foundation for Science Technology and Civilisation, 2006</p>
+<p>Credits Mawlān\ Muḥammad Yaḥy\ ibn Fārūq Director Mawlān\ Muḥammad Qāsim Manjra Project Manager Mawlān\ Harūn Makda, Mawlān\ Isḥāq Boodi and Mawlān\ Ḍhahīr Sidat Consultation Panel 'Irfān Chhatbar Design &amp; Artwork Shakīl Zikr Illustration 'Ābid Russell, Rachel Larson &amp; Khadījah Vania Editing Bakh Sumira Sul{ān Workbooks &amp; Extension Activities Media Jamshidi Vectorisation Rest of the team at An Nasihah Publications May Allāh  reward them all abundantly in this world with blessings and grant them all Jannat al-Firdaws with His everlasting pleasure in the next.</p>
+<p>Āmīn.</p>
+<p>Credits</p>
+</article>
+</section>
+
+</main>
+<footer>
+  Content from An Nasihah Publications Ltd. &middot; Organized for reference
+</footer>
+</body>
+</html>

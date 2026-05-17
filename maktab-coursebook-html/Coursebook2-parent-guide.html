@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coursebook 2 — Parent Guide</title>
+<style>
+  :root {
+    --primary: #1a5632;
+    --primary-light: #e8f5e9;
+    --accent: #c0392b;
+    --quiz-bg: #fff8e1;
+    --summary-bg: #e3f2fd;
+    --bg: #fefefe;
+    --text: #2c2c2c;
+    --border: #ddd;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  header {
+    text-align: center;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle { color: #666; font-size: 1rem; }
+  .intro {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+  }
+  .intro p { margin-bottom: 0.5rem; }
+  .subject-guide {
+    margin-bottom: 3rem;
+    border-top: 3px solid var(--primary);
+    padding-top: 1.5rem;
+  }
+  .subject-guide > h2 {
+    color: var(--primary);
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .lesson-card {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lesson-card h3 {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.15rem;
+  }
+  .summary {
+    background: var(--summary-bg);
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  .summary p { margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .summary ul {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  .quiz {
+    background: var(--quiz-bg);
+    padding: 1.2rem;
+  }
+  .quiz h4 {
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+  }
+  .quiz ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .quiz li {
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+  }
+  .quiz .answer {
+    display: none;
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+  .quiz details {
+    margin-top: 0.8rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.8rem;
+  }
+  .quiz details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quiz details p {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .discussion {
+    padding: 1rem 1.2rem;
+    background: #f3e5f5;
+    border-top: 1px solid var(--border);
+  }
+  .discussion h4 {
+    color: #6a1b9a;
+    margin-bottom: 0.5rem;
+  }
+  .discussion ul {
+    margin-left: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .toc h2 { color: var(--primary); margin-bottom: 1rem; }
+  .toc h3 { color: var(--accent); margin: 0.8rem 0 0.3rem; font-size: 1.05rem; }
+  .toc ul { list-style: none; padding-left: 1.2rem; }
+  .toc a { color: var(--primary); text-decoration: none; border-bottom: 1px dotted var(--primary); }
+  .toc a:hover { border-bottom-style: solid; }
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  @media print {
+    body { max-width: 100%; }
+    .quiz details { display: block; }
+    .quiz details[open] summary { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>📖 Coursebook 2 — Parent Guide</h1>
+  <div class="subtitle">An Nasihah Publications · Age Range: 7–8 years</div>
+</header>
+<div class="intro">
+  <p><strong>How to use this guide:</strong> Each lesson has three parts:</p>
+  <ul style="margin-left:1.5rem">
+    <li><strong>Summary</strong> — Key points to review with your child</li>
+    <li><strong>Quiz</strong> — Questions to test understanding (answers are hidden — click to reveal)</li>
+    <li><strong>Discussion</strong> — Conversation starters to deepen learning</li>
+  </ul>
+  <p>Work through one topic at a time. Read the summary together, then try the quiz orally or in writing.</p>
+</div>
+<nav class="toc"><h2>Contents</h2>
+<h3><a href="#fiqh-guide">Fiqh</a></h3>
+<ul>
+  <li><a href="#fiqh-keeping-clean-g">Keeping Clean</a></li>
+  <li><a href="#fiqh-wu----g">Wuḍū'</a></li>
+  <li><a href="#fiqh-keywords-g">Keywords</a></li>
+  <li><a href="#fiqh-far--i--of-wu----g">Farā'iḍ of Wuḍū'</a></li>
+  <li><a href="#fiqh-sunan-of-wu----g">Sunan of Wuḍū'</a></li>
+  <li><a href="#fiqh-naw-qi--of-wu----g">Nawāqiḍ of Wuḍū'</a></li>
+  <li><a href="#fiqh-makr-h-t-of-wu----g">Makrūhāt of Wuḍū'</a></li>
+  <li><a href="#fiqh-musta-abb-t-of-wu----g">Mustaḥabbāt of Wuḍū'</a></li>
+  <li><a href="#fiqh-tayammum-g">Tayammum</a></li>
+  <li><a href="#fiqh--al-h-g">Ṣalāh</a></li>
+</ul>
+<h3><a href="#a--d-th-guide">Aḥādīth</a></h3>
+<ul>
+  <li><a href="#a--d-th-singular---ad-th-g">Singular: Ḥadīth</a></li>
+  <li><a href="#a--d-th-truth-g">Truth</a></li>
+  <li><a href="#a--d-th-sal-m-g">Salām</a></li>
+  <li><a href="#a--d-th-using-the-right-hand-g">Using the Right Hand</a></li>
+  <li><a href="#a--d-th-drinking-whilst-sitting-g">Drinking Whilst Sitting</a></li>
+  <li><a href="#a--d-th-none-of-you-should-g">None of you should</a></li>
+  <li><a href="#a--d-th-be-kind-to-your-g">Be kind to your</a></li>
+</ul>
+<h3><a href="#s-rah-guide">Sīrah</a></h3>
+<ul>
+  <li><a href="#s-rah-s-rah-so-far----g">Sīrah so far...</a></li>
+</ul>
+<h3><a href="#t-r-kh-guide">Tārīkh</a></h3>
+<ul>
+  <li><a href="#t-r-kh-h-d-g">Hūd</a></li>
+  <li><a href="#t-r-kh---li--g">Ṣāliḥ</a></li>
+</ul>
+<h3><a href="#aq--id-guide">Aqā'id</a></h3>
+<ul>
+  <li><a href="#aq--id-angels-g">Angels</a></li>
+  <li><a href="#aq--id-books-g">Books</a></li>
+</ul>
+<h3><a href="#akhl-q-guide">Akhlāq</a></h3>
+<ul>
+  <li><a href="#akhl-q-keeping-promises-g">Keeping Promises</a></li>
+  <li><a href="#akhl-q-there-are-three-ways-to-thank-all-h-g">There are three ways to thank Allāh</a></li>
+  <li><a href="#akhl-q-if-we-thank-all-h---all-h--will-increase-us-g">If we thank Allāh , Allāh  will increase us</a></li>
+  <li><a href="#akhl-q-thank-g">Thank</a></li>
+  <li><a href="#akhl-q-spreading-sal-m-g">Spreading Salām</a></li>
+  <li><a href="#akhl-q-how-can-such-a-person-hurt-g">How can such a person hurt</a></li>
+  <li><a href="#akhl-q-helping-in-good-things-g">Helping in Good Things</a></li>
+  <li><a href="#akhl-q-kindness-to-animals-g">Kindness to Animals</a></li>
+</ul>
+<h3><a href="#-d-b-guide">Ādāb</a></h3>
+<ul>
+  <li><a href="#-d-b--d-b-of-greeting-g">Ādāb of Greeting</a></li>
+  <li><a href="#-d-b--d-b-of-speaking-g">Ādāb of Speaking</a></li>
+  <li><a href="#-d-b--d-b-of-sneezing-g">Ādāb of Sneezing</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="subject-guide" id="fiqh-guide">
+<h2>Fiqh</h2>
+<div class="lesson-card" id="fiqh-keeping-clean-g">
+<h3>Keeping Clean</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>There are three different times when we use water to clean and purify ourselves. In other words, there are three times when we use water to gain ṭahārah: Ṭahārah Ghusl Wuḍū' Istinjā'</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>There are three different times when we use water to clean and purify ourselves.</li>
+  <li>In other words, there are three times when we use water to gain ṭahārah: Ṭahārah Ghusl Wuḍū' Istinjā'.</li>
+  <li>In other words, there are three times when we use water to gain ṭahārah: Ṭahārah Ghusl Wuḍū' Istinjā'.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Keeping Clean?</li>
+  <li>Why is Keeping Clean important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Keeping Clean?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Keeping Clean?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Keeping Clean important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Keeping Clean?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do keeping clean step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-wu----g">
+<h3>Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Whenever a person wants to meet someone special, they make sure that they get ready properly. When we pray our ṣalāh, we are going to speak to Allāh , the King of all kings. Wuḍū' is preparing us for ṣalāh by cleaning our body. Also by doing wuḍū', sins that we might have done are washed away! Ṣalāh cannot be performed without wuḍū'.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>When we pray our ṣalāh, we are going to speak to Allāh , the King of all kings.</li>
+  <li>Wuḍū' is preparing us for ṣalāh by cleaning our body.</li>
+  <li>Also by doing wuḍū', sins that we might have done are washed away! Ṣalāh cannot be performed without wuḍū'.</li>
+  <li>The Qur'ān cannot be touched without wuḍū', although it is permissible to recite from memory without wuḍū'.</li>
+  <li>Wuḍū' is a type of worship which includes washing certain parts of the body.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is wuḍū'?</li>
+  <li>What are the key rules or steps of Wuḍū'?</li>
+  <li>Why is Wuḍū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Wuḍū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is wuḍū'?</strong><br>Wuḍū' is preparing us for ṣalāh by cleaning our body.</li>
+  <li><strong>What are the key rules or steps of Wuḍū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Wuḍū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Wuḍū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-keywords-g">
+<h3>Keywords</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Actions in Islām are placed in different groups. Some are far}, some are sunnah whilst others are mustaḥabb. There are also some which are makrūh and others which are nāqi}. So what do these words mean? 1.Farā'iḍ: Plural of far}.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Actions in Islām are placed in different groups.</li>
+  <li>Some are far}, some are sunnah whilst others are mustaḥabb.</li>
+  <li>There are also some which are makrūh and others which are nāqi}.</li>
+  <li>Far} is something that you have to do.</li>
+  <li>By leaving a far} action out, the act remains incomplete. 2.Sunan: Plural of sunnah.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is far}?</li>
+  <li>What is sunnah?</li>
+  <li>What is in ﬁqh, it?</li>
+  <li>What is mustaḥabb?</li>
+  <li>What is makrūh?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is far}?</strong><br>Far} is something that you have to do.</li>
+  <li><strong>What is sunnah?</strong><br>Sunnah is an act which our Beloved Messenger Muḥammad practised and carried out.</li>
+  <li><strong>What is in ﬁqh, it?</strong><br>In ﬁqh, it is a stage after far} and wājib.</li>
+  <li><strong>What is mustaḥabb?</strong><br>Mustaḥabb is an act that is good for us to do and is beloved in Islām.</li>
+  <li><strong>What is makrūh?</strong><br>Makrūh is something that is disliked in Islām.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do keywords step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-far--i--of-wu----g">
+<h3>Farā'iḍ of Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>There are four things you have to do in wuḍū'; they are known as farā'iḍ. 1.2. Wash both the Wash the arms including face once. the elbows once. Farā'iḍ of wuḍū' 3.4. Do masa# of a Wash both feet quarter of the including the head once.ankles once.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>There are four things you have to do in wuḍū'; they are known as farā'iḍ. 1.2.</li>
+  <li>If you only do the four farā'iḍ, your wuḍū' will be counted but you will not get the full reward.</li>
+  <li>Remember to do the sunan and mustaḥabbāt too to get the full reward.</li>
+  <li>If you are in a hurry or there is too little water, then you can do the four farā'iḍ and leave some sunan and mustaḥabbāt out.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is if you are in a hurry or there?</li>
+  <li>What are the key rules or steps of Farā'iḍ of Wuḍū'?</li>
+  <li>Why is Farā'iḍ of Wuḍū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Farā'iḍ of Wuḍū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is if you are in a hurry or there?</strong><br>If you are in a hurry or there is too little water, then you can do the four farā'iḍ and leave some sunan and mustaḥabbāt out.</li>
+  <li><strong>What are the key rules or steps of Farā'iḍ of Wuḍū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Farā'iḍ of Wuḍū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Farā'iḍ of Wuḍū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do farā'iḍ of wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-sunan-of-wu----g">
+<h3>Sunan of Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>1.Make niyyah (intention). 2.Say 'Bismillāh' (In the name of Allāh). 3.Wash both hands three times. 4.Brush the teeth with a miswāk. 5.Rinse the mouth three times. 6.Put water into the nostrils three times. 7.For men, khilāl of the beard (passing wet hands through the beard). 8.Make khilāl of the ﬁngers and toes. 9.Wash each part three times. 10.Do masa# of the whole head once. 11.Do masa# of both the ears once. 12.Wash each part in order. 13.Wash each part before the other parts dry.</p>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Sunan of Wuḍū'?</li>
+  <li>Why is Sunan of Wuḍū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Sunan of Wuḍū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Sunan of Wuḍū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Sunan of Wuḍū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Sunan of Wuḍū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do sunan of wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-naw-qi--of-wu----g">
+<h3>Nawāqiḍ of Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Wuḍū' can break if a person does any of the following 8 things which are called the nawāqi} of wuḍū'. Before touching the Qur'ān or performing ṣalāh, you must do wuḍū' again if you: 1. Pass urine or stool. 2. Fall asleep whilst leaning on something. 5.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Wuḍū' can break if a person does any of the following 8 things which are called the nawāqi} of wuḍū'.</li>
+  <li>Before touching the Qur'ān or performing ṣalāh, you must do wuḍū' again if you: 1.</li>
+  <li>Pass urine or stool. 2.</li>
+  <li>Fall asleep whilst leaning on something. 5.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Nawāqiḍ of Wuḍū'?</li>
+  <li>Why is Nawāqiḍ of Wuḍū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Nawāqiḍ of Wuḍū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Nawāqiḍ of Wuḍū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Nawāqiḍ of Wuḍū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Nawāqiḍ of Wuḍū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do nawāqiḍ of wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-makr-h-t-of-wu----g">
+<h3>Makrūhāt of Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>By doing any of the makrūhāt, the wuḍū' will be disliked and its full blessings will be lost. 2. 1. Don't clean Don't make the nose wuḍū' in a with the dirty place. right hand. These are the "DON'Ts" of wuḍū': 3. 4. Don't make wuḍū' in a Don't talk manner against about worldly the sunnah.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>These are the "DON'Ts" of wuḍū': 3. 4.</li>
+  <li>Don't make wuḍū' in a Don't talk manner against about worldly the sunnah.</li>
+  <li>Water is a gift from Allāh .</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is water?</li>
+  <li>What should we do?</li>
+  <li>What are the key rules or steps of Makrūhāt of Wuḍū'?</li>
+  <li>Why is Makrūhāt of Wuḍū' important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is water?</strong><br>Water is a gift from Allāh.</li>
+  <li><strong>What should we do?</strong><br>We must use it 36properly and not waste it.</li>
+  <li><strong>What are the key rules or steps of Makrūhāt of Wuḍū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Makrūhāt of Wuḍū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do makrūhāt of wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-musta-abb-t-of-wu----g">
+<h3>Mustaḥabbāt of Wuḍū'</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>By doing the mustaḥabbāt, you will get more reward. These are the "DO's" of wuḍū': 1. 2. Do begin with the Do make right hand. masa# of the nape. 3. 4. Do face the Do sit on a Qiblah. high, clean place. 5.It is good for a person to do wuḍū' without taking any help from other people.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>By doing the mustaḥabbāt, you will get more reward.</li>
+  <li>These are the "DO's" of wuḍū': 1. 2.</li>
+  <li>Do face the Do sit on a Qiblah. high, clean place. 5.It is good for a person to do wuḍū' without taking any help from other people.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Mustaḥabbāt of Wuḍū'?</li>
+  <li>Why is Mustaḥabbāt of Wuḍū' important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Mustaḥabbāt of Wuḍū'?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Mustaḥabbāt of Wuḍū'?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Mustaḥabbāt of Wuḍū' important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Mustaḥabbāt of Wuḍū'?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do mustaḥabbāt of wuḍū' step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh-tayammum-g">
+<h3>Tayammum</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>For wuḍū' and ghusl, you need to have water, however at times water may not be available. You may be in a desert or in a place without any water! How can you touch the Qur'ān and perform ṣalāh then? Allāh  has taught us a way to become pure by using things other than water.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>This special way of becoming pure is called TAYAMMUM.</li>
+  <li>Tayammum is performed by striking your hands on soil or brick and then passing the hands over the face and arms.</li>
+  <li>For wuḍū' and ghusl, you need to have water, however at times water may not be available.</li>
+  <li>You may be in a desert or in a place without any water!</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this special way of becoming pure?</li>
+  <li>What is tayammum?</li>
+  <li>What are the key rules or steps of Tayammum?</li>
+  <li>Why is Tayammum important for a Muslim's daily worship?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this special way of becoming pure?</strong><br>This special way of becoming pure is called TAYAMMUM.</li>
+  <li><strong>What is tayammum?</strong><br>Tayammum is performed by striking your hands on soil or brick and then passing the hands over the face and arms.</li>
+  <li><strong>What are the key rules or steps of Tayammum?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Tayammum important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do tayammum step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="fiqh--al-h-g">
+<h3>Ṣalāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Method of ṣalāh for boys 1)Lift both hands up to the ears with say: 2)Place the right hand on top of the left below the navel whilst grasping the wrist with the thumb and small ﬁnger, placing the three remaining ﬁngers closely together on the forearm. 3)Read Du‘\’ al-Istiftāḥ (Thanā'), Ta'awwudh, Tasmiyah, Sūrah Fātiḥah andat least one long āyah or three short āyāt of the Qur'ān. 4)Go into rukū' saying .</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Lift the index ﬁnger, indicating to the oneness of Allāh .</li>
+  <li>Lift the index ﬁnger, indicating to the ّoneness of Allāh .</li>
+  <li>Place the knees ﬁrst, followed by the hands then the nose and forehead.</li>
+  <li>In sajdah the thighs and stomach should not touch.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the key rules or steps of Ṣalāh?</li>
+  <li>Why is Ṣalāh important for a Muslim's daily worship?</li>
+  <li>What happens if someone forgets or makes a mistake in Ṣalāh?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the key rules or steps of Ṣalāh?</strong><br>List the main rules from the lesson.</li>
+  <li><strong>Why is Ṣalāh important for a Muslim's daily worship?</strong><br>Discuss how it connects to pleasing Allāh.</li>
+  <li><strong>What happens if someone forgets or makes a mistake in Ṣalāh?</strong><br>Review the lesson for guidance on mistakes.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you show me how to do ṣalāh step by step?</li>
+  <li>Why do you think Allāh made this part of our worship?</li>
+  <li>What would happen if Muslims didn't follow these rules?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="a--d-th-guide">
+<h2>Aḥādīth</h2>
+<div class="lesson-card" id="a--d-th-singular---ad-th-g">
+<h3>Singular: Ḥadīth</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Plural: Aḥādīth Ḥadīth is what our Beloved Messenger Muḥammad                said, did or didn’t say ‘no’ to when he saw it. Our Beloved Messenger Muḥammad  said: "Speak the truth, even though it may be bitter." Our Beloved Messenger Muḥammad  said: "The closest of people to Allāh is the one who initiates saying salām to them." ّOur Beloved Messenger Muḥammad  said: "Say 'Bismillāh' and eat with your right hand." "None of you should drink whilst standing.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Plural: Aḥādīth Ḥadīth is what our Beloved Messenger Muḥammad                said, did or didn’t say ‘no’ to when he saw it.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is plural: aḥādīth ḥadīth?</li>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is plural: aḥādīth ḥadīth?</strong><br>Plural: Aḥādīth Ḥadīth is what our Beloved Messenger Muḥammad                said, did or didn’t say ‘no’ to when he saw it.</li>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-truth-g">
+<h3>Truth</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Our Beloved Messenger Muḥammad              said:ّ "Speak the truth, even though it may be bitter." (Aḥmad) Speak the truth, even though it may be bitter One night, the second khalīfah 'Umar ibn al-Kha{{āb walked through the narrow streets of Madīnah in silence, observing the state of his people. As he passed by one mud-brick home, he heard a mother and daughter talking to each other. The mother said: “Tomorrow, when you take the milk to sell, mix it with water.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>As he passed by one mud-brick home, he heard a mother and daughter talking to each other.</li>
+  <li>The mother said: “Tomorrow, when you take the milk to sell, mix it with water.</li>
+  <li>We’ll make more money for less milk.</li>
+  <li>Today you sold all the milk and brought back very little money.” “We cannot do such a thing, mother!</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-sal-m-g">
+<h3>Salām</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Our Beloved Messenger Muḥammad              said:َْ "The closest of people to Allāh is the one who initiates saying salām to them." (Abū Dāwūd) The closest to Allāh is the one who begins with salām Salām means peace. When we say "Assalāmu 'alaykum", we are praying for peace for the other person. We get many rewards for saying salām. Our Beloved Messenger Muḥammad  has told us of an easy way to be close to Allāh : just begin by saying "Assalāmu 'alaykum".</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>When we say "Assalāmu 'alaykum", we are praying for peace for the other person.</li>
+  <li>We get many rewards for saying salām.</li>
+  <li>Our Beloved Messenger Muḥammad  has told us of an easy way to be close to Allāh : just begin by saying "Assalāmu 'alaykum".</li>
+  <li>Try to remember that wherever or whenever you meet a Muslim, say the salām ﬁrst.</li>
+  <li>We must aim to compete and race with one another to become closer to Allāh .</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must aim to compete and race with one another to become closer to Allāh.</li>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-using-the-right-hand-g">
+<h3>Using the Right Hand</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Our Beloved Messenger Muḥammad              said:ّْ "Say 'Bismillāh' and eat with your right hand." (Ṣaḥīḥ al-Bukhārī) Say 'Bismillāh' and eat with your right hand Our Beloved Messenger Muḥammad taught us so many good manners. He told us how to do everything. Our Beloved Messenger Muḥammad would eat with his right hand and say 'Bismillāh'. Dear children, when we love someone, we want to be like them.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>He told us how to do everything.</li>
+  <li>Our Beloved Messenger Muḥammad would eat with his right hand and say 'Bismillāh'.</li>
+  <li>Dear children, when we love someone, we want to be like them.</li>
+  <li>We must also eat with our right hand and say Bismillāh.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must also eat with our right hand and say Bismillāh.</li>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-drinking-whilst-sitting-g">
+<h3>Drinking Whilst Sitting</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>َOur Beloved Messenger Muḥammad              said: "None of you should drink whilst standing." (Ṣaḥīḥ Muslim)</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>َOur Beloved Messenger Muḥammad              said: "None of you should drink whilst standing." (Ṣaḥīḥ Muslim).</li>
+  <li>َOur Beloved Messenger Muḥammad              said: "None of you should drink whilst standing." (Ṣaḥīḥ Muslim).</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does the ḥadīth "None of you should drink whilst standing." teach us?</li>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does the ḥadīth "None of you should drink whilst standing." teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-none-of-you-should-g">
+<h3>None of you should</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>drink whilst standing If we drink water whilst we are standing, we are not following the sunnah. The sunnah is something our Beloved Messenger Muḥammad used to do. If we follow his Sunnah and sit down to drink, Allāh  will give us many good rewards. Drinking whilst standing is not good for our stomach, as it makes the water go down too quickly.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>drink whilst standing If we drink water whilst we are standing, we are not following the sunnah.</li>
+  <li>The sunnah is something our Beloved Messenger Muḥammad used to do.</li>
+  <li>If we follow his Sunnah and sit down to drink, Allāh  will give us many good rewards.</li>
+  <li>Drinking whilst standing is not good for our stomach, as it makes the water go down too quickly.</li>
+  <li>Our Beloved Messenger Muḥammad              said: "Be kind to your neighbour and you will be a (complete) Mu'min." (Tirmidhī).</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is the sunnah?</li>
+  <li>What is drinking whilst standing?</li>
+  <li>What does the ḥadīth "Be kind to your neighbour and you will be a (complete) Mu" teach us?</li>
+  <li>Can you recite this ḥadīth from memory?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is the sunnah?</strong><br>The sunnah is something our Beloved Messenger Muḥammad used to do.</li>
+  <li><strong>What is drinking whilst standing?</strong><br>Drinking whilst standing is not good for our stomach, as it makes the water go down too quickly.</li>
+  <li><strong>What does the ḥadīth "Be kind to your neighbour and you will be a (complete) Mu" teach us?</strong><br>Explain the meaning in your own words and give a practical example.</li>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="a--d-th-be-kind-to-your-g">
+<h3>Be kind to your</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>neighbour and you will be a (complete) Mu'min We Muslims are being told to be kind to our neighbours in order to become complete believers. Neighbours are very important in Islām as they live close by. Sometimes we can be a little mean to the people we always see and meet. And sometimes we can forget they are there and make extra noise which may disturb them.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>neighbour and you will be a (complete) Mu'min We Muslims are being told to be kind to our neighbours in order to become complete believers.</li>
+  <li>Neighbours are very important in Islām as they live close by.</li>
+  <li>And sometimes we can forget they are there and make extra noise which may disturb them.</li>
+  <li>This ḥadīth is reminding us to think about other people who might get hurt or upset by the things we do.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is this ḥadīth?</li>
+  <li>Can you recite this ḥadīth from memory?</li>
+  <li>What is the main lesson of this ḥadīth?</li>
+  <li>Give an example of how you can follow this ḥadīth today.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is this ḥadīth?</strong><br>This ḥadīth is reminding us to think about other people who might get hurt or upset by the things we do.</li>
+  <li><strong>Can you recite this ḥadīth from memory?</strong><br>Practice reciting the Arabic and English translation.</li>
+  <li><strong>What is the main lesson of this ḥadīth?</strong><br>Summarize the teaching in one sentence.</li>
+  <li><strong>Give an example of how you can follow this ḥadīth today.</strong><br>Think of a practical action you can take.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you memorize this ḥadīth and say it back to me?</li>
+  <li>Tell me a time when you could have followed this teaching — what happened?</li>
+  <li>If your friend asked you what this ḥadīth means, how would you explain it?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="s-rah-guide">
+<h2>Sīrah</h2>
+<div class="lesson-card" id="s-rah-s-rah-so-far----g">
+<h3>Sīrah so far...</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Our Beloved Messenger Muḥammad  was born in Makkah in the year known as the ‘Year of the Elephant’ in the month of Rab|’ul Awwal. His mother’s name was Āminah and his father, who passed away before he was born, was called ‘Abdullāh. He went to stay with Ḥalimah Sa‘diyyah  for four years. His beloved mother passed away when he was six and his grandfather ‘Abdul Muṭṭalib took care of him until he too passed away when our Beloved Messenger  was eight years of age.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Our Beloved Messenger Muḥammad  was born in Makkah in the year known as the ‘Year of the Elephant’ in the month of Rab|’ul Awwal.</li>
+  <li>Our Beloved Messenger  married Khadījah  and had four daughters and two sons.</li>
+  <li>Our Beloved Messenger Muḥammad began to spend long hours in deep thought.</li>
+  <li>There, he would think about the Creation and worship Allāh .</li>
+  <li>Even before he  was made a messenger, he used to feel the pain of the people around him and would think of ways to help them.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is waraqah said, "this?</li>
+  <li>What should we do?</li>
+  <li>What happened during Sīrah so far...?</li>
+  <li>What lesson can we learn from this event?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is waraqah said, "this?</strong><br>Waraqah said, "This is the angel that came down to Mūsā.</li>
+  <li><strong>What should we do?</strong><br>We must try to do all the things that Allāh  wants us to do.</li>
+  <li><strong>What happened during Sīrah so far...?</strong><br>Retell the key events in your own words.</li>
+  <li><strong>What lesson can we learn from this event?</strong><br>Think about what it teaches us about character and faith.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>If you were there, what would you have done?</li>
+  <li>What quality of the Prophet ﷺ do you admire most from this story?</li>
+  <li>How does this event connect to our life today?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="t-r-kh-guide">
+<h2>Tārīkh</h2>
+<div class="lesson-card" id="t-r-kh-h-d-g">
+<h3>Hūd</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Life continues descended from the Ark and The people of Nūḥ began living in the world once again. They remembered what happened to the people who 's messenger. did not obey or follow Allāh . The people began worshipping Allāh The world was a better place. After a long time the people forgot what had happened to their forefathers.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>They remembered what happened to the people who 's messenger. did not obey or follow Allāh .</li>
+  <li>The people began worshipping Allāh The world was a better place.</li>
+  <li>A messenger is sent Allāh sent a messenger to the people of 'Ād.</li>
+  <li>Hūd told his people, "O my people, worship Allāh , you have no god other than Him." The people of 'Ād did not like to be told what to do.</li>
+  <li>He tried his best to move them away Allāh from the idols.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is a messenger?</li>
+  <li>What should we do?</li>
+  <li>Tell me about Hūd in your own words.</li>
+  <li>What challenges did the people in this story face?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is a messenger?</strong><br>A messenger is sent Allāh sent a messenger to the people of 'Ād.</li>
+  <li><strong>What should we do?</strong><br>We must always remember that these things are a gift from Allāh and can be taken away at any time.</li>
+  <li><strong>Tell me about Hūd in your own words.</strong><br>Summarize the main events and people.</li>
+  <li><strong>What challenges did the people in this story face?</strong><br>Describe the difficulties and how they were overcome.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>What do you find most interesting about this story?</li>
+  <li>What challenge did this person face and how did they overcome it?</li>
+  <li>What lesson can we take from this into our own lives?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="t-r-kh---li--g">
+<h3>Ṣāliḥ</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Thamūd Ṣāliḥ (The Messenger of Thamūd) The Thamūd were a famous tribe. They were from the children of Nūḥ . Thamūd lived in a place called Ḥijr in Arabia. The people of Thamūd came after the people of 'Ād.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Thamūd Ṣāliḥ (The Messenger of Thamūd) The Thamūd were a famous tribe.</li>
+  <li>But they did not appreciate these things and disobeyed Allāh .</li>
+  <li>Allāh sent to them a person from their own tribe, a slave of Allāh and His messenger, named Ṣāliḥ .</li>
+  <li>He invited them to worship Allāh , the One, who has no partner.</li>
+  <li>Some people of Thamūd believed in Allāh , but most of the people did not.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>Tell me about Ṣāliḥ in your own words.</li>
+  <li>What challenges did the people in this story face?</li>
+  <li>What can we learn from this historical event?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must respect the signs of Allāh and not reject them.</li>
+  <li><strong>Tell me about Ṣāliḥ in your own words.</strong><br>Summarize the main events and people.</li>
+  <li><strong>What challenges did the people in this story face?</strong><br>Describe the difficulties and how they were overcome.</li>
+  <li><strong>What can we learn from this historical event?</strong><br>Connect the lesson to our lives today.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>What do you find most interesting about this story?</li>
+  <li>What challenge did this person face and how did they overcome it?</li>
+  <li>What lesson can we take from this into our own lives?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="aq--id-guide">
+<h2>Aqā'id</h2>
+<div class="lesson-card" id="aq--id-angels-g">
+<h3>Angels</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>They are His special servants. They are made of nūr (light). They are neither male nor female. They always obey Allāh  and they do what Allāh  has ordered them to do.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>They are His special servants.</li>
+  <li>They are made of nūr (light).</li>
+  <li>They are neither male nor female.</li>
+  <li>They always obey Allāh  and they do what Allāh  has ordered them to do.</li>
+  <li>Angels never disobey Allāh .</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is malakul mawt he?</li>
+  <li>What is their duty?</li>
+  <li>What is isrāfīl; the hour?</li>
+  <li>What does Islam teach us about Angels?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is malakul mawt he?</strong><br>Malakul Mawt He is known as the Angel of Death.</li>
+  <li><strong>What is their duty?</strong><br>Their duty is to write down the good and bad deeds a person does.</li>
+  <li><strong>What is isrāfīl; the hour?</strong><br>Isrāfīl; the Hour is near; the Trumpet will be blown, When ordered by Allāh, Owner of the Throne.</li>
+  <li><strong>What does Islam teach us about Angels?</strong><br>Explain the key belief from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="aq--id-books-g">
+<h3>Books</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Revelation is called 'Waḥy' in Arabic. Allāh  sent down many books to different prophets. Four books were sent down. Many other scrolls were sent with smaller messages and these were called 'ṣuḥuf.' Allāh  sent books and ṣuḥuf to show us how to live.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Revelation is called 'Waḥy' in Arabic.</li>
+  <li>Allāh  sent down many books to different prophets.</li>
+  <li>Many other scrolls were sent with smaller messages and these were called 'ṣuḥuf.' Allāh  sent books and ṣuḥuf to show us how to live.</li>
+  <li>The Qur'ān is the only book that has never been changed.</li>
+  <li>The Qur'ān is a miracle for us all.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is revelation?</li>
+  <li>What is the qur'ān?</li>
+  <li>What is the qur'ān the holy qur'ān?</li>
+  <li>What is each word of the qur'ān?</li>
+  <li>What is this?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is revelation?</strong><br>Revelation is called 'Waḥy' in Arabic.</li>
+  <li><strong>What is the qur'ān?</strong><br>The Qur'ān is the only book that has never been changed.</li>
+  <li><strong>What is the qur'ān the holy qur'ān?</strong><br>The Qur'ān The Holy Qur'ān is the book of Allāh.</li>
+  <li><strong>What is each word of the qur'ān?</strong><br>Each word of the Qur'ān is the word of Allāh.</li>
+  <li><strong>What is this?</strong><br>This is a miracle of the Qur'ān and a means of its protection.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Why is this belief important for a Muslim?</li>
+  <li>How does knowing this make you feel about Allāh?</li>
+  <li>If someone asked you about this, how would you explain it simply?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="akhl-q-guide">
+<h2>Akhlāq</h2>
+<div class="lesson-card" id="akhl-q-keeping-promises-g">
+<h3>Keeping Promises</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>A hypocrite is a person who tells people that they are a Muslim, but inside they really aren't Muslim. Such a person is called a 'Mun\ﬁq' in Arabic. A Mun\ﬁq will have the worst kind of punishment in Jahannam. Dear children, think: when we break our promise we are bringing the quality of a Mun\ﬁq into our lives.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>A hypocrite is a person who tells people that they are a Muslim, but inside they really aren't Muslim.</li>
+  <li>Such a person is called a 'Mun\ﬁq' in Arabic.</li>
+  <li>A Mun\ﬁq will have the worst kind of punishment in Jahannam.</li>
+  <li>Dear children, think: when we break our promise we are bringing the quality of a Mun\ﬁq into our lives.</li>
+  <li>May Allāh  protect us from hypocrisy (nifāq). Āmīn.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is a hypocrite?</li>
+  <li>What is such a person?</li>
+  <li>What does Keeping Promises mean and why is it important?</li>
+  <li>Give an example of how you can practice Keeping Promises at home or school.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is a hypocrite?</strong><br>A hypocrite is a person who tells people that they are a Muslim, but inside they really aren't Muslim.</li>
+  <li><strong>What is such a person?</strong><br>Such a person is called a 'Mun\ﬁq' in Arabic.</li>
+  <li><strong>What does Keeping Promises mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Keeping Promises at home or school.</strong><br>Think of a real situation.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-there-are-three-ways-to-thank-all-h-g">
+<h3>There are three ways to thank Allāh</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>for a blessing: 1)Say 'Alḥamdulillāh' 2)Be happy with the blessing 3)  Use this blessing in the obedience of Allāh  and do not use it in the disobedience of Allāh . For example -our tongue- how can we thank Allāh for this great gift? Firstly we say Alḥamdulillāh. Secondly we should be happy that we have a tongue to speak with.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>For example -our tongue- how can we thank Allāh for this great gift?</li>
+  <li>Secondly we should be happy that we have a tongue to speak with.</li>
+  <li>Finally, we should make sure we do not use the tongue in saying those things which displease Allāh .</li>
+  <li>Can you discuss other blessings Allāh  has blessed us with and how we can apply these three rules to each of them?</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What does There are three ways to thank Allāh mean and why is it important?</li>
+  <li>Give an example of how you can practice There are three ways to thank Allāh at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about There are three ways to thank Allāh?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must be happy that we have a tongue to speak with.</li>
+  <li><strong>What does There are three ways to thank Allāh mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice There are three ways to thank Allāh at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about There are three ways to thank Allāh?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-if-we-thank-all-h---all-h--will-increase-us-g">
+<h3>If we thank Allāh , Allāh  will increase us</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>in that blessing by making it stronger or granting us more of it. But if we are ungrateful and do not thank Allāh , then Allāh  warns us that His punishment is severe. Allāh  gives us an example in the Qur'ān of a group of people who lived in a village. They had been granted all sorts of blessings; their food would come from all directions.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>But if we are ungrateful and do not thank Allāh , then Allāh  warns us that His punishment is severe.</li>
+  <li>However, they were ungrateful for these blessings, so Allāh  made them taste the pangs of hunger and fear because of their ungratefulness.</li>
+  <li>We should be happy with the gifts Allāh has given us and thank Him often.</li>
+  <li>That is because these people are not happy with what Allāh  has blessed them with.</li>
+  <li>They are always worried about what other people have and forget to look at what they have been given.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What is that?</li>
+  <li>What is another important point to remember?</li>
+  <li>What does If we thank Allāh , Allāh  will increase us mean and why is it important?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must be happy with the gifts Allāh has given us and thank Him often.</li>
+  <li><strong>What is that?</strong><br>That is because these people are not happy with what Allāh  has blessed them with.</li>
+  <li><strong>What is another important point to remember?</strong><br>Another important point to remember is that part of thanking Allāh  is thanking people.</li>
+  <li><strong>What does If we thank Allāh , Allāh  will increase us mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-thank-g">
+<h3>Thank</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>So we learn from this chapter that there are many beneﬁts of being grateful and thankful. Being thankful reminds us of the favours we have been given. Gratitude helps us to help others because we see that some people do not have what we have. Thankfulness increases our blessings.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>So we learn from this chapter that there are many beneﬁts of being grateful and thankful.</li>
+  <li>Being thankful pleases Allāh .</li>
+  <li>Being thankful reminds us of the favours we have been given.</li>
+  <li>Gratitude helps us to help others because we see that some people do not have what we have.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What does Thank mean and why is it important?</li>
+  <li>Give an example of how you can practice Thank at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about Thank?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What does Thank mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Thank at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about Thank?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-spreading-sal-m-g">
+<h3>Spreading Salām</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"When you are greeted with a greeting, greet with one better than it, or return the same. Surely, Allāh is the One who takes account of everything". (Qur'ān 4:86) Abū Hurayrah  said that the Beloved Messenger Muḥammad  said that "You will not enter Jannah until you believe and you will not believe until you love one another. Shall I not guide you to something which if you carry out you will love one another? Spread salām amongst you.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>"When you are greeted with a greeting, greet with one better than it, or return the same.</li>
+  <li>Allāh  is so merciful and kind.</li>
+  <li>Through small actions we can gain His nearness and get the ﬁrst step towards guaranteeing our place in Jannah.</li>
+  <li>It is so simple to say 'salām'.</li>
+  <li>We must say 'salām' to every Muslim we meet.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is allāh?</li>
+  <li>What should we do?</li>
+  <li>What does Spreading Salām mean and why is it important?</li>
+  <li>Give an example of how you can practice Spreading Salām at home or school.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is allāh?</strong><br>Allāh is so merciful and kind.</li>
+  <li><strong>What should we do?</strong><br>We must say 'salām' to every Muslim we meet.</li>
+  <li><strong>What does Spreading Salām mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Spreading Salām at home or school.</strong><br>Think of a real situation.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-how-can-such-a-person-hurt-g">
+<h3>How can such a person hurt</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>anyone who is peaceful, follows peace and spreads peace? We must think about this when we say 'salām'. We must not spread anything which is the Akhlāq opposite to peace. Allāh  does not like those who spread evil in the world.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>anyone who is peaceful, follows peace and spreads peace?</li>
+  <li>We must not spread anything which is the Akhlāq opposite to peace.</li>
+  <li>Some people spread tales that are false.</li>
+  <li>A person who does this is called a nammām (a talebearer).</li>
+  <li>Muḥammad  said that a talebearer shall not enter Jannah (Aḥmad) A talebearer causes people to disunite.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What is we must not spread anything which?</li>
+  <li>What is a person who does this?</li>
+  <li>What is a person who spreads false tales?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must think about this when we say 'salām'.</li>
+  <li><strong>What is we must not spread anything which?</strong><br>We must not spread anything which is the Akhlāq opposite to peace.</li>
+  <li><strong>What is a person who does this?</strong><br>A person who does this is called a nammām (a talebearer).</li>
+  <li><strong>What is a person who spreads false tales?</strong><br>A person who spreads false tales is not liked by others.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-helping-in-good-things-g">
+<h3>Helping in Good Things</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>"Help each other in good and piety, and do not help each other in sin and aggression." (Qur'ān 5:2) Our Beloved Messenger Muḥammad said, "Whoever fulﬁlled the needs of his brother, Allāh  will fulﬁl his needs; whoever brought his (Muslim) brother out of a discomfort, Allāh  will bring him out of the discomforts of the Day of Resurrection." (Ṣaḥīḥ al-Bukhārī) Our Beloved Messenger Muḥammad has said, "The most virtuous charity is that you feed a hungry creature.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>We can become the beloved of Allāh  when we help His Akhlāq Creation.</li>
+  <li>If we see someone in need, we should help them, whoever it may be, as they are the Creation of Allāh .</li>
+  <li>Our Beloved Messenger Muḥammad  always used to help people even before he became a prophet.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What does Helping in Good Things mean and why is it important?</li>
+  <li>Give an example of how you can practice Helping in Good Things at home or school.</li>
+  <li>What did the Prophet ﷺ teach us about Helping in Good Things?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must help them, whoever it may be, as they are the Creation of Allāh.</li>
+  <li><strong>What does Helping in Good Things mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Helping in Good Things at home or school.</strong><br>Think of a real situation.</li>
+  <li><strong>What did the Prophet ﷺ teach us about Helping in Good Things?</strong><br>Share what you learned from the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="akhl-q-kindness-to-animals-g">
+<h3>Kindness to Animals</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Our Beloved Messenger  said "Fear Allāh regarding these mute animals: mount them when they are ﬁt (they are fully rested), and dismount them while they are still ﬁt (before tiring them out)." (Abū Dāwūd) Our Beloved Messenger  commanded us to be kind to animals. We must not hurt any animal. Animals are also the Creation of Allāh . The Ṣa#ābah asked Muḥammad  "Is there a reward for us in serving (the) animal?" He replied, "Yes, there is a reward for serving every living creature.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>Animals are also the Creation of Allāh .</li>
+  <li>Allāh  was so happy with this one action of hers, showing kindness to one of Allāh 's Creation, that He forgave all her sins and granted her Jannah.</li>
+  <li>Dear children, if we ever see any animal that may be hurt or in pain we should try our best to help.</li>
+  <li>Even when we are riding an animal we should do so without making it too tired.</li>
+  <li>There is a story of another lady who used to pray a lot.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What should we do?</li>
+  <li>What is there?</li>
+  <li>What does Kindness to Animals mean and why is it important?</li>
+  <li>Give an example of how you can practice Kindness to Animals at home or school.</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What should we do?</strong><br>We must not hurt any animal.</li>
+  <li><strong>What is there?</strong><br>There is a story of another lady who used to pray a lot.</li>
+  <li><strong>What does Kindness to Animals mean and why is it important?</strong><br>Define it and explain its value in Islam.</li>
+  <li><strong>Give an example of how you can practice Kindness to Animals at home or school.</strong><br>Think of a real situation.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Can you think of a time you showed this quality?</li>
+  <li>What would the world look like if everyone practiced this?</li>
+  <li>Who do you know that is a good example of this quality?</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="subject-guide" id="-d-b-guide">
+<h2>Ādāb</h2>
+<div class="lesson-card" id="-d-b--d-b-of-greeting-g">
+<h3>Ādāb of Greeting</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>When you are greeted with a greeting, greet with one better than it, or return the same. Surely, Allāh is the One who takes account of everything. (Qur'ān 4:86) and "Peace, the mercy of Allāh His blessings be upon you." reports that our Beloved Messenger Bar\’ said, "When two Muslims meet Muḥammad forgives the sins of both and shake hands, Allāh before they depart." (Abū Dāwūd) reports that our Beloved ’ ‘A{\ said: Ādāb Messenger Muḥammad "Shake hands, for this will remove hatred.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>When you are greeted with a greeting, greet with one better than it, or return the same.</li>
+  <li>When walking past those that are sitting.</li>
+  <li>Our Beloved Messenger was referring to the amount of reward each of them received.</li>
+  <li>After three spaced knocks, if permission is granted, then enter.</li>
+  <li>If you are entering a house wherein people may be resting, do not raise your voice.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What is after three spaced knocks, if permission?</li>
+  <li>What are the main manners related to Ādāb of Greeting?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Greeting?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What is after three spaced knocks, if permission?</strong><br>After three spaced knocks, if permission is granted, then enter.</li>
+  <li><strong>What are the main manners related to Ādāb of Greeting?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Greeting?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b--d-b-of-speaking-g">
+<h3>Ādāb of Speaking</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>O you who believe, fear Allāh , and speak in straightforward words. (If you do so) Allāh will correct your deeds for you, and forgive your sins for you. Whoever obeys Allāh and His Messenger  has achieved a great success. (Qur'ān 33:70-71) …and lower your voice... (Qur'ān 31:19) narrates that the words of our ishah ’Ā‘ Beloved Messenger Muḥammad were always clear so it could be understood by all who heard. (Abū Dāwūd) Say only that which benefits the situation.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>If you are the youngest in a gathering, do not speak unless you are asked to or unless you feel your words will please the host or other guests.</li>
+  <li>Do not raise your voice.</li>
+  <li>Do not speak too much so that people get tired.</li>
+  <li>When possible, smile while talking.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Ādāb of Speaking?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Speaking?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Ādāb of Speaking?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Speaking?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+<div class="lesson-card" id="-d-b--d-b-of-sneezing-g">
+<h3>Ādāb of Sneezing</h3>
+<div class="summary">
+<h4>📝 Lesson Summary</h4>
+<p>Ādāb of Sneezing &amp; Yawning reported that our Beloved Abū Hurayrah said, "Every Messenger Muḥammad Muslim has ﬁve rights over another Muslim: to return the greetings, to visit the sick, to accompany the funeral, to accept an invitation and to respond to the sneezer." (Ṣaḥīḥ al-Bukhārī) reported that our Beloved Abū Hurayrah , said, "Allāh Messenger Muḥammad loves sneezing and dislikes yawning.</p>
+<h4>Key Points:</h4>
+<ul>
+  <li>When one of you yawns, he should control it as much as possible.</li>
+  <li>Do not make a noise whilst yawning or leave the mouth open.</li>
+</ul>
+</div>
+<div class="quiz">
+<h4>✅ Quiz Questions</h4>
+<ol>
+  <li>What are the main manners related to Ādāb of Sneezing?</li>
+  <li>Why does Islam teach us these specific manners?</li>
+  <li>Can you demonstrate the correct ādāb of Ādāb of Sneezing?</li>
+</ol>
+<details><summary>Show Answers</summary>
+<ol>
+  <li><strong>What are the main manners related to Ādāb of Sneezing?</strong><br>List the key etiquettes from the lesson.</li>
+  <li><strong>Why does Islam teach us these specific manners?</strong><br>Think about how they benefit us and others.</li>
+  <li><strong>Can you demonstrate the correct ādāb of Ādāb of Sneezing?</strong><br>Show the proper way as described in the lesson.</li>
+</ol>
+</details>
+</div>
+<div class="discussion">
+<h4>💬 Discussion Starters</h4>
+<ul>
+  <li>Let's practice these manners together today.</li>
+  <li>Why do you think Islam teaches us these specific manners?</li>
+  <li>How do you feel when someone shows you good manners?</li>
+</ul>
+</div>
+</div>
+</section>
+
+</main>
+<footer>
+  Parent Guide for An Nasihah Islamic Curriculum &middot; For home learning support
+</footer>
+</body>
+</html>

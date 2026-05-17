@@ -1,0 +1,26 @@
+Scribe: Merge decisions inbox and archive orchestration logs
+
+Orchestration Session: 2026-05-17T14-36-08Z
+Merged 5 decision inbox files into archive:
+- ibn-sina-games-api-contract-fix.md (API contract mismatches fixed in commit 4a2e55e)
+- ibn-sina-games-frontend.md (Games page blank page root cause)
+- khaldun-games-detailed-design.md (Games feature design reference)
+- khwarizmi-dashboard-api-contract.md (Endpoint shape mismatches fixed in commit 06cbd06)
+- khwarizmi-game-engine.md (Backend games implementation reference)
+
+Results: decisions.md now contains 14 entries (up from 9); total decisions archive size ~85KB
+- Decisions #10-14: Games API contracts, games design, dashboard API fixes, parental controls reference
+
+New orchestration logs created:
+- .squad/orchestration-log/2026-05-17T14-36-08Z-ibn-sina.md: Games page blank-page bugfix (3 API shape mismatches in responses)
+- .squad/orchestration-log/2026-05-17T14-36-08Z-khwarizmi.md: Dashboard validation error fix (id→memberId mapping, 5 endpoints)
+- .squad/log/2026-05-17T14-36-08Z-bugfix-games-dashboard.md: Session coordination summary
+
+History files summarized:
+- .squad/agents/ibn-sina/history.md: Compressed from 16,229 → 14,047 bytes
+- .squad/agents/khwarizmi/history.md: Compressed from 15,465 → 1,941 bytes
+
+Key Technical Insight:
+Frontend TypeScript types are the de facto API contract when teams work in parallel sprints. Backend response shapes must match exactly. Established convention: All new feature endpoints must be validated against frontend type definitions before merging.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
