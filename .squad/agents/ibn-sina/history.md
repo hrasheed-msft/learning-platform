@@ -186,3 +186,59 @@ TERM_MATCH, SPEED_QUIZ, FLASHCARD_FLIP, WORD_SCRAMBLE, FILL_IN_BLANK, MEMORY_MAT
 - DailyChallengeGame kept in router as special meta-game (not in GameType enum)
 - All games follow same 3-screen pattern: pre-game → active → game over (via shared GameOverScreen)
 - Course names displayed in GamesHub cards to distinguish duplicate-looking games (e.g., 5 Term Match games for different courses)
+
+---
+
+## 2026-05-17 — Games Frontend Implementation Phase 2 (Session 14:57:13Z)
+
+**Status:** COMPLETED  
+**Orchestration Log:** .squad/orchestration-log/2026-05-17T14-57-13Z-ibn-sina.md
+
+### Deliverables
+
+Built 11 new game components (total 15 game types now supported) with complete frontend integration:
+
+**New game components created (11 files):**
+1. **WordScrambleGame** — Clickable letter tiles, build area, auto-submit, hint reveals letter
+2. **FillInBlankGame** — Sentence with blank, MCQ fill, immediate feedback
+3. **MemoryMatchGame** — 3D card flip, 4×4/4×5/5×6 grids by difficulty
+4. **TrueFalseGame** — Large ✅/❌ buttons, animated feedback, explanation
+5. **MultipleChoiceGame** — 2×2 colored grid, hint eliminates wrong answer
+6. **SentenceBuildGame** — Shuffled word tiles, tap-to-place/remove, check button
+7. **ListeningQuizGame** — Speaker icon + Arabic text reveal, then MCQ
+8. **CalligraphyTraceGame** — HTML5 Canvas with watermark, green stroke, clear/submit
+9. **SpellingBeeGame** — Text input, Enter submit, transliteration hint
+10. **StoryPuzzleGame** — Tap-to-select segments, tap-to-swap reordering
+11. **MazeRunnerGame** — Recursive backtracker maze, WASD+arrows, gate questions as modal
+
+### Key Architectural Decisions
+
+- **GamePlay Router Updated:** Maps all 15 slug types (term-match, speed-quiz, …, maze-runner) to components
+- **GameType Enum Expanded:** 15 types now in types/game.ts
+- **GamesHub Fixed:** Shows course name as subtitle to distinguish duplicate-named games
+- **GAME_META Updated:** All 15 types with metadata (icon, color, description)
+- **Build Status:** ✅ Clean — no TypeScript errors from new components
+
+### File Modifications
+
+**Modified (4):**
+- 	ypes/game.ts — GameType enum: 15 types, updated GAME_META
+- pages/games/GamePlay.tsx — Router with slug-to-component mapping
+- pages/games/GamesHub.tsx — Course labels displayed
+- services/gameService.ts — courseName passed through from API
+
+**Created (11):**
+- All new game components in components/games/ and pages/games/
+
+### Frontend-Backend Integration Ready
+
+- Backend (Khwarizmi): 15 game type engines ✅
+- Frontend (Ibn Sina): 15 game type UI components ✅
+- API contracts: Matching (course names, game metadata, round formats)
+- Ready for integration testing and parental controls validation
+
+### Next Phase
+
+1. Integration test game engine with frontend components
+2. Verify parental controls UI enforcement
+3. Test game state transitions and SRS writeback

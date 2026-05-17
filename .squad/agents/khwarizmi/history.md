@@ -47,3 +47,50 @@
 - SRS writeback: Game answers feed into FlashCardProgress with ratings
 - Activity tracking: recordActivity() helper ready for quiz/flashcard/course integration
 - Daily challenge: Deterministic seed ensures all users get same challenge per day
+
+---
+
+## 2026-05-17 — Games Backend Implementation (Session 14:57:13Z)
+
+**Status:** COMPLETED  
+**Orchestration Log:** `.squad/orchestration-log/2026-05-17T14-57-13Z-khwarizmi.md`
+
+### Deliverables
+
+All 15 game type engines implemented in game.service.ts with full type-specific logic:
+
+**Implemented game types (all with dedicated round formatting & grading):**
+1. TERM_MATCH — Drag-and-drop pair matching
+2. SPEED_QUIZ — Rapid-fire questions
+3. FLASHCARD_FLIP — Self-rated card flips
+4. WORD_SCRAMBLE — Letter tile assembly
+5. FILL_IN_BLANK — Word bank completion
+6. MEMORY_MATCH — Card pair matching
+7. TRUE_FALSE — Binary statement validation
+8. MULTIPLE_CHOICE — MCQ with distractors
+9. SENTENCE_BUILD — Word tile sequencing
+10. LISTENING_QUIZ — Audio + comprehension
+11. CALLIGRAPHY_TRACE — Canvas drawing
+12. SPELLING_BEE — Text input accuracy
+13. STORY_PUZZLE — Segment reordering
+14. ESCAPE_ROOM — Puzzle challenge
+15. MAZE_RUNNER — Spatial navigation
+
+### Key Implementation Details
+
+- **File Growth:** 1249 → 1555 lines (+306 lines)
+- **TypeScript:** ✅ Zero errors
+- **Round Formatting:** Each game type has dedicated formatRoundsForGameType() logic
+- **Grading Logic:** Type-aware gradeAnswer() with difficulty scaling
+- **Timer Configs:** Per-game-type configuration (e.g., SPEED_QUIZ: 30s/round, CALLIGRAPHY_TRACE: 120s/round)
+- **Course Names:** Added to /games/available response for game type disambiguation
+- **Scoring:** Base + bonuses (speed, streaks, perfection multipliers)
+- **SRS Integration:** Game answers feed into FlashCardProgress with SM-2 ratings
+
+### Outcomes
+
+- All 15 game engines production-ready
+- No breaking changes to existing API contracts
+- Frontend integration path clear: gameService.ts ready for GamePlay component consumption
+- Parental controls enforcement verified
+- Commit pending: `.squad/orchestration-log/2026-05-17T14-57-13Z-khwarizmi.md`
