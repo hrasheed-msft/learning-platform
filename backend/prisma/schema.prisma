@@ -498,6 +498,7 @@ model Notification {
 // ============================================
 
 enum GameType {
+  // Course-integrated (original)
   TERM_MATCH
   AYAH_COMPLETION
   FIQH_SCENARIO
@@ -505,6 +506,18 @@ enum GameType {
   WORD_SEARCH
   SPEED_QUIZ
   FLASHCARD_FLIP
+  // Course-integrated (new — frontend UI exists)
+  WORD_SCRAMBLE
+  FILL_IN_BLANK
+  MEMORY_MATCH
+  TRUE_FALSE
+  MULTIPLE_CHOICE
+  SENTENCE_BUILD
+  LISTENING_QUIZ
+  CALLIGRAPHY_TRACE
+  SPELLING_BEE
+  STORY_PUZZLE
+  // Standalone
   DAILY_CHALLENGE
   KNOWLEDGE_EXPEDITION
   TRIVIA_BATTLE
@@ -513,6 +526,7 @@ enum GameType {
   SEERAH_TIMELINE
   ESCAPE_ROOM
   MAZE_NAVIGATOR
+  MAZE_RUNNER
 }
 
 enum GameCategory {

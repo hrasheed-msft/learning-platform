@@ -1,6 +1,7 @@
 // Game Types — matching backend enums and API contracts
 
 export type GameType =
+  // Course-integrated
   | 'TERM_MATCH'
   | 'SPEED_QUIZ'
   | 'FLASHCARD_FLIP'
@@ -13,9 +14,21 @@ export type GameType =
   | 'LISTENING_QUIZ'
   | 'CALLIGRAPHY_TRACE'
   | 'SPELLING_BEE'
+  | 'AYAH_COMPLETION'
+  | 'FIQH_SCENARIO'
+  | 'HADITH_CHAIN'
+  | 'WORD_SEARCH'
+  // Standalone
   | 'STORY_PUZZLE'
   | 'ESCAPE_ROOM'
-  | 'MAZE_RUNNER';
+  | 'MAZE_RUNNER'
+  | 'MAZE_NAVIGATOR'
+  | 'DAILY_CHALLENGE'
+  | 'KNOWLEDGE_EXPEDITION'
+  | 'TRIVIA_BATTLE'
+  | 'MOSQUE_BUILDER'
+  | 'PATTERN_CREATOR'
+  | 'SEERAH_TIMELINE';
 
 export type GameCategory = 'COURSE_INTEGRATED' | 'STANDALONE';
 export type GameDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
@@ -272,7 +285,18 @@ export const GAME_META: Record<GameType, { name: string; emoji: string; color: s
   LISTENING_QUIZ: { name: 'Listening Quiz', emoji: '🎧', color: 'bg-rose-500', description: 'Listen and answer questions about what you hear' },
   CALLIGRAPHY_TRACE: { name: 'Calligraphy Trace', emoji: '🖌️', color: 'bg-violet-500', description: 'Trace Arabic letters with your finger or mouse' },
   SPELLING_BEE: { name: 'Spelling Bee', emoji: '🐝', color: 'bg-yellow-500', description: 'Read the definition and spell the word correctly' },
+  AYAH_COMPLETION: { name: 'Ayah Completion', emoji: '📖', color: 'bg-sky-500', description: 'Complete missing words in Quranic verses' },
+  FIQH_SCENARIO: { name: 'Fiqh Scenario', emoji: '⚖️', color: 'bg-slate-500', description: 'Choose the correct ruling for real-life scenarios' },
+  HADITH_CHAIN: { name: 'Hadith Chain', emoji: '🔗', color: 'bg-stone-500', description: 'Arrange narrators in the correct chain' },
+  WORD_SEARCH: { name: 'Word Search', emoji: '🔍', color: 'bg-pink-500', description: 'Find hidden Islamic terms in a letter grid' },
   STORY_PUZZLE: { name: 'Story Puzzle', emoji: '📚', color: 'bg-green-500', description: 'Arrange story segments in the right order' },
   ESCAPE_ROOM: { name: 'Escape Room', emoji: '🔐', color: 'bg-fuchsia-500', description: 'Solve challenges to escape themed rooms' },
   MAZE_RUNNER: { name: 'Maze Runner', emoji: '🧭', color: 'bg-lime-500', description: 'Navigate mazes by answering questions at gates' },
+  MAZE_NAVIGATOR: { name: 'Maze Navigator', emoji: '🗺️', color: 'bg-emerald-600', description: 'Answer questions to unlock maze paths' },
+  DAILY_CHALLENGE: { name: 'Daily Challenge', emoji: '📅', color: 'bg-amber-600', description: 'A fresh set of questions every day' },
+  KNOWLEDGE_EXPEDITION: { name: 'Knowledge Expedition', emoji: '🗻', color: 'bg-blue-600', description: 'Journey through Islamic knowledge zones' },
+  TRIVIA_BATTLE: { name: 'Trivia Battle', emoji: '⚔️', color: 'bg-red-600', description: 'Compete in an Islamic trivia showdown' },
+  MOSQUE_BUILDER: { name: 'Mosque Builder', emoji: '🕌', color: 'bg-teal-600', description: 'Build a virtual mosque by answering correctly' },
+  PATTERN_CREATOR: { name: 'Pattern Creator', emoji: '🎨', color: 'bg-purple-600', description: 'Complete Arabic and geometric patterns' },
+  SEERAH_TIMELINE: { name: 'Seerah Timeline', emoji: '📜', color: 'bg-orange-600', description: "Order events from the Prophet's life (ﷺ)" },
 };

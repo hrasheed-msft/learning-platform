@@ -14,16 +14,28 @@ const CONTENT_REQUIREMENTS: Record<string, { minArabicTerms: number; minFlashcar
   FIQH_SCENARIO:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
   HADITH_CHAIN:         { minArabicTerms: 0,  minFlashcards: 4, minQuestions: 0 },
   WORD_SEARCH:          { minArabicTerms: 6,  minFlashcards: 0, minQuestions: 0 },
-  SPEED_QUIZ:           { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 10 },
+  SPEED_QUIZ:           { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
   FLASHCARD_FLIP:       { minArabicTerms: 0,  minFlashcards: 5, minQuestions: 0 },
   DAILY_CHALLENGE:      { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
   KNOWLEDGE_EXPEDITION: { minArabicTerms: 0,  minFlashcards: 5, minQuestions: 5 },
-  TRIVIA_BATTLE:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 20 },
+  TRIVIA_BATTLE:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 10 },
   MOSQUE_BUILDER:       { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
   PATTERN_CREATOR:      { minArabicTerms: 0,  minFlashcards: 5, minQuestions: 0 },
   SEERAH_TIMELINE:      { minArabicTerms: 0,  minFlashcards: 8, minQuestions: 0 },
   ESCAPE_ROOM:          { minArabicTerms: 0,  minFlashcards: 3, minQuestions: 3 },
-  MAZE_NAVIGATOR:       { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 10 },
+  MAZE_NAVIGATOR:       { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
+  // New types with frontend UI support
+  WORD_SCRAMBLE:        { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
+  FILL_IN_BLANK:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
+  MEMORY_MATCH:         { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
+  TRUE_FALSE:           { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
+  MULTIPLE_CHOICE:      { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
+  SENTENCE_BUILD:       { minArabicTerms: 0,  minFlashcards: 4, minQuestions: 0 },
+  LISTENING_QUIZ:       { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
+  CALLIGRAPHY_TRACE:    { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
+  SPELLING_BEE:         { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
+  STORY_PUZZLE:         { minArabicTerms: 0,  minFlashcards: 4, minQuestions: 0 },
+  MAZE_RUNNER:          { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
 };
 
 const ROUNDS_BY_DIFFICULTY: Record<string, number> = {
@@ -48,6 +60,18 @@ const TIMER_CONFIGS: Record<string, Record<string, { type: string; durationMs: n
   SEERAH_TIMELINE:      { EASY: { type: 'GLOBAL', durationMs: 120000 },     MEDIUM: { type: 'GLOBAL', durationMs: 90000 },        HARD: { type: 'GLOBAL', durationMs: 60000 } },
   ESCAPE_ROOM:          { EASY: { type: 'GLOBAL', durationMs: 600000 },     MEDIUM: { type: 'GLOBAL', durationMs: 420000 },       HARD: { type: 'GLOBAL', durationMs: 300000 } },
   MAZE_NAVIGATOR:       { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 240000 },       HARD: { type: 'GLOBAL', durationMs: 180000 } },
+  // New types
+  WORD_SCRAMBLE:        { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
+  FILL_IN_BLANK:        { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
+  MEMORY_MATCH:         { EASY: { type: 'GLOBAL', durationMs: 180000 },     MEDIUM: { type: 'GLOBAL', durationMs: 120000 },       HARD: { type: 'GLOBAL', durationMs: 90000 } },
+  TRUE_FALSE:           { EASY: { type: 'PER_QUESTION', durationMs: 15000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 10000 }, HARD: { type: 'PER_QUESTION', durationMs: 7000 } },
+  MULTIPLE_CHOICE:      { EASY: { type: 'PER_QUESTION', durationMs: 20000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 15000 }, HARD: { type: 'PER_QUESTION', durationMs: 10000 } },
+  SENTENCE_BUILD:       { EASY: { type: 'PER_QUESTION', durationMs: 45000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 30000 }, HARD: { type: 'PER_QUESTION', durationMs: 20000 } },
+  LISTENING_QUIZ:       { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
+  CALLIGRAPHY_TRACE:    { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
+  SPELLING_BEE:         { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
+  STORY_PUZZLE:         { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 180000 },       HARD: { type: 'GLOBAL', durationMs: 120000 } },
+  MAZE_RUNNER:          { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 240000 },       HARD: { type: 'GLOBAL', durationMs: 180000 } },
 };
 
 const BASE_POINTS = 100;
@@ -158,11 +182,19 @@ async function selectContent(
 
   // ---------- Questions ----------
   if (req.minQuestions > 0) {
-    const questions = await prisma.question.findMany({
+    // Try exact difficulty first, fallback to any difficulty if no match
+    let questions = await prisma.question.findMany({
       where: { ...unitFilter, difficulty: difficulty as string },
       orderBy: { createdAt: 'desc' },
       take: roundCount * 2,
     });
+    if (questions.length === 0) {
+      questions = await prisma.question.findMany({
+        where: unitFilter,
+        orderBy: { createdAt: 'desc' },
+        take: roundCount * 2,
+      });
+    }
     for (const q of questions) {
       items.push({
         contentType: 'QUESTION',
@@ -653,6 +685,231 @@ function formatRoundsForGameType(
             options: c.options || generateOptions(c, items),
             direction: directions[index % directions.length],
             progress: Math.round(((index + 1) / totalCheckpoints) * 100),
+          },
+        };
+      });
+    }
+
+    // ── WORD_SCRAMBLE: Scramble letters of a term for the player to unscramble ──
+    case 'WORD_SCRAMBLE': {
+      return items.map((item) => {
+        const c = item.content as any;
+        const word = (c.transliteration || c.front || c.translation || '').trim();
+        const letters = shuffleArray(word.split(''));
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'WORD_SCRAMBLE',
+            scrambledLetters: letters,
+            hint: c.translation || c.back || '',
+            arabicText: c.arabicText || c.frontArabic || '',
+            wordLength: word.length,
+          },
+        };
+      });
+    }
+
+    // ── FILL_IN_BLANK: Remove a word from a sentence for the player to fill ──
+    case 'FILL_IN_BLANK': {
+      return items.map((item) => {
+        const c = item.content as any;
+        const text: string = c.questionText || c.front || c.back || '';
+        const words = text.split(/\s+/);
+        const removable = words.map((_, i) => i).filter((i) => words[i].length > 3);
+        const blankIdx = removable.length > 0 ? removable[Math.floor(Math.random() * removable.length)] : 0;
+        const missingWord = words[blankIdx];
+        const sentence = words.map((w, i) => i === blankIdx ? '______' : w).join(' ');
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'FILL_IN_BLANK',
+            sentence,
+            missingWord,
+            options: shuffleArray([missingWord, ...items.filter((i) => i.contentId !== item.contentId).slice(0, 3).map((i) => {
+              const ic = i.content as any;
+              const t = ic.questionText || ic.front || ic.back || '';
+              const w = t.split(/\s+/);
+              return w[Math.floor(Math.random() * w.length)] || 'none';
+            })]),
+            explanation: c.explanation || '',
+          },
+        };
+      });
+    }
+
+    // ── MEMORY_MATCH: Pair-matching card game ──
+    case 'MEMORY_MATCH': {
+      const pairs = items.map((item) => {
+        const c = item.content as any;
+        return {
+          id: item.contentId,
+          term: c.arabicText || c.front || '',
+          definition: c.translation || c.back || '',
+          transliteration: c.transliteration || '',
+        };
+      });
+      return [{
+        contentType: items[0]?.contentType ?? 'ARABIC_TERM',
+        contentId: items.map((i) => i.contentId).join(','),
+        metadata: {
+          gameMode: 'MEMORY_MATCH',
+          cards: shuffleArray([
+            ...pairs.map((p) => ({ id: `${p.id}-term`, pairId: p.id, face: p.term, type: 'term' })),
+            ...pairs.map((p) => ({ id: `${p.id}-def`, pairId: p.id, face: p.definition, type: 'definition' })),
+          ]),
+          totalPairs: pairs.length,
+        },
+      }];
+    }
+
+    // ── TRUE_FALSE: Present a statement, player decides true or false ──
+    case 'TRUE_FALSE': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'TRUE_FALSE',
+            statement: c.questionText || c.front || '',
+            options: ['True', 'False'],
+            explanation: c.explanation || c.back || '',
+          },
+        };
+      });
+    }
+
+    // ── MULTIPLE_CHOICE: Standard four-option question ──
+    case 'MULTIPLE_CHOICE': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'MULTIPLE_CHOICE',
+            questionText: c.questionText || c.front || '',
+            options: c.options || generateOptions(c, items),
+            explanation: undefined,
+          },
+        };
+      });
+    }
+
+    // ── SENTENCE_BUILD: Arrange words into the correct sentence ──
+    case 'SENTENCE_BUILD': {
+      return items.map((item) => {
+        const c = item.content as any;
+        const sentence: string = c.back || c.front || '';
+        const words = sentence.split(/\s+/).filter(Boolean);
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'SENTENCE_BUILD',
+            scrambledWords: shuffleArray(words),
+            wordCount: words.length,
+            hint: c.front || c.arabicText || '',
+            arabicText: c.frontArabic || c.backArabic || '',
+          },
+        };
+      });
+    }
+
+    // ── LISTENING_QUIZ: Listen to Arabic audio and answer ──
+    case 'LISTENING_QUIZ': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'LISTENING_QUIZ',
+            audioUrl: c.audioUrl || '',
+            arabicText: c.arabicText || c.frontArabic || '',
+            options: generateOptions(c, items),
+            hint: c.transliteration || '',
+          },
+        };
+      });
+    }
+
+    // ── CALLIGRAPHY_TRACE: Trace Arabic letters/words ──
+    case 'CALLIGRAPHY_TRACE': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'CALLIGRAPHY_TRACE',
+            arabicText: c.arabicText || c.frontArabic || '',
+            transliteration: c.transliteration || '',
+            translation: c.translation || c.back || '',
+          },
+        };
+      });
+    }
+
+    // ── SPELLING_BEE: Read definition, spell the transliterated term ──
+    case 'SPELLING_BEE': {
+      return items.map((item) => {
+        const c = item.content as any;
+        const word = (c.transliteration || c.front || '').trim();
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'SPELLING_BEE',
+            definition: c.translation || c.back || '',
+            arabicText: c.arabicText || c.frontArabic || '',
+            wordLength: word.length,
+            firstLetter: word.charAt(0),
+          },
+        };
+      });
+    }
+
+    // ── STORY_PUZZLE: Arrange flashcard content segments in order ──
+    case 'STORY_PUZZLE': {
+      const segments = items.map((item, index) => {
+        const c = item.content as any;
+        return {
+          id: item.contentId,
+          text: c.front || c.back || '',
+          correctPosition: index,
+        };
+      });
+      return [{
+        contentType: items[0]?.contentType ?? 'FLASHCARD',
+        contentId: items.map((i) => i.contentId).join(','),
+        metadata: {
+          gameMode: 'STORY_PUZZLE',
+          description: 'Arrange these segments in the correct order',
+          scrambledSegments: shuffleArray(segments.map(({ id, text }) => ({ id, text }))),
+          totalSegments: segments.length,
+          correctOrder: segments.map((s) => s.id),
+        },
+      }];
+    }
+
+    // ── MAZE_RUNNER: Similar to MAZE_NAVIGATOR with different theming ──
+    case 'MAZE_RUNNER': {
+      const totalGates = items.length;
+      return items.map((item, index) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'MAZE_RUNNER',
+            gate: index + 1,
+            totalGates,
+            questionText: c.questionText || c.front || '',
+            options: c.options || generateOptions(c, items),
+            progress: Math.round(((index + 1) / totalGates) * 100),
           },
         };
       });
@@ -1719,6 +1976,72 @@ async function gradeAnswer(
   if (gameMode === 'FLASHCARD_FLIP') {
     const rating = typeof answer === 'number' ? answer : parseInt(answer as string, 10);
     return !isNaN(rating) && rating >= 3;
+  }
+
+  // ── CALLIGRAPHY_TRACE: answer is self-rating (1-5), like flashcard flip ──
+  if (gameMode === 'CALLIGRAPHY_TRACE') {
+    const rating = typeof answer === 'number' ? answer : parseInt(answer as string, 10);
+    return !isNaN(rating) && rating >= 3;
+  }
+
+  // ── WORD_SCRAMBLE: answer is the unscrambled word ──
+  if (gameMode === 'WORD_SCRAMBLE') {
+    const term = round.contentType === 'ARABIC_TERM'
+      ? await prisma.arabicTerm.findUnique({ where: { id: round.contentId } })
+      : null;
+    if (term) {
+      const expected = (term.transliteration || term.translation).trim().toLowerCase();
+      const playerAnswer = (typeof answer === 'string' ? answer : '').trim().toLowerCase();
+      return playerAnswer === expected;
+    }
+  }
+
+  // ── SPELLING_BEE: answer is the spelled-out transliteration ──
+  if (gameMode === 'SPELLING_BEE') {
+    const term = round.contentType === 'ARABIC_TERM'
+      ? await prisma.arabicTerm.findUnique({ where: { id: round.contentId } })
+      : null;
+    if (term) {
+      const expected = (term.transliteration || '').trim().toLowerCase();
+      const playerAnswer = (typeof answer === 'string' ? answer : '').trim().toLowerCase();
+      return playerAnswer === expected;
+    }
+  }
+
+  // ── MEMORY_MATCH: answer is array of matched pair IDs; correct if all pairs matched ──
+  if (gameMode === 'MEMORY_MATCH') {
+    const totalPairs = (meta.totalPairs as number) || 0;
+    const matched = answer as string[];
+    if (!Array.isArray(matched)) return false;
+    return matched.length >= totalPairs;
+  }
+
+  // ── SENTENCE_BUILD / STORY_PUZZLE: answer is array of IDs or words in order ──
+  if (gameMode === 'SENTENCE_BUILD') {
+    const c = meta as any;
+    const correctSentence = (c.scrambledWords as string[])?.sort()?.join(' ');
+    // For sentence build the "correct" check is done by comparing reconstructed sentence
+    // Player submits words in order; we compare to original sentence
+    const playerWords = answer as string[];
+    if (!Array.isArray(playerWords)) return false;
+    const fc = await prisma.flashCard.findUnique({ where: { id: round.contentId } });
+    if (!fc) return false;
+    const expected = (fc.back || fc.front || '').split(/\s+/).filter(Boolean);
+    return expected.length === playerWords.length && expected.every((w, i) => w.toLowerCase() === (playerWords[i] || '').toLowerCase());
+  }
+
+  if (gameMode === 'STORY_PUZZLE') {
+    const correctOrder = meta.correctOrder as string[];
+    const playerOrder = answer as string[];
+    if (!Array.isArray(playerOrder) || playerOrder.length !== correctOrder.length) return false;
+    return correctOrder.every((id, i) => id === playerOrder[i]);
+  }
+
+  // ── FILL_IN_BLANK: answer is the missing word ──
+  if (gameMode === 'FILL_IN_BLANK') {
+    const missingWord = (meta.missingWord as string) || '';
+    const playerAnswer = (typeof answer === 'string' ? answer : '').trim().toLowerCase();
+    return playerAnswer === missingWord.trim().toLowerCase();
   }
 
   // ── Generic multiple-choice types: SPEED_QUIZ, FIQH_SCENARIO, TRIVIA_BATTLE, KNOWLEDGE_EXPEDITION, MOSQUE_BUILDER, PATTERN_CREATOR, ESCAPE_ROOM, MAZE_NAVIGATOR ──
