@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
-import { useFamilyStore } from '@/stores/familyStore';
+import { useActiveMemberId } from '@/hooks/useActiveMemberId';
 import { GameTimer, ScoreDisplay, GameProgressBar, HintButton, GameOverScreen, DifficultySelector } from '@/components/games';
 import { Button } from '@/components/ui/Button';
 import { Lock, Unlock, KeyRound } from 'lucide-react';
@@ -21,7 +21,7 @@ const THEMES = [
 const LOCKS_CONFIG: Record<GameDifficulty, number> = { EASY: 3, MEDIUM: 5, HARD: 7 };
 
 export default function EscapeRoomGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const { selectedMember } = useFamilyStore();
+  const activeMemberId = useActiveMemberId();
   const {
     activeSession, score, currentRound, lastResult, rounds: _submittedRounds,
     startGame, submitAnswer, completeGame, resetSession, isLoading,
@@ -41,8 +41,11 @@ export default function EscapeRoomGame({ gameId, difficulty: initialDifficulty }
   const theme = THEMES[Math.floor(Math.random() * THEMES.length)] || THEMES[0];
 
   const handleStart = async () => {
-    if (!gameId || !selectedMember?.id) return;
-    await startGame(gameId, selectedMember.id, difficulty);
+    if (!gameId || !activeMemberId) {
+      console.warn('Cannot start game: no active family member found.');
+      return;
+    }
+    await startGame(gameId, activeMemberId, difficulty);
     setGameStarted(true);
     setUnlockedLocks(new Set());
     setRoundStartTime(Date.now());

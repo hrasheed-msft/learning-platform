@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
-import { useFamilyStore } from '@/stores/familyStore';
+import { useActiveMemberId } from '@/hooks/useActiveMemberId';
 import { GameTimer, ScoreDisplay, GameOverScreen, DifficultySelector } from '@/components/games';
 import { Button } from '@/components/ui/Button';
 import type { GameDifficulty, GameRound } from '@/types/game';
@@ -66,7 +66,7 @@ function generateMaze(size: number): Cell[][] {
 }
 
 export default function MazeRunnerGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const { selectedMember } = useFamilyStore();
+  const activeMemberId = useActiveMemberId();
   const {
     activeSession, score, currentRound, lastResult, rounds: _submittedRounds,
     startGame, submitAnswer, completeGame, resetSession, isLoading,
@@ -90,8 +90,11 @@ export default function MazeRunnerGame({ gameId, difficulty: initialDifficulty }
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleStart = async () => {
-    if (!gameId || !selectedMember?.id) return;
-    await startGame(gameId, selectedMember.id, difficulty);
+    if (!gameId || !activeMemberId) {
+      console.warn('Cannot start game: no active family member found.');
+      return;
+    }
+    await startGame(gameId, activeMemberId, difficulty);
     const newMaze = generateMaze(mazeSize);
     setMaze(newMaze);
     setPlayerPos([1, 1]);

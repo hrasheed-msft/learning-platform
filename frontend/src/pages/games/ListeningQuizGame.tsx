@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
-import { useFamilyStore } from '@/stores/familyStore';
+import { useActiveMemberId } from '@/hooks/useActiveMemberId';
 import { ScoreDisplay, GameProgressBar, StreakIndicator, GameOverScreen, DifficultySelector } from '@/components/games';
 import { Button } from '@/components/ui/Button';
 import { Volume2 } from 'lucide-react';
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function ListeningQuizGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const { selectedMember } = useFamilyStore();
+  const activeMemberId = useActiveMemberId();
   const {
     activeSession, score, streak, currentRound, lastResult, rounds: submittedRounds,
     startGame, submitAnswer, completeGame, resetSession, isLoading,
@@ -32,8 +32,11 @@ export default function ListeningQuizGame({ gameId, difficulty: initialDifficult
   const totalRounds = activeSession?.totalRounds || 0;
 
   const handleStart = async () => {
-    if (!gameId || !selectedMember?.id) return;
-    await startGame(gameId, selectedMember.id, difficulty);
+    if (!gameId || !activeMemberId) {
+      console.warn('Cannot start game: no active family member found.');
+      return;
+    }
+    await startGame(gameId, activeMemberId, difficulty);
     setGameStarted(true);
     setHasListened(false);
     setIsPlaying(false);

@@ -157,10 +157,10 @@ export default function GamesHub() {
 
       {/* Games Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGames.map((game) => {
+        {filteredGames.map((game, index) => {
           const meta = GAME_META[game.template.type];
           return (
-            <Card key={game.id} hover padding="none" className="overflow-hidden">
+            <Card key={`${game.id}-${game.template.type}-${index}`} hover padding="none" className="overflow-hidden">
               {/* Color header */}
               <div className={clsx('h-2', meta?.color || 'bg-primary-500')} />
               <div className="p-5">

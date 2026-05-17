@@ -53,3 +53,12 @@
 
 **History Last Summarized:** 2026-05-17T14:57:13Z  
 **File Size Before:** 20,239 bytes | **After:** ~3.6 KB (82% reduction)
+
+## Learnings
+
+### 2026-05-17 — useActiveMemberId Pattern
+- **Problem:** All 26 game components used `selectedMember?.id` from `useFamilyStore()`, but `selectedMember` is only set via explicit `selectMember()` call — nobody does that. Result: "Start Game" silently fails for every game.
+- **Fix:** Created `frontend/src/hooks/useActiveMemberId.ts` — returns `selectedMember?.id || members[0]?.id` with auto-fetch of members. Updated all 26 game components to use this hook.
+- **Pattern:** GamesHub already had `activeMemberId = selectedMember?.id || members[0]?.id` inline. The hook centralizes this pattern.
+- **Key file:** `frontend/src/hooks/useActiveMemberId.ts`
+- **GamesHub key fix:** `filteredGames.map` used `key={game.id}` which can duplicate when same template creates multiple games. Changed to composite key `${game.id}-${game.template.type}-${index}`.

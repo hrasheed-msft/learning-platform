@@ -15,7 +15,17 @@ import SpellingBeeGame from './SpellingBeeGame';
 import StoryPuzzleGame from './StoryPuzzleGame';
 import EscapeRoomGame from './EscapeRoomGame';
 import MazeRunnerGame from './MazeRunnerGame';
+import MazeNavigatorGame from './MazeNavigatorGame';
 import DailyChallengeGame from './DailyChallengeGame';
+import AyahCompletionGame from './AyahCompletionGame';
+import FiqhScenarioGame from './FiqhScenarioGame';
+import HadithChainGame from './HadithChainGame';
+import WordSearchGame from './WordSearchGame';
+import KnowledgeExpeditionGame from './KnowledgeExpeditionGame';
+import TriviaBattleGame from './TriviaBattleGame';
+import MosqueBuilderGame from './MosqueBuilderGame';
+import PatternCreatorGame from './PatternCreatorGame';
+import SeerahTimelineGame from './SeerahTimelineGame';
 import { GameBlockedScreen } from '@/components/games';
 import type { GameDifficulty } from '@/types/game';
 
@@ -35,7 +45,17 @@ const GAME_COMPONENTS: Record<string, React.ComponentType<{ gameId?: string; dif
   'story-puzzle': StoryPuzzleGame,
   'escape-room': EscapeRoomGame,
   'maze-runner': MazeRunnerGame,
+  'maze-navigator': MazeNavigatorGame,
   'daily-challenge': DailyChallengeGame,
+  'ayah-completion': AyahCompletionGame,
+  'fiqh-scenario': FiqhScenarioGame,
+  'hadith-chain': HadithChainGame,
+  'word-search': WordSearchGame,
+  'knowledge-expedition': KnowledgeExpeditionGame,
+  'trivia-battle': TriviaBattleGame,
+  'mosque-builder': MosqueBuilderGame,
+  'pattern-creator': PatternCreatorGame,
+  'seerah-timeline': SeerahTimelineGame,
 };
 
 export default function GamePlay() {

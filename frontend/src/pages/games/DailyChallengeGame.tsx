@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '@/stores/gameStore';
-import { useFamilyStore } from '@/stores/familyStore';
+import { useActiveMemberId } from '@/hooks/useActiveMemberId';
 import { GameTimer, ScoreDisplay, GameProgressBar, StreakIndicator, GameOverScreen } from '@/components/games';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
@@ -16,7 +16,7 @@ interface Props {
 
 export default function DailyChallengeGame({ gameId, difficulty: initialDifficulty }: Props) {
   const navigate = useNavigate();
-  const { selectedMember } = useFamilyStore();
+  const activeMemberId = useActiveMemberId();
   const {
     activeSession, score, streak, currentRound, lastResult, dailyChallenge, rounds: _submittedRounds,
     startGame, submitAnswer, completeGame, fetchDailyChallenge, isLoading,
@@ -29,7 +29,7 @@ export default function DailyChallengeGame({ gameId, difficulty: initialDifficul
   const [roundStartTime, setRoundStartTime] = useState(Date.now());
   const [timerKey, setTimerKey] = useState(0);
 
-  const memberId = selectedMember?.id;
+  const memberId = activeMemberId;
   const difficulty = dailyChallenge?.difficulty || initialDifficulty;
   const timerDuration = difficulty === 'EASY' ? 20000 : difficulty === 'MEDIUM' ? 15000 : 10000;
 
@@ -44,7 +44,10 @@ export default function DailyChallengeGame({ gameId, difficulty: initialDifficul
 
   const handleStart = async () => {
     if (!gameId && !dailyChallenge?.id) return;
-    if (!memberId) return;
+    if (!memberId) {
+      console.warn('Cannot start game: no active family member found.');
+      return;
+    }
     // Use the daily challenge game ID or fallback
     const gId = gameId || dailyChallenge?.id || '';
     await startGame(gId, memberId, difficulty);

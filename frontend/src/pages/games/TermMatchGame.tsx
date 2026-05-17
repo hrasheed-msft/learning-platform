@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
-import { useFamilyStore } from '@/stores/familyStore';
+import { useActiveMemberId } from '@/hooks/useActiveMemberId';
 import { GameTimer, ScoreDisplay, GameProgressBar, StreakIndicator, HintButton, GameOverScreen } from '@/components/games';
 import { DifficultySelector } from '@/components/games';
 import { Button } from '@/components/ui/Button';
@@ -28,7 +28,7 @@ const GRID_CONFIG: Record<GameDifficulty, { cols: number; rows: number; pairs: n
 };
 
 export default function TermMatchGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const { selectedMember } = useFamilyStore();
+  const activeMemberId = useActiveMemberId();
   const { activeSession, score, streak, lastResult, startGame, submitAnswer, completeGame, resetSession, isLoading } = useGameStore();
 
   const [difficulty, setDifficulty] = useState(initialDifficulty);
@@ -77,8 +77,11 @@ export default function TermMatchGame({ gameId, difficulty: initialDifficulty }:
   }, [activeSession?.rounds]);
 
   const handleStart = async () => {
-    if (!gameId || !selectedMember?.id) return;
-    await startGame(gameId, selectedMember.id, difficulty);
+    if (!gameId || !activeMemberId) {
+      console.warn('Cannot start game: no active family member found.');
+      return;
+    }
+    await startGame(gameId, activeMemberId, difficulty);
     setGameStarted(true);
     setMatchedCount(0);
     setFlippedIds([]);
