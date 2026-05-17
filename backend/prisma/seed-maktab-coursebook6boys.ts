@@ -942,14 +942,14 @@ export async function seedMaktabCoursebook6Boys() {
   let flashcardIndex = 0;
 
   const fiqhCards = [
-    { front: 'Ṭāhir Muṭahhir', back: 'Pure water that purifies — rain, river, sea, well, spring, snow.', difficulty: 'EASY' as const },
-    { front: 'Najāsah Ghalīẓah', back: 'Heavy impurity (urine, stool, blood, alcohol, pork). Up to a dirham excused.', difficulty: 'MEDIUM' as const },
-    { front: 'Najāsah Khafīfah', back: 'Light impurity — urine of ḥalāl animals. Up to ¼ of garment excused.', difficulty: 'MEDIUM' as const },
-    { front: 'Bulūgh (Maturity)', back: 'Reached by iḥtilām, ejaculation, ability to impregnate, or 15 lunar years.', difficulty: 'EASY' as const },
-    { front: 'Farāʾiḍ of Ghusl', back: 'Rinsing the mouth, rinsing the nose, washing the whole body.', difficulty: 'EASY' as const },
-    { front: 'Sajdah Sahw', back: 'Two prostrations of forgetfulness done when a wājib is missed by mistake.', difficulty: 'MEDIUM' as const },
-    { front: 'Janāzah Ṣalāh', back: 'Four takbīrāt, no rukūʿ or sajdah. Farḍ kifāyah.', difficulty: 'EASY' as const },
-    { front: 'Iqāmah Difference', back: '"Qad qāmati-ṣ-ṣalāh" is said twice after "Ḥayya ʿalal-falāḥ".', difficulty: 'MEDIUM' as const },
+    { front: 'Ṭāhir Muṭahhir', back: 'Pure water that purifies — rain, river, sea, well, spring, snow.', category: 'definition', tags: ['fiqh', 'ṭahārah', 'water'], difficulty: 'EASY' as const },
+    { front: 'Najāsah Ghalīẓah', back: 'Heavy impurity (urine, stool, blood, alcohol, pork). Up to a dirham excused.', category: 'definition', tags: ['fiqh', 'ṭahārah', 'najāsah'], difficulty: 'MEDIUM' as const },
+    { front: 'Najāsah Khafīfah', back: 'Light impurity — urine of ḥalāl animals. Up to ¼ of garment excused.', category: 'definition', tags: ['fiqh', 'ṭahārah', 'najāsah'], difficulty: 'MEDIUM' as const },
+    { front: 'Bulūgh (Maturity)', back: 'Reached by iḥtilām, ejaculation, ability to impregnate, or 15 lunar years.', category: 'definition', tags: ['fiqh', 'bulūgh', 'maturity'], difficulty: 'EASY' as const },
+    { front: 'Farāʾiḍ of Ghusl', back: 'Rinsing the mouth, rinsing the nose, washing the whole body.', category: 'rule', tags: ['fiqh', 'ghusl', 'farāʾiḍ'], difficulty: 'EASY' as const },
+    { front: 'Sajdah Sahw', back: 'Two prostrations of forgetfulness done when a wājib is missed by mistake.', category: 'rule', tags: ['fiqh', 'ṣalāh', 'sajdah-sahw'], difficulty: 'MEDIUM' as const },
+    { front: 'Janāzah Ṣalāh', back: 'Four takbīrāt, no rukūʿ or sajdah. Farḍ kifāyah.', category: 'rule', tags: ['fiqh', 'ṣalāh', 'janāzah'], difficulty: 'EASY' as const },
+    { front: 'Iqāmah Difference', back: '"Qad qāmati-ṣ-ṣalāh" is said twice after "Ḥayya ʿalal-falāḥ".', category: 'rule', tags: ['fiqh', 'ṣalāh', 'iqāmah'], difficulty: 'MEDIUM' as const },
   ];
   await prisma.flashCard.createMany({
     data: fiqhCards.map((fc, i) => ({
@@ -962,13 +962,13 @@ export async function seedMaktabCoursebook6Boys() {
   flashcardIndex += fiqhCards.length;
 
   const ahadithCards = [
-    { front: 'Kabīrah', back: 'A major sin — one which the Qur\'ān/Sunnah threatens with Hellfire, curse, or ḥadd.', difficulty: 'EASY' as const },
-    { front: 'Seven Destroyers', back: 'Shirk, sorcery, killing, ribā, orphan\'s wealth, fleeing battle, slandering chaste women.', difficulty: 'MEDIUM' as const },
-    { front: 'Tawbah', back: 'Sincere repentance — stop, regret, resolve not to return, restore others\' rights.', difficulty: 'EASY' as const },
-    { front: 'ʿUqūq al-Wālidayn', back: 'Disobedience to parents — a major sin.', difficulty: 'EASY' as const },
-    { front: 'Buhtān', back: 'Slander — saying about someone what is untrue. Worse than ghībah.', difficulty: 'MEDIUM' as const },
-    { front: 'Riyāʾ', back: 'Showing off in worship — counted among the major sins.', difficulty: 'MEDIUM' as const },
-    { front: 'Despair', back: 'Despairing of Allāh\'s mercy is itself a major sin (Sūrah az-Zumar 39:53).', difficulty: 'MEDIUM' as const },
+    { front: 'Kabīrah', back: 'A major sin — one which the Qur\'ān/Sunnah threatens with Hellfire, curse, or ḥadd.', category: 'definition', tags: ['aḥādīth', 'kabīrah', 'sins'], difficulty: 'EASY' as const },
+    { front: 'Seven Destroyers', back: 'Shirk, sorcery, killing, ribā, orphan\'s wealth, fleeing battle, slandering chaste women.', category: 'rule', tags: ['aḥādīth', 'kabāʾir', 'major-sins'], difficulty: 'MEDIUM' as const },
+    { front: 'Tawbah', back: 'Sincere repentance — stop, regret, resolve not to return, restore others\' rights.', category: 'definition', tags: ['aḥādīth', 'tawbah', 'repentance'], difficulty: 'EASY' as const },
+    { front: 'ʿUqūq al-Wālidayn', back: 'Disobedience to parents — a major sin.', category: 'definition', tags: ['aḥādīth', 'parents', 'sins'], difficulty: 'EASY' as const },
+    { front: 'Buhtān', back: 'Slander — saying about someone what is untrue. Worse than ghībah.', category: 'vocabulary', tags: ['aḥādīth', 'buhtān', 'tongue'], difficulty: 'MEDIUM' as const },
+    { front: 'Riyāʾ', back: 'Showing off in worship — counted among the major sins.', category: 'vocabulary', tags: ['aḥādīth', 'riyāʾ', 'sincerity'], difficulty: 'MEDIUM' as const },
+    { front: 'Despair', back: 'Despairing of Allāh\'s mercy is itself a major sin (Sūrah az-Zumar 39:53).', category: 'rule', tags: ['aḥādīth', 'despair', 'sins'], difficulty: 'MEDIUM' as const },
   ];
   await prisma.flashCard.createMany({
     data: ahadithCards.map((fc, i) => ({
@@ -981,14 +981,14 @@ export async function seedMaktabCoursebook6Boys() {
   flashcardIndex += ahadithCards.length;
 
   const sirahCards = [
-    { front: 'Shamāʾil', back: 'The noble physical and moral description of the Prophet ﷺ.', difficulty: 'EASY' as const },
-    { front: 'Khātam an-Nubuwwah', back: 'The seal of prophethood between the shoulders of the Prophet ﷺ.', difficulty: 'MEDIUM' as const },
-    { front: 'al-Ṣādiq al-Amīn', back: 'The truthful, the trustworthy — title of the Prophet ﷺ before nubuwwah.', difficulty: 'EASY' as const },
-    { front: 'Abū Bakr al-Ṣiddīq', back: 'First adult male Muslim, companion of the cave, first Khalīfah.', difficulty: 'EASY' as const },
-    { front: 'Cave of Thawr', back: 'Where the Prophet ﷺ and Abū Bakr hid for three nights during Hijrah.', difficulty: 'EASY' as const },
-    { front: 'Ridda Wars', back: 'Wars during Abū Bakr\'s khilāfah against apostates and false prophets.', difficulty: 'MEDIUM' as const },
-    { front: 'First Muṣḥaf', back: 'Compiled under Abū Bakr by Zayd ibn Thābit, on ʿUmar\'s suggestion.', difficulty: 'MEDIUM' as const },
-    { front: 'Burial of Abū Bakr', back: 'Beside the Prophet ﷺ in the chamber of ʿĀʾishah in al-Madīnah.', difficulty: 'EASY' as const },
+    { front: 'Shamāʾil', back: 'The noble physical and moral description of the Prophet ﷺ.', category: 'vocabulary', tags: ['sīrah', 'shamāʾil', 'Prophet'], difficulty: 'EASY' as const },
+    { front: 'Khātam an-Nubuwwah', back: 'The seal of prophethood between the shoulders of the Prophet ﷺ.', category: 'definition', tags: ['sīrah', 'Prophet', 'prophethood'], difficulty: 'MEDIUM' as const },
+    { front: 'al-Ṣādiq al-Amīn', back: 'The truthful, the trustworthy — title of the Prophet ﷺ before nubuwwah.', category: 'vocabulary', tags: ['sīrah', 'Prophet', 'titles'], difficulty: 'EASY' as const },
+    { front: 'Abū Bakr al-Ṣiddīq', back: 'First adult male Muslim, companion of the cave, first Khalīfah.', category: 'definition', tags: ['sīrah', 'Abū-Bakr', 'ṣaḥābah'], difficulty: 'EASY' as const },
+    { front: 'Cave of Thawr', back: 'Where the Prophet ﷺ and Abū Bakr hid for three nights during Hijrah.', category: 'definition', tags: ['sīrah', 'hijrah', 'Abū-Bakr'], difficulty: 'EASY' as const },
+    { front: 'Ridda Wars', back: 'Wars during Abū Bakr\'s khilāfah against apostates and false prophets.', category: 'definition', tags: ['sīrah', 'ridda', 'Abū-Bakr'], difficulty: 'MEDIUM' as const },
+    { front: 'First Muṣḥaf', back: 'Compiled under Abū Bakr by Zayd ibn Thābit, on ʿUmar\'s suggestion.', category: 'definition', tags: ['sīrah', 'qurʾān', 'compilation'], difficulty: 'MEDIUM' as const },
+    { front: 'Burial of Abū Bakr', back: 'Beside the Prophet ﷺ in the chamber of ʿĀʾishah in al-Madīnah.', category: 'definition', tags: ['sīrah', 'Abū-Bakr', 'burial'], difficulty: 'EASY' as const },
   ];
   await prisma.flashCard.createMany({
     data: sirahCards.map((fc, i) => ({
@@ -1001,14 +1001,14 @@ export async function seedMaktabCoursebook6Boys() {
   flashcardIndex += sirahCards.length;
 
   const tarikhCards = [
-    { front: 'Ṭālūt vs Jālūt', back: 'King Saul\'s army defeated Goliath\'s army; Dāwūd killed Jālūt.', difficulty: 'EASY' as const },
-    { front: 'Zabūr', back: 'The scripture revealed to Dāwūd عليه السلام.', difficulty: 'EASY' as const },
-    { front: 'Sulaymān\'s Gift', back: 'A kingdom none after him would have; understood birds, ants, jinn.', difficulty: 'EASY' as const },
-    { front: 'Bilqīs', back: 'Queen of Sabaʾ (Sheba); accepted Islām through Sulaymān عليه السلام.', difficulty: 'MEDIUM' as const },
-    { front: 'Yūnus\' Duʿāʾ', back: '"Lā ilāha illā Anta, Subḥānaka, innī kuntu mina-ẓ-ẓālimīn."', difficulty: 'MEDIUM' as const },
-    { front: 'Nineveh', back: 'The city in ʿIrāq to which Yūnus عليه السلام was sent.', difficulty: 'MEDIUM' as const },
-    { front: 'Umayyad Capital', back: 'Damascus (Dimashq), from 41 AH.', difficulty: 'EASY' as const },
-    { front: 'ʿUmar ibn ʿAbd al-ʿAzīz', back: 'Pious Umayyad Khalīfah called the "fifth rightly-guided Khalīfah".', difficulty: 'EASY' as const },
+    { front: 'Ṭālūt vs Jālūt', back: 'King Saul\'s army defeated Goliath\'s army; Dāwūd killed Jālūt.', category: 'definition', tags: ['tārīkh', 'Dāwūd', 'Banū-Isrāʾīl'], difficulty: 'EASY' as const },
+    { front: 'Zabūr', back: 'The scripture revealed to Dāwūd عليه السلام.', category: 'vocabulary', tags: ['tārīkh', 'Dāwūd', 'scripture'], difficulty: 'EASY' as const },
+    { front: 'Sulaymān\'s Gift', back: 'A kingdom none after him would have; understood birds, ants, jinn.', category: 'definition', tags: ['tārīkh', 'Sulaymān', 'prophets'], difficulty: 'EASY' as const },
+    { front: 'Bilqīs', back: 'Queen of Sabaʾ (Sheba); accepted Islām through Sulaymān عليه السلام.', category: 'definition', tags: ['tārīkh', 'Sulaymān', 'Bilqīs'], difficulty: 'MEDIUM' as const },
+    { front: 'Yūnus\' Duʿāʾ', back: '"Lā ilāha illā Anta, Subḥānaka, innī kuntu mina-ẓ-ẓālimīn."', category: 'example', tags: ['tārīkh', 'Yūnus', 'duʿāʾ'], difficulty: 'MEDIUM' as const },
+    { front: 'Nineveh', back: 'The city in ʿIrāq to which Yūnus عليه السلام was sent.', category: 'definition', tags: ['tārīkh', 'Yūnus', 'places'], difficulty: 'MEDIUM' as const },
+    { front: 'Umayyad Capital', back: 'Damascus (Dimashq), from 41 AH.', category: 'definition', tags: ['tārīkh', 'Umayyads', 'places'], difficulty: 'EASY' as const },
+    { front: 'ʿUmar ibn ʿAbd al-ʿAzīz', back: 'Pious Umayyad Khalīfah called the "fifth rightly-guided Khalīfah".', category: 'definition', tags: ['tārīkh', 'Umayyads', 'khalīfah'], difficulty: 'EASY' as const },
   ];
   await prisma.flashCard.createMany({
     data: tarikhCards.map((fc, i) => ({
@@ -1021,14 +1021,14 @@ export async function seedMaktabCoursebook6Boys() {
   flashcardIndex += tarikhCards.length;
 
   const aqaidCards = [
-    { front: 'Ahlus Sunnah', back: 'Those following the way of the Prophet ﷺ and his Companions.', difficulty: 'EASY' as const },
-    { front: 'ʿIṣmah', back: 'The protection of prophets from major sins before and after nubuwwah.', difficulty: 'MEDIUM' as const },
-    { front: 'Khātam an-Nabiyyīn', back: 'The Seal of the Prophets — Muḥammad ﷺ. No prophet after him.', difficulty: 'EASY' as const },
-    { front: 'Muʿjizah', back: 'Supernatural sign Allāh grants a prophet to prove his truthfulness.', difficulty: 'EASY' as const },
-    { front: 'Al-Isrāʾ', back: 'Night journey from Makkah to Bayt al-Maqdis on the Burāq.', difficulty: 'EASY' as const },
-    { front: 'Al-Miʿrāj', back: 'Ascension through the seven heavens to Sidrah al-Muntahā.', difficulty: 'EASY' as const },
-    { front: 'Karāmah', back: 'Extraordinary event Allāh grants a righteous believer (walī).', difficulty: 'MEDIUM' as const },
-    { front: 'Aṣḥāb al-Kahf', back: 'The Companions of the Cave — slept 309 years; a famous karāmah.', difficulty: 'MEDIUM' as const },
+    { front: 'Ahlus Sunnah', back: 'Those following the way of the Prophet ﷺ and his Companions.', category: 'definition', tags: ['ʿaqīdah', 'ahlus-sunnah'], difficulty: 'EASY' as const },
+    { front: 'ʿIṣmah', back: 'The protection of prophets from major sins before and after nubuwwah.', category: 'definition', tags: ['ʿaqīdah', 'prophets', 'ʿiṣmah'], difficulty: 'MEDIUM' as const },
+    { front: 'Khātam an-Nabiyyīn', back: 'The Seal of the Prophets — Muḥammad ﷺ. No prophet after him.', category: 'definition', tags: ['ʿaqīdah', 'Prophet', 'finality'], difficulty: 'EASY' as const },
+    { front: 'Muʿjizah', back: 'Supernatural sign Allāh grants a prophet to prove his truthfulness.', category: 'definition', tags: ['ʿaqīdah', 'muʿjizah', 'prophets'], difficulty: 'EASY' as const },
+    { front: 'Al-Isrāʾ', back: 'Night journey from Makkah to Bayt al-Maqdis on the Burāq.', category: 'definition', tags: ['ʿaqīdah', 'isrāʾ', 'Prophet'], difficulty: 'EASY' as const },
+    { front: 'Al-Miʿrāj', back: 'Ascension through the seven heavens to Sidrah al-Muntahā.', category: 'definition', tags: ['ʿaqīdah', 'miʿrāj', 'Prophet'], difficulty: 'EASY' as const },
+    { front: 'Karāmah', back: 'Extraordinary event Allāh grants a righteous believer (walī).', category: 'definition', tags: ['ʿaqīdah', 'karāmah', 'walī'], difficulty: 'MEDIUM' as const },
+    { front: 'Aṣḥāb al-Kahf', back: 'The Companions of the Cave — slept 309 years; a famous karāmah.', category: 'example', tags: ['ʿaqīdah', 'karāmah', 'qurʾān'], difficulty: 'MEDIUM' as const },
   ];
   await prisma.flashCard.createMany({
     data: aqaidCards.map((fc, i) => ({
@@ -1041,13 +1041,13 @@ export async function seedMaktabCoursebook6Boys() {
   flashcardIndex += aqaidCards.length;
 
   const akhlaqCards = [
-    { front: 'Ẓulm', back: 'Oppression — placing a thing where it does not belong; taking another\'s right.', difficulty: 'EASY' as const },
-    { front: 'Ḥasad', back: 'Envy — wishing a blessing be removed from another.', difficulty: 'EASY' as const },
-    { front: 'Ghibṭah', back: 'Wishing the same blessing for yourself without ill-will. Permissible.', difficulty: 'MEDIUM' as const },
-    { front: 'Ghībah', back: 'Backbiting — mentioning a Muslim\'s true fault in his absence.', difficulty: 'EASY' as const },
-    { front: 'Kibr', back: 'Pride — rejecting truth and looking down on others.', difficulty: 'EASY' as const },
-    { front: 'Tawāḍuʿ', back: 'Humility — the cure for kibr.', difficulty: 'EASY' as const },
-    { front: 'Sunnah Daily', back: 'Right hand for eating, Bismillāh, salām, miswāk — small acts, huge reward.', difficulty: 'MEDIUM' as const },
+    { front: 'Ẓulm', back: 'Oppression — placing a thing where it does not belong; taking another\'s right.', category: 'vocabulary', tags: ['akhlāq', 'ẓulm', 'sins'], difficulty: 'EASY' as const },
+    { front: 'Ḥasad', back: 'Envy — wishing a blessing be removed from another.', category: 'vocabulary', tags: ['akhlāq', 'ḥasad', 'heart'], difficulty: 'EASY' as const },
+    { front: 'Ghibṭah', back: 'Wishing the same blessing for yourself without ill-will. Permissible.', category: 'vocabulary', tags: ['akhlāq', 'ghibṭah', 'heart'], difficulty: 'MEDIUM' as const },
+    { front: 'Ghībah', back: 'Backbiting — mentioning a Muslim\'s true fault in his absence.', category: 'vocabulary', tags: ['akhlāq', 'ghībah', 'tongue'], difficulty: 'EASY' as const },
+    { front: 'Kibr', back: 'Pride — rejecting truth and looking down on others.', category: 'vocabulary', tags: ['akhlāq', 'kibr', 'heart'], difficulty: 'EASY' as const },
+    { front: 'Tawāḍuʿ', back: 'Humility — the cure for kibr.', category: 'vocabulary', tags: ['akhlāq', 'tawāḍuʿ', 'character'], difficulty: 'EASY' as const },
+    { front: 'Sunnah Daily', back: 'Right hand for eating, Bismillāh, salām, miswāk — small acts, huge reward.', category: 'example', tags: ['akhlāq', 'sunnah', 'daily'], difficulty: 'MEDIUM' as const },
   ];
   await prisma.flashCard.createMany({
     data: akhlaqCards.map((fc, i) => ({
@@ -1060,14 +1060,14 @@ export async function seedMaktabCoursebook6Boys() {
   flashcardIndex += akhlaqCards.length;
 
   const adabCards = [
-    { front: 'ʿAwrah (Men)', back: 'From the navel to the knees — must be covered always.', difficulty: 'EASY' as const },
-    { front: 'Silk & Gold', back: 'Ḥarām for men, ḥalāl for women.', difficulty: 'EASY' as const },
-    { front: 'Adhān Reply', back: 'Repeat each phrase quietly; reply "Lā ḥawla wa lā quwwata illā billāh" to the ḥayya phrases.', difficulty: 'MEDIUM' as const },
-    { front: 'Duʿāʾ after Adhān', back: '"Allāhumma rabba hādhihi-d-daʿwati-t-tāmmah..."', difficulty: 'MEDIUM' as const },
-    { front: 'ʿĪd Sunnahs', back: 'Ghusl, best clothes, ʿiṭr, dates before Fiṭr, two routes, takbīrāt.', difficulty: 'MEDIUM' as const },
-    { front: 'Jumuʿah Sunnahs', back: 'Ghusl, miswāk, ʿiṭr, early arrival, al-Kahf, silence in khuṭbah, ṣalawāt.', difficulty: 'EASY' as const },
-    { front: 'Sunan al-Fiṭrah', back: 'Khitān, trimming moustache, beard, nails, removing under-arm and pubic hair.', difficulty: 'MEDIUM' as const },
-    { front: 'Toilet Duʿāʾ', back: '"Allāhumma innī aʿūdhu bika min al-khubthi wal-khabāʾith." Enter with left foot.', difficulty: 'MEDIUM' as const },
+    { front: 'ʿAwrah (Men)', back: 'From the navel to the knees — must be covered always.', category: 'rule', tags: ['ādāb', 'ʿawrah', 'dress'], difficulty: 'EASY' as const },
+    { front: 'Silk & Gold', back: 'Ḥarām for men, ḥalāl for women.', category: 'rule', tags: ['ādāb', 'dress', 'ḥarām'], difficulty: 'EASY' as const },
+    { front: 'Adhān Reply', back: 'Repeat each phrase quietly; reply "Lā ḥawla wa lā quwwata illā billāh" to the ḥayya phrases.', category: 'rule', tags: ['ādāb', 'adhān', 'sunnah'], difficulty: 'MEDIUM' as const },
+    { front: 'Duʿāʾ after Adhān', back: '"Allāhumma rabba hādhihi-d-daʿwati-t-tāmmah..."', category: 'example', tags: ['ādāb', 'adhān', 'duʿāʾ'], difficulty: 'MEDIUM' as const },
+    { front: 'ʿĪd Sunnahs', back: 'Ghusl, best clothes, ʿiṭr, dates before Fiṭr, two routes, takbīrāt.', category: 'rule', tags: ['ādāb', 'ʿīd', 'sunnah'], difficulty: 'MEDIUM' as const },
+    { front: 'Jumuʿah Sunnahs', back: 'Ghusl, miswāk, ʿiṭr, early arrival, al-Kahf, silence in khuṭbah, ṣalawāt.', category: 'rule', tags: ['ādāb', 'jumuʿah', 'sunnah'], difficulty: 'EASY' as const },
+    { front: 'Sunan al-Fiṭrah', back: 'Khitān, trimming moustache, beard, nails, removing under-arm and pubic hair.', category: 'rule', tags: ['ādāb', 'fiṭrah', 'sunnah'], difficulty: 'MEDIUM' as const },
+    { front: 'Toilet Duʿāʾ', back: '"Allāhumma innī aʿūdhu bika min al-khubthi wal-khabāʾith." Enter with left foot.', category: 'example', tags: ['ādāb', 'toilet', 'duʿāʾ'], difficulty: 'MEDIUM' as const },
   ];
   await prisma.flashCard.createMany({
     data: adabCards.map((fc, i) => ({
