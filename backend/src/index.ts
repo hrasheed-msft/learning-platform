@@ -16,6 +16,9 @@ import assessmentRoutes from './routes/assessment.routes';
 import srsRoutes from './routes/srs.routes';
 import userRoutes from './routes/user.routes';
 import flashCardRoutes from './routes/flashcard/flashcard.routes';
+import childAuthRoutes from './routes/child-auth.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import notificationRoutes from './routes/notification.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -65,6 +68,9 @@ app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/assessments', assessmentRoutes);
 app.use('/api/v1/srs', srsRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1', childAuthRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // Error handling
 app.use(notFoundHandler);

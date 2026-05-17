@@ -131,3 +131,29 @@ Key fields standardized:
 - Once approved: Child Auth implementation sprint
 - Catalog fix (this session) ensures courses load smoothly for game content integration
 
+### Seed Loading Fix + Child Auth + Parent Dashboard (2026-05-17)
+
+**Seed Loading Bug Fix:**
+- **Root cause:** 12 of 23 seed files were standalone scripts (no `export`, direct `main()` call) — not wired into `seed.ts`. Only the 11 maktab/quduri seeds were imported.
+- **Fix:** Added `export` to all 12 missing seed functions, wrapped bottom-level `main()` calls in `if (require.main === module)` guard (matching maktab pattern). Imported and called all from `seed.ts`.
+- **Missing seeds now wired:** tazkiyah, habits, rawai-hadaratina, hujjatullah, sarf-course (parts 1-5), sarf-quizzes, sarf-flashcards.
+- **Note:** `seed-sarf-simple.ts` is a standalone alternative to the multi-part sarf approach — NOT wired into seed.ts to avoid duplicate course creation.
+- **Pattern rule:** All seed files must `export` their main function and guard standalone execution with `require.main === module`.
+
+**Child Auth (Phase 1):**
+- Schema: Added `username String? @unique`, `passwordHash String?`, `loginEnabled Boolean @default(false)` to FamilyMember model.
+- JWT dual-token: `authenticate` middleware now handles both parent tokens (`userId` claim) and child tokens (`sub` = memberId, `role: "CHILD"`).
+- New middleware: `requireChild`, `requireParent` (distinct from `requireParentRole`).
+- API endpoints: `POST /api/v1/auth/child-login`, `POST /api/v1/family/members/:memberId/credentials`, `GET/PUT /api/v1/child/me`.
+- Password policy: min 6 chars, bcrypt-hashed, username globally unique, lowercase-normalized.
+- Key files: `services/child-auth.service.ts`, `controllers/child-auth.controller.ts`, `routes/child-auth.routes.ts`.
+
+**Parent Dashboard Backend:**
+- New models: `ActivityEvent` (enum: QUIZ_COMPLETED, COURSE_STARTED, etc.), `Notification` (enum: MILESTONE, ALERT, WEEKLY_SUMMARY).
+- Dashboard endpoints: `GET /api/v1/dashboard/children`, `GET /api/v1/dashboard/children/:memberId/stats`, `GET /api/v1/dashboard/children/:memberId/activity`, `GET /api/v1/dashboard/family/summary`.
+- Notification endpoints: `GET /api/v1/notifications`, `PUT /api/v1/notifications/:id/read`.
+- `recordActivity()` helper wired into quiz completion flow in `assessment.service.ts`.
+- Key files: `services/dashboard.service.ts`, `services/notification.service.ts`, `services/activity.service.ts`.
+
+**Migration:** `20260517110850_add_child_auth_and_dashboard` applied. Includes new tables: `activity_events`, `notifications`, plus FamilyMember schema additions.
+

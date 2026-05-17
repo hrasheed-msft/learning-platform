@@ -11,6 +11,17 @@ import { seedMaktabCoursebook7 } from './seed-maktab-coursebook7';
 import { seedMaktabCoursebook8 } from './seed-maktab-coursebook8';
 import { seedMaktabFurtherStudiesNW } from './seed-maktab-further-studies-nw';
 import { seedQuduriTaharah } from './seed-quduri-taharah';
+import { seedTazkiyahCourse } from './seed-tazkiyah-course';
+import { seedHabitsCourse } from './seed-habits-course';
+import { seedRawaiHadaratinaCourse } from './seed-rawai-hadaratina-course';
+import { seedHujjatullahCourse } from './seed-hujjatullah-course';
+import { seedSarfCourse } from './seed-sarf-course';
+import { seedSarfCoursePart2 } from './seed-sarf-course-part2';
+import { seedSarfCoursePart3 } from './seed-sarf-course-part3';
+import { seedSarfCoursePart4 } from './seed-sarf-course-part4';
+import { seedSarfCoursePart5 } from './seed-sarf-course-part5';
+import { seedSarfQuizzes } from './seed-sarf-quizzes';
+import { seedSarfFlashcards } from './seed-sarf-flashcards';
 
 const prisma = new PrismaClient();
 
@@ -20,10 +31,13 @@ async function main() {
 
   // Clear existing data
   console.log('🧹 Clearing existing data...');
+  await prisma.notification.deleteMany();
+  await prisma.activityEvent.deleteMany();
   await prisma.reviewLog.deleteMany();
   await prisma.memorizationItem.deleteMany();
   await prisma.achievement.deleteMany();
   await prisma.quizResult.deleteMany();
+  await prisma.flashCardProgress.deleteMany();
   await prisma.unitProgress.deleteMany();
   await prisma.courseEnrollment.deleteMany();
   await prisma.question.deleteMany();
@@ -2711,17 +2725,31 @@ async function main() {
   // Advanced Fiqh Courses
   await seedQuduriTaharah();
 
+  // Additional Courses
+  await seedTazkiyahCourse();
+  await seedHabitsCourse();
+  await seedRawaiHadaratinaCourse();
+  await seedHujjatullahCourse();
+
+  // Advanced Sarf (Arabic Morphology) — sequential parts
+  await seedSarfCourse();
+  await seedSarfCoursePart2();
+  await seedSarfCoursePart3();
+  await seedSarfCoursePart4();
+  await seedSarfCoursePart5();
+  await seedSarfQuizzes();
+  await seedSarfFlashcards();
+
   console.log('');
   console.log('🎉 Database seed completed successfully!');
   console.log('');
   console.log('📊 Summary:');
-  console.log('   - 1 Demo Family (The Abdullah Family)');
+  console.log('   - 1 Demo Family (The Ahmad Family)');
   console.log('   - 1 Parent User (demo@example.com)');
   console.log('   - 3 Family Members (Ahmed, Fatima, Yusuf)');
-  console.log('   - 6 Courses with detailed content');
-  console.log('   - 24+ Units with rich HTML content');
-  console.log('   - 50+ Quiz questions');
-  console.log('   - 40+ Arabic terms');
+  console.log('   - 23 Seed files loaded (Maktab CB1-8, CB6B/6G, Further Studies, Quduri,');
+  console.log('     Tazkiyah, Habits, Rawai Hadaratina, Hujjatullah, Sarf Parts 1-5 + Quizzes + Flashcards)');
+  console.log('   - All courses with units, quizzes, flashcards, and Arabic terms');
   console.log('   - Multiple enrollments per member');
   console.log('   - Unit progress records');
   console.log('   - Achievement badges');

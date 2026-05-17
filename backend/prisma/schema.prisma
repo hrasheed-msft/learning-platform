@@ -1,0 +1,481 @@
+// Prisma Schema for Islamic Studies Learning Platform
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// FAMILY & USER MODELS
+// ============================================
+
+model Family {
+  id               String         @id @default(uuid())
+  name             String
+  subscriptionTier String         @default("FREE") // FREE, BASIC, PREMIUM
+  subscriptionEnd  DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  users   User[]
+  members FamilyMember[]
+
+  activityEvents ActivityEvent[]
+  notifications  Notification[]
+
+  @@map("families")
+}
+
+model User {
+  id                   String    @id @default(uuid())
+  email                String    @unique
+  passwordHash         String
+  role                 String    @default("PARENT") // PARENT, ADMIN
+  emailVerified        Boolean   @default(false)
+  verificationToken    String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  lastLoginAt          DateTime?
+  settings             Json?     @default("{}")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
+
+  @@index([email])
+  @@index([familyId])
+  @@map("users")
+}
+
+model FamilyMember {
+  id            String   @id @default(uuid())
+  name          String
+  age           Int
+  ageCategory   String   // EARLY_CHILD, CHILD, PRE_TEEN, TEEN, ADULT
+  pin           String?  // Optional 4-6 digit PIN for child login
+  username      String?  @unique
+  passwordHash  String?
+  loginEnabled  Boolean  @default(false)
+  avatarUrl     String?
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  totalPoints   Int      @default(0)
+  lastActiveAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  enrollments       CourseEnrollment[]
+  achievements      Achievement[]
+  quizResults       QuizResult[]
+  memorizationItems MemorizationItem[]
+  reviewLogs        ReviewLog[]
+  flashCardProgress FlashCardProgress[]
+  activityEvents    ActivityEvent[]
+
+  @@index([familyId])
+  @@map("family_members")
+}
+
+// ============================================
+// COURSE & CONTENT MODELS
+// ============================================
+
+model Course {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  category     String   // QURAN, HADITH, FIQH, SEERAH, ARABIC, ISLAMIC_HISTORY
+  ageLevels    String[] // Array of: EARLY_CHILD, CHILD, PRE_TEEN, TEEN, ADULT
+  thumbnailUrl String?
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  units       Unit[]
+  flashCards  FlashCard[]
+  enrollments CourseEnrollment[]
+
+  @@index([category])
+  @@index([isPublished])
+  @@map("courses")
+}
+
+model Unit {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  content     String?  @db.Text // Rich text / HTML content
+  orderIndex  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  videoResources VideoResource[]
+  audioResources AudioResource[]
+  arabicTerms    ArabicTerm[]
+  questions      Question[]
+  flashCards     FlashCard[]
+  unitProgress   UnitProgress[]
+  quizResults    QuizResult[]
+
+  @@unique([courseId, orderIndex])
+  @@index([courseId])
+  @@map("units")
+}
+
+model VideoResource {
+  id          String   @id @default(uuid())
+  title       String
+  url         String
+  duration    Int?     // Duration in seconds
+  thumbnailUrl String?
+  orderIndex  Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([unitId])
+  @@map("video_resources")
+}
+
+model AudioResource {
+  id         String   @id @default(uuid())
+  title      String
+  url        String
+  duration   Int?     // Duration in seconds
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([unitId])
+  @@map("audio_resources")
+}
+
+model ArabicTerm {
+  id              String   @id @default(uuid())
+  arabicText      String
+  transliteration String
+  translation     String
+  audioUrl        String?
+  createdAt       DateTime @default(now())
+
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([unitId])
+  @@map("arabic_terms")
+}
+
+// ============================================
+// ASSESSMENT MODELS
+// ============================================
+
+model Question {
+  id            String   @id @default(uuid())
+  type          String   // MULTIPLE_CHOICE, TRUE_FALSE, MATCHING, FILL_BLANK
+  questionText  String   @db.Text
+  options       Json?    // Array of options for multiple choice
+  correctAnswer String
+  explanation   String?  @db.Text
+  difficulty    String   @default("MEDIUM") // EASY, MEDIUM, HARD
+  aiGenerated   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([unitId])
+  @@index([type])
+  @@map("questions")
+}
+
+model QuizResult {
+  id        String   @id @default(uuid())
+  score     Int      // 0-100 percentage
+  passed    Boolean
+  timeSpent Int?     // Time spent in seconds
+  answers   Json     // Array of { questionId, answer, isCorrect }
+  createdAt DateTime @default(now())
+
+  memberId String
+  member   FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([unitId])
+  @@map("quiz_results")
+}
+
+// ============================================
+// FLASH CARD MODELS
+// ============================================
+
+enum FlashCardStatus {
+  NEW
+  LEARNING
+  REVIEWING
+  MASTERED
+}
+
+enum FlashCardDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model FlashCard {
+  id          String               @id @default(uuid())
+  front       String               @db.Text // Question/front side
+  back        String               @db.Text // Answer/back side
+  frontArabic String?              @db.Text // Optional Arabic text for front
+  backArabic  String?              @db.Text // Optional Arabic text for back
+  category    String               // vocabulary, definition, pattern, example, rule
+  tags        String[]             // Array of tags for filtering
+  difficulty  FlashCardDifficulty  @default(MEDIUM)
+  orderIndex  Int                  // Order within unit
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  unitId   String
+  unit     Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  progress FlashCardProgress[]
+
+  @@unique([unitId, orderIndex])
+  @@index([unitId])
+  @@index([courseId])
+  @@index([category])
+  @@index([difficulty])
+  @@map("flashcards")
+}
+
+model FlashCardProgress {
+  id             String           @id @default(uuid())
+  easeFactor     Float            @default(2.5) // SM-2 ease factor (1.3 - 2.5+)
+  interval       Int              @default(0)   // Days until next review
+  repetitions    Int              @default(0)   // Number of successful reviews
+  nextReviewDate DateTime         @default(now()) // When card is due for review
+  totalReviews   Int              @default(0)   // Total times reviewed
+  correctReviews Int              @default(0)   // Times reviewed correctly (rating 4-5)
+  lastRating     Int              @default(0)   // Last rating given (1-5)
+  status         FlashCardStatus  @default(NEW) // Current learning status
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  memberId    String
+  member      FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  flashCardId String
+  flashCard   FlashCard    @relation(fields: [flashCardId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, flashCardId])
+  @@index([memberId])
+  @@index([flashCardId])
+  @@index([nextReviewDate])
+  @@index([status])
+  @@map("flashcard_progress")
+}
+
+// ============================================
+// PROGRESS & ENROLLMENT MODELS
+// ============================================
+
+model CourseEnrollment {
+  id          String    @id @default(uuid())
+  status      String    @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED
+  progress    Int       @default(0) // 0-100 percentage
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  memberId String
+  member   FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  unitProgress UnitProgress[]
+
+  @@unique([memberId, courseId])
+  @@index([memberId])
+  @@index([courseId])
+  @@map("course_enrollments")
+}
+
+model UnitProgress {
+  id               String    @id @default(uuid())
+  videoCompleted   Boolean   @default(false)
+  readingCompleted Boolean   @default(false)
+  quizCompleted    Boolean   @default(false)
+  quizScore        Int?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  enrollmentId String
+  enrollment   CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, unitId])
+  @@index([enrollmentId])
+  @@index([unitId])
+  @@map("unit_progress")
+}
+
+// ============================================
+// SPACED REPETITION (SRS) MODELS
+// ============================================
+
+model MemorizationItem {
+  id              String    @id @default(uuid())
+  type            String    // AYAH, HADITH, DUA, TERM
+  front           String    @db.Text // Question/prompt side
+  back            String    @db.Text // Answer side
+  arabicText      String?   @db.Text
+  transliteration String?
+  audioUrl        String?
+  interval        Int       @default(0) // Days until next review
+  easeFactor      Float     @default(2.5) // SM-2 ease factor
+  repetitions     Int       @default(0)
+  lastReviewedAt  DateTime?
+  nextReviewDate  DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  memberId String
+  member   FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  sourceUnitId String? // Optional link to source unit
+
+  reviewLogs ReviewLog[]
+
+  @@index([memberId])
+  @@index([nextReviewDate])
+  @@index([type])
+  @@map("memorization_items")
+}
+
+model ReviewLog {
+  id             String   @id @default(uuid())
+  rating         Int      // 1-4 (Again, Hard, Good, Easy)
+  intervalBefore Int
+  intervalAfter  Int
+  createdAt      DateTime @default(now())
+
+  memorizationItemId String
+  memorizationItem   MemorizationItem @relation(fields: [memorizationItemId], references: [id], onDelete: Cascade)
+
+  memberId String
+  member   FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memorizationItemId])
+  @@index([memberId])
+  @@index([createdAt])
+  @@map("review_logs")
+}
+
+// ============================================
+// GAMIFICATION MODELS
+// ============================================
+
+model Achievement {
+  id          String   @id @default(uuid())
+  type        String   // STREAK, COURSE_COMPLETE, QUIZ_MASTER, etc.
+  name        String
+  description String
+  iconUrl     String?
+  earnedAt    DateTime @default(now())
+
+  memberId String
+  member   FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([type])
+  @@map("achievements")
+}
+
+// ============================================
+// ACTIVITY & DASHBOARD MODELS
+// ============================================
+
+enum ActivityEventType {
+  QUIZ_COMPLETED
+  COURSE_STARTED
+  COURSE_COMPLETED
+  FLASHCARD_REVIEWED
+  GAME_PLAYED
+  STREAK_REACHED
+  BADGE_EARNED
+}
+
+enum NotificationType {
+  MILESTONE
+  ALERT
+  WEEKLY_SUMMARY
+}
+
+model ActivityEvent {
+  id             String            @id @default(uuid())
+  eventType      ActivityEventType
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+
+  familyMemberId String
+  familyMember   FamilyMember @relation(fields: [familyMemberId], references: [id], onDelete: Cascade)
+
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyMemberId])
+  @@index([familyId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("activity_events")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  read      Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
