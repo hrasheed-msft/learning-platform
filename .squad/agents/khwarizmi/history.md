@@ -88,3 +88,22 @@ Key fields standardized:
 - Test database seeding (development and staging)
 - UI validation: Bilingual rendering, Arabic diacritics, flashcard SM-2 progress
 - Performance: Verify seed execution time and database indexes
+
+## Learnings
+
+### Login/Auth Debugging (2026-05-16)
+- **Rate limiter placement matters:** Global `app.use(limiter)` was applied before health check, blocking diagnostics when limit was exhausted. Health check now lives above the rate limiter in `backend/src/index.ts`.
+- **Dev rate limit:** `.env` had `RATE_LIMIT_MAX_REQUESTS=100` (config default is 1000). Vite HMR + frontend polling can burn through 100 fast. Bumped to 1000 for dev.
+- **Error shape mismatch:** Rate limiter returns `{error: "string"}`, but frontend `getErrorMessage()` in `frontend/src/services/api.ts` only handled `{error: {message: string}}`. Fixed to check `typeof data.error === 'string'` first.
+- **express-rate-limit uses in-memory store by default** — counter resets on server restart. No Redis store configured.
+- **Key file paths for auth flow:** `backend/src/services/auth.service.ts` (login logic, bcrypt, JWT), `backend/src/routes/auth.routes.ts` (validation), `backend/src/controllers/auth.controller.ts` (thin controller), `frontend/src/services/api.ts` (axios interceptors, error extraction), `frontend/src/services/authService.ts` (API calls), `frontend/src/stores/authStore.ts` (Zustand state).
+- **API versioning:** Backend routes are at `/api/v1/*`, Vite proxy forwards `/api/v1` → `localhost:3000`.
+
+### Session Summary (2026-05-17T02:05:32Z)
+**Status:** Login error bug fixed and documented in decisions.md #3.
+- Health check moved above rate limiter middleware (always reachable for monitoring)
+- Frontend error extraction fixed to handle both error response shapes
+- Dev rate limit increased from 100 → 1000
+- Orchestration log: `2026-05-17T020532Z-khwarizmi.md`
+- Session log: `2026-05-17T020532Z-login-fix.md`
+

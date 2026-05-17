@@ -35,6 +35,21 @@ Implemented seed file for Mukhtasar al-Quduri's Kitab al-Taharah targeting TEEN/
 
 ---
 
+### 3. Rate Limiter & Error Handling Fix (2026-05-16)
+**Author:** Khwarizmi
+
+Fixed login error caused by rate limiter exhaustion and frontend error extraction failure.
+
+**Key Decisions:**
+- **Health check moved above rate limiter** in `backend/src/index.ts` — ensures `/health` is always reachable even when rate limit is exhausted.
+- **Frontend error extraction fixed** in `frontend/src/services/api.ts` — `getErrorMessage()` now handles both `{error: "string"}` and `{error: {message: string}}` response shapes.
+- **Dev rate limit bumped** from 100 → 1000 in `.env`.
+- **Convention:** Backend error responses should use `{message: "..."}` for consistency. The rate limiter's `{error: "..."}` shape is the exception, now handled.
+
+**Impact:** Frontend devs can trust error message extraction; DevOps monitoring won't get false negatives on health checks.
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
