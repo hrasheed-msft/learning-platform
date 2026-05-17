@@ -107,3 +107,11 @@ Key fields standardized:
 - Orchestration log: `2026-05-17T020532Z-khwarizmi.md`
 - Session log: `2026-05-17T020532Z-login-fix.md`
 
+### Course Catalog Not Loading — Pagination Limit Fix (2026-05-17)
+- **Root cause:** Frontend `courseStore.ts` had `defaultFilters.limit = 12`, but there are 17 published courses. The `CourseCatalog.tsx` page calls `fetchCourses()` with no args, inheriting the 12-course limit. No pagination UI exists, so the remaining 5 courses were silently invisible.
+- **Secondary issue:** Rate limiter (in-memory store) was exhausted again from Vite HMR traffic, causing `{"error":"Too many requests"}` on the courses endpoint. Restarting the backend cleared the counter.
+- **Fix:** Changed `defaultFilters.limit` from 12 → 50 in `frontend/src/stores/courseStore.ts`. With 17 published courses, all now load on a single page.
+- **DB state:** 17 courses total, all `isPublished: true`. The backend service defaults to `limit = 20` but the frontend was overriding with 12.
+- **Pattern:** When a catalog page has no pagination UI, the default fetch limit must exceed the total item count. Consider adding pagination UI if course count grows past 50.
+- **Rate limiter note:** In-memory store means restart clears the counter. For dev, consider switching to Redis store or exempting read-only public endpoints from rate limiting.
+
