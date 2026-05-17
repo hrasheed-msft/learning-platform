@@ -66,7 +66,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'Detailed rulings of wuḍū\' (farā\'iḍ, sunan, makrūhāt, nawāqiḍ), tayammum, ṣalāh sunan and mustaḥabbāt, the masbūq, qaḍā\' prayers, \'Īd ṣalāh, \'umrah, ḥajj, and ziyārah of Madīnah.',
       orderIndex: 0,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -243,7 +243,7 @@ export async function seedMaktabCoursebook5() {
   <li>Visit Jannat al-Baqī' (the graveyard of many Companions).</li>
   <li>Visit Masjid Qubā' — the first masjid in Islam.</li>
 </ul>
-.trim(),
+`.trim(),
     },
   });
 
@@ -260,7 +260,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'Ten aḥādīth covering the importance of keeping promises, guarding the tongue, the sin of ghībah (backbiting), the prohibition of intoxicants, and cultivating good character.',
       orderIndex: 1,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -320,7 +320,7 @@ export async function seedMaktabCoursebook5() {
 <p class="arabic" dir="rtl" lang="ar">الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ</p>
 <p><em>"The (true) Muslim is one from whose tongue and hand other Muslims are safe."</em> (Bukhārī & Muslim)</p>
 <p>A true Muslim does not harm others — neither through speech (lies, backbiting, insults) nor through physical actions. This ḥadīth defines the essence of being Muslim: bringing safety and peace to those around you.</p>
-.trim(),
+`.trim(),
     },
   });
 
@@ -337,7 +337,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'The Treaty of Ḥudaybiyah (6 AH), the conquest of Makkah (8 AH), and the farewell ḥajj and sermon of Rasūlullāh ﷺ (10 AH).',
       orderIndex: 2,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -418,7 +418,7 @@ export async function seedMaktabCoursebook5() {
 <p class="arabic" dir="rtl" lang="ar">الْيَوْمَ أَكْمَلْتُ لَكُمْ دِينَكُمْ وَأَتْمَمْتُ عَلَيْكُمْ نِعْمَتِي وَرَضِيتُ لَكُمُ الْإِسْلَامَ دِينًا</p>
 <p><em>"Today I have perfected your religion for you, completed My favour upon you, and chosen Islam as your religion."</em> (Qur'ān 5:3)</p>
 <p>This confirmed that the message of Islam was now complete.</p>
-.trim(),
+`.trim(),
     },
   });
 
@@ -435,7 +435,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'The life and mission of Mūsā عليه السلام (from birth to the Exodus and beyond) and \'Īsā عليه السلام (his miraculous birth, miracles, and ascension).',
       orderIndex: 3,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -516,7 +516,7 @@ export async function seedMaktabCoursebook5() {
 
 <h3>The Second Coming</h3>
 <p>'Īsā عليه السلام will return before the Day of Judgement. He will descend to earth, follow the Sharī'ah of Muḥammad ﷺ, defeat the Dajjāl (false messiah), and establish justice on earth. He will then pass away naturally and be buried.</p>
-.trim(),
+`.trim(),
     },
   });
 
@@ -533,7 +533,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'Beliefs about death and its reality, the life of the grave (barzakh), the Day of Judgement, Jannah, Jahannam, A\'rāf, and the concept of al-Qadr (Divine decree).',
       orderIndex: 4,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -621,7 +621,7 @@ export async function seedMaktabCoursebook5() {
   <li><strong>Khalq (Creation):</strong> Allāh is the Creator of everything — including our actions.</li>
 </ol>
 <p>Belief in qadr does not negate free will. Allāh has given humans the ability to choose, and they are held accountable for their choices. We do not know what is decreed for us, so we must strive to do good and trust in Allāh's wisdom.</p>
-.trim(),
+`.trim(),
     },
   });
 
@@ -638,7 +638,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'Good character traits including mashwarah (consultation), ṣabr (patience), ṣilah al-raḥim (keeping family ties), giving gifts, and the virtues of dhikr (remembrance of Allāh).',
       orderIndex: 5,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -739,7 +739,7 @@ export async function seedMaktabCoursebook5() {
 
 <h3>Virtue of Dhikr</h3>
 <p>The Prophet ﷺ said: "Keep your tongue moist with the dhikr of Allāh." Dhikr can be done at any time — walking, sitting, lying down — and it is the easiest path to Allāh's pleasure.</p>
-.trim(),
+`.trim(),
     },
   });
 
@@ -756,7 +756,7 @@ export async function seedMaktabCoursebook5() {
       description:
         'Etiquettes of ghusl (ritual bath), social interaction (meeting people, gatherings), writing (bismillāh, neat handwriting), using the miswāk, and visiting the sick (\'iyādah).',
       orderIndex: 6,
-      content: 
+      content: `
 <h2>Learning Objectives</h2>
 <p>By the end of this unit, pupils will be able to:</p>
 <ul>
@@ -883,7 +883,7 @@ export async function seedMaktabCoursebook5() {
 <p class="arabic" dir="rtl" lang="ar">أَسْأَلُ اللَّهَ الْعَظِيمَ رَبَّ الْعَرْشِ الْعَظِيمِ أَنْ يَشْفِيَكَ</p>
 <p><em>"As'alullāh al-'Aẓīm Rabb al-'Arsh al-'Aẓīm an yashfiyak — I ask Allāh the Almighty, Lord of the Mighty Throne, to cure you."</em></p>
 <p>This du'ā' should be recited seven times. The Prophet ﷺ said that whoever recites it seven times, Allāh will cure the sick person if it is not their time to die.</p>
-.trim(),
+`.trim(),
     },
   });
 
