@@ -5,106 +5,30 @@
 - **Stack:** React 18 + Vite + TypeScript (frontend), Node.js + Express + Prisma + PostgreSQL + Redis (backend), TailwindCSS, Zustand, JWT auth
 - **Created:** 2026-05-16
 
-## Learnings
-
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
+## Learnings (Summarized)
 
 ### 2026-05-16 — Full Frontend Inventory
 
-#### Routing Map (App.tsx)
-**Public routes** (redirect to /dashboard if authenticated):
-| Route | Component | Layout |
-|-------|-----------|--------|
-| `/` → redirects to `/login` | — | AuthLayout |
-| `/login` | LoginPage | AuthLayout |
-| `/register` | RegisterPage | AuthLayout |
-| `/forgot-password` | ForgotPasswordPage | AuthLayout |
-| `/reset-password/:token` | ResetPasswordPage | AuthLayout |
-| `/verify-email/:token` | VerifyEmailPage | AuthLayout |
+**Status:** 90-95% feature-complete with clear gaps
 
-**Protected routes** (redirect to /login if unauthenticated):
-| Route | Component | Layout |
-|-------|-----------|--------|
-| `/dashboard` | FamilyDashboard | MainLayout |
-| `/dashboard/child/:memberId` | ChildDashboard | MainLayout |
-| `/dashboard/member/:memberId` | MemberProgress | MainLayout |
-| `/courses` | CourseCatalog | MainLayout |
-| `/courses/:courseId` | CourseDetail | MainLayout |
-| `/courses/:courseId/learn` | CourseLearner | MainLayout |
-| `/courses/:courseId/units/:unitId` | UnitViewer | MainLayout |
-| `/courses/:courseId/units/:unitId/quiz` | QuizPage | MainLayout |
-| `/courses/:courseId/flashcards` | CourseFlashCardsPage | MainLayout |
-| `/courses/:courseId/flashcards/study` | StudySessionPage | MainLayout |
-| `/courses/:courseId/flashcards/review` | StudySessionPage | MainLayout |
-| `/courses/:courseId/units/:unitId/flashcards` | UnitFlashCardsPage | MainLayout |
-| `/courses/:courseId/units/:unitId/flashcards/study` | StudySessionPage | MainLayout |
-| `/courses/:courseId/units/:unitId/flashcards/review` | StudySessionPage | MainLayout |
-| `/reviews` | ReviewSessionPage | MainLayout |
-| `/settings` | FamilySettings | MainLayout |
-| `*` (catch-all) → redirects to `/dashboard` | — | — |
+**Architecture:**
+- Auth via `ProtectedRoute` (reads authStore); 19 core routes across auth/dashboard/courses/flashcards/review/settings
+- 5 pages directories with 19 total files (all ✅ functional)
+- Reusable: 8 UI components, 2 layouts, 5 flashcard components
+- Stores: authStore, courseStore, familyStore, flashcardStore (40+ actions for SRS flow)
+- Services: 6 service files covering auth, courses, family, flashcards, assessment, SRS (~60 endpoints total)
 
-Auth guard: `ProtectedRoute` reads `useAuthStore().isAuthenticated`.
+**Component ecosystem:**
+- UI: Avatar, Badge, Button, Card, Input, Modal, ProgressBar, Spinner
+- Flashcards: FlashCard (3D flip), FlashCardEditor (bilingual EN/AR), FlashCardList, ProgressStats, StudySession (5-point rating)
+- Styling: Tailwind + custom Islamic palette (green primary, gold secondary, blue accent), Amiri font for Arabic, RTL support
 
-#### Pages (frontend/src/pages/)
-- **auth/** — 5 files, all ✅ functional (login, register, forgot/reset password, verify email)
-- **dashboard/** — 3 files, all ✅ functional (FamilyDashboard, ChildDashboard, MemberProgress)
-- **courses/** — 5 files, all ✅ functional (CourseCatalog, CourseDetail, CourseLearner, UnitViewer, QuizPage)
-- **flashcards/** — 4 files, all ✅ functional (StudySessionPage, ReviewSessionPage, UnitFlashCardsPage, CourseFlashCardsPage)
-- **review/** — 1 file, ✅ functional (ReviewSession — standalone SRS review with 5-point rating)
-- **settings/** — 1 file, ✅ functional (FamilySettings — name, members CRUD, subscription display)
+**Key gaps identified (10 total):**
+- Items 1-2: Quick wins (404 page, @utils/@hooks dirs)
+- Items 3-7: Need product direction (family admin, AI quiz UI, gamification page, orphaned component, localStorage→backend)
+- Items 8-10: Mostly documented, low priority
 
-#### Reusable Components (frontend/src/components/)
-- **ui/** — Avatar, Badge, Button, Card (with Header/Title/Description/Content/Footer), Input, Modal, ProgressBar, Spinner/LoadingOverlay — all ✅ complete
-- **layouts/** — AuthLayout (gradient bg, centered card), MainLayout (collapsible sidebar, nav, logout) — all ✅ complete
-- **flashcards/** — FlashCard (3D flip), FlashCardEditor (bilingual EN/AR form), FlashCardList (grid + actions), ProgressStats (stat cards + breakdown), StudySession (rating system + keyboard shortcuts) — all ✅ complete
-
-#### Zustand Stores (frontend/src/stores/)
-- **authStore** — user, family, tokens, isAuthenticated, isLoading; actions: login, register, logout, refreshAuth. Uses persist middleware.
-- **courseStore** — courses[], selectedCourse, units[], enrollments[], filters; actions: fetchCourses, fetchCourse, fetchUnits, enrollMember, unenrollMember, etc.
-- **familyStore** — members[], selectedMember; actions: fetchMembers, addMember, updateMember, removeMember, selectMember.
-- **flashcardStore** — flashCards[], dueCards[], statistics, currentSession, categories[], tags[]; 40+ actions for CRUD, progress, study sessions, filters.
-
-#### Services (frontend/src/services/)
-- **api.ts** — Axios instance, base URL `VITE_API_URL || '/api/v1'`, 30s timeout, auth interceptor with token refresh on 401.
-- **authService** — 8 endpoints (login, register, logout, forgot/reset password, verify email, refresh, resend verification)
-- **courseService** — 9 endpoints (CRUD courses/units, enrollments, progress)
-- **familyService** — 9 endpoints (family CRUD, members CRUD, switch member, progress) — ⚠️ admin invite endpoints stubbed but not implemented
-- **flashcardService** — 20+ endpoints (CRUD, batch create, reorder, metadata, progress, due cards, stats, reviews)
-- **assessmentService** — 5 endpoints (quiz questions, submit, results, member progress)
-- **srsService** — 6 endpoints (due reviews, submit review, history, memorization items, stats)
-
-#### Types (frontend/src/types/)
-- **user.ts** — UserRole, AgeCategory, SubscriptionStatus, Family, User, FamilyMember, auth request/response types
-- **course.ts** — CourseCategory (7 subjects), AgeLevel (5 levels), Course, Unit, UnitContent, VideoResource, AudioResource, ArabicTerm, filters
-- **flashcard.types.ts** — FlashCardStatus enum, FlashCardDifficulty enum, FlashCard, FlashCardProgress, StudySession, review types, filter types
-- **assessment.ts** — QuestionType (5 formats), QuestionDifficulty, Question, QuizQuestion, QuizSubmission, QuizResult
-- **progress.ts** — EnrollmentStatus, UnitStatus, SkillLevel, CourseEnrollment, UnitProgress, MemberProgress, Achievement, StreakInfo
-- **srs.ts** — ContentType (5 types), MemorizationStatus, Rating, MemorizationItem, ReviewDueResponse, ReviewStats, RATING_LABELS
-
-#### UI Gaps & Issues Found
-1. **Missing barrel export**: `courses/index.ts` does NOT export `CourseLearner` — import works via direct path in App.tsx but barrel is incomplete.
-2. **No flashcards/index.ts**: The flashcards page directory has no barrel export file.
-3. **Family admin features stubbed**: `familyService` has `getAdmins`, `inviteAdmin`, `removeAdmin`, `acceptAdminInvite` — all unimplemented.
-4. **No 404 page**: Catch-all route silently redirects to `/dashboard` instead of showing a proper 404.
-5. **No utils/ directory**: Vite config aliases `@utils` but no `src/utils/` directory exists.
-6. **No hooks/ directory**: Vite config aliases `@hooks` but no `src/hooks/` directory exists.
-7. **README promises "AI-Powered automatic quiz generation"** — no frontend UI for this exists.
-8. **README promises "Gamification: Points, streaks, achievements"** — ChildDashboard shows locked achievement badges but there's no dedicated achievements/leaderboard page.
-9. **Review streak tracking uses localStorage** instead of backend persistence.
-10. **ReviewSessionPage vs review/ReviewSession.tsx**: Route `/reviews` maps to `ReviewSessionPage` (from flashcards/), but there's also a separate `review/ReviewSession.tsx` component that isn't routed.
-
-#### Styling & Design
-- **Tailwind config**: Custom Islamic palette (primary=green #359963, secondary=gold #d6823e, accent=blue #577da1), custom fonts (Inter, Amiri for Arabic, Poppins for headings), 4 custom animations.
-- **Arabic support**: `.arabic-text` CSS class with RTL direction, Amiri font, 1.5em size. FlashCard component has bilingual support.
-- **Accessibility**: `:focus-visible` outline set to primary green. Keyboard shortcuts throughout (quiz, flashcards, reviews).
-- **Responsive**: MainLayout has mobile sidebar toggle. No dedicated breakpoint customization beyond Tailwind defaults.
-- **Fonts loaded**: Inter, Amiri, Poppins — should verify these are in index.html `<link>` tags (not checked).
-
-#### Test Coverage
-- Component tests: FlashCard, FlashCardEditor, FlashCardList, ProgressStats, StudySession
-- Page tests: ChildDashboard, CourseCatalog, FamilyDashboard, MemberProgress, QuizPage, ReviewSession
-- Integration: learning-flow.test.ts
-- Test infra: Vitest + Testing Library + MSW for mocking
+**Tests:** Component + page tests via Vitest + Testing Library + MSW
 
 ---
 
@@ -210,3 +134,19 @@ Built the complete Games frontend feature based on Khaldun's detailed design doc
 
 ## 2026-05-17 — Games Frontend (Ibn Sina-2)
 Status: COMPLETED - 34 files, 3667 LOC
+
+### 2026-05-17 — Games Page Blank Page Fix
+
+**Status:** COMPLETED  
+**Root Cause:** Three backend-frontend API contract mismatches in gameService.ts caused the GamesHub component to crash silently (React unmounts entire tree on uncaught render error → blank page).
+
+**Bugs found and fixed:**
+1. **`getAchievements`** — Backend returns an achievement array directly; frontend expected `{ achievements, totalXpFromAchievements }`. Destructuring `data.achievements` yielded `undefined`, crashing on `achievements.length` in the render.
+2. **`getLeaderboard`** — Backend returns `{ leaderboard: FlatEntry[] }` with fields `memberId`, `name`, `totalScore`, `averageAccuracy`; frontend expected `{ leaderboard: { entries: Entry[] }, myRank }` with nested `member` object. Added transformation layer.
+3. **`getStreak`** — Used unsafe `as StreakInfo` cast on an object missing 7 required fields. Fixed to return a fully-populated default StreakInfo.
+
+**Defensive improvements:**
+- Added `?? []` and `?? 0` guards in gameStore setters for achievements and leaderboard
+- All three service methods now handle both expected and actual backend response shapes
+
+**Lesson:** Never trust `as T` type assertions in service layers — they hide runtime shape mismatches that only surface as blank-page crashes in production. Always validate/transform API responses explicitly.
