@@ -251,8 +251,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       const data = await gameService.getLeaderboard(params);
       set({
-        leaderboardEntries: data.leaderboard.entries,
-        myRank: data.myRank,
+        leaderboardEntries: data.leaderboard?.entries ?? [],
+        myRank: data.myRank ?? 0,
         isLoading: false,
       });
     } catch (error) {
@@ -268,8 +268,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       const data = await gameService.getAchievements(memberId);
       set({
-        achievements: data.achievements,
-        totalXp: data.totalXpFromAchievements,
+        achievements: data.achievements ?? [],
+        totalXp: data.totalXpFromAchievements ?? 0,
         isLoading: false,
       });
     } catch (error) {

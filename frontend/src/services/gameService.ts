@@ -8,6 +8,7 @@ import type {
   DailyChallenge,
   GameScore,
   Leaderboard,
+  LeaderboardEntry,
   UserAchievement,
   UserBadge,
   BadgeProgress,
@@ -28,8 +29,48 @@ export const gameService = {
   // --- Game Discovery ---
 
   async getAvailableGames(filters: GameFilters): Promise<{ games: Game[]; dailyChallenge: DailyChallenge | null }> {
-    const response = await api.get<ApiResponse<{ games: Game[]; dailyChallenge: DailyChallenge | null }>>('/games/available', { params: filters });
-    return response.data.data;
+    const response = await api.get<ApiResponse<any>>('/games/available', { params: filters });
+    const raw = response.data.data;
+
+    // API returns template-centric array; flatten into Game[] with nested template
+    const templates = Array.isArray(raw) ? raw : (raw?.games ?? []);
+    const games: Game[] = [];
+    for (const t of templates) {
+      const template: Game['template'] = {
+        type: t.type,
+        category: t.category,
+        name: t.name,
+        description: t.description,
+        iconUrl: t.iconUrl,
+      };
+      if (t.games && t.games.length > 0) {
+        for (const g of t.games) {
+          games.push({
+            id: g.id,
+            template,
+            difficulty: g.difficulty ?? 'MEDIUM',
+            courseId: g.courseId,
+            unitId: g.unitId,
+            contentCount: t.contentCount ?? 0,
+            suggestedDifficulty: g.suggestedDifficulty ?? g.difficulty ?? 'MEDIUM',
+            lastPlayed: t.lastPlayed,
+            bestScore: t.bestScore?.totalScore,
+          });
+        }
+      } else if (t.available !== false) {
+        // Standalone template with no game instances — create a virtual entry
+        games.push({
+          id: t.templateId ?? t.type,
+          template,
+          difficulty: 'MEDIUM',
+          contentCount: t.contentCount ?? 0,
+          suggestedDifficulty: 'MEDIUM',
+          lastPlayed: t.lastPlayed,
+          bestScore: t.bestScore?.totalScore,
+        });
+      }
+    }
+    return { games, dailyChallenge: raw?.dailyChallenge ?? null };
   },
 
   async getGamesByUnit(unitId: string, memberId: string): Promise<Game[]> {
@@ -49,16 +90,18 @@ export const gameService = {
   // --- Session Lifecycle ---
 
   async startGame(gameId: string, memberId: string, difficulty: GameDifficulty): Promise<{ session: GameSession }> {
-    const response = await api.post<ApiResponse<{ session: GameSession }>>(`/games/${gameId}/sessions`, {
+    const response = await api.post<ApiResponse<{ session: GameSession }>>('/games/start', {
+      gameId,
       memberId,
       difficulty,
+      gameType: gameId, // fallback if gameId is actually a type slug
     });
     return response.data.data;
   },
 
   async submitRound(sessionId: string, roundIndex: number, answer: unknown, timeSpentMs: number): Promise<RoundResult> {
-    const response = await api.post<ApiResponse<RoundResult>>(`/games/sessions/${sessionId}/rounds`, {
-      roundIndex,
+    const roundId = `round-${roundIndex}`;
+    const response = await api.post<ApiResponse<RoundResult>>(`/games/sessions/${sessionId}/rounds/${roundId}/submit`, {
       answer,
       timeSpentMs,
     });
@@ -101,58 +144,108 @@ export const gameService = {
   // --- Scores & Leaderboards ---
 
   async getScoreHistory(params: ScoreHistoryParams): Promise<{ scores: GameScore[]; pagination: { page: number; limit: number; total: number } }> {
-    const response = await api.get<ApiResponse<{ scores: GameScore[]; pagination: { page: number; limit: number; total: number } }>>('/games/scores/history', {
+    const response = await api.get<ApiResponse<{ scores: GameScore[]; pagination: { page: number; limit: number; total: number } }>>('/games/scores', {
       params,
     });
     return response.data.data;
   },
 
   async getLeaderboard(params: LeaderboardParams): Promise<{ leaderboard: Leaderboard; myRank: number }> {
-    const response = await api.get<ApiResponse<{ leaderboard: Leaderboard; myRank: number }>>('/games/leaderboards', {
+    const gameType = params.gameType || 'TERM_MATCH';
+    const response = await api.get<ApiResponse<any>>(`/games/leaderboard/${gameType}`, {
       params,
     });
-    return response.data.data;
+    const raw = response.data.data;
+    // Backend returns { leaderboard: Entry[], period, gameType }
+    // Frontend expects { leaderboard: { entries: Entry[] }, myRank }
+    const entries: LeaderboardEntry[] = Array.isArray(raw?.leaderboard)
+      ? raw.leaderboard.map((e: any) => ({
+          rank: e.rank,
+          member: { id: e.memberId, name: e.name, avatarUrl: e.avatarUrl },
+          score: e.totalScore ?? 0,
+          gamesPlayed: e.gamesPlayed ?? 0,
+          accuracy: e.averageAccuracy ?? 0,
+        }))
+      : (raw?.leaderboard?.entries ?? []);
+    return {
+      leaderboard: {
+        id: gameType,
+        scope: params.scope,
+        period: params.period,
+        entries,
+      },
+      myRank: raw?.myRank ?? 0,
+    };
   },
 
   // --- Achievements & Badges ---
 
   async getAchievements(memberId: string): Promise<{ achievements: UserAchievement[]; totalXpFromAchievements: number }> {
-    const response = await api.get<ApiResponse<{ achievements: UserAchievement[]; totalXpFromAchievements: number }>>('/games/achievements', {
+    const response = await api.get<ApiResponse<any>>('/games/achievements', {
       params: { memberId },
     });
-    return response.data.data;
+    const raw = response.data.data;
+    // Backend returns an array of achievement objects directly
+    const achievements: UserAchievement[] = Array.isArray(raw)
+      ? raw
+      : (raw?.achievements ?? []);
+    const totalXp = Array.isArray(raw)
+      ? achievements.reduce((sum: number, a: any) => sum + (a.xpReward ?? 0), 0)
+      : (raw?.totalXpFromAchievements ?? 0);
+    return { achievements, totalXpFromAchievements: totalXp };
   },
 
   async getBadges(memberId: string): Promise<{ earned: UserBadge[]; available: BadgeProgress[] }> {
-    const response = await api.get<ApiResponse<{ earned: UserBadge[]; available: BadgeProgress[] }>>('/games/badges', {
-      params: { memberId },
-    });
-    return response.data.data;
+    try {
+      const response = await api.get<ApiResponse<{ earned: UserBadge[]; available: BadgeProgress[] }>>('/games/badges', {
+        params: { memberId },
+      });
+      return response.data.data;
+    } catch {
+      return { earned: [], available: [] };
+    }
   },
 
   // --- Streaks ---
 
   async getStreak(memberId: string): Promise<StreakInfo> {
-    const response = await api.get<ApiResponse<StreakInfo>>('/games/streaks', {
-      params: { memberId },
-    });
-    return response.data.data;
+    const defaultStreak: StreakInfo = {
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActivityDate: '',
+      gracePeriodUsed: false,
+      freezesRemaining: 0,
+      milestones: [],
+      nextMilestone: 7,
+      daysToNextMilestone: 7,
+      streakAchievements: [],
+    };
+    try {
+      const data = await gameService.getDailyChallenge(memberId);
+      return {
+        ...defaultStreak,
+        currentStreak: data.streak?.currentStreak ?? 0,
+        longestStreak: data.streak?.longestStreak ?? 0,
+      };
+    } catch {
+      return defaultStreak;
+    }
   },
 
   // --- Parental Controls ---
 
   async getParentalSettings(memberId: string): Promise<GameParentalSettings> {
-    const response = await api.get<ApiResponse<GameParentalSettings>>(`/family/members/${memberId}/game-settings`);
+    const response = await api.get<ApiResponse<GameParentalSettings>>(`/games/settings/${memberId}`);
     return response.data.data;
   },
 
   async updateParentalSettings(memberId: string, settings: Partial<GameParentalSettings>): Promise<GameParentalSettings> {
-    const response = await api.put<ApiResponse<GameParentalSettings>>(`/family/members/${memberId}/game-settings`, settings);
+    const response = await api.put<ApiResponse<GameParentalSettings>>(`/games/settings/${memberId}`, settings);
     return response.data.data;
   },
 
   async getGameTime(memberId: string): Promise<GameTimeStatus> {
-    const response = await api.get<ApiResponse<GameTimeStatus>>(`/family/members/${memberId}/game-time`);
+    const response = await api.get<ApiResponse<GameTimeStatus>>(`/games/time/${memberId}`);
     return response.data.data;
   },
 };
