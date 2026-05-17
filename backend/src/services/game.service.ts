@@ -33,11 +33,21 @@ const ROUNDS_BY_DIFFICULTY: Record<string, number> = {
 };
 
 const TIMER_CONFIGS: Record<string, Record<string, { type: string; durationMs: number }>> = {
-  TERM_MATCH:      { EASY: { type: 'NONE', durationMs: 0 },     MEDIUM: { type: 'GLOBAL', durationMs: 90000 },  HARD: { type: 'GLOBAL', durationMs: 60000 } },
-  SPEED_QUIZ:      { EASY: { type: 'PER_QUESTION', durationMs: 15000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 10000 }, HARD: { type: 'PER_QUESTION', durationMs: 7000 } },
-  FLASHCARD_FLIP:  { EASY: { type: 'NONE', durationMs: 0 },     MEDIUM: { type: 'NONE', durationMs: 0 },        HARD: { type: 'NONE', durationMs: 0 } },
-  DAILY_CHALLENGE: { EASY: { type: 'PER_QUESTION', durationMs: 20000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 15000 }, HARD: { type: 'PER_QUESTION', durationMs: 10000 } },
-  WORD_SEARCH:     { EASY: { type: 'GLOBAL', durationMs: 300000 }, MEDIUM: { type: 'GLOBAL', durationMs: 180000 }, HARD: { type: 'GLOBAL', durationMs: 120000 } },
+  TERM_MATCH:           { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'GLOBAL', durationMs: 90000 },       HARD: { type: 'GLOBAL', durationMs: 60000 } },
+  SPEED_QUIZ:           { EASY: { type: 'PER_QUESTION', durationMs: 15000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 10000 }, HARD: { type: 'PER_QUESTION', durationMs: 7000 } },
+  FLASHCARD_FLIP:       { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'NONE', durationMs: 0 },              HARD: { type: 'NONE', durationMs: 0 } },
+  DAILY_CHALLENGE:      { EASY: { type: 'PER_QUESTION', durationMs: 20000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 15000 }, HARD: { type: 'PER_QUESTION', durationMs: 10000 } },
+  WORD_SEARCH:          { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 180000 },       HARD: { type: 'GLOBAL', durationMs: 120000 } },
+  AYAH_COMPLETION:      { EASY: { type: 'PER_QUESTION', durationMs: 60000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
+  FIQH_SCENARIO:        { EASY: { type: 'PER_QUESTION', durationMs: 90000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 60000 }, HARD: { type: 'PER_QUESTION', durationMs: 45000 } },
+  HADITH_CHAIN:         { EASY: { type: 'GLOBAL', durationMs: 120000 },     MEDIUM: { type: 'GLOBAL', durationMs: 90000 },        HARD: { type: 'GLOBAL', durationMs: 60000 } },
+  KNOWLEDGE_EXPEDITION: { EASY: { type: 'PER_QUESTION', durationMs: 60000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
+  TRIVIA_BATTLE:        { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
+  MOSQUE_BUILDER:       { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'NONE', durationMs: 0 },              HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
+  PATTERN_CREATOR:      { EASY: { type: 'PER_QUESTION', durationMs: 60000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
+  SEERAH_TIMELINE:      { EASY: { type: 'GLOBAL', durationMs: 120000 },     MEDIUM: { type: 'GLOBAL', durationMs: 90000 },        HARD: { type: 'GLOBAL', durationMs: 60000 } },
+  ESCAPE_ROOM:          { EASY: { type: 'GLOBAL', durationMs: 600000 },     MEDIUM: { type: 'GLOBAL', durationMs: 420000 },       HARD: { type: 'GLOBAL', durationMs: 300000 } },
+  MAZE_NAVIGATOR:       { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 240000 },       HARD: { type: 'GLOBAL', durationMs: 180000 } },
 };
 
 const BASE_POINTS = 100;
@@ -250,6 +260,442 @@ async function selectContent(
   }
 
   return items.slice(0, roundCount);
+}
+
+// ---------------------------------------------------------------------------
+// Game-type-specific round formatting
+// ---------------------------------------------------------------------------
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * Generate word search grid containing the given words.
+ * Returns the grid (2D char array) and the placed words with positions.
+ */
+function generateWordSearchGrid(words: string[], gridSize: number): { grid: string[][]; placements: Array<{ word: string; row: number; col: number; direction: string }> } {
+  const grid: string[][] = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+  const placements: Array<{ word: string; row: number; col: number; direction: string }> = [];
+  const directions = [
+    { dr: 0, dc: 1, name: 'RIGHT' },
+    { dr: 1, dc: 0, name: 'DOWN' },
+    { dr: 1, dc: 1, name: 'DIAGONAL_DOWN_RIGHT' },
+  ];
+
+  for (const rawWord of words) {
+    const word = rawWord.toUpperCase().replace(/[^A-Z]/g, '');
+    if (word.length === 0 || word.length > gridSize) continue;
+
+    let placed = false;
+    for (let attempts = 0; attempts < 50 && !placed; attempts++) {
+      const dir = directions[Math.floor(Math.random() * directions.length)];
+      const maxRow = gridSize - (dir.dr === 0 ? 1 : word.length);
+      const maxCol = gridSize - (dir.dc === 0 ? 1 : word.length);
+      if (maxRow < 0 || maxCol < 0) continue;
+
+      const startRow = Math.floor(Math.random() * (maxRow + 1));
+      const startCol = Math.floor(Math.random() * (maxCol + 1));
+
+      let canPlace = true;
+      for (let k = 0; k < word.length; k++) {
+        const r = startRow + k * dir.dr;
+        const c = startCol + k * dir.dc;
+        if (grid[r][c] !== '' && grid[r][c] !== word[k]) { canPlace = false; break; }
+      }
+
+      if (canPlace) {
+        for (let k = 0; k < word.length; k++) {
+          grid[startRow + k * dir.dr][startCol + k * dir.dc] = word[k];
+        }
+        placements.push({ word, row: startRow, col: startCol, direction: dir.name });
+        placed = true;
+      }
+    }
+  }
+
+  // Fill empty cells with random letters
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      if (grid[r][c] === '') grid[r][c] = alphabet[Math.floor(Math.random() * 26)];
+    }
+  }
+  return { grid, placements };
+}
+
+/**
+ * Transform raw content items into game-type-specific round metadata.
+ * Returns an array of round data objects with `metadata` shaped for the frontend.
+ */
+function formatRoundsForGameType(
+  gameType: GameType,
+  items: ContentItem[],
+  difficulty: GameDifficulty,
+): Array<{ contentType: string; contentId: string; metadata: Record<string, unknown> }> {
+  switch (gameType) {
+    // ── TERM_MATCH: All items become a single matching round ──
+    case 'TERM_MATCH': {
+      const pairs = items.map((item) => {
+        const c = item.content as any;
+        return {
+          id: item.contentId,
+          term: c.arabicText || c.front || '',
+          transliteration: c.transliteration || '',
+          definition: c.translation || c.back || '',
+        };
+      });
+      // Single round containing all pairs
+      return [{
+        contentType: items[0]?.contentType ?? 'ARABIC_TERM',
+        contentId: items.map((i) => i.contentId).join(','),
+        metadata: {
+          gameMode: 'TERM_MATCH',
+          pairs,
+          shuffledTerms: shuffleArray(pairs.map((p) => ({ id: p.id, term: p.term, transliteration: p.transliteration }))),
+          shuffledDefinitions: shuffleArray(pairs.map((p) => ({ id: p.id, definition: p.definition }))),
+          totalPairs: pairs.length,
+        },
+      }];
+    }
+
+    // ── SPEED_QUIZ: Timed multiple choice from Questions ──
+    case 'SPEED_QUIZ': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'SPEED_QUIZ',
+            questionText: c.questionText || c.front || '',
+            options: c.options || generateOptions(c, items),
+            explanation: undefined, // hidden until answered
+          },
+        };
+      });
+    }
+
+    // ── FLASHCARD_FLIP: SRS-style self-rating review ──
+    case 'FLASHCARD_FLIP': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'FLASHCARD_FLIP',
+            front: c.front || c.arabicText || c.questionText || '',
+            frontArabic: c.frontArabic || c.arabicText || '',
+            back: c.back || c.translation || c.correctAnswer || '',
+            backArabic: c.backArabic || '',
+          },
+        };
+      });
+    }
+
+    // ── AYAH_COMPLETION: Fill in blanks from flashcard text ──
+    case 'AYAH_COMPLETION': {
+      return items.map((item) => {
+        const c = item.content as any;
+        const fullText: string = c.back || c.front || '';
+        const words = fullText.split(/\s+/);
+        // Remove 1-3 words based on difficulty
+        const blanksCount = difficulty === 'EASY' ? 1 : difficulty === 'MEDIUM' ? 2 : 3;
+        const blankIndices: number[] = [];
+        const removableIndices = words.map((_, i) => i).filter((i) => words[i].length > 2);
+        const shuffledIndices = shuffleArray(removableIndices);
+        for (let i = 0; i < Math.min(blanksCount, shuffledIndices.length); i++) {
+          blankIndices.push(shuffledIndices[i]);
+        }
+        blankIndices.sort((a, b) => a - b);
+
+        const missingWords = blankIndices.map((i) => words[i]);
+        const textWithBlanks = words.map((w, i) => blankIndices.includes(i) ? '______' : w).join(' ');
+
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'AYAH_COMPLETION',
+            textWithBlanks,
+            missingWords,
+            arabicText: c.frontArabic || c.backArabic || '',
+            hint: c.front || '',
+          },
+        };
+      });
+    }
+
+    // ── FIQH_SCENARIO: Scenario-based multiple choice ──
+    case 'FIQH_SCENARIO': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'FIQH_SCENARIO',
+            scenario: c.questionText || '',
+            options: c.options || [],
+            explanation: undefined,
+          },
+        };
+      });
+    }
+
+    // ── HADITH_CHAIN: Arrange items in correct order ──
+    case 'HADITH_CHAIN': {
+      const orderedItems = items.map((item, index) => {
+        const c = item.content as any;
+        return {
+          id: item.contentId,
+          text: c.front || c.arabicText || '',
+          arabicText: c.frontArabic || c.arabicText || '',
+          correctPosition: index,
+        };
+      });
+      return [{
+        contentType: items[0]?.contentType ?? 'FLASHCARD',
+        contentId: items.map((i) => i.contentId).join(','),
+        metadata: {
+          gameMode: 'HADITH_CHAIN',
+          description: 'Arrange these items in the correct order',
+          scrambledItems: shuffleArray(orderedItems.map(({ id, text, arabicText }) => ({ id, text, arabicText }))),
+          totalItems: orderedItems.length,
+          correctOrder: orderedItems.map((o) => o.id),
+        },
+      }];
+    }
+
+    // ── WORD_SEARCH: Find terms in a letter grid ──
+    case 'WORD_SEARCH': {
+      const words = items.map((item) => {
+        const c = item.content as any;
+        return c.transliteration || c.front || c.translation || '';
+      }).filter((w) => w.length >= 3);
+
+      const gridSize = difficulty === 'EASY' ? 10 : difficulty === 'MEDIUM' ? 12 : 15;
+      const { grid, placements } = generateWordSearchGrid(words, gridSize);
+
+      return [{
+        contentType: items[0]?.contentType ?? 'ARABIC_TERM',
+        contentId: items.map((i) => i.contentId).join(','),
+        metadata: {
+          gameMode: 'WORD_SEARCH',
+          grid,
+          wordsToFind: items.map((item) => {
+            const c = item.content as any;
+            return {
+              id: item.contentId,
+              word: (c.transliteration || c.front || '').toUpperCase().replace(/[^A-Z]/g, ''),
+              hint: c.translation || c.back || '',
+            };
+          }),
+          gridSize,
+          placements, // stored for validation but frontend shouldn't show this
+        },
+      }];
+    }
+
+    // ── TRIVIA_BATTLE: Competitive-styled multiple choice ──
+    case 'TRIVIA_BATTLE': {
+      return items.map((item) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'TRIVIA_BATTLE',
+            questionText: c.questionText || c.front || '',
+            options: c.options || generateOptions(c, items),
+            category: c.type || 'GENERAL',
+          },
+        };
+      });
+    }
+
+    // ── KNOWLEDGE_EXPEDITION: Multi-zone journey with mixed content ──
+    case 'KNOWLEDGE_EXPEDITION': {
+      const zones = ['Foundations', 'Arabic', 'Fiqh', 'History', 'Quran'];
+      return items.map((item, index) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'KNOWLEDGE_EXPEDITION',
+            zone: zones[index % zones.length],
+            zoneIndex: index,
+            questionText: c.questionText || c.front || c.translation || '',
+            options: c.options || generateOptions(c, items),
+            hint: c.explanation || c.back || '',
+          },
+        };
+      });
+    }
+
+    // ── MOSQUE_BUILDER: Answer questions to earn building blocks ──
+    case 'MOSQUE_BUILDER': {
+      const parts = ['foundation', 'walls', 'dome', 'minaret', 'courtyard', 'mihrab', 'entrance', 'garden', 'fountain', 'balcony'];
+      return items.map((item, index) => {
+        const c = item.content as any;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'MOSQUE_BUILDER',
+            questionText: c.questionText || c.front || '',
+            options: c.options || generateOptions(c, items),
+            buildingPart: parts[index % parts.length],
+            buildProgress: index,
+          },
+        };
+      });
+    }
+
+    // ── PATTERN_CREATOR: Match and complete patterns ──
+    case 'PATTERN_CREATOR': {
+      return items.map((item) => {
+        const c = item.content as any;
+        const front = c.front || c.arabicText || '';
+        const back = c.back || c.translation || '';
+        // Create a pattern: show front, pick correct back from options
+        const wrongOptions = items
+          .filter((i) => i.contentId !== item.contentId)
+          .slice(0, 3)
+          .map((i) => (i.content as any).back || (i.content as any).translation || '');
+        const allOptions = shuffleArray([back, ...wrongOptions]);
+
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'PATTERN_CREATOR',
+            pattern: front,
+            arabicText: c.frontArabic || c.arabicText || '',
+            options: allOptions,
+            hint: c.backArabic || '',
+          },
+        };
+      });
+    }
+
+    // ── SEERAH_TIMELINE: Arrange events chronologically ──
+    case 'SEERAH_TIMELINE': {
+      const events = items.map((item, index) => {
+        const c = item.content as any;
+        return {
+          id: item.contentId,
+          event: c.front || c.translation || '',
+          description: c.back || c.arabicText || '',
+          correctPosition: index,
+        };
+      });
+      return [{
+        contentType: items[0]?.contentType ?? 'FLASHCARD',
+        contentId: items.map((i) => i.contentId).join(','),
+        metadata: {
+          gameMode: 'SEERAH_TIMELINE',
+          description: 'Arrange these events in chronological order',
+          scrambledEvents: shuffleArray(events.map(({ id, event, description }) => ({ id, event, description }))),
+          totalEvents: events.length,
+          correctOrder: events.map((e) => e.id),
+        },
+      }];
+    }
+
+    // ── ESCAPE_ROOM: Multi-stage puzzle rooms ──
+    case 'ESCAPE_ROOM': {
+      const roomThemes = ['Library of Wisdom', 'Chamber of Sunnah', 'Garden of Fiqh', 'Hall of Quran'];
+      const roomName = roomThemes[Math.floor(Math.random() * roomThemes.length)];
+      return items.map((item, index) => {
+        const c = item.content as any;
+        const totalStages = items.length;
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'ESCAPE_ROOM',
+            roomName,
+            stage: index + 1,
+            totalStages,
+            puzzleType: item.contentType === 'QUESTION' ? 'RIDDLE' : item.contentType === 'FLASHCARD' ? 'DECODE' : 'TRANSLATE',
+            questionText: c.questionText || c.front || c.arabicText || '',
+            options: c.options || generateOptions(c, items),
+            hint: c.explanation || c.back || c.translation || '',
+            clue: `Solve puzzle ${index + 1} of ${totalStages} to escape the ${roomName}`,
+          },
+        };
+      });
+    }
+
+    // ── MAZE_NAVIGATOR: Answer at checkpoints to proceed ──
+    case 'MAZE_NAVIGATOR': {
+      const totalCheckpoints = items.length;
+      return items.map((item, index) => {
+        const c = item.content as any;
+        // Build a simple maze path with checkpoints
+        const directions = ['north', 'east', 'south', 'west'];
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'MAZE_NAVIGATOR',
+            checkpoint: index + 1,
+            totalCheckpoints,
+            questionText: c.questionText || c.front || '',
+            options: c.options || generateOptions(c, items),
+            direction: directions[index % directions.length],
+            progress: Math.round(((index + 1) / totalCheckpoints) * 100),
+          },
+        };
+      });
+    }
+
+    // ── Fallback: generic round format ──
+    default: {
+      return items.map((item) => ({
+        contentType: item.contentType,
+        contentId: item.contentId,
+        metadata: {
+          gameMode: gameType,
+          ...item.content,
+        },
+      }));
+    }
+  }
+}
+
+/**
+ * Generate multiple-choice options from content item, using other items as distractors.
+ */
+function generateOptions(content: Record<string, unknown>, allItems: ContentItem[]): string[] {
+  const correctAnswer = (content.correctAnswer || content.back || content.translation || '') as string;
+  if (!correctAnswer) return [];
+
+  // Gather distractors from other items
+  const distractors: string[] = [];
+  for (const item of allItems) {
+    const c = item.content as any;
+    const candidate = c.correctAnswer || c.back || c.translation || '';
+    if (candidate && candidate !== correctAnswer && !distractors.includes(candidate)) {
+      distractors.push(candidate);
+    }
+    if (distractors.length >= 3) break;
+  }
+
+  // If not enough distractors, add generic ones
+  while (distractors.length < 3) {
+    distractors.push(`Option ${distractors.length + 2}`);
+  }
+
+  return shuffleArray([correctAnswer, ...distractors.slice(0, 3)]);
 }
 
 async function checkContentAvailability(
@@ -536,6 +982,7 @@ export class GameService {
               take: 1,
               select: { startedAt: true, score: true, status: true },
             },
+            course: { select: { id: true, title: true } },
           },
         },
       },
@@ -580,6 +1027,7 @@ export class GameService {
           id: g.id,
           difficulty: g.difficulty,
           courseId: g.courseId,
+          courseName: (g as any).course?.title ?? null,
           unitId: g.unitId,
         })),
         lastPlayed: lastSession?.startedAt ?? null,
@@ -690,8 +1138,11 @@ export class GameService {
       throw new BadRequestError('No content available for this game configuration');
     }
 
-    // 5. Create session and rounds
-    const maxScore = contentItems.length * (BASE_POINTS + SPEED_BONUS_MAX) * 3; // theoretical max with highest streak
+    // 5. Format rounds per game type
+    const formattedRounds = formatRoundsForGameType(gameType, contentItems, difficulty);
+
+    // 6. Create session and rounds
+    const maxScore = formattedRounds.length * (BASE_POINTS + SPEED_BONUS_MAX) * 3; // theoretical max with highest streak
 
     const session = await prisma.gameSession.create({
       data: {
@@ -704,16 +1155,16 @@ export class GameService {
         accuracy: 0,
         streakBest: 0,
         timeSpentMs: 0,
-        roundsTotal: contentItems.length,
+        roundsTotal: formattedRounds.length,
         roundsCorrect: 0,
         livesUsed: 0,
         metadata: {},
         rounds: {
-          create: contentItems.map((item, index) => ({
+          create: formattedRounds.map((round, index) => ({
             roundIndex: index,
-            contentType: item.contentType,
-            contentId: item.contentId,
-            metadata: item.content as any,
+            contentType: round.contentType,
+            contentId: round.contentId,
+            metadata: round.metadata as any,
           })),
         },
       },
@@ -1220,6 +1671,57 @@ async function gradeAnswer(
   round: { contentType: string; contentId: string; metadata: unknown },
   answer: unknown,
 ): Promise<boolean> {
+  const meta = round.metadata as Record<string, unknown>;
+  const gameMode = meta?.gameMode as string | undefined;
+
+  // ── TERM_MATCH: answer is array of { termId, definitionId } pairs ──
+  if (gameMode === 'TERM_MATCH') {
+    const pairs = meta.pairs as Array<{ id: string }>;
+    const playerPairs = answer as Array<{ termId: string; definitionId: string }>;
+    if (!Array.isArray(playerPairs)) return false;
+    let allCorrect = true;
+    for (const pp of playerPairs) {
+      if (pp.termId !== pp.definitionId) { allCorrect = false; break; }
+    }
+    return allCorrect;
+  }
+
+  // ── HADITH_CHAIN / SEERAH_TIMELINE: answer is array of IDs in order ──
+  if (gameMode === 'HADITH_CHAIN' || gameMode === 'SEERAH_TIMELINE') {
+    const correctOrder = meta.correctOrder as string[];
+    const playerOrder = answer as string[];
+    if (!Array.isArray(playerOrder) || playerOrder.length !== correctOrder.length) return false;
+    return correctOrder.every((id, i) => id === playerOrder[i]);
+  }
+
+  // ── WORD_SEARCH: answer is array of found word strings ──
+  if (gameMode === 'WORD_SEARCH') {
+    const wordsToFind = meta.wordsToFind as Array<{ word: string }>;
+    const found = answer as string[];
+    if (!Array.isArray(found)) return false;
+    const expectedSet = new Set(wordsToFind.map((w) => w.word.toUpperCase()));
+    const foundSet = new Set(found.map((w) => (typeof w === 'string' ? w : '').toUpperCase()));
+    // Correct if all words found
+    return [...expectedSet].every((w) => foundSet.has(w));
+  }
+
+  // ── AYAH_COMPLETION: answer is array of missing words ──
+  if (gameMode === 'AYAH_COMPLETION') {
+    const missingWords = meta.missingWords as string[];
+    const playerWords = answer as string[];
+    if (!Array.isArray(playerWords)) return false;
+    return missingWords.every((w, i) =>
+      playerWords[i] && playerWords[i].trim().toLowerCase() === w.trim().toLowerCase()
+    );
+  }
+
+  // ── FLASHCARD_FLIP: answer is self-rating (1-5), always "correct" if rating >= 3 ──
+  if (gameMode === 'FLASHCARD_FLIP') {
+    const rating = typeof answer === 'number' ? answer : parseInt(answer as string, 10);
+    return !isNaN(rating) && rating >= 3;
+  }
+
+  // ── Generic multiple-choice types: SPEED_QUIZ, FIQH_SCENARIO, TRIVIA_BATTLE, KNOWLEDGE_EXPEDITION, MOSQUE_BUILDER, PATTERN_CREATOR, ESCAPE_ROOM, MAZE_NAVIGATOR ──
   const answerStr = typeof answer === 'string' ? answer.trim().toLowerCase() : JSON.stringify(answer);
 
   if (round.contentType === 'QUESTION') {
@@ -1231,7 +1733,6 @@ async function gradeAnswer(
   if (round.contentType === 'FLASHCARD') {
     const flashcard = await prisma.flashCard.findUnique({ where: { id: round.contentId } });
     if (!flashcard) return false;
-    // Accept back (translation) or backArabic
     const acceptable = [flashcard.back, flashcard.backArabic].filter(Boolean).map((s) => s!.trim().toLowerCase());
     return acceptable.includes(answerStr);
   }
@@ -1239,7 +1740,6 @@ async function gradeAnswer(
   if (round.contentType === 'ARABIC_TERM') {
     const term = await prisma.arabicTerm.findUnique({ where: { id: round.contentId } });
     if (!term) return false;
-    // Accept translation or transliteration
     const acceptable = [term.translation, term.transliteration].map((s) => s.trim().toLowerCase());
     return acceptable.includes(answerStr);
   }

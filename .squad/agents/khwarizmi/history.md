@@ -24,11 +24,21 @@
 - Response shapes must match exactly (example: id vs memberId caused undefined crashes)
 - Established pattern: Always validate response shapes against frontend types before merging
 
+**Game Type Engines (2026-05-17):**
+- All 15 game types now have dedicated formatRoundsForGameType() and gradeAnswer() logic
+- Game-type-specific metadata in rounds is the frontend contract — each gameMode has a defined shape
+- Composite-round games (TERM_MATCH, HADITH_CHAIN, SEERAH_TIMELINE, WORD_SEARCH) collapse all items into a single round with combined metadata
+- Per-round games (SPEED_QUIZ, FIQH_SCENARIO, TRIVIA_BATTLE, etc.) produce one round per content item with multiple-choice options auto-generated from sibling items
+- FLASHCARD_FLIP uses self-rating (1-5) model — "correct" means rating >= 3 for scoring purposes
+- Course name now included in /games/available response to distinguish course-linked game instances
+- generateOptions() helper creates distractors from sibling content items in the same session
+
 **Recent Fixes:**
 1. Seed Loading: Wired 12 missing seed files into main seed.ts
 2. Dashboard API: Fixed 4 endpoints (children, stats, activity, family) to match frontend contracts
 3. Child Auth: Implemented /auth/child-login and credential management
 4. Course Catalog: Bumped limit from 12 → 50 (17 published courses now visible)
+5. Game Engines: Implemented all 15 game types with type-specific round formatting + grading
 
 ## Architecture Decisions
 
