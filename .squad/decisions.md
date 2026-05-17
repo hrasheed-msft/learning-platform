@@ -104,6 +104,79 @@ Comprehensive design document for three interconnected features transforming the
 
 ---
 
+### 5. Games Engine Backend Implementation (2026-05-17)
+**Author:** Khwarizmi  
+**Status:** IMPLEMENTED  
+**Related:** `khaldun-games-detailed-design.md`
+
+Backend implementation of the game engine with 14 Prisma models, 8 enums, and full gamification layer.
+
+**Key Decisions:**
+- **Schema:** 14 models, 8 enums (all 15 GameType values defined upfront, 5 active in Phase 1)
+- **Content Selection Priority:** SRS-due items → recently incorrect → unseen → random fill
+- **SRS Writeback:** Game answers feed into flashcard SRS via SM-2 algorithm (correct=rating 4, incorrect=rating 2, fast correct=rating 5)
+- **Scoring Formula:** BASE_POINTS(100) + SPEED_BONUS(max 50) × STREAK_MULTIPLIER(1x/1.5x/2x/3x); Stars: ≥90%=3★, ≥75%=2★, ≥50%=1★; XP = score×0.1 + stars×25
+- **Parental Controls:** Whitelist model—empty array = all allowed, non-empty = whitelist; includes time budget, difficulty cap, optional enforce-after-hour
+- **Achievement System:** Decoupled check after game completion; 11 triggers defined
+- **Daily Challenge:** Date-based seed shuffle; one attempt per member per day enforced via constraint
+
+**Files Created:** ~13 files, 3390 lines total
+- `prisma/schema.prisma`: +~350 lines, 8 enums, 14 models
+- `services/game.service.ts`: ~1095 lines (core engine)
+- `services/achievement.service.ts`: ~210 lines
+- `controllers/game.controller.ts`: ~260 lines
+- `routes/game.routes.ts`: ~135 lines
+- 15 API endpoints; migration applied; commit a43888a
+
+---
+
+### 6. Games Feature Frontend Architecture (2026-05-18)
+**Author:** Ibn Sina (Frontend Dev)  
+**Status:** IMPLEMENTED  
+**Related:** `khaldun-games-detailed-design.md`
+
+Frontend implementation of games feature with 25 new files: 6 playable game types, 10 shared UI components, Games Hub page, routing, navigation updates.
+
+**Key Decisions:**
+- **Barrel Re-exports:** Explicit named re-exports in `types/index.ts` to avoid StreakInfo/progress.ts conflicts
+- **GamePlay Router Pattern:** Single `GamePlay.tsx` component mapping URL slugs (e.g., `term-match`) to game components
+- **Shared Game Components:** 10 reusable components (timer, score, progress bar, stars, game over, difficulty selector, hint button, streak indicator, time bar, blocked screen)
+- **Parental Controls Integration:** Every game checks parental settings; `GameBlockedScreen` handles 4 block reasons (TIME_LIMIT, NOT_ALLOWED, OUTSIDE_HOURS, DIFFICULTY_EXCEEDED); `DifficultySelector` respects `maxDifficulty`
+- **Dual-Layout Routing:** Parent (`/games/*`) and child (`/child/games/*`) layouts; child routes via `ChildProtectedRoute`
+
+**Game Types (Phase 1):** Term Match, Speed Quiz, Flashcard Flip, Daily Challenge, Escape Room, Maze Navigator
+
+**API Contracts:** All follow `ApiResponse<T>` pattern; key endpoints: `/games/available`, `/games/:gameId/sessions`, `/games/sessions/:sessionId/rounds`, `/games/daily-challenge`, `/games/leaderboards`, `/games/scores`, `/games/achievements`, `/family/members/:memberId/game-settings`
+
+**Files:** 34 files, 3667 lines; build clean
+
+---
+
+### 7. Games Engine Detailed Design (2026-05-17)
+**Author:** Khaldun (Lead Architect)  
+**Status:** PROPOSAL — Implementation blueprint  
+**Reference:** Full 2960-line document at `.squad/decisions/inbox/khaldun-games-detailed-design.md`
+
+Comprehensive implementation blueprint for Games feature specifying all game types, data models, engine architecture, auto-generation pipeline, API design, frontend components, placement strategy, gamification layer, and testing strategy.
+
+**Summary:**
+- **Game Type Catalog:** 15 types total (8 course-integrated, 6 standalone/hub, 1 shared); Phase 1 focuses on 5 core types with auto-generated content
+- **Data Model:** 14 Prisma models (Game, GameSession, GameScore, GameRound, Leaderboard, Achievement, UserAchievement, StreamAchievement, UserStreakRecord, BadgeDefinition, parental control models)
+- **Auto-Generation Pipeline:** Extract content from existing Questions, FlashCards, ArabicTerms; difficulty-tier mapping; age-aware presentation (EARLY_CHILD with hints → TEEN/ADULT timed mode)
+- **Engine Architecture:** Content selection (SRS-priority), session lifecycle, SM-2 SRS writeback, streak tracking, scoring with multipliers, achievement triggers, daily challenge seeding
+- **Placement Strategy:** Course-integrated games embed within Units; standalone games accessible via Games Hub; visual cues distinguish game availability
+- **Gamification:** Streaks, badges, leaderboards, XP progression, daily challenges; achievement system with 11 trigger types
+- **Phase 1 Scope:** 5 game types (Term Match, Speed Quiz, Flashcard Flip, Daily Challenge, Word Search) + auto-generated content only
+- **Phase 2 Scope:** Remaining game types, manual scenario authoring, social features, email digests; scope creep risk identified
+
+**Key Principles:**
+- 100% content auto-generated from existing platform data (Phase 1)
+- Games count as SRS reviews, reducing review burden (engagement lever)
+- Difficulty scaling: 3 tiers mapped to age categories and content metadata
+- Parental control enforcement at session start
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus

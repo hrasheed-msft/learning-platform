@@ -201,3 +201,8 @@ Implemented three backend features: Seed wiring fix, Child Auth Phase 1, Parent 
 - Used `recordActivity()` for dashboard integration on game completion + achievement earned
 - Timer configs stored per game type × difficulty in service constants
 - Parental controls: whitelist model, enforced at game start via `checkParentalControls()`
+
+---
+
+## 2026-05-17 — Games Backend (Khwarizmi-6)
+Status: COMPLETED - 13 files, 3390 LOC

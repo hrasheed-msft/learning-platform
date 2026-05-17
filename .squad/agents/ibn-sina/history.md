@@ -205,3 +205,8 @@ Built the complete Games frontend feature based on Khaldun's detailed design doc
 - **FlashcardFlipGame** uses inline CSS for 3D `preserve-3d` / `backface-hidden` / `rotateY` transforms
 - **Parental controls** integrated via GameBlockedScreen + TimeRemainingBar components on all game pages
 - **Phase 1 scope:** TermMatch, SpeedQuiz, FlashcardFlip, DailyChallenge are ready; EscapeRoom + MazeNavigator are Phase 2 stubs with full UI
+
+---
+
+## 2026-05-17 — Games Frontend (Ibn Sina-2)
+Status: COMPLETED - 34 files, 3667 LOC
