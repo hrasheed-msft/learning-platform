@@ -34,26 +34,15 @@ export class DashboardService {
           : 0;
 
       return {
-        id: member.id,
+        memberId: member.id,
         name: member.name,
         age: member.age,
         ageCategory: member.ageCategory,
         avatarUrl: member.avatarUrl,
+        coursesEnrolled: member.enrollments.length,
+        avgQuizScore,
         currentStreak: member.currentStreak,
-        longestStreak: member.longestStreak,
-        totalPoints: member.totalPoints,
         lastActiveAt: member.lastActiveAt,
-        loginEnabled: member.loginEnabled,
-        stats: {
-          avgQuizScore,
-          totalQuizzes: member._count.quizResults,
-          totalFlashcardsReviewed: member._count.flashCardProgress,
-          totalActivities: member._count.activityEvents,
-          coursesEnrolled: member.enrollments.length,
-          coursesCompleted: member.enrollments.filter(
-            (e) => e.status === 'COMPLETED'
-          ).length,
-        },
       };
     });
   }
@@ -110,44 +99,43 @@ export class DashboardService {
           )
         : 0;
 
+    // Flatten flashcard stats
+    const flashcardStatsMap = flashcardStats.reduce(
+      (acc, fs) => ({ ...acc, [fs.status]: fs._count.id }),
+      {} as Record<string, number>
+    );
+    const flashcardsReviewed = Object.values(flashcardStatsMap).reduce((a, b) => a + b, 0);
+    const flashcardsMastered = flashcardStatsMap['MASTERED'] || 0;
+
+    // Build quiz score trend from recent results
+    const quizScoreTrend = quizResults.slice(0, 10).map((qr) => ({
+      date: qr.createdAt.toISOString(),
+      score: qr.score,
+      quizTitle: `${qr.unit.course.title} — ${qr.unit.title}`,
+    }));
+
+    // Estimate study time from activity events (count × 5 min average)
+    const totalStudyTimeMinutes = recentActivity.length * 5;
+
     return {
-      member: {
-        id: member.id,
-        name: member.name,
-        age: member.age,
-        ageCategory: member.ageCategory,
-        currentStreak: member.currentStreak,
-        longestStreak: member.longestStreak,
-        totalPoints: member.totalPoints,
-        lastActiveAt: member.lastActiveAt,
-      },
-      quizStats: {
-        avgScore: avgQuizScore,
-        totalQuizzes: quizResults.length,
-        recentResults: quizResults.slice(0, 10).map((qr) => ({
-          score: qr.score,
-          passed: qr.passed,
-          unitTitle: qr.unit.title,
-          courseTitle: qr.unit.course.title,
-          completedAt: qr.createdAt,
-        })),
-      },
+      memberId: member.id,
+      name: member.name,
+      ageCategory: member.ageCategory,
+      coursesEnrolled: enrollments.length,
+      coursesCompleted: enrollments.filter((e) => e.status === 'COMPLETED').length,
+      avgQuizScore,
+      currentStreak: member.currentStreak,
+      longestStreak: member.longestStreak,
+      totalStudyTimeMinutes,
+      flashcardsReviewed,
+      flashcardsMastered,
       courseProgress: enrollments.map((e) => ({
         courseId: e.course.id,
         courseTitle: e.course.title,
-        category: e.course.category,
-        status: e.status,
         progress: e.progress,
-        startedAt: e.startedAt,
-        completedAt: e.completedAt,
-        unitsCompleted: e.unitProgress.filter((up) => up.completedAt).length,
-        totalUnits: e.unitProgress.length,
+        status: e.status,
       })),
-      flashcardStats: flashcardStats.reduce(
-        (acc, fs) => ({ ...acc, [fs.status]: fs._count.id }),
-        {} as Record<string, number>
-      ),
-      recentActivity,
+      quizScoreTrend,
     };
   }
 
@@ -180,13 +168,17 @@ export class DashboardService {
     ]);
 
     return {
-      activities,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      activities: activities.map((a) => ({
+        id: a.id,
+        type: a.eventType.toLowerCase().replace(/_/g, '_'),
+        title: formatEventTitle(a.eventType),
+        description: a.metadata ? summarizeMetadata(a.metadata) : '',
+        timestamp: a.createdAt.toISOString(),
+        metadata: a.metadata as Record<string, unknown> | undefined,
+      })),
+      total,
+      page,
+      pageSize: limit,
     };
   }
 
@@ -218,15 +210,16 @@ export class DashboardService {
     });
 
     const totalPoints = members.reduce((sum, m) => sum + m.totalPoints, 0);
-    const totalQuizzes = members.reduce(
-      (sum, m) => sum + m._count.quizResults,
-      0
-    );
-    const totalActivities = members.reduce(
-      (sum, m) => sum + m._count.activityEvents,
-      0
-    );
     const bestStreak = Math.max(...members.map((m) => m.currentStreak), 0);
+    const averageStreak = members.length > 0
+      ? Math.round(members.reduce((sum, m) => sum + m.currentStreak, 0) / members.length)
+      : 0;
+
+    // Count active enrollments across all members
+    const activeCoursesCount = members.reduce(
+      (sum, m) => sum + m._count.enrollments,
+      0
+    );
 
     // Recent family activity (last 7 days)
     const weekAgo = new Date();
@@ -239,22 +232,38 @@ export class DashboardService {
       },
     });
 
+    // Estimate weekly study time from recent activity (count × 5 min average)
+    const totalStudyTimeMinutesThisWeek = recentActivityCount * 5;
+
     return {
-      family: { id: family.id, name: family.name },
-      totalMembers: members.length,
-      totalPoints,
-      totalQuizzes,
-      totalActivities,
-      bestCurrentStreak: bestStreak,
-      recentActivityCount,
-      memberSummaries: members.map((m) => ({
-        id: m.id,
-        name: m.name,
-        currentStreak: m.currentStreak,
-        totalPoints: m.totalPoints,
-        quizCount: m._count.quizResults,
-        courseCount: m._count.enrollments,
-      })),
+      totalStudyTimeMinutesThisWeek,
+      activeCoursesCount,
+      totalChildren: members.length,
+      averageFamilyStreak: averageStreak,
     };
   }
+}
+
+function formatEventTitle(eventType: string): string {
+  const titles: Record<string, string> = {
+    QUIZ_COMPLETED: 'Completed a quiz',
+    COURSE_STARTED: 'Started a course',
+    COURSE_COMPLETED: 'Completed a course',
+    UNIT_COMPLETED: 'Completed a unit',
+    FLASHCARD_REVIEWED: 'Reviewed flashcards',
+    GAME_COMPLETED: 'Played a game',
+    ACHIEVEMENT_EARNED: 'Earned an achievement',
+    STREAK_MILESTONE: 'Reached a streak milestone',
+  };
+  return titles[eventType] || eventType.replace(/_/g, ' ').toLowerCase();
+}
+
+function summarizeMetadata(metadata: unknown): string {
+  if (!metadata || typeof metadata !== 'object') return '';
+  const m = metadata as Record<string, unknown>;
+  const parts: string[] = [];
+  if (m.courseTitle) parts.push(String(m.courseTitle));
+  if (m.unitTitle) parts.push(String(m.unitTitle));
+  if (m.score !== undefined) parts.push(`Score: ${m.score}%`);
+  return parts.join(' — ') || '';
 }

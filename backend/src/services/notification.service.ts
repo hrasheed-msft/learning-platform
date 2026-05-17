@@ -27,7 +27,16 @@ export class NotificationService {
     ]);
 
     return {
-      notifications,
+      notifications: notifications.map((n) => ({
+        id: n.id,
+        type: n.type.toLowerCase() as 'milestone' | 'alert' | 'achievement' | 'reminder',
+        title: n.title,
+        message: n.message,
+        isRead: n.read,
+        createdAt: n.createdAt.toISOString(),
+        memberId: undefined,
+        memberName: undefined,
+      })),
       unreadCount,
       pagination: {
         page,

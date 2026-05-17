@@ -43,8 +43,8 @@ export const dashboardService = {
   },
 
   async getNotifications(): Promise<Notification[]> {
-    const response = await api.get<ApiResponse<Notification[]>>('/notifications');
-    return response.data.data;
+    const response = await api.get<ApiResponse<{ notifications: Notification[]; unreadCount: number }>>('/notifications');
+    return response.data.data.notifications;
   },
 
   async markNotificationRead(notificationId: string): Promise<void> {
