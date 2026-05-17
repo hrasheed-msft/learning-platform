@@ -1,0 +1,107 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+
+import config from './config';
+import prisma from './config/database';
+import redis from './config/redis';
+
+// Import routes
+import authRoutes from './routes/auth.routes';
+import familyRoutes from './routes/family.routes';
+import courseRoutes from './routes/course.routes';
+import assessmentRoutes from './routes/assessment.routes';
+import srsRoutes from './routes/srs.routes';
+import userRoutes from './routes/user.routes';
+import flashCardRoutes from './routes/flashcard/flashcard.routes';
+
+// Import middleware
+import { errorHandler } from './middleware/error.middleware';
+import { notFoundHandler } from './middleware/notFound.middleware';
+
+const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: config.frontend.url,
+  credentials: true,
+}));
+
+// Health check endpoint (above rate limiter so it's always accessible)
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: config.rateLimit.windowMs,
+  max: config.rateLimit.maxRequests,
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// Body parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Logging
+if (config.env !== 'test') {
+  app.use(morgan(config.env === 'development' ? 'dev' : 'combined'));
+}
+
+// API routes (v1)
+// Note: flashCardRoutes must be before courseRoutes because it has more specific
+// routes like /courses/:courseId/flashcards that would otherwise be caught by
+// the course router's authenticate middleware
+app.use('/api/v1', flashCardRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/family', familyRoutes);
+app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/assessments', assessmentRoutes);
+app.use('/api/v1/srs', srsRoutes);
+app.use('/api/v1/users', userRoutes);
+
+// Error handling
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// Start server
+const startServer = async (): Promise<void> => {
+  try {
+    // Connect to database
+    await prisma.$connect();
+    console.log('Connected to PostgreSQL database');
+
+    // Connect to Redis
+    await redis.connect();
+
+    // Start listening
+    app.listen(config.port, () => {
+      console.log(`Server running on port ${config.port} in ${config.env} mode`);
+      console.log(`API available at http://localhost:${config.port}/api/v1`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+// Graceful shutdown
+const gracefulShutdown = async (): Promise<void> => {
+  console.log('Shutting down gracefully...');
+  await prisma.$disconnect();
+  await redis.quit();
+  process.exit(0);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+startServer();
+
+export default app;
