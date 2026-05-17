@@ -1,7 +1,7 @@
 # Decisions Archive
 
-**Last Updated:** 2026-05-17T14:36:08Z  
-**Total Decisions:** 14  
+**Last Updated:** 2026-05-17T14:57:13Z  
+**Total Decisions:** 16  
 **Source:** Merged from .squad/decisions/inbox/ on 2026-05-17
 
 ---
@@ -402,4 +402,59 @@ The complete 3335-line design document with detailed section specifications, sco
 `.squad/decisions/inbox/khaldun-games-detailed-design.md`
 
 This summary captures the key architectural decisions. Engineering teams should reference the full document during implementation for scoring algorithms, UI patterns, and test strategies.
+
+---
+
+# Decision: Game Start Validation — Relax Required Fields
+
+**Date:** 2026-05-17
+**Author:** Khwarizmi (Backend Dev)
+**Status:** Implemented
+
+## Context
+POST /api/v1/games/start was failing because validation required `gameType` (with no enum whitelist matching the 26 actual types) and `difficulty` (required, no default). The frontend only sends `{ gameId, memberId }`.
+
+## Decision
+1. **`gameId` and `memberId` are now the only required fields** for starting a game.
+2. **`difficulty` defaults to `'MEDIUM'`** when not provided — the frontend doesn't need to pick difficulty upfront.
+3. **`gameType` is optional** — when a `gameId` is provided, the service derives gameType from the game's template record. This eliminates the need to validate against all 26 enum values.
+4. **Removed the hard-coded controller guard** (`if (!gameType || !difficulty)`) since the service now handles resolution.
+5. **Parental controls check moved after gameType resolution** so it works with the derived type.
+
+## Files Changed
+- `backend/src/routes/game.routes.ts` — validation schema
+- `backend/src/controllers/game.controller.ts` — removed redundant guard, default difficulty
+- `backend/src/services/game.service.ts` — gameType optional, derived from gameId, error if neither provided
+
+---
+
+# GameType Enum Alignment — Schema + Engine + Frontend + Seed
+
+**Author:** Khwarizmi  
+**Date:** 2026-05-17  
+**Status:** IMPLEMENTED
+
+## Problem
+
+Backend schema had 15 GameType enum values; frontend expected a different set of 15. Only 4 overlapped (TERM_MATCH, SPEED_QUIZ, FLASHCARD_FLIP, ESCAPE_ROOM). Additionally, MAZE_NAVIGATOR (backend) vs MAZE_RUNNER (frontend) was a naming conflict.
+
+## Decision
+
+Extended GameType to 26 values — the full union of both sets. Both MAZE_NAVIGATOR and MAZE_RUNNER kept as separate types (different theming, same mechanics). All 26 types now have:
+- Prisma schema enum value
+- CONTENT_REQUIREMENTS, TIMER_CONFIGS in game.service.ts
+- formatRoundsForGameType() case with game-mode-specific metadata
+- gradeAnswer() handling (specific or generic fallback)
+- GameTemplate + Game seed records
+- Frontend type + GAME_META entry
+
+## Also Fixed
+
+selectContent was filtering questions by exact difficulty match while checkContentAvailability was not — root cause of "game start returns success=false". Fixed with fallback to any-difficulty when exact match returns 0.
+
+## Impact
+
+- Ibn Sina: All 15 frontend game UIs now have working backend support
+- Seed: 26 templates, 60+ course-linked games, 9 standalone games
+- API: /games/available returns all 26 types with availability status
 
