@@ -1323,21 +1323,16 @@ export class GameService {
    */
   static async startGame(params: {
     memberId: string;
-    gameType: GameType;
+    gameType?: GameType;
     gameId?: string;
     unitId?: string;
     courseId?: string;
     difficulty: GameDifficulty;
   }) {
-    const { memberId, gameType, gameId, unitId, courseId, difficulty } = params;
+    const { memberId, gameId, unitId, courseId, difficulty } = params;
+    let { gameType } = params;
 
-    // 1. Parental controls
-    const parentalCheck = await checkParentalControls(memberId, gameType, difficulty);
-    if (!parentalCheck.allowed) {
-      throw new ForbiddenError(parentalCheck.reason ?? 'Game not allowed by parental settings');
-    }
-
-    // 2. Resolve or find Game record
+    // 1. Resolve or find Game record
     let game;
     if (gameId) {
       game = await prisma.game.findUnique({
@@ -1345,7 +1340,11 @@ export class GameService {
         include: { template: true },
       });
       if (!game) throw new NotFoundError(`Game ${gameId} not found`);
-    } else {
+      // Derive gameType from the game record when not explicitly provided
+      if (!gameType) {
+        gameType = game.template.type;
+      }
+    } else if (gameType) {
       // Find or create a matching Game for this template/unit/course/difficulty
       const template = await prisma.gameTemplate.findUnique({ where: { type: gameType } });
       if (!template) throw new NotFoundError(`Game template for type ${gameType} not found`);
@@ -1372,6 +1371,14 @@ export class GameService {
           include: { template: true },
         });
       }
+    } else {
+      throw new BadRequestError('Either gameId or gameType is required');
+    }
+
+    // 2. Parental controls (after gameType is resolved)
+    const parentalCheck = await checkParentalControls(memberId, gameType!, difficulty);
+    if (!parentalCheck.allowed) {
+      throw new ForbiddenError(parentalCheck.reason ?? 'Game not allowed by parental settings');
     }
 
     // 3. Check content availability

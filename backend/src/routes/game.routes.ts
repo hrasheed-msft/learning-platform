@@ -16,12 +16,12 @@ router.use(authenticate);
 const uuidParam = (name: string) => param(name).isUUID().withMessage(`Valid ${name} is required`);
 
 const startGameValidation = [
-  body('gameType').isString().notEmpty().withMessage('gameType is required'),
-  body('difficulty').isIn(['EASY', 'MEDIUM', 'HARD']).withMessage('difficulty must be EASY, MEDIUM, or HARD'),
-  body('gameId').optional().isUUID(),
+  body('gameId').isUUID().withMessage('Valid gameId is required'),
+  body('memberId').isUUID().withMessage('Valid memberId is required'),
+  body('gameType').optional().isString(),
+  body('difficulty').optional().isIn(['EASY', 'MEDIUM', 'HARD']).withMessage('difficulty must be EASY, MEDIUM, or HARD'),
   body('unitId').optional().isUUID(),
   body('courseId').optional().isUUID(),
-  body('memberId').optional().isUUID(),
 ];
 
 const submitRoundValidation = [
@@ -55,6 +55,7 @@ const updateGameSettingsValidation = [
 // ---------------------------------------------------------------------------
 
 router.get('/', GameController.getAvailableGames);
+router.get('/available', GameController.getAvailableGames);
 
 router.get(
   '/unit/:unitId',

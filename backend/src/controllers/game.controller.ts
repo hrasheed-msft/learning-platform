@@ -69,17 +69,13 @@ export class GameController {
       const memberId = resolveMemberId(req, true);
       const { gameType, gameId, unitId, courseId, difficulty } = req.body;
 
-      if (!gameType || !difficulty) {
-        throw new BadRequestError('gameType and difficulty are required');
-      }
-
       const result = await GameService.startGame({
         memberId,
-        gameType: gameType as GameType,
+        gameType: gameType as GameType | undefined,
         gameId,
         unitId,
         courseId,
-        difficulty: difficulty as GameDifficulty,
+        difficulty: (difficulty as GameDifficulty) ?? 'MEDIUM',
       });
 
       res.status(201).json({ success: true, data: result });
