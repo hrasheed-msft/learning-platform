@@ -19,6 +19,7 @@ import flashCardRoutes from './routes/flashcard/flashcard.routes';
 import childAuthRoutes from './routes/child-auth.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import notificationRoutes from './routes/notification.routes';
+import gameRoutes from './routes/game.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -71,6 +72,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1', childAuthRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/games', gameRoutes);
 
 // Error handling
 app.use(notFoundHandler);

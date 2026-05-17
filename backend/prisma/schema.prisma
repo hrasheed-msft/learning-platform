@@ -83,6 +83,17 @@ model FamilyMember {
   flashCardProgress FlashCardProgress[]
   activityEvents    ActivityEvent[]
 
+  // Game relations
+  gameSessions            GameSession[]
+  gameScores              GameScore[]
+  userBadges              UserBadge[]
+  userAchievements        UserAchievement[]
+  leaderboardEntries      LeaderboardEntry[]
+  dailyChallengeAttempts  DailyChallengeAttempt[]
+  streakRecord            UserStreakRecord?
+  gameParentalSettings    GameParentalSettings?
+  gameTimeLogs            GameTimeLog[]
+
   @@index([familyId])
   @@map("family_members")
 }
@@ -105,6 +116,7 @@ model Course {
   units       Unit[]
   flashCards  FlashCard[]
   enrollments CourseEnrollment[]
+  games       Game[]
 
   @@index([category])
   @@index([isPublished])
@@ -130,6 +142,7 @@ model Unit {
   flashCards     FlashCard[]
   unitProgress   UnitProgress[]
   quizResults    QuizResult[]
+  games          Game[]
 
   @@unique([courseId, orderIndex])
   @@index([courseId])
@@ -478,4 +491,411 @@ model Notification {
   @@index([read])
   @@index([createdAt])
   @@map("notifications")
+}
+
+// ============================================
+// GAME ENGINE MODELS
+// ============================================
+
+enum GameType {
+  TERM_MATCH
+  AYAH_COMPLETION
+  FIQH_SCENARIO
+  HADITH_CHAIN
+  WORD_SEARCH
+  SPEED_QUIZ
+  FLASHCARD_FLIP
+  DAILY_CHALLENGE
+  KNOWLEDGE_EXPEDITION
+  TRIVIA_BATTLE
+  MOSQUE_BUILDER
+  PATTERN_CREATOR
+  SEERAH_TIMELINE
+  ESCAPE_ROOM
+  MAZE_NAVIGATOR
+}
+
+enum GameCategory {
+  COURSE_INTEGRATED
+  STANDALONE
+}
+
+enum GameDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum GameSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+  TIMED_OUT
+}
+
+enum AchievementTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum BadgeCategory {
+  STREAK
+  MASTERY
+  EXPLORER
+  SPEED
+  BUILDER
+  SOCIAL
+  SPECIAL
+}
+
+enum LeaderboardScope {
+  FAMILY
+  GLOBAL
+}
+
+enum LeaderboardPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  ALL_TIME
+}
+
+model GameTemplate {
+  id          String       @id @default(uuid())
+  type        GameType     @unique
+  category    GameCategory
+  name        String
+  description String       @db.Text
+  iconUrl     String?
+  rules       Json         // { minContent, defaultDifficulty, timerDefaults, livesDefaults, scoringRules }
+  isActive    Boolean      @default(true)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  games       Game[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("game_templates")
+}
+
+model Game {
+  id          String         @id @default(uuid())
+  difficulty  GameDifficulty @default(MEDIUM)
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  templateId  String
+  template    GameTemplate   @relation(fields: [templateId], references: [id])
+
+  courseId     String?
+  course       Course?       @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  unitId       String?
+  unit         Unit?         @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  sessions    GameSession[]
+
+  @@index([templateId])
+  @@index([courseId])
+  @@index([unitId])
+  @@index([difficulty])
+  @@map("games")
+}
+
+model GameSession {
+  id            String            @id @default(uuid())
+  status        GameSessionStatus @default(IN_PROGRESS)
+  difficulty    GameDifficulty
+  score         Int               @default(0)
+  maxScore      Int               @default(0)
+  accuracy      Float             @default(0)
+  streakBest    Int               @default(0)
+  timeSpentMs   Int               @default(0)
+  roundsTotal   Int               @default(0)
+  roundsCorrect Int               @default(0)
+  livesUsed     Int               @default(0)
+  metadata      Json?
+  startedAt     DateTime          @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  gameId        String
+  game          Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  memberId      String
+  member        FamilyMember      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  rounds        GameRound[]
+  gameScore     GameScore?
+
+  @@index([gameId])
+  @@index([memberId])
+  @@index([status])
+  @@index([startedAt])
+  @@index([memberId, gameId])
+  @@map("game_sessions")
+}
+
+model GameRound {
+  id            String   @id @default(uuid())
+  roundIndex    Int
+  contentType   String   // QUESTION, FLASHCARD, ARABIC_TERM
+  contentId     String
+  playerAnswer  Json?
+  isCorrect     Boolean  @default(false)
+  pointsEarned  Int      @default(0)
+  timeSpentMs   Int      @default(0)
+  srsRating     Int?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  sessionId     String
+  session       GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([contentType, contentId])
+  @@map("game_rounds")
+}
+
+model GameScore {
+  id          String   @id @default(uuid())
+  totalScore  Int
+  accuracy    Float
+  timeSpentMs Int
+  xpEarned    Int      @default(0)
+  bonuses     Json?
+  createdAt   DateTime @default(now())
+
+  sessionId   String   @unique
+  session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([createdAt])
+  @@index([memberId, createdAt])
+  @@map("game_scores")
+}
+
+// ============================================
+// BADGE & ACHIEVEMENT MODELS
+// ============================================
+
+model BadgeDefinition {
+  id          String        @id @default(uuid())
+  key         String        @unique
+  name        String
+  description String
+  iconUrl     String?
+  category    BadgeCategory
+  tier        AchievementTier
+  criteria    Json
+  xpReward    Int           @default(0)
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+
+  userBadges  UserBadge[]
+
+  @@index([category])
+  @@index([tier])
+  @@map("badge_definitions")
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  earnedAt  DateTime @default(now())
+
+  memberId  String
+  member    FamilyMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     BadgeDefinition @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, badgeId])
+  @@index([memberId])
+  @@index([badgeId])
+  @@map("user_badges")
+}
+
+model UserAchievement {
+  id          String   @id @default(uuid())
+  type        String
+  name        String
+  description String
+  iconUrl     String?
+  xpReward    Int      @default(0)
+  metadata    Json?
+  earnedAt    DateTime @default(now())
+
+  memberId    String
+  member      FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([type])
+  @@index([earnedAt])
+  @@map("user_achievements")
+}
+
+// ============================================
+// LEADERBOARD MODELS
+// ============================================
+
+model Leaderboard {
+  id        String            @id @default(uuid())
+  scope     LeaderboardScope
+  period    LeaderboardPeriod
+  gameType  GameType?
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+
+  entries   LeaderboardEntry[]
+
+  @@unique([scope, period, gameType, startDate])
+  @@index([scope, period])
+  @@index([isActive])
+  @@map("leaderboards")
+}
+
+model LeaderboardEntry {
+  id          String   @id @default(uuid())
+  rank        Int
+  score       Int
+  gamesPlayed Int      @default(0)
+  accuracy    Float    @default(0)
+  updatedAt   DateTime @updatedAt
+
+  leaderboardId String
+  leaderboard   Leaderboard  @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+  memberId      String
+  member        FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([leaderboardId, memberId])
+  @@index([leaderboardId, rank])
+  @@index([memberId])
+  @@map("leaderboard_entries")
+}
+
+// ============================================
+// DAILY CHALLENGE MODELS
+// ============================================
+
+model DailyChallenge {
+  id          String         @id @default(uuid())
+  date        DateTime       @db.Date
+  difficulty  GameDifficulty
+  contentIds  Json
+  seed        Int
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+
+  attempts    DailyChallengeAttempt[]
+
+  @@unique([date, difficulty])
+  @@index([date])
+  @@map("daily_challenges")
+}
+
+model DailyChallengeAttempt {
+  id          String   @id @default(uuid())
+  score       Int
+  accuracy    Float
+  timeSpentMs Int
+  answers     Json
+  completedAt DateTime @default(now())
+
+  challengeId String
+  challenge   DailyChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      FamilyMember   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, memberId])
+  @@index([challengeId])
+  @@index([memberId])
+  @@index([completedAt])
+  @@map("daily_challenge_attempts")
+}
+
+// ============================================
+// STREAK MODELS
+// ============================================
+
+model UserStreakRecord {
+  id               String    @id @default(uuid())
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastActivityDate DateTime  @db.Date
+  gracePeriodUsed  Boolean   @default(false)
+  freezesRemaining Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  memberId         String    @unique
+  member           FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  streakAchievements StreakAchievement[]
+
+  @@index([memberId])
+  @@index([currentStreak])
+  @@map("user_streak_records")
+}
+
+model StreakAchievement {
+  id          String   @id @default(uuid())
+  streakCount Int
+  xpReward    Int      @default(0)
+  earnedAt    DateTime @default(now())
+
+  streakRecordId String
+  streakRecord   UserStreakRecord @relation(fields: [streakRecordId], references: [id], onDelete: Cascade)
+
+  @@unique([streakRecordId, streakCount])
+  @@index([streakRecordId])
+  @@map("streak_achievements")
+}
+
+// ============================================
+// PARENTAL CONTROLS MODELS
+// ============================================
+
+model GameParentalSettings {
+  id                  String         @id @default(cuid())
+  dailyLimitMinutes   Int            @default(30)
+  weekendLimitMinutes Int            @default(60)
+  allowedGameTypes    GameType[]     @default([])
+  maxDifficulty       GameDifficulty @default(EASY)
+  enforceAfterHour    Int?
+  isActive            Boolean        @default(true)
+  updatedBy           String
+  updatedAt           DateTime       @updatedAt
+  createdAt           DateTime       @default(now())
+
+  familyMemberId      String         @unique
+  familyMember        FamilyMember   @relation(fields: [familyMemberId], references: [id], onDelete: Cascade)
+
+  @@index([familyMemberId])
+  @@index([isActive])
+  @@map("game_parental_settings")
+}
+
+model GameTimeLog {
+  id                 String       @id @default(cuid())
+  date               String       // YYYY-MM-DD
+  minutesPlayed      Int          @default(0)
+  sessionsPlayed     Int          @default(0)
+  lastSessionEndedAt DateTime     @default(now())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  familyMemberId     String
+  familyMember       FamilyMember @relation(fields: [familyMemberId], references: [id], onDelete: Cascade)
+
+  @@unique([familyMemberId, date])
+  @@index([familyMemberId, date])
+  @@index([date])
+  @@map("game_time_logs")
 }

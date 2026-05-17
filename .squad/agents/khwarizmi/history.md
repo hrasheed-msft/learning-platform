@@ -176,3 +176,28 @@ Implemented three backend features: Seed wiring fix, Child Auth Phase 1, Parent 
 
 **Migration:** `20260517110850_add_child_auth_and_dashboard` applied. Includes new tables: `activity_events`, `notifications`, plus FamilyMember schema additions.
 
+
+
+## Game Engine Implementation (2026-05-17)
+
+**Full backend game engine built from khaldun-games-detailed-design.md blueprint:**
+
+### Schema Changes
+- 8 new enums: GameType (15 values), GameCategory, GameDifficulty, GameSessionStatus, AchievementTier, BadgeCategory, LeaderboardScope, LeaderboardPeriod
+- 14 new models: GameTemplate, Game, GameSession, GameRound, GameScore, BadgeDefinition, UserBadge, UserAchievement, Leaderboard, LeaderboardEntry, DailyChallenge, DailyChallengeAttempt, UserStreakRecord, StreakAchievement, GameParentalSettings, GameTimeLog
+- Migration: `20260517114607_add_game_engine`
+
+### Services
+- `game.service.ts` (~1095 lines): Content selection (SRS-due → wrong → unseen → random), session lifecycle, scoring (base + speed bonus + streak multiplier), SRS writeback via SM-2, streak management (1-day grace), daily challenge (deterministic seed), leaderboard, parental controls enforcement (time budget, difficulty cap, game-type whitelist)
+- `achievement.service.ts` (~210 lines): 11 Phase-1 achievements (first_game, perfect_score, speed_demon, streak_3/7/14/30/100, vocab_50, daily_7, all_game_types), check-and-award after game completion, XP rewards
+
+### Controller & Routes
+- `game.controller.ts`: Thin controller, 15 endpoints, dual JWT resolution (parent or child)
+- `game.routes.ts`: express-validator schemas, authenticate middleware, requireParent for parental controls
+- Wired at `/api/v1/games` in index.ts
+
+### Design Patterns
+- Followed existing static-method service/controller pattern
+- Used `recordActivity()` for dashboard integration on game completion + achievement earned
+- Timer configs stored per game type × difficulty in service constants
+- Parental controls: whitelist model, enforced at game start via `checkParentalControls()`
