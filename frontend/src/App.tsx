@@ -35,6 +35,13 @@ import ReviewSessionPage from '@/pages/flashcards/ReviewSessionPage';
 import UnitFlashCardsPage from '@/pages/flashcards/UnitFlashCardsPage';
 import CourseFlashCardsPage from '@/pages/flashcards/CourseFlashCardsPage';
 
+// Games Pages
+import GamesHub from '@/pages/games/GamesHub';
+import GamePlay from '@/pages/games/GamePlay';
+import ScoreHistory from '@/pages/games/ScoreHistory';
+import AchievementGallery from '@/pages/games/AchievementGallery';
+import LeaderboardPage from '@/pages/games/LeaderboardPage';
+
 // Settings Pages
 import FamilySettings from '@/pages/settings/FamilySettings';
 
@@ -129,6 +136,11 @@ function App() {
         <Route path="courses" element={<ChildCoursesPage />} />
         <Route path="flashcards" element={<ChildFlashcardsPage />} />
         <Route path="achievements" element={<ChildAchievementsPage />} />
+        <Route path="games" element={<GamesHub />} />
+        <Route path="games/play/:gameType" element={<GamePlay />} />
+        <Route path="games/scores" element={<ScoreHistory />} />
+        <Route path="games/achievements" element={<AchievementGallery />} />
+        <Route path="games/leaderboard" element={<LeaderboardPage />} />
       </Route>
 
       {/* Protected Routes (parent/admin) */}
@@ -164,6 +176,13 @@ function App() {
 
         {/* Reviews */}
         <Route path="reviews" element={<ReviewSessionPage />} />
+
+        {/* Games */}
+        <Route path="games" element={<GamesHub />} />
+        <Route path="games/play/:gameType" element={<GamePlay />} />
+        <Route path="games/scores" element={<ScoreHistory />} />
+        <Route path="games/achievements" element={<AchievementGallery />} />
+        <Route path="games/leaderboard" element={<LeaderboardPage />} />
 
         {/* Settings */}
         <Route path="settings" element={<FamilySettings />} />

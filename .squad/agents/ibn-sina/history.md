@@ -178,3 +178,30 @@ Implemented complete frontend for child authentication, child-scoped layout, par
 - All API contracts documented in decision entry #8
 
 **Team Integration:** Ready for backend integration testing with Khwarizmi; dashboard UI prepared for parental controls additions (pending games blueprint finalization).
+
+### 2026-05-18 — Games Feature Frontend Implementation
+
+**Status:** COMPLETED
+
+Built the complete Games frontend feature based on Khaldun's detailed design document (`khaldun-games-detailed-design.md`). All game-specific files compile cleanly (1 pre-existing error in StudySession.tsx is unrelated).
+
+**Files created (25 total):**
+- `types/game.ts` — 35 exported types/interfaces + GAME_META constant for all 15 game types
+- `services/gameService.ts` — full API service: game discovery, session lifecycle, daily challenge, scores, leaderboards, achievements, badges, streaks, parental controls
+- `stores/gameStore.ts` — Zustand store with complete state management (follows courseStore pattern)
+- `components/games/` — 10 shared components: GameTimer, ScoreDisplay, GameProgressBar, StarRating, GameOverScreen, DifficultySelector, HintButton, StreakIndicator, TimeRemainingBar, GameBlockedScreen + barrel export
+- `pages/games/` — GamesHub, GamePlay (router), 6 game type components (TermMatch, SpeedQuiz, FlashcardFlip, DailyChallenge, EscapeRoom, MazeNavigator), ScoreHistory, AchievementGallery, LeaderboardPage + barrel export
+
+**Modified files (5):**
+- `App.tsx` — added game routes for both parent (`/games/*`) and child (`/child/games/*`) layouts
+- `MainLayout.tsx` — added "Games 🎮" with Gamepad2 icon to parent sidebar navigation
+- `ChildLayout.tsx` — added "Games 🎮" with Gamepad2 icon to child sidebar navigation
+- `types/index.ts`, `services/index.ts`, `stores/index.ts` — barrel export updates
+
+**Architecture decisions:**
+- **StreakInfo name conflict** resolved by using explicit named re-exports in `types/index.ts` instead of `export *` from game.ts (conflict with progress.ts)
+- **GamePlay router** maps URL slugs to components; only 6 game types are playable, others show "coming soon"
+- **MazeNavigatorGame** uses recursive backtracker algorithm for procedural maze generation
+- **FlashcardFlipGame** uses inline CSS for 3D `preserve-3d` / `backface-hidden` / `rotateY` transforms
+- **Parental controls** integrated via GameBlockedScreen + TimeRemainingBar components on all game pages
+- **Phase 1 scope:** TermMatch, SpeedQuiz, FlashcardFlip, DailyChallenge are ready; EscapeRoom + MazeNavigator are Phase 2 stubs with full UI

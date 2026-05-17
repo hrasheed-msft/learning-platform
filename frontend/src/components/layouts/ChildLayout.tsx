@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   GraduationCap,
+  Gamepad2,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -17,6 +18,7 @@ const childNavigation = [
   { name: 'My Dashboard', href: '/child/dashboard', icon: Home },
   { name: 'My Courses', href: '/child/courses', icon: BookOpen },
   { name: 'My Flashcards', href: '/child/flashcards', icon: Brain },
+  { name: 'Games 🎮', href: '/child/games', icon: Gamepad2 },
   { name: 'Achievements', href: '/child/achievements', icon: Trophy },
 ];
 
