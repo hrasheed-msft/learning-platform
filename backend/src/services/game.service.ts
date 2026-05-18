@@ -105,7 +105,9 @@ const GAME_DEFS: Record<GameType, GameDef> = {
       MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 },
       HARD:   { type: 'PER_QUESTION', durationMs: 30000 },
     },
-    defaultCompatibility: { contentType: 'ARABIC_TERM', courseCategory: 'ARABIC', minItems: 4 },
+    // No courseCategory restriction: Arabic terms exist across all subjects,
+    // not only ARABIC-category courses. The minArabicTerms check is the gate.
+    defaultCompatibility: { contentType: 'ARABIC_TERM', minItems: 4 },
   },
   FIQH_SCENARIO: {
     // Fiqh Scenario uses a manually-authored branching tree (FiqhScenario

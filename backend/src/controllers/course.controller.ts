@@ -5,11 +5,12 @@ import { CourseService } from '../services/course.service';
 export class CourseController {
   static async getCourses(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { category, ageLevel, search, page, limit } = req.query;
+      // Accept both ageLevel and ageCategory (frontend CourseFilters uses ageCategory)
+      const { category, ageLevel, ageCategory, search, page, limit } = req.query;
       
       const courses = await CourseService.getCourses({
         category: category as string,
-        ageLevel: ageLevel as string,
+        ageLevel: (ageLevel || ageCategory) as string,
         search: search as string,
         page: page ? parseInt(page as string) : undefined,
         limit: limit ? parseInt(limit as string) : undefined,

@@ -175,3 +175,9 @@ Implemented the Khaldun game redesign — collapsed 26 GameType values into 9 ca
 **GameTemplate has NO defaultDifficulty column:** Difficulty defaults live in the `rules` JSON blob under `rules.defaultDifficulty`. Don't add it as a separate field.
 
 **Dev-server-locked Prisma client:** Multiple `ts-node-dev` processes hold `node_modules/.prisma/client/query_engine-windows.dll.node`, blocking `prisma generate`. Always check `Get-Process node` and stop by PID before running generate.
+
+**GAME_DEFS courseCategory is an eligibility hard-wall (2026-05-18):** Setting `courseCategory` in `defaultCompatibility` filters out ALL courses that don't match that category. For CALLIGRAPHY_TRACE, `courseCategory: 'ARABIC'` meant users enrolled only in FIQH/SEERAH courses got 0 eligible courses. Remove `courseCategory` from any game def where the content type (ArabicTerm, FlashCard, etc.) can reasonably appear in courses of any subject. Let `minItems` be the gate.
+
+**CourseFilters type vs API param mismatch (2026-05-18):** The frontend `CourseFilters` type uses `courseType` and `ageCategory` while the backend controller extracted `category` and `ageLevel`. Result: subject and age filters were silently ignored. Fix pattern: backend accepts aliases (`ageCategory` alongside `ageLevel`); frontend catalog uses the canonical `category` field from `CourseFilters`. Also: `setFilters()` in Zustand doesn't auto-re-fetch — always add a `useEffect` keyed on the filter values that calls `fetchCourses(filters)`.
+
+**CourseCatalog filter values must be UPPERCASE to match DB:** The category dropdown was sending title-case strings ("Fiqh") but Prisma does exact-match on the stored value ("FIQH"). Always normalize to the enum value before sending to the API.

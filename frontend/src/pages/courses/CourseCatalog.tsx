@@ -3,21 +3,47 @@ import { Link } from 'react-router-dom';
 import { useCourseStore } from '@/stores';
 import { Search, BookOpen, Clock, Users, ChevronRight } from 'lucide-react';
 
+// Map display labels to the API category values
+const CATEGORY_OPTIONS: { label: string; value: string | undefined }[] = [
+  { label: 'All', value: undefined },
+  { label: 'Quran', value: 'QURAN' },
+  { label: 'Hadith', value: 'HADITH' },
+  { label: 'Fiqh', value: 'FIQH' },
+  { label: 'Seerah', value: 'SEERAH' },
+  { label: 'Arabic', value: 'ARABIC' },
+  { label: 'Islamic History', value: 'ISLAMIC_HISTORY' },
+];
+
+const AGE_LEVEL_OPTIONS: { label: string; value: string | undefined }[] = [
+  { label: 'All Ages', value: undefined },
+  { label: 'Early Child', value: 'EARLY_CHILD' },
+  { label: 'Child', value: 'CHILD' },
+  { label: 'Pre-Teen', value: 'PRE_TEEN' },
+  { label: 'Teen', value: 'TEEN' },
+  { label: 'Adult', value: 'ADULT' },
+];
+
 export default function CourseCatalog() {
   const { courses, fetchCourses, isLoading, filters, setFilters } = useCourseStore();
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Initial fetch
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
 
-  const filteredCourses = courses.filter(course => 
+  // Re-fetch when category or ageCategory filter changes
+  useEffect(() => {
+    fetchCourses(filters);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.category, filters.ageCategory]);
+
+  // Client-side search (instant, no round-trip)
+  const filteredCourses = courses.filter(course =>
+    !searchTerm ||
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const categories = ['All', 'Quran', 'Hadith', 'Fiqh', 'Seerah', 'Arabic', 'Islamic History'];
-  const ageLevels = ['All Ages', 'EARLY_CHILD', 'CHILD', 'PRE_TEEN', 'TEEN', 'ADULT'];
 
   return (
     <div className="space-y-6 animate-in">
@@ -48,24 +74,24 @@ export default function CourseCatalog() {
 
           {/* Category Filter */}
           <select
-            value={filters.courseType || 'All'}
-            onChange={(e) => setFilters({ courseType: e.target.value === 'All' ? undefined : e.target.value as any })}
+            value={filters.category || ''}
+            onChange={(e) => setFilters({ category: e.target.value ? e.target.value as any : undefined })}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
           >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {CATEGORY_OPTIONS.map(opt => (
+              <option key={opt.label} value={opt.value ?? ''}>{opt.label}</option>
             ))}
           </select>
 
           {/* Age Level Filter */}
           <select
-            value={filters.ageCategory || 'All Ages'}
-            onChange={(e) => setFilters({ ageCategory: e.target.value === 'All Ages' ? undefined : e.target.value })}
+            value={filters.ageCategory || ''}
+            onChange={(e) => setFilters({ ageCategory: e.target.value || undefined })}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
           >
-            {ageLevels.map(level => (
-              <option key={level} value={level}>
-                {level === 'All Ages' ? level : level.replace('_', ' ').toLowerCase()}
+            {AGE_LEVEL_OPTIONS.map(opt => (
+              <option key={opt.label} value={opt.value ?? ''}>
+                {opt.label}
               </option>
             ))}
           </select>
