@@ -153,3 +153,25 @@ All 15 game type engines implemented in game.service.ts with full type-specific 
 3. Achievements (milestone triggers)
 4. Notifications (game completion, achievement unlocks)
 5. Analytics (per-user performance dashboard)
+
+---
+
+## 2026-05-18 — Game Engine Collapse (26 → 9 types)
+
+**Status:** ✅ COMPLETE (migration written, not applied)
+
+Implemented the Khaldun game redesign — collapsed 26 GameType values into 9 canonical types. G8 (Verify/True-False) merged into G1 (Quick Recall) as 2-option MCQ variant per user directive. Decision artifact: `.squad/decisions/inbox/khwarizmi-game-engine-collapse.md`.
+
+### Learnings
+
+**Postgres enum migration pattern:** Can't drop enum values still referenced. Use `GameType_new` + ALTER each column with `USING (CASE ... END)::"GameType_new"` mapping, then drop old and rename. Array columns (`allowedGameTypes GameType[]`) need `DROP DEFAULT` before the swap. Sequence: drop array default → ALTER all referencing columns → DROP TYPE → RENAME → re-add default.
+
+**Template dedup with sessions preserved:** When N old types collapse to 1 new type, multiple GameTemplate rows share the same type post-conversion. Use CTE `ROW_NUMBER() OVER (PARTITION BY type ORDER BY sortOrder, createdAt)` to pick canonical row, `UPDATE games SET templateId = canonical_id WHERE templateId IN (duplicates)`, then DELETE duplicates. GameSession FKs to Game (not GameTemplate) so sessions survive untouched.
+
+**Service rewrite ratio:** 2047 → 1561 lines (24% reduction) by replacing 26 per-type formatters/graders with single switch statements over a `GAME_DEFS` config table. Each game type's behavior is now declarative: content requirements, per-difficulty timers, `defaultCompatibility`. New `getEligibleCourses(slug, memberId)` endpoint powers the launcher's reverse course selection.
+
+**CourseEnrollment is keyed by memberId, NOT familyId:** When building course discovery for a member, query `where: { memberId }` directly. There is no `familyId` field — that lives on FamilyMember and is irrelevant to enrollments.
+
+**GameTemplate has NO defaultDifficulty column:** Difficulty defaults live in the `rules` JSON blob under `rules.defaultDifficulty`. Don't add it as a separate field.
+
+**Dev-server-locked Prisma client:** Multiple `ts-node-dev` processes hold `node_modules/.prisma/client/query_engine-windows.dll.node`, blocking `prisma generate`. Always check `Get-Process node` and stop by PID before running generate.

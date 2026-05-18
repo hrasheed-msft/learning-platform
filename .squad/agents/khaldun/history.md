@@ -35,6 +35,13 @@
 - **Existing deployment doc:** `docs/AZURE_DEPLOYMENT.md` (491 lines) — covers basics but lacks Key Vault, VNet, cost estimates, scaling guidance. New comprehensive guide at `docs/azure-deployment-guide.md`.
 - **Static Web Apps config:** Needs `staticwebapp.config.json` with `navigationFallback` for SPA routing (React Router).
 - **Port mapping:** Azure App Service expects port 8080 (not 3000). Set `PORT=8080` in production env.
+- **Game system audit (2026-05-18):** Of 26 GameType enum values, ~17 are MCQ or flashcard reskins producing byte-identical round payloads in `backend/src/services/game.service.ts` (case branches at lines 398–1000). Cosmetic differences (roomName, direction, stage number, "expedition" framing) live only as unused metadata strings.
+- **Worst offender:** `FIQH_SCENARIO` was implemented as a 4-option MCQ identical to `MULTIPLE_CHOICE` (game.service.ts:510–528). No branching, no scenario tree, no consequence chain — completely failed to deliver the feature name.
+- **Pattern: presentation themes ≠ game types.** When two "games" produce the same generator output and differ only in flavor strings, they should be one game with `presentationConfig: Json?` on the Game model, not two enum values.
+- **Course-compatibility matrix belongs on Game model, not in code.** Proposed `contentRequirements: { contentType, courseCategory, minItems }` shape lets the hub show all games but filter the course picker at launch time.
+- **Hub UX principle (user-stated):** "card is just identity → click → course + difficulty picker → play." Difficulty selectors on hub cards are clutter; defer to launcher screen.
+- **Redesign proposal:** 26 → 10 game types (QUICK_RECALL, PAIR_MATCH, FLASHCARD_SPRINT, CLOZE, WORD_SEARCH, SEQUENCE_IT, WORD_SCRAMBLE, VERIFY, CALLIGRAPHY_TRACE, FIQH_SCENARIO-rewritten). Document at `.squad/decisions/inbox/khaldun-game-redesign.md`.
+- **Key file paths for games work:** `backend/src/services/game.service.ts` (engine, 1095 LOC, switch at line ~398), `backend/prisma/schema.prisma` (GameType enum), `frontend/src/pages/games/*.tsx` (30 files — most candidates for deletion), `frontend/src/pages/games/GamesHub.tsx` (hub), `frontend/src/types/game.ts` (GAME_META).
 
 ## Next Steps
 

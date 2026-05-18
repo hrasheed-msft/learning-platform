@@ -62,3 +62,18 @@
 - **Pattern:** GamesHub already had `activeMemberId = selectedMember?.id || members[0]?.id` inline. The hook centralizes this pattern.
 - **Key file:** `frontend/src/hooks/useActiveMemberId.ts`
 - **GamesHub key fix:** `filteredGames.map` used `key={game.id}` which can duplicate when same template creates multiple games. Changed to composite key `${game.id}-${game.template.type}-${index}`.
+
+
+### 2026-05-18 — Games frontend rebuilt: 26 → 9 mechanics
+
+- **Driver:** `khaldun-game-redesign.md` consolidated 26 redundant game components into 9 distinct mechanics. User directive merged True/False into Quick Recall — final = 9.
+- **9 games (slug → ActiveGameType):** quick-recall, pair-match, flashcard-sprint, cloze, word-search, sequence-it, word-scramble, calligraphy-trace, fiqh-scenario.
+- **New routing pattern:** `/games` (hub) → `/games/:gameSlug/launch` (course + difficulty picker) → `/games/:gameSlug/play?gameId=X&difficulty=Y`. Replaces old `/games/play/:gameType` direct-launch flow.
+- **Launcher pattern:** Hub no longer launches games. New `GameLauncher.tsx` fetches eligible courses for the chosen mechanic, lets user pick course + difficulty, writes selection to `gameStore.setLauncherSelection`, then navigates to play route. GamePlay re-hydrates from URL params if direct-loaded.
+- **DRY lifecycle:** `frontend/src/hooks/useGameRunner.ts` centralizes auto-start / submit / playAgain / exit-to-hub for all 9 games. Uses `startAttempted` ref to prevent double-start in StrictMode.
+- **Legacy back-compat:** `mapToActiveType()` in `utils/gameHelpers.ts` collapses old GameTypes (MULTIPLE_CHOICE / SPEED_QUIZ / TRIVIA_BATTLE / ESCAPE_ROOM / MAZE_RUNNER / etc) into the 9 new ActiveGameType values, so backend records with legacy types still route correctly.
+- **Eligible courses fallback:** `gameService.getEligibleCourses(slug, memberId)` calls `/games/:slug/eligible-courses` but falls back to filtering `/games/available` by `mapToActiveType(g.template.type)` if endpoint 404s. Backend (Khwarizmi) needs to add the dedicated endpoint.
+- **GAME_META gotcha:** had to keep WORD_SCRAMBLE/WORD_SEARCH/FIQH_SCENARIO/CALLIGRAPHY_TRACE in the **new** section only — the legacy duplicates caused `TS1117: multiple properties with the same name`. Removed duplicates from legacy block.
+- **Pre-existing fix:** Removed unused `user` destructure in `StudySession.tsx` to unblock typecheck (TS6133, pre-existing from prior commit).
+- **Key files:** `pages/games/{GamesHub,GameLauncher,GamePlay}.tsx`, 9 new game components in `pages/games/`, `hooks/useGameRunner.ts`, `stores/gameStore.ts` (launcher state), `services/gameService.ts` (getEligibleCourses), `types/game.ts` (ActiveGameType + GAME_META), `utils/gameHelpers.ts` (mapToActiveType / slug maps / shuffle), `App.tsx` (routes).
+- **Build:** `npm run build` ✓ (1531 modules, 507kB main bundle).
