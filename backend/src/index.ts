@@ -40,14 +40,36 @@ app.get('/health', (_req, res) => {
 });
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxRequests,
-  message: { error: 'Too many requests, please try again later.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
+// In development we disable global rate limiting entirely. React StrictMode,
+// Vite HMR, dashboard fan-out requests, and rapid retries during local work
+// can easily blow past any reasonable global limit and break logins. We still
+// rely on auth (JWT) and validation middleware for protection.
+// In production we apply a generous global limit, plus a stricter per-IP
+// limit on auth endpoints to mitigate credential stuffing / brute force.
+if (config.env === 'production') {
+  const globalLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 600,
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) =>
+      req.path.includes('/games/sessions/') &&
+      (req.method === 'POST' || req.method === 'GET'),
+  });
+  app.use(globalLimiter);
+
+  const authLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 20,
+    message: { error: 'Too many authentication attempts, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use('/api/v1/auth', authLimiter);
+} else {
+  console.log('[startup] Rate limiting DISABLED (non-production environment)');
+}
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));

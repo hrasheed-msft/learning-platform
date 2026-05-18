@@ -80,9 +80,9 @@ const config: Config = {
     apiKey: process.env.OPENAI_API_KEY || '',
   },
   rateLimit: {
-    // Higher limit for development (1000 requests per 15 minutes)
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
-    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000', 10),
+    // Used only in production (see src/index.ts). 1-minute window, generous global cap.
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000', 10),
+    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '600', 10),
   },
 };
 
