@@ -1004,7 +1004,8 @@ async function writeSrsUpdates(
   rounds: Array<{ contentType: string; contentId: string; isCorrect: boolean | null; timeSpentMs: number | null; srsRating: number | null }>,
   memberId: string,
 ): Promise<void> {
-  const flashcardRounds = rounds.filter((r) => r.contentType === 'FLASHCARD' && r.isCorrect !== null);
+  // Skip aggregate rounds (SEERAH_TIMELINE, STORY_PUZZLE, etc.) whose contentId is a comma-joined list
+  const flashcardRounds = rounds.filter((r) => r.contentType === 'FLASHCARD' && r.isCorrect !== null && !r.contentId.includes(','));
 
   for (const round of flashcardRounds) {
     const rating = round.srsRating ?? (round.isCorrect ? 4 : 2);
