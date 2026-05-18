@@ -1,31 +1,19 @@
 export { default as GamesHub } from './GamesHub';
+export { default as GameLauncher } from './GameLauncher';
 export { default as GamePlay } from './GamePlay';
-export { default as TermMatchGame } from './TermMatchGame';
-export { default as SpeedQuizGame } from './SpeedQuizGame';
-export { default as FlashcardFlipGame } from './FlashcardFlipGame';
-export { default as WordScrambleGame } from './WordScrambleGame';
-export { default as FillInBlankGame } from './FillInBlankGame';
-export { default as MemoryMatchGame } from './MemoryMatchGame';
-export { default as TrueFalseGame } from './TrueFalseGame';
-export { default as MultipleChoiceGame } from './MultipleChoiceGame';
-export { default as SentenceBuildGame } from './SentenceBuildGame';
-export { default as ListeningQuizGame } from './ListeningQuizGame';
-export { default as CalligraphyTraceGame } from './CalligraphyTraceGame';
-export { default as SpellingBeeGame } from './SpellingBeeGame';
-export { default as StoryPuzzleGame } from './StoryPuzzleGame';
-export { default as EscapeRoomGame } from './EscapeRoomGame';
-export { default as MazeRunnerGame } from './MazeRunnerGame';
-export { default as MazeNavigatorGame } from './MazeNavigatorGame';
-export { default as DailyChallengeGame } from './DailyChallengeGame';
-export { default as AyahCompletionGame } from './AyahCompletionGame';
-export { default as FiqhScenarioGame } from './FiqhScenarioGame';
-export { default as HadithChainGame } from './HadithChainGame';
+
+// The 9 game mechanics
+export { default as QuickRecallGame } from './QuickRecallGame';
+export { default as PairMatchGame } from './PairMatchGame';
+export { default as FlashcardSprintGame } from './FlashcardSprintGame';
+export { default as ClozeGame } from './ClozeGame';
 export { default as WordSearchGame } from './WordSearchGame';
-export { default as KnowledgeExpeditionGame } from './KnowledgeExpeditionGame';
-export { default as TriviaBattleGame } from './TriviaBattleGame';
-export { default as MosqueBuilderGame } from './MosqueBuilderGame';
-export { default as PatternCreatorGame } from './PatternCreatorGame';
-export { default as SeerahTimelineGame } from './SeerahTimelineGame';
+export { default as SequenceItGame } from './SequenceItGame';
+export { default as WordScrambleGame } from './WordScrambleGame';
+export { default as CalligraphyTraceGame } from './CalligraphyTraceGame';
+export { default as FiqhScenarioGame } from './FiqhScenarioGame';
+
+// Supporting pages
 export { default as ScoreHistory } from './ScoreHistory';
 export { default as AchievementGallery } from './AchievementGallery';
 export { default as LeaderboardPage } from './LeaderboardPage';

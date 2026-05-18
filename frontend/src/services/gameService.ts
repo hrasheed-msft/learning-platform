@@ -112,6 +112,53 @@ export const gameService = {
     return response.data.data ?? [];
   },
 
+  /**
+   * Fetch courses eligible for a given game slug (one of the 9 new mechanics).
+   * Tries the dedicated endpoint first; falls back to filtering availableGames
+   * client-side if the endpoint isn't deployed yet.
+   */
+  async getEligibleCourses(
+    gameSlug: string,
+    memberId: string
+  ): Promise<Array<{ gameId: string; courseId?: string; courseName: string; contentCount: number; suggestedDifficulty: GameDifficulty }>> {
+    try {
+      const response = await api.get<ApiResponse<any>>(`/games/${gameSlug}/eligible-courses`, {
+        params: { memberId },
+      });
+      const raw = response.data.data;
+      const list = Array.isArray(raw) ? raw : raw?.courses ?? [];
+      return list.map((c: any) => ({
+        gameId: c.gameId ?? c.id,
+        courseId: c.courseId,
+        courseName: c.courseName ?? c.course?.title ?? 'Untitled',
+        contentCount: c.contentCount ?? 0,
+        suggestedDifficulty: c.suggestedDifficulty ?? 'MEDIUM',
+      }));
+    } catch {
+      // Fallback: derive from /games/available by matching template type
+      const { SLUG_TO_TYPE, mapToActiveType } = await import('@/utils/gameHelpers');
+      const target = SLUG_TO_TYPE[gameSlug];
+      if (!target) return [];
+      const { games } = await gameService.getAvailableGames({ memberId });
+      const matched = games.filter((g) => mapToActiveType(g.template.type) === target);
+      // Deduplicate by gameId
+      const seen = new Set<string>();
+      return matched
+        .filter((g) => {
+          if (seen.has(g.id)) return false;
+          seen.add(g.id);
+          return true;
+        })
+        .map((g) => ({
+          gameId: g.id,
+          courseId: g.courseId,
+          courseName: g.courseName || 'General',
+          contentCount: g.contentCount,
+          suggestedDifficulty: g.suggestedDifficulty,
+        }));
+    }
+  },
+
   // --- Session Lifecycle ---
 
   async startGame(gameId: string, memberId: string, difficulty: GameDifficulty): Promise<{ session: GameSession }> {

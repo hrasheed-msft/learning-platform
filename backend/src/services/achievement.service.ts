@@ -47,7 +47,7 @@ const ACHIEVEMENT_DEFS: AchievementDef[] = [
         where: {
           memberId,
           status: 'COMPLETED',
-          game: { template: { type: 'SPEED_QUIZ' as GameType } },
+          game: { template: { type: 'QUICK_RECALL' as GameType } },
         },
         include: { rounds: true },
         take: 50,
@@ -118,7 +118,7 @@ const ACHIEVEMENT_DEFS: AchievementDef[] = [
         where: {
           session: {
             memberId,
-            game: { template: { type: 'TERM_MATCH' as GameType } },
+            game: { template: { type: 'PAIR_MATCH' as GameType } },
           },
           contentType: 'ARABIC_TERM',
           isCorrect: true,
@@ -149,7 +149,7 @@ const ACHIEVEMENT_DEFS: AchievementDef[] = [
       });
       const played = new Set(sessions.map((s) => s.game.template.type));
       // Phase 1 game types
-      const phase1Types: GameType[] = ['TERM_MATCH', 'SPEED_QUIZ', 'FLASHCARD_FLIP', 'DAILY_CHALLENGE', 'WORD_SEARCH'];
+      const phase1Types: GameType[] = ['QUICK_RECALL', 'PAIR_MATCH', 'FLASHCARD_SPRINT', 'CLOZE', 'WORD_SEARCH'];
       return phase1Types.every((t) => played.has(t));
     },
   },

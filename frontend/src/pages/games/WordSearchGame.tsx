@@ -1,248 +1,162 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { useGameStore } from '@/stores/gameStore';
-import { useActiveMemberId } from '@/hooks/useActiveMemberId';
-import { ScoreDisplay, GameProgressBar, GameOverScreen, DifficultySelector, GameTimer } from '@/components/games';
+import { CheckCircle2 } from 'lucide-react';
+import { GameOverScreen, ScoreDisplay, GameProgressBar } from '@/components/games';
 import { Button } from '@/components/ui/Button';
-import type { GameDifficulty, GameRound } from '@/types/game';
+import { Spinner } from '@/components/ui/Spinner';
+import { useGameRunner } from '@/hooks/useGameRunner';
 
-interface Props {
-  gameId?: string;
-  difficulty: GameDifficulty;
-}
+interface Cell { row: number; col: number }
 
-type Direction = [number, number];
-const DIRECTIONS: Direction[] = [[0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1]];
-const ARABIC_LETTERS = 'ابتثجحخدذرزسشصضطظعغفقكلمنهوي';
-const GRID_SIZE: Record<GameDifficulty, number> = { EASY: 8, MEDIUM: 10, HARD: 12 };
-
-function placeWord(grid: string[][], word: string, size: number): boolean {
-  const dirs = [...DIRECTIONS].sort(() => Math.random() - 0.5);
-  for (const [dr, dc] of dirs) {
-    const maxR = dr >= 0 ? size - word.length * dr : size - 1;
-    const minR = dr < 0 ? -dr * (word.length - 1) : 0;
-    const maxC = dc >= 0 ? size - word.length * dc : size - 1;
-    const minC = dc < 0 ? -dc * (word.length - 1) : 0;
-
-    for (let attempt = 0; attempt < 20; attempt++) {
-      const r = minR + Math.floor(Math.random() * (maxR - minR + 1));
-      const c = minC + Math.floor(Math.random() * (maxC - minC + 1));
-      let canPlace = true;
-
-      for (let i = 0; i < word.length; i++) {
-        const nr = r + dr * i;
-        const nc = c + dc * i;
-        if (nr < 0 || nr >= size || nc < 0 || nc >= size) { canPlace = false; break; }
-        if (grid[nr][nc] !== '' && grid[nr][nc] !== word[i]) { canPlace = false; break; }
-      }
-
-      if (canPlace) {
-        for (let i = 0; i < word.length; i++) {
-          grid[r + dr * i][c + dc * i] = word[i];
-        }
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function buildGrid(words: string[], size: number): string[][] {
-  const grid: string[][] = Array.from({ length: size }, () => Array(size).fill(''));
-  for (const word of words) placeWord(grid, word, size);
-  // Fill empty cells
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (grid[r][c] === '') grid[r][c] = ARABIC_LETTERS[Math.floor(Math.random() * ARABIC_LETTERS.length)];
-    }
-  }
-  return grid;
-}
-
-export default function WordSearchGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const activeMemberId = useActiveMemberId();
+/**
+ * Word Search — find target words by clicking start cell + end cell (straight lines).
+ */
+export default function WordSearchGame() {
+  const r = useGameRunner();
   const {
-    activeSession, score, lastResult,
-    startGame, submitAnswer, completeGame, resetSession, isLoading,
-  } = useGameStore();
+    activeSession, started, lastResult,
+    currentRound, totalRounds, currentContent,
+    score, submit, playAgain, exitToHub,
+  } = r;
 
-  const [difficulty, setDifficulty] = useState(initialDifficulty);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
-  const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<[number, number] | null>(null);
-  const [currentSelection, setCurrentSelection] = useState<string[]>([]);
-  const [roundStartTime, setRoundStartTime] = useState(Date.now());
+  const [start, setStart] = useState<Cell | null>(null);
+  const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [foundCells, setFoundCells] = useState<Set<string>>(new Set());
+  const [hoverCells, setHoverCells] = useState<Set<string>>(new Set());
 
-  const gridSize = GRID_SIZE[difficulty];
+  const c = currentContent?.content;
+  const grid: string[][] = useMemo(() => {
+    const g = c?.grid;
+    if (Array.isArray(g) && Array.isArray(g[0])) return g as string[][];
+    return Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))));
+  }, [c]);
+  const words: string[] = (c?.targetWords as string[]) || [];
 
-  const words = useMemo(() => {
-    if (!activeSession?.rounds) return [];
-    return activeSession.rounds.map((r: GameRound) =>
-      r.content.arabicText || r.content.front || r.content.translation || ''
-    ).filter(Boolean);
-  }, [activeSession?.rounds]);
+  useEffect(() => {
+    setStart(null); setFoundWords([]); setFoundCells(new Set()); setHoverCells(new Set());
+  }, [currentRound]);
 
-  const grid = useMemo(() => {
-    if (words.length === 0) return [];
-    return buildGrid(words, gridSize);
-  }, [words, gridSize]);
+  useEffect(() => {
+    if (words.length > 0 && foundWords.length === words.length && started) {
+      const t = setTimeout(() => submit({ foundWords }), 600);
+      return () => clearTimeout(t);
+    }
+  }, [foundWords, words.length, started, submit]);
 
-  const handleStart = async () => {
-    if (!gameId || !activeMemberId) {
-      console.warn('Cannot start game: no active family member found.');
+  if (lastResult) return <GameOverScreen result={lastResult} onPlayAgain={playAgain} />;
+  if (!started || !activeSession || !currentContent) {
+    return <div className="flex items-center justify-center min-h-[40vh]"><Spinner size="lg" /></div>;
+  }
+
+  const cellsBetween = (a: Cell, b: Cell): Cell[] | null => {
+    const dr = b.row - a.row, dc = b.col - a.col;
+    const len = Math.max(Math.abs(dr), Math.abs(dc));
+    if (len === 0) return [a];
+    if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) return null;
+    const stepR = Math.sign(dr), stepC = Math.sign(dc);
+    const cells: Cell[] = [];
+    for (let i = 0; i <= len; i++) cells.push({ row: a.row + stepR * i, col: a.col + stepC * i });
+    return cells;
+  };
+
+  const handleCellClick = (cell: Cell) => {
+    if (!start) {
+      setStart(cell);
+      setHoverCells(new Set([`${cell.row},${cell.col}`]));
       return;
     }
-    await startGame(gameId, activeMemberId, difficulty);
-    setGameStarted(true);
-    setRoundStartTime(Date.now());
-  };
-
-  const handleCellDown = (r: number, c: number) => {
-    setIsSelecting(true);
-    setSelectionStart([r, c]);
-    setCurrentSelection([`${r},${c}`]);
-  };
-
-  const handleCellEnter = (r: number, c: number) => {
-    if (!isSelecting || !selectionStart) return;
-    const [sr, sc] = selectionStart;
-    const dr = Math.sign(r - sr);
-    const dc = Math.sign(c - sc);
-    if (dr === 0 && dc === 0) return;
-
-    const cells: string[] = [];
-    let cr = sr, cc = sc;
-    while (cr >= 0 && cr < gridSize && cc >= 0 && cc < gridSize) {
-      cells.push(`${cr},${cc}`);
-      if (cr === r && cc === c) break;
-      cr += dr;
-      cc += dc;
+    const path = cellsBetween(start, cell);
+    setStart(null);
+    setHoverCells(new Set());
+    if (!path) return;
+    const word = path.map((p) => grid[p.row]?.[p.col] ?? '').join('');
+    const reversed = word.split('').reverse().join('');
+    const match = words.find((w) => w.toUpperCase() === word.toUpperCase() || w.toUpperCase() === reversed.toUpperCase());
+    if (match && !foundWords.includes(match)) {
+      setFoundWords((prev) => [...prev, match]);
+      const newCells = new Set(foundCells);
+      path.forEach((p) => newCells.add(`${p.row},${p.col}`));
+      setFoundCells(newCells);
     }
-    setCurrentSelection(cells);
   };
 
-  const handleCellUp = useCallback(async () => {
-    if (!isSelecting) return;
-    setIsSelecting(false);
-
-    const selectedWord = currentSelection.map((key) => {
-      const [r, c] = key.split(',').map(Number);
-      return grid[r]?.[c] || '';
-    }).join('');
-
-    if (words.includes(selectedWord) && !foundWords.has(selectedWord)) {
-      const newFound = new Set(foundWords);
-      newFound.add(selectedWord);
-      setFoundWords(newFound);
-
-      const newCells = new Set(selectedCells);
-      currentSelection.forEach((k) => newCells.add(k));
-      setSelectedCells(newCells);
-
-      const timeSpent = Date.now() - roundStartTime;
-      try {
-        await submitAnswer(newFound.size - 1, { selectedOption: selectedWord }, timeSpent);
-        setRoundStartTime(Date.now());
-      } catch { /* continue */ }
-
-      if (newFound.size >= words.length) {
-        setTimeout(() => completeGame('FINISHED'), 500);
-      }
-    }
-    setCurrentSelection([]);
-    setSelectionStart(null);
-  }, [isSelecting, currentSelection, grid, words, foundWords, selectedCells, roundStartTime]);
-
-  const handlePlayAgain = () => {
-    resetSession();
-    setGameStarted(false);
-    setSelectedCells(new Set());
-    setFoundWords(new Set());
+  const handleCellHover = (cell: Cell) => {
+    if (!start) return;
+    const path = cellsBetween(start, cell);
+    setHoverCells(new Set(path?.map((p) => `${p.row},${p.col}`) ?? []));
   };
-
-  const handleTimeUp = () => completeGame('TIMED_OUT');
-
-  if (lastResult) {
-    return <GameOverScreen result={lastResult} onPlayAgain={handlePlayAgain} />;
-  }
-
-  if (!gameStarted || !activeSession) {
-    return (
-      <div className="max-w-md mx-auto text-center py-16">
-        <span className="text-6xl mb-4 block">🔍</span>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Word Search</h1>
-        <p className="text-gray-500 mb-6">Find hidden Islamic terms in the letter grid</p>
-        <div className="flex justify-center mb-6">
-          <DifficultySelector selected={difficulty} onChange={setDifficulty} />
-        </div>
-        <p className="text-xs text-gray-400 mb-6">{GRID_SIZE[difficulty]}×{GRID_SIZE[difficulty]} grid</p>
-        <Button onClick={handleStart} variant="primary" size="lg" isLoading={isLoading}>
-          Start Search
-        </Button>
-      </div>
-    );
-  }
-
-  if (grid.length === 0) {
-    return <div className="text-center py-16 text-gray-500">Building grid...</div>;
-  }
-
-  const timerDuration = difficulty === 'HARD' ? 120000 : difficulty === 'MEDIUM' ? 180000 : 0;
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
         <ScoreDisplay score={score} />
-        {timerDuration > 0 && <GameTimer durationMs={timerDuration} onTimeUp={handleTimeUp} />}
+        <span className="text-sm text-gray-500">Found <strong>{foundWords.length}</strong> / {words.length}</span>
       </div>
-      <GameProgressBar current={foundWords.size} total={words.length} className="mb-4" />
+      <GameProgressBar current={currentRound} total={totalRounds} className="mb-6" />
 
-      {/* Word list */}
-      <div className="flex flex-wrap gap-2 mb-4 justify-center">
-        {words.map((word, idx) => (
-          <span
-            key={idx}
-            className={clsx(
-              'px-3 py-1 rounded-full text-sm font-arabic',
-              foundWords.has(word) ? 'bg-green-100 text-green-700 line-through' : 'bg-pink-100 text-pink-700',
-            )}
-          >
-            {word}
-          </span>
-        ))}
-      </div>
-
-      {/* Grid */}
-      <div
-        className="inline-grid border-2 border-gray-300 rounded-lg overflow-hidden select-none mx-auto"
-        style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
-        onMouseUp={handleCellUp}
-        onMouseLeave={handleCellUp}
-      >
-        {grid.map((row, r) =>
-          row.map((cell, c) => {
-            const key = `${r},${c}`;
-            const isFound = selectedCells.has(key);
-            const isCurrent = currentSelection.includes(key);
-
-            return (
-              <div
-                key={key}
-                onMouseDown={() => handleCellDown(r, c)}
-                onMouseEnter={() => handleCellEnter(r, c)}
-                className={clsx(
-                  'w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-arabic text-sm sm:text-base cursor-pointer border border-gray-100 select-none',
-                  isFound && 'bg-green-200 text-green-800',
-                  isCurrent && !isFound && 'bg-pink-200 text-pink-800',
-                  !isFound && !isCurrent && 'bg-white hover:bg-pink-50',
-                )}
-              >
-                {cell}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <div className="inline-block bg-white p-3 rounded-2xl shadow-sm border border-pink-100">
+            {grid.map((row, ri) => (
+              <div key={ri} className="flex">
+                {row.map((ch, ci) => {
+                  const key = `${ri},${ci}`;
+                  const isFound = foundCells.has(key);
+                  const isHover = hoverCells.has(key);
+                  const isArabic = /[\u0600-\u06FF]/.test(ch);
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleCellClick({ row: ri, col: ci })}
+                      onMouseEnter={() => handleCellHover({ row: ri, col: ci })}
+                      className={clsx(
+                        'w-9 h-9 sm:w-10 sm:h-10 m-0.5 rounded-md font-bold text-sm flex items-center justify-center transition-colors',
+                        isFound ? 'bg-emerald-500 text-white'
+                          : isHover ? 'bg-pink-200 text-pink-900'
+                          : 'bg-pink-50 hover:bg-pink-100 text-gray-700',
+                        isArabic && 'font-arabic text-base',
+                      )}
+                      dir={isArabic ? 'rtl' : 'ltr'}
+                    >
+                      {ch}
+                    </button>
+                  );
+                })}
               </div>
-            );
-          })
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-3">Click the first letter, then the last letter of a word.</p>
+        </div>
+
+        <div className="md:col-span-1">
+          <h3 className="font-bold text-gray-800 mb-3">Find these:</h3>
+          <ul className="space-y-2">
+            {words.map((w) => {
+              const found = foundWords.includes(w);
+              const isArabic = /[\u0600-\u06FF]/.test(w);
+              return (
+                <li
+                  key={w}
+                  className={clsx(
+                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+                    found ? 'bg-emerald-50 text-emerald-700 line-through' : 'bg-gray-50 text-gray-700',
+                  )}
+                >
+                  {found && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                  <span dir={isArabic ? 'rtl' : 'ltr'} className={clsx(isArabic && 'font-arabic text-base')}>{w}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-8 text-center">
+        <button onClick={exitToHub} className="text-sm text-gray-400 hover:text-gray-600">Exit to Hub</button>
+        {words.length > 0 && (
+          <Button onClick={() => submit({ foundWords })} variant="outline" className="ml-3">
+            Skip / Submit
+          </Button>
         )}
       </div>
     </div>

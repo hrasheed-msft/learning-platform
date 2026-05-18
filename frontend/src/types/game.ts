@@ -1,24 +1,30 @@
 // Game Types — matching backend enums and API contracts
 
+// New 9-game taxonomy (active). Legacy types preserved for backend backward compat.
 export type GameType =
-  // Course-integrated
+  // --- Active (the 9 mechanics) ---
+  | 'QUICK_RECALL'         // 4-opt MCQ + 2-opt true/false
+  | 'PAIR_MATCH'           // Memory / Connect pairs
+  | 'FLASHCARD_SPRINT'     // Self-rated recall
+  | 'CLOZE'                // Fill the gap
+  | 'WORD_SEARCH'
+  | 'SEQUENCE_IT'          // Drag into order
+  | 'WORD_SCRAMBLE'
+  | 'CALLIGRAPHY_TRACE'
+  | 'FIQH_SCENARIO'        // Branching scenario tree
+  // --- Legacy (still emitted by older backend records) ---
   | 'TERM_MATCH'
   | 'SPEED_QUIZ'
   | 'FLASHCARD_FLIP'
-  | 'WORD_SCRAMBLE'
   | 'FILL_IN_BLANK'
   | 'MEMORY_MATCH'
   | 'TRUE_FALSE'
   | 'MULTIPLE_CHOICE'
   | 'SENTENCE_BUILD'
   | 'LISTENING_QUIZ'
-  | 'CALLIGRAPHY_TRACE'
   | 'SPELLING_BEE'
   | 'AYAH_COMPLETION'
-  | 'FIQH_SCENARIO'
   | 'HADITH_CHAIN'
-  | 'WORD_SEARCH'
-  // Standalone
   | 'STORY_PUZZLE'
   | 'ESCAPE_ROOM'
   | 'MAZE_RUNNER'
@@ -29,6 +35,18 @@ export type GameType =
   | 'MOSQUE_BUILDER'
   | 'PATTERN_CREATOR'
   | 'SEERAH_TIMELINE';
+
+// The 9 active mechanics — used for filtering & routing
+export type ActiveGameType =
+  | 'QUICK_RECALL'
+  | 'PAIR_MATCH'
+  | 'FLASHCARD_SPRINT'
+  | 'CLOZE'
+  | 'WORD_SEARCH'
+  | 'SEQUENCE_IT'
+  | 'WORD_SCRAMBLE'
+  | 'CALLIGRAPHY_TRACE'
+  | 'FIQH_SCENARIO';
 
 export type GameCategory = 'COURSE_INTEGRATED' | 'STANDALONE';
 export type GameDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
@@ -304,23 +322,78 @@ export interface ScoreHistoryParams {
 }
 
 // Game metadata for UI display
-export const GAME_META: Record<GameType, { name: string; emoji: string; color: string; description: string }> = {
+export interface GameMeta {
+  name: string;
+  emoji: string;
+  color: string;
+  description: string;
+  whatItTests?: string;
+  restriction?: string; // e.g., "Arabic only", "Fiqh only"
+  slug?: string;
+}
+
+export const GAME_META: Record<GameType, GameMeta> = {
+  // --- The 9 active mechanics ---
+  QUICK_RECALL: {
+    name: 'Quick Recall', emoji: '⚡', color: 'bg-orange-500', slug: 'quick-recall',
+    description: 'Answer multiple-choice and true/false questions',
+    whatItTests: 'Recognition',
+  },
+  PAIR_MATCH: {
+    name: 'Pair Match', emoji: '🃏', color: 'bg-purple-500', slug: 'pair-match',
+    description: 'Match terms with their definitions',
+    whatItTests: 'Association',
+  },
+  FLASHCARD_SPRINT: {
+    name: 'Flashcard Sprint', emoji: '🔄', color: 'bg-indigo-500', slug: 'flashcard-sprint',
+    description: 'Flip cards, rate your own recall',
+    whatItTests: 'Self-assessed memory',
+  },
+  CLOZE: {
+    name: 'Fill the Gap', emoji: '✏️', color: 'bg-teal-500', slug: 'cloze',
+    description: 'Complete sentences with the missing word',
+    whatItTests: 'Production',
+  },
+  WORD_SEARCH: {
+    name: 'Word Search', emoji: '🔍', color: 'bg-pink-500', slug: 'word-search',
+    description: 'Find hidden words in a letter grid',
+    whatItTests: 'Visual scanning',
+  },
+  SEQUENCE_IT: {
+    name: 'Sequence It', emoji: '🧩', color: 'bg-cyan-500', slug: 'sequence-it',
+    description: 'Drag items into the correct order',
+    whatItTests: 'Ordering & chronology',
+  },
+  WORD_SCRAMBLE: {
+    name: 'Word Scramble', emoji: '🔤', color: 'bg-amber-500', slug: 'word-scramble',
+    description: 'Unscramble jumbled letters to spell the word',
+    whatItTests: 'Spelling & vocabulary',
+  },
+  CALLIGRAPHY_TRACE: {
+    name: 'Calligraphy Trace', emoji: '🖌️', color: 'bg-violet-500', slug: 'calligraphy-trace',
+    description: 'Trace Arabic letters on the canvas',
+    whatItTests: 'Handwriting & form',
+    restriction: 'Arabic only',
+  },
+  FIQH_SCENARIO: {
+    name: 'Fiqh Scenario', emoji: '⚖️', color: 'bg-slate-500', slug: 'fiqh-scenario',
+    description: 'Navigate branching situations to find the correct ruling',
+    whatItTests: 'Applied jurisprudence',
+    restriction: 'Fiqh only',
+  },
+  // --- Legacy (kept for backward compat with existing backend records) ---
   TERM_MATCH: { name: 'Term Match', emoji: '🃏', color: 'bg-purple-500', description: 'Match Arabic terms to their definitions' },
   SPEED_QUIZ: { name: 'Speed Quiz', emoji: '⚡', color: 'bg-red-500', description: 'Answer rapid-fire questions against the clock' },
   FLASHCARD_FLIP: { name: 'Flashcard Flip', emoji: '🔄', color: 'bg-indigo-500', description: 'Flip cards to reveal definitions and rate yourself' },
-  WORD_SCRAMBLE: { name: 'Word Scramble', emoji: '🔤', color: 'bg-amber-500', description: 'Unscramble letters to spell the correct word' },
   FILL_IN_BLANK: { name: 'Fill in the Blank', emoji: '✏️', color: 'bg-teal-500', description: 'Complete sentences with the missing word' },
   MEMORY_MATCH: { name: 'Memory Match', emoji: '🧠', color: 'bg-blue-500', description: 'Flip cards to find matching pairs' },
   TRUE_FALSE: { name: 'True or False', emoji: '✅', color: 'bg-emerald-500', description: 'Decide if statements are true or false' },
   MULTIPLE_CHOICE: { name: 'Multiple Choice', emoji: '📝', color: 'bg-orange-500', description: 'Pick the correct answer from four options' },
   SENTENCE_BUILD: { name: 'Sentence Builder', emoji: '🧩', color: 'bg-cyan-500', description: 'Arrange words in the correct order' },
   LISTENING_QUIZ: { name: 'Listening Quiz', emoji: '🎧', color: 'bg-rose-500', description: 'Listen and answer questions about what you hear' },
-  CALLIGRAPHY_TRACE: { name: 'Calligraphy Trace', emoji: '🖌️', color: 'bg-violet-500', description: 'Trace Arabic letters with your finger or mouse' },
   SPELLING_BEE: { name: 'Spelling Bee', emoji: '🐝', color: 'bg-yellow-500', description: 'Read the definition and spell the word correctly' },
   AYAH_COMPLETION: { name: 'Ayah Completion', emoji: '📖', color: 'bg-sky-500', description: 'Complete missing words in Quranic verses' },
-  FIQH_SCENARIO: { name: 'Fiqh Scenario', emoji: '⚖️', color: 'bg-slate-500', description: 'Choose the correct ruling for real-life scenarios' },
   HADITH_CHAIN: { name: 'Hadith Chain', emoji: '🔗', color: 'bg-stone-500', description: 'Arrange narrators in the correct chain' },
-  WORD_SEARCH: { name: 'Word Search', emoji: '🔍', color: 'bg-pink-500', description: 'Find hidden Islamic terms in a letter grid' },
   STORY_PUZZLE: { name: 'Story Puzzle', emoji: '📚', color: 'bg-green-500', description: 'Arrange story segments in the right order' },
   ESCAPE_ROOM: { name: 'Escape Room', emoji: '🔐', color: 'bg-fuchsia-500', description: 'Solve challenges to escape themed rooms' },
   MAZE_RUNNER: { name: 'Maze Runner', emoji: '🧭', color: 'bg-lime-500', description: 'Navigate mazes by answering questions at gates' },

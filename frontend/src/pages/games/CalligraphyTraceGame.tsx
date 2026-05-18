@@ -1,274 +1,138 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import clsx from 'clsx';
-import { useGameStore } from '@/stores/gameStore';
-import { useActiveMemberId } from '@/hooks/useActiveMemberId';
-import { ScoreDisplay, GameProgressBar, StreakIndicator, GameOverScreen, DifficultySelector } from '@/components/games';
-import { Button } from '@/components/ui/Button';
+import { useEffect, useRef, useState } from 'react';
 import { Eraser, Check } from 'lucide-react';
-import type { GameDifficulty, GameRound } from '@/types/game';
+import { GameOverScreen, ScoreDisplay, GameProgressBar } from '@/components/games';
+import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
+import { useGameRunner } from '@/hooks/useGameRunner';
 
-interface Props {
-  gameId?: string;
-  difficulty: GameDifficulty;
-}
-
-export default function CalligraphyTraceGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const activeMemberId = useActiveMemberId();
+/**
+ * Calligraphy Trace — trace Arabic letters/words on a canvas.
+ */
+export default function CalligraphyTraceGame() {
+  const r = useGameRunner();
   const {
-    activeSession, score, streak, currentRound, lastResult, rounds: submittedRounds,
-    startGame, submitAnswer, completeGame, resetSession, isLoading,
-  } = useGameStore();
+    activeSession, started, lastResult,
+    currentRound, totalRounds, currentContent,
+    score, difficulty, submit, playAgain, exitToHub,
+  } = r;
 
-  const [difficulty, setDifficulty] = useState(initialDifficulty);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [hasDrawn, setHasDrawn] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [roundStartTime, setRoundStartTime] = useState(Date.now());
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [drawing, setDrawing] = useState(false);
+  const [pathPoints, setPathPoints] = useState<number>(0);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+  const c = currentContent?.content;
+  const letter = String(c?.letter ?? c?.arabicText ?? c?.front ?? 'ا');
+  const showGuide = difficulty !== 'HARD';
 
-  const currentQuestion: GameRound | undefined = activeSession?.rounds?.[currentRound];
-  const totalRounds = activeSession?.totalRounds || 0;
-
-  const arabicText = currentQuestion?.content.arabicText || currentQuestion?.content.front || '';
-
-  // Draw the watermark guide text on canvas
   useEffect(() => {
-    if (!gameStarted || !arabicText) return;
-    drawWatermark();
-  }, [gameStarted, currentRound, arabicText]);
+    const cv = canvasRef.current; if (!cv) return;
+    const ctx = cv.getContext('2d'); if (!ctx) return;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    setPathPoints(0);
+  }, [currentRound]);
 
-  const drawWatermark = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Background
-    ctx.fillStyle = '#fefce8';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Watermark text
-    ctx.save();
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = '#065f46';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const fontSize = Math.min(canvas.width / (arabicText.length * 0.6 || 1), 160);
-    ctx.font = `${fontSize}px "Noto Naskh Arabic", "Amiri", serif`;
-    ctx.direction = 'rtl';
-    ctx.fillText(arabicText, canvas.width / 2, canvas.height / 2);
-    ctx.restore();
-  };
-
-  const getPos = (e: React.MouseEvent | React.TouchEvent): { x: number; y: number } | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    if ('touches' in e) {
-      const touch = e.touches[0];
-      if (!touch) return null;
-      return { x: (touch.clientX - rect.left) * scaleX, y: (touch.clientY - rect.top) * scaleY };
-    }
-    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
-  };
-
-  const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const pos = getPos(e);
-    if (!pos) return;
-    setIsDrawing(true);
-    setHasDrawn(true);
-    lastPointRef.current = pos;
-  };
-
-  const draw = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    if (!isDrawing) return;
-    const pos = getPos(e);
-    if (!pos) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx || !lastPointRef.current) return;
-
-    ctx.beginPath();
-    ctx.strokeStyle = '#047857';
-    ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-
-    lastPointRef.current = pos;
-  };
-
-  const endDraw = () => {
-    setIsDrawing(false);
-    lastPointRef.current = null;
-  };
-
-  const clearCanvas = () => {
-    setHasDrawn(false);
-    drawWatermark();
-  };
-
-  const handleStart = async () => {
-    if (!gameId || !activeMemberId) {
-      console.warn('Cannot start game: no active family member found.');
-      return;
-    }
-    await startGame(gameId, activeMemberId, difficulty);
-    setGameStarted(true);
-    setHasDrawn(false);
-    setRoundStartTime(Date.now());
-  };
-
-  const handleSubmit = useCallback(async () => {
-    if (showFeedback || !activeSession || !currentQuestion) return;
-    setShowFeedback(true);
-
-    const timeSpent = Date.now() - roundStartTime;
-    try {
-      const result = await submitAnswer(
-        currentRound,
-        { selectedOption: currentQuestion.content.id },
-        timeSpent,
-      );
-
-      setTimeout(() => {
-        setShowFeedback(false);
-        setHasDrawn(false);
-        setRoundStartTime(Date.now());
-
-        if (result.sessionState.roundsCompleted >= totalRounds) {
-          completeGame('FINISHED');
-        }
-      }, 1000);
-    } catch {
-      setShowFeedback(false);
-    }
-  }, [showFeedback, activeSession, currentQuestion, currentRound, roundStartTime, totalRounds]);
-
-  const handlePlayAgain = () => {
-    resetSession();
-    setGameStarted(false);
-    setHasDrawn(false);
-    setShowFeedback(false);
-  };
-
-  if (lastResult) {
-    return <GameOverScreen result={lastResult} onPlayAgain={handlePlayAgain} />;
+  if (lastResult) return <GameOverScreen result={lastResult} onPlayAgain={playAgain} />;
+  if (!started || !activeSession || !currentContent) {
+    return <div className="flex items-center justify-center min-h-[40vh]"><Spinner size="lg" /></div>;
   }
 
-  if (!gameStarted || !activeSession) {
-    return (
-      <div className="max-w-md mx-auto text-center py-16">
-        <span className="text-6xl mb-4 block">✍️</span>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Calligraphy Trace</h1>
-        <p className="text-gray-500 mb-6">Trace Arabic letters and words to practice your writing!</p>
-        <div className="flex justify-center mb-6">
-          <DifficultySelector selected={difficulty} onChange={setDifficulty} />
-        </div>
-        <Button onClick={handleStart} variant="primary" size="lg" isLoading={isLoading}>
-          Start Tracing
-        </Button>
-      </div>
-    );
-  }
+  const getPos = (e: React.PointerEvent) => {
+    const cv = canvasRef.current!;
+    const rect = cv.getBoundingClientRect();
+    return { x: (e.clientX - rect.left) * (cv.width / rect.width), y: (e.clientY - rect.top) * (cv.height / rect.height) };
+  };
 
-  if (!currentQuestion) {
-    return <div className="text-center py-16 text-gray-500">Loading round...</div>;
-  }
+  const onDown = (e: React.PointerEvent) => {
+    setDrawing(true);
+    const { x, y } = getPos(e);
+    const ctx = canvasRef.current!.getContext('2d')!;
+    ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = '#7c3aed';
+    ctx.beginPath(); ctx.moveTo(x, y);
+  };
+  const onMove = (e: React.PointerEvent) => {
+    if (!drawing) return;
+    const { x, y } = getPos(e);
+    const ctx = canvasRef.current!.getContext('2d')!;
+    ctx.lineTo(x, y); ctx.stroke();
+    setPathPoints((p) => p + 1);
+  };
+  const onUp = () => setDrawing(false);
 
-  const results = submittedRounds.map((r) => r.isCorrect);
+  const clear = () => {
+    const cv = canvasRef.current; if (!cv) return;
+    cv.getContext('2d')!.clearRect(0, 0, cv.width, cv.height);
+    setPathPoints(0);
+  };
+
+  const scorePath = (): number => {
+    const cv = canvasRef.current; if (!cv) return 0;
+    const ctx = cv.getContext('2d')!;
+    const data = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    let inked = 0;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > 0) inked++;
+    }
+    const total = cv.width * cv.height;
+    const coverage = inked / total;
+    if (coverage < 0.01) return 0;
+    if (coverage > 0.25) return 0.5;
+    return Math.min(1, coverage / 0.10);
+  };
+
+  const handleSubmit = () => {
+    const accuracy = scorePath();
+    submit({ accuracy, strokePoints: pathPoints, correct: accuracy >= 0.5 });
+  };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* HUD */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="max-w-xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
         <ScoreDisplay score={score} />
-        <StreakIndicator streak={streak} />
-        <span className="text-sm text-gray-500">
-          {currentRound + 1} / {totalRounds}
-        </span>
+        <span className="text-sm text-gray-500">{currentRound + 1} / {totalRounds}</span>
       </div>
+      <GameProgressBar current={currentRound} total={totalRounds} className="mb-6" />
 
-      <GameProgressBar current={currentRound} total={totalRounds} results={results} className="mb-6" />
-
-      {/* Reference text */}
-      <div className="text-center mb-4">
-        <p className="text-4xl font-arabic text-emerald-800 leading-relaxed">{arabicText}</p>
-        {currentQuestion.content.transliteration && (
-          <p className="text-sm text-gray-500 italic mt-1">{currentQuestion.content.transliteration}</p>
+      <div className="relative bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl border-2 border-violet-200 mb-4 overflow-hidden">
+        {showGuide && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+            <span
+              dir="rtl"
+              className="font-arabic text-[12rem] sm:text-[16rem] leading-none text-violet-200 opacity-60"
+            >
+              {letter}
+            </span>
+          </div>
         )}
-        {currentQuestion.content.translation && (
-          <p className="text-sm text-gray-400 mt-1">{currentQuestion.content.translation}</p>
-        )}
-      </div>
-
-      <p className="text-center text-xs text-gray-400 mb-3">
-        Trace over the guide below with your mouse or finger
-      </p>
-
-      {/* Canvas */}
-      <div className={clsx(
-        'rounded-2xl overflow-hidden shadow-lg border-2 mb-6 touch-none transition-colors',
-        showFeedback ? 'border-green-400' : 'border-amber-200',
-      )}>
         <canvas
           ref={canvasRef}
-          width={600}
-          height={300}
-          className="w-full cursor-crosshair"
-          style={{ touchAction: 'none' }}
-          onMouseDown={startDraw}
-          onMouseMove={draw}
-          onMouseUp={endDraw}
-          onMouseLeave={endDraw}
-          onTouchStart={startDraw}
-          onTouchMove={draw}
-          onTouchEnd={endDraw}
+          width={480}
+          height={360}
+          className="w-full h-72 touch-none relative cursor-crosshair"
+          onPointerDown={onDown}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+          onPointerLeave={onUp}
         />
       </div>
 
-      {/* Feedback */}
-      {showFeedback && (
-        <div className="text-center mb-4 p-3 rounded-xl bg-green-100 text-green-700 font-semibold text-sm">
-          ✨ Beautiful work! Keep practising your calligraphy!
-        </div>
-      )}
+      <p className="text-xs text-gray-500 text-center mb-4">
+        {showGuide
+          ? 'Trace over the faded letter. Lift your finger between strokes.'
+          : 'Write the letter from memory.'}
+      </p>
 
-      {/* Action buttons */}
-      {!showFeedback && (
-        <div className="flex justify-center gap-3">
-          <Button
-            onClick={clearCanvas}
-            variant="outline"
-            leftIcon={<Eraser className="w-4 h-4" />}
-          >
-            Clear
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="primary"
-            disabled={!hasDrawn}
-            leftIcon={<Check className="w-4 h-4" />}
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-          >
-            Submit Trace
-          </Button>
-        </div>
-      )}
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={clear}>
+          <Eraser className="w-4 h-4 mr-1" /> Clear
+        </Button>
+        <Button variant="primary" onClick={handleSubmit} className="flex-1" disabled={pathPoints < 5}>
+          <Check className="w-4 h-4 mr-1" /> Submit Trace
+        </Button>
+      </div>
+
+      <div className="mt-8 text-center">
+        <button onClick={exitToHub} className="text-sm text-gray-400 hover:text-gray-600">Exit to Hub</button>
+      </div>
     </div>
   );
 }

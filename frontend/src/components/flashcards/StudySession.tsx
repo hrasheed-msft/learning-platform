@@ -46,7 +46,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
   } = useFlashCardStore();
   
   const { selectedMember, members, fetchMembers } = useFamilyStore();
-  const { user, family } = useAuthStore();
+  const { family } = useAuthStore();
 
   const [showAnswer, setShowAnswer] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

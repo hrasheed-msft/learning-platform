@@ -1,252 +1,163 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { useGameStore } from '@/stores/gameStore';
-import { useActiveMemberId } from '@/hooks/useActiveMemberId';
-import { ScoreDisplay, GameProgressBar, StreakIndicator, HintButton, GameOverScreen, DifficultySelector } from '@/components/games';
+import { Lightbulb, X } from 'lucide-react';
+import { GameOverScreen, ScoreDisplay, GameProgressBar, StreakIndicator } from '@/components/games';
 import { Button } from '@/components/ui/Button';
-import type { GameDifficulty, GameRound } from '@/types/game';
+import { Spinner } from '@/components/ui/Spinner';
+import { useGameRunner } from '@/hooks/useGameRunner';
+import { shuffle } from '@/utils/gameHelpers';
 
-interface Props {
-  gameId?: string;
-  difficulty: GameDifficulty;
-}
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-export default function WordScrambleGame({ gameId, difficulty: initialDifficulty }: Props) {
-  const activeMemberId = useActiveMemberId();
+/**
+ * Word Scramble — unscramble jumbled letters of a single word.
+ */
+export default function WordScrambleGame() {
+  const r = useGameRunner();
   const {
-    activeSession, score, streak, currentRound, lastResult, rounds: submittedRounds,
-    startGame, submitAnswer, completeGame, resetSession, isLoading,
-  } = useGameStore();
+    activeSession, started, lastResult,
+    currentRound, totalRounds, currentContent,
+    score, streak, difficulty,
+    submit, playAgain, exitToHub, submittedRounds,
+  } = r;
 
-  const [difficulty, setDifficulty] = useState(initialDifficulty);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
-  const [roundStartTime, setRoundStartTime] = useState(Date.now());
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [scrambleKey, setScrambleKey] = useState(0);
-  const [hintsRemaining, setHintsRemaining] = useState(difficulty === 'EASY' ? 3 : difficulty === 'MEDIUM' ? 2 : 1);
+  const c = currentContent?.content;
+  const word: string = String(c?.correctAnswer ?? c?.front ?? '');
+  const isArabic = /[\u0600-\u06FF]/.test(word);
 
-  const currentQuestion: GameRound | undefined = activeSession?.rounds?.[currentRound];
-  const totalRounds = activeSession?.totalRounds || 0;
+  const letters = useMemo(() => {
+    const src = (c?.scrambledWord as string) || shuffle(word.split('')).join('');
+    return src.split('').map((ch, i) => ({ id: `${i}-${ch}`, ch }));
+  }, [word, c]);
 
-  const targetWord = currentQuestion
-    ? (currentQuestion.content.correctAnswer || currentQuestion.content.translation || currentQuestion.content.back || '')
-    : '';
+  const [bank, setBank] = useState(letters);
+  const [picked, setPicked] = useState<typeof letters>([]);
+  const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const [showHint, setShowHint] = useState(false);
 
-  const hint = currentQuestion
-    ? (currentQuestion.content.questionText || currentQuestion.content.front || '')
-    : '';
+  useEffect(() => {
+    setBank(letters); setPicked([]); setFeedback(null); setShowHint(false);
+  }, [letters, currentRound]);
 
-  const scrambledLetters = useMemo(() => {
-    if (!targetWord) return [];
-    const letters = targetWord.toUpperCase().split('');
-    let shuffled = shuffleArray(letters);
-    // Ensure the shuffle isn't identical to the answer
-    if (shuffled.join('') === letters.join('') && letters.length > 1) {
-      shuffled = shuffleArray(letters);
-    }
-    return shuffled;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetWord, scrambleKey]);
-
-  const handleStart = async () => {
-    if (!gameId || !activeMemberId) {
-      console.warn('Cannot start game: no active family member found.');
-      return;
-    }
-    await startGame(gameId, activeMemberId, difficulty);
-    setGameStarted(true);
-    setRoundStartTime(Date.now());
-    setSelectedIndices([]);
-    setScrambleKey(0);
-  };
-
-  const handleLetterClick = useCallback((index: number) => {
-    if (showFeedback) return;
-    if (selectedIndices.includes(index)) return;
-
-    const newSelected = [...selectedIndices, index];
-    setSelectedIndices(newSelected);
-
-    const newWord = newSelected.map((i) => scrambledLetters[i]).join('');
-
-    // Auto-submit when all letters placed
-    if (newWord.length === targetWord.length) {
-      const correct = newWord.toLowerCase() === targetWord.toLowerCase();
-      setIsCorrect(correct);
-      setShowFeedback(true);
-
-      const timeSpent = Date.now() - roundStartTime;
-      submitAnswer(currentRound, { selectedOption: newWord }, timeSpent)
-        .then((result) => {
-          setTimeout(() => {
-            setShowFeedback(false);
-            setSelectedIndices([]);
-            setRoundStartTime(Date.now());
-            setScrambleKey((k) => k + 1);
-
-            if (result.sessionState.roundsCompleted >= totalRounds) {
-              completeGame('FINISHED');
-            }
-          }, correct ? 800 : 1200);
-        })
-        .catch(() => {
-          setShowFeedback(false);
-          setSelectedIndices([]);
-        });
-    }
-  }, [showFeedback, selectedIndices, scrambledLetters, targetWord, currentRound, roundStartTime, totalRounds]);
-
-  const handleDeselectLetter = useCallback((positionIndex: number) => {
-    if (showFeedback) return;
-    setSelectedIndices((prev) => prev.filter((_, i) => i !== positionIndex));
-  }, [showFeedback]);
-
-  const handleHint = () => {
-    if (hintsRemaining <= 0 || showFeedback) return;
-    // Reveal the next correct letter
-    const correctLetters = targetWord.toUpperCase().split('');
-    const nextPos = selectedIndices.length;
-    if (nextPos >= correctLetters.length) return;
-
-    const neededLetter = correctLetters[nextPos];
-    const availableIndex = scrambledLetters.findIndex(
-      (l, i) => l === neededLetter && !selectedIndices.includes(i)
-    );
-    if (availableIndex !== -1) {
-      handleLetterClick(availableIndex);
-    }
-    setHintsRemaining((h) => h - 1);
-  };
-
-  const handlePlayAgain = () => {
-    resetSession();
-    setGameStarted(false);
-    setSelectedIndices([]);
-    setShowFeedback(false);
-    setHintsRemaining(difficulty === 'EASY' ? 3 : difficulty === 'MEDIUM' ? 2 : 1);
-  };
-
-  if (lastResult) {
-    return <GameOverScreen result={lastResult} onPlayAgain={handlePlayAgain} />;
+  if (lastResult) return <GameOverScreen result={lastResult} onPlayAgain={playAgain} />;
+  if (!started || !activeSession || !currentContent) {
+    return <div className="flex items-center justify-center min-h-[40vh]"><Spinner size="lg" /></div>;
   }
 
-  if (!gameStarted || !activeSession) {
-    return (
-      <div className="max-w-md mx-auto text-center py-16">
-        <span className="text-6xl mb-4 block">🔤</span>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Word Scramble</h1>
-        <p className="text-gray-500 mb-6">Unscramble the letters to spell the correct word!</p>
-        <div className="flex justify-center mb-6">
-          <DifficultySelector selected={difficulty} onChange={setDifficulty} />
-        </div>
-        <Button onClick={handleStart} variant="primary" size="lg" isLoading={isLoading}>
-          Start Game
-        </Button>
-      </div>
-    );
-  }
+  const pick = (idx: number) => {
+    if (feedback) return;
+    const letter = bank[idx];
+    setBank((b) => b.filter((_, i) => i !== idx));
+    setPicked((p) => [...p, letter]);
+  };
+  const unpick = (idx: number) => {
+    if (feedback) return;
+    const letter = picked[idx];
+    setPicked((p) => p.filter((_, i) => i !== idx));
+    setBank((b) => [...b, letter]);
+  };
+  const reset = () => {
+    if (feedback) return;
+    setBank(letters); setPicked([]);
+  };
 
-  if (!currentQuestion) {
-    return <div className="text-center py-16 text-gray-500">Loading question...</div>;
-  }
+  const check = () => {
+    const guess = picked.map((p) => p.ch).join('');
+    const ok = guess.toLowerCase() === word.toLowerCase();
+    setFeedback(ok ? 'correct' : 'wrong');
+    setTimeout(() => submit({ guess, correct: ok }), 1100);
+  };
 
-  const results = submittedRounds.map((r) => r.isCorrect);
+  const results = submittedRounds.map((s) => s.isCorrect);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* HUD */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="max-w-xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
         <ScoreDisplay score={score} />
         <StreakIndicator streak={streak} />
-        <HintButton hintsRemaining={hintsRemaining} maxHints={difficulty === 'EASY' ? 3 : difficulty === 'MEDIUM' ? 2 : 1} onUseHint={handleHint} />
       </div>
+      <GameProgressBar current={currentRound} total={totalRounds} results={results} className="mb-6" />
 
-      <GameProgressBar current={currentRound} total={totalRounds} results={results} className="mb-8" />
+      {c?.questionText ? (
+        <p className="text-center text-gray-600 mb-4">{c.questionText as string}</p>
+      ) : (
+        <p className="text-center text-gray-500 mb-4 text-sm">Unscramble the letters to spell the word.</p>
+      )}
 
-      {/* Question / Hint */}
-      <div className="text-center mb-6">
-        <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-          Round {currentRound + 1} of {totalRounds}
-        </p>
-        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl p-6 shadow-sm border border-teal-100">
-          <p className="text-lg text-gray-700 font-medium">{hint}</p>
-          {currentQuestion.content.arabicText && (
-            <p className="mt-2 text-2xl font-arabic text-teal-700">
-              {currentQuestion.content.arabicText}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Build Area */}
-      <div className={clsx(
-        'flex flex-wrap justify-center gap-2 min-h-[60px] p-4 rounded-2xl border-2 border-dashed mb-6 transition-all duration-300',
-        showFeedback && isCorrect && 'border-green-400 bg-green-50',
-        showFeedback && !isCorrect && 'border-red-400 bg-red-50 animate-pulse',
-        !showFeedback && 'border-amber-300 bg-amber-50/50',
-      )}>
-        {selectedIndices.length === 0 && (
-          <p className="text-amber-400 text-sm self-center">Tap letters below to spell the word</p>
+      <div
+        dir={isArabic ? 'rtl' : 'ltr'}
+        className={clsx(
+          'min-h-[80px] p-4 rounded-2xl border-2 border-dashed flex flex-wrap gap-2 items-center justify-center mb-4 transition-colors',
+          feedback === 'correct' && 'border-green-400 bg-green-50',
+          feedback === 'wrong' && 'border-red-400 bg-red-50',
+          !feedback && 'border-amber-300 bg-amber-50/50',
         )}
-        {selectedIndices.map((letterIdx, posIdx) => (
+      >
+        {picked.length === 0 ? (
+          <p className="text-gray-400 text-sm">Tap letters below to build the word…</p>
+        ) : (
+          picked.map((l, idx) => (
+            <button
+              key={l.id}
+              onClick={() => unpick(idx)}
+              className={clsx(
+                'w-12 h-12 rounded-lg bg-white border-2 border-amber-400 font-bold text-xl shadow-sm hover:bg-amber-50',
+                isArabic && 'font-arabic text-2xl',
+              )}
+            >
+              {l.ch}
+            </button>
+          ))
+        )}
+      </div>
+
+      {showHint && (
+        <p className="text-center text-sm text-amber-700 mb-3">
+          💡 First letter: <strong className={clsx(isArabic && 'font-arabic text-xl')}>{word[0]}</strong>
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-2 justify-center mb-6" dir={isArabic ? 'rtl' : 'ltr'}>
+        {bank.map((l, idx) => (
           <button
-            key={posIdx}
-            onClick={() => handleDeselectLetter(posIdx)}
-            disabled={showFeedback}
+            key={l.id}
+            onClick={() => pick(idx)}
+            disabled={!!feedback}
             className={clsx(
-              'w-11 h-11 rounded-xl font-bold text-lg flex items-center justify-center transition-all duration-200 shadow-sm',
-              showFeedback && isCorrect && 'bg-green-500 text-white scale-110',
-              showFeedback && !isCorrect && 'bg-red-500 text-white',
-              !showFeedback && 'bg-white text-teal-800 border-2 border-teal-300 hover:border-red-300 hover:bg-red-50 cursor-pointer',
+              'w-12 h-12 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold text-xl shadow-md hover:scale-105 transition-transform',
+              isArabic && 'font-arabic text-2xl',
             )}
           >
-            {scrambledLetters[letterIdx]}
+            {l.ch}
           </button>
         ))}
       </div>
 
-      {/* Scrambled Letters */}
-      <div className="flex flex-wrap justify-center gap-2">
-        {scrambledLetters.map((letter, idx) => {
-          const isUsed = selectedIndices.includes(idx);
-          return (
-            <button
-              key={idx}
-              onClick={() => handleLetterClick(idx)}
-              disabled={isUsed || showFeedback}
-              className={clsx(
-                'w-12 h-12 rounded-xl font-bold text-lg flex items-center justify-center transition-all duration-200',
-                isUsed
-                  ? 'bg-gray-100 text-gray-300 border-2 border-gray-200 scale-90'
-                  : 'bg-gradient-to-b from-amber-400 to-amber-500 text-white shadow-md border-2 border-amber-500 hover:from-amber-500 hover:to-amber-600 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer active:translate-y-0',
-              )}
-            >
-              {letter}
-            </button>
-          );
-        })}
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={reset} disabled={!!feedback || picked.length === 0}>
+          <X className="w-4 h-4 mr-1" /> Reset
+        </Button>
+        {difficulty !== 'HARD' && (
+          <Button variant="outline" onClick={() => setShowHint(true)} disabled={showHint || !!feedback}>
+            <Lightbulb className="w-4 h-4 mr-1" /> Hint
+          </Button>
+        )}
+        <Button variant="primary" onClick={check} disabled={!!feedback || bank.length > 0} className="flex-1">
+          Check
+        </Button>
       </div>
 
-      {/* Feedback message */}
-      {showFeedback && (
+      {feedback && (
         <div className={clsx(
-          'text-center mt-6 text-lg font-semibold transition-opacity duration-300',
-          isCorrect ? 'text-green-600' : 'text-red-600',
+          'mt-4 p-3 rounded-xl text-center font-medium',
+          feedback === 'correct' ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50 text-red-700 border border-red-200',
         )}>
-          {isCorrect ? '✨ Masha\'Allah! Correct!' : `The answer was: ${targetWord}`}
+          {feedback === 'correct' ? '🌟 Excellent!' : <>The word was: <strong className={clsx(isArabic && 'font-arabic text-xl')}>{word}</strong></>}
         </div>
       )}
+
+      <div className="mt-8 text-center">
+        <button onClick={exitToHub} className="text-sm text-gray-400 hover:text-gray-600">Exit to Hub</button>
+      </div>
     </div>
   );
 }

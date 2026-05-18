@@ -26,6 +26,12 @@ interface GameState {
   dailyChallenge: DailyChallenge | null;
   isLoadingGames: boolean;
 
+  // Launcher selections (chosen on /games/:slug/launch, consumed by GamePlay)
+  selectedGameSlug: string | null;
+  selectedCourseId: string | null;
+  selectedGameId: string | null;
+  selectedDifficulty: GameDifficulty;
+
   // Active session
   activeSession: GameSession | null;
   currentRound: number;
@@ -87,6 +93,15 @@ interface GameState {
   // Actions — Timer
   setTimeRemaining: (ms: number | null) => void;
 
+  // Actions — Launcher
+  setLauncherSelection: (selection: {
+    gameSlug?: string;
+    courseId?: string;
+    gameId?: string;
+    difficulty?: GameDifficulty;
+  }) => void;
+  clearLauncherSelection: () => void;
+
   clearError: () => void;
 }
 
@@ -95,6 +110,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   availableGames: [],
   dailyChallenge: null,
   isLoadingGames: false,
+  selectedGameSlug: null,
+  selectedCourseId: null,
+  selectedGameId: null,
+  selectedDifficulty: 'MEDIUM',
   activeSession: null,
   currentRound: 0,
   score: 0,
@@ -346,6 +365,22 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setTimeRemaining: (ms) => set({ timeRemainingMs: ms }),
+
+  setLauncherSelection: (selection) =>
+    set((state) => ({
+      selectedGameSlug: selection.gameSlug ?? state.selectedGameSlug,
+      selectedCourseId: selection.courseId ?? state.selectedCourseId,
+      selectedGameId: selection.gameId ?? state.selectedGameId,
+      selectedDifficulty: selection.difficulty ?? state.selectedDifficulty,
+    })),
+
+  clearLauncherSelection: () =>
+    set({
+      selectedGameSlug: null,
+      selectedCourseId: null,
+      selectedGameId: null,
+      selectedDifficulty: 'MEDIUM',
+    }),
 
   clearError: () => set({ error: null }),
 }));

@@ -1,102 +1,179 @@
 import prisma from '../config/database';
-import { GameType, GameDifficulty, GameSessionStatus, FlashCardStatus, ActivityEventType } from '@prisma/client';
+import {
+  GameType,
+  GameDifficulty,
+  GameSessionStatus,
+  FlashCardStatus,
+  ActivityEventType,
+} from '@prisma/client';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../middleware/error.middleware';
 import { calculateNextReview } from './flashcard/sm2-algorithm.service';
 import { recordActivity } from './activity.service';
 
 // ---------------------------------------------------------------------------
-// Constants
+// Game taxonomy
+//
+// 9 distinct mechanics (per khaldun-game-redesign.md §2, with the user's
+// directive merging G8 VERIFY into G1 QUICK_RECALL as a true/false variant).
+//
+// Each entry declares:
+//   - minimum content thresholds (for availability checks)
+//   - per-difficulty timer config
+//   - default course-compatibility hint used when seeding a Game row
 // ---------------------------------------------------------------------------
 
-const CONTENT_REQUIREMENTS: Record<string, { minArabicTerms: number; minFlashcards: number; minQuestions: number }> = {
-  TERM_MATCH:           { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
-  AYAH_COMPLETION:      { minArabicTerms: 0,  minFlashcards: 3, minQuestions: 0 },
-  FIQH_SCENARIO:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  HADITH_CHAIN:         { minArabicTerms: 0,  minFlashcards: 4, minQuestions: 0 },
-  WORD_SEARCH:          { minArabicTerms: 6,  minFlashcards: 0, minQuestions: 0 },
-  SPEED_QUIZ:           { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  FLASHCARD_FLIP:       { minArabicTerms: 0,  minFlashcards: 5, minQuestions: 0 },
-  DAILY_CHALLENGE:      { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  KNOWLEDGE_EXPEDITION: { minArabicTerms: 0,  minFlashcards: 5, minQuestions: 5 },
-  TRIVIA_BATTLE:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 10 },
-  MOSQUE_BUILDER:       { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  PATTERN_CREATOR:      { minArabicTerms: 0,  minFlashcards: 5, minQuestions: 0 },
-  SEERAH_TIMELINE:      { minArabicTerms: 0,  minFlashcards: 8, minQuestions: 0 },
-  ESCAPE_ROOM:          { minArabicTerms: 0,  minFlashcards: 3, minQuestions: 3 },
-  MAZE_NAVIGATOR:       { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  // New types with frontend UI support
-  WORD_SCRAMBLE:        { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
-  FILL_IN_BLANK:        { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  MEMORY_MATCH:         { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
-  TRUE_FALSE:           { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  MULTIPLE_CHOICE:      { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
-  SENTENCE_BUILD:       { minArabicTerms: 0,  minFlashcards: 4, minQuestions: 0 },
-  LISTENING_QUIZ:       { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
-  CALLIGRAPHY_TRACE:    { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
-  SPELLING_BEE:         { minArabicTerms: 4,  minFlashcards: 0, minQuestions: 0 },
-  STORY_PUZZLE:         { minArabicTerms: 0,  minFlashcards: 4, minQuestions: 0 },
-  MAZE_RUNNER:          { minArabicTerms: 0,  minFlashcards: 0, minQuestions: 5 },
+interface GameDef {
+  minQuestions: number;
+  minFlashcards: number;
+  minArabicTerms: number;
+  timers: Record<GameDifficulty, { type: 'NONE' | 'PER_QUESTION' | 'GLOBAL'; durationMs: number }>;
+  defaultCompatibility: {
+    contentType: 'QUESTION' | 'FLASHCARD' | 'ARABIC_TERM' | 'FIQH_SCENARIO';
+    courseCategory?: string;
+    minItems: number;
+  };
+}
+
+const GAME_DEFS: Record<GameType, GameDef> = {
+  QUICK_RECALL: {
+    minQuestions: 5, minFlashcards: 0, minArabicTerms: 0,
+    timers: {
+      EASY:   { type: 'NONE',         durationMs: 0 },
+      MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 },
+      HARD:   { type: 'PER_QUESTION', durationMs: 10000 },
+    },
+    defaultCompatibility: { contentType: 'QUESTION', minItems: 5 },
+  },
+  PAIR_MATCH: {
+    minQuestions: 0, minFlashcards: 4, minArabicTerms: 0,
+    timers: {
+      EASY:   { type: 'NONE',   durationMs: 0 },
+      MEDIUM: { type: 'GLOBAL', durationMs: 120000 },
+      HARD:   { type: 'GLOBAL', durationMs: 90000 },
+    },
+    defaultCompatibility: { contentType: 'FLASHCARD', minItems: 4 },
+  },
+  FLASHCARD_SPRINT: {
+    minQuestions: 0, minFlashcards: 5, minArabicTerms: 0,
+    timers: {
+      EASY:   { type: 'NONE',         durationMs: 0 },
+      MEDIUM: { type: 'NONE',         durationMs: 0 },
+      HARD:   { type: 'PER_QUESTION', durationMs: 8000 },
+    },
+    defaultCompatibility: { contentType: 'FLASHCARD', minItems: 5 },
+  },
+  CLOZE: {
+    minQuestions: 0, minFlashcards: 5, minArabicTerms: 0,
+    timers: {
+      EASY:   { type: 'PER_QUESTION', durationMs: 45000 },
+      MEDIUM: { type: 'PER_QUESTION', durationMs: 30000 },
+      HARD:   { type: 'PER_QUESTION', durationMs: 20000 },
+    },
+    defaultCompatibility: { contentType: 'FLASHCARD', minItems: 5 },
+  },
+  WORD_SEARCH: {
+    minQuestions: 0, minFlashcards: 0, minArabicTerms: 6,
+    timers: {
+      EASY:   { type: 'GLOBAL', durationMs: 300000 },
+      MEDIUM: { type: 'GLOBAL', durationMs: 180000 },
+      HARD:   { type: 'GLOBAL', durationMs: 120000 },
+    },
+    defaultCompatibility: { contentType: 'ARABIC_TERM', minItems: 6 },
+  },
+  SEQUENCE_IT: {
+    minQuestions: 0, minFlashcards: 4, minArabicTerms: 0,
+    timers: {
+      EASY:   { type: 'GLOBAL', durationMs: 180000 },
+      MEDIUM: { type: 'GLOBAL', durationMs: 120000 },
+      HARD:   { type: 'GLOBAL', durationMs: 75000 },
+    },
+    defaultCompatibility: { contentType: 'FLASHCARD', minItems: 4 },
+  },
+  WORD_SCRAMBLE: {
+    minQuestions: 0, minFlashcards: 0, minArabicTerms: 4,
+    timers: {
+      EASY:   { type: 'PER_QUESTION', durationMs: 30000 },
+      MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 },
+      HARD:   { type: 'PER_QUESTION', durationMs: 12000 },
+    },
+    defaultCompatibility: { contentType: 'ARABIC_TERM', minItems: 4 },
+  },
+  CALLIGRAPHY_TRACE: {
+    minQuestions: 0, minFlashcards: 0, minArabicTerms: 4,
+    timers: {
+      EASY:   { type: 'NONE',         durationMs: 0 },
+      MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 },
+      HARD:   { type: 'PER_QUESTION', durationMs: 30000 },
+    },
+    defaultCompatibility: { contentType: 'ARABIC_TERM', courseCategory: 'ARABIC', minItems: 4 },
+  },
+  FIQH_SCENARIO: {
+    // Fiqh Scenario uses a manually-authored branching tree (FiqhScenario
+    // content model — Phase C). Until that content exists we fall back to
+    // Question-table fiqh items so the game stays playable.
+    minQuestions: 3, minFlashcards: 0, minArabicTerms: 0,
+    timers: {
+      EASY:   { type: 'PER_QUESTION', durationMs: 90000 },
+      MEDIUM: { type: 'PER_QUESTION', durationMs: 60000 },
+      HARD:   { type: 'PER_QUESTION', durationMs: 45000 },
+    },
+    defaultCompatibility: { contentType: 'FIQH_SCENARIO', courseCategory: 'FIQH', minItems: 3 },
+  },
 };
 
-const ROUNDS_BY_DIFFICULTY: Record<string, number> = {
+const ROUNDS_BY_DIFFICULTY: Record<GameDifficulty, number> = {
   EASY: 5,
   MEDIUM: 10,
   HARD: 15,
-};
-
-const TIMER_CONFIGS: Record<string, Record<string, { type: string; durationMs: number }>> = {
-  TERM_MATCH:           { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'GLOBAL', durationMs: 90000 },       HARD: { type: 'GLOBAL', durationMs: 60000 } },
-  SPEED_QUIZ:           { EASY: { type: 'PER_QUESTION', durationMs: 15000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 10000 }, HARD: { type: 'PER_QUESTION', durationMs: 7000 } },
-  FLASHCARD_FLIP:       { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'NONE', durationMs: 0 },              HARD: { type: 'NONE', durationMs: 0 } },
-  DAILY_CHALLENGE:      { EASY: { type: 'PER_QUESTION', durationMs: 20000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 15000 }, HARD: { type: 'PER_QUESTION', durationMs: 10000 } },
-  WORD_SEARCH:          { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 180000 },       HARD: { type: 'GLOBAL', durationMs: 120000 } },
-  AYAH_COMPLETION:      { EASY: { type: 'PER_QUESTION', durationMs: 60000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
-  FIQH_SCENARIO:        { EASY: { type: 'PER_QUESTION', durationMs: 90000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 60000 }, HARD: { type: 'PER_QUESTION', durationMs: 45000 } },
-  HADITH_CHAIN:         { EASY: { type: 'GLOBAL', durationMs: 120000 },     MEDIUM: { type: 'GLOBAL', durationMs: 90000 },        HARD: { type: 'GLOBAL', durationMs: 60000 } },
-  KNOWLEDGE_EXPEDITION: { EASY: { type: 'PER_QUESTION', durationMs: 60000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
-  TRIVIA_BATTLE:        { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
-  MOSQUE_BUILDER:       { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'NONE', durationMs: 0 },              HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
-  PATTERN_CREATOR:      { EASY: { type: 'PER_QUESTION', durationMs: 60000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
-  SEERAH_TIMELINE:      { EASY: { type: 'GLOBAL', durationMs: 120000 },     MEDIUM: { type: 'GLOBAL', durationMs: 90000 },        HARD: { type: 'GLOBAL', durationMs: 60000 } },
-  ESCAPE_ROOM:          { EASY: { type: 'GLOBAL', durationMs: 600000 },     MEDIUM: { type: 'GLOBAL', durationMs: 420000 },       HARD: { type: 'GLOBAL', durationMs: 300000 } },
-  MAZE_NAVIGATOR:       { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 240000 },       HARD: { type: 'GLOBAL', durationMs: 180000 } },
-  // New types
-  WORD_SCRAMBLE:        { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
-  FILL_IN_BLANK:        { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
-  MEMORY_MATCH:         { EASY: { type: 'GLOBAL', durationMs: 180000 },     MEDIUM: { type: 'GLOBAL', durationMs: 120000 },       HARD: { type: 'GLOBAL', durationMs: 90000 } },
-  TRUE_FALSE:           { EASY: { type: 'PER_QUESTION', durationMs: 15000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 10000 }, HARD: { type: 'PER_QUESTION', durationMs: 7000 } },
-  MULTIPLE_CHOICE:      { EASY: { type: 'PER_QUESTION', durationMs: 20000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 15000 }, HARD: { type: 'PER_QUESTION', durationMs: 10000 } },
-  SENTENCE_BUILD:       { EASY: { type: 'PER_QUESTION', durationMs: 45000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 30000 }, HARD: { type: 'PER_QUESTION', durationMs: 20000 } },
-  LISTENING_QUIZ:       { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
-  CALLIGRAPHY_TRACE:    { EASY: { type: 'NONE', durationMs: 0 },            MEDIUM: { type: 'PER_QUESTION', durationMs: 45000 }, HARD: { type: 'PER_QUESTION', durationMs: 30000 } },
-  SPELLING_BEE:         { EASY: { type: 'PER_QUESTION', durationMs: 30000 }, MEDIUM: { type: 'PER_QUESTION', durationMs: 20000 }, HARD: { type: 'PER_QUESTION', durationMs: 15000 } },
-  STORY_PUZZLE:         { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 180000 },       HARD: { type: 'GLOBAL', durationMs: 120000 } },
-  MAZE_RUNNER:          { EASY: { type: 'GLOBAL', durationMs: 300000 },     MEDIUM: { type: 'GLOBAL', durationMs: 240000 },       HARD: { type: 'GLOBAL', durationMs: 180000 } },
 };
 
 const BASE_POINTS = 100;
 const SPEED_BONUS_MAX = 50;
 
 // ---------------------------------------------------------------------------
-// Types
+// Slugs (for /games/:slug/eligible-courses launcher endpoint)
+// ---------------------------------------------------------------------------
+
+const SLUG_TO_TYPE: Record<string, GameType> = {
+  'quick-recall':       'QUICK_RECALL',
+  'pair-match':         'PAIR_MATCH',
+  'flashcard-sprint':   'FLASHCARD_SPRINT',
+  'cloze':              'CLOZE',
+  'word-search':        'WORD_SEARCH',
+  'sequence-it':        'SEQUENCE_IT',
+  'word-scramble':      'WORD_SCRAMBLE',
+  'calligraphy-trace':  'CALLIGRAPHY_TRACE',
+  'fiqh-scenario':      'FIQH_SCENARIO',
+};
+
+export function gameTypeToSlug(type: GameType): string {
+  return type.toLowerCase().replace(/_/g, '-');
+}
+
+export function slugToGameType(slug: string): GameType | null {
+  return SLUG_TO_TYPE[slug] ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
 // ---------------------------------------------------------------------------
 
 interface ContentItem {
   contentType: 'QUESTION' | 'FLASHCARD' | 'ARABIC_TERM';
   contentId: string;
-  content: Record<string, unknown>;
+  content: any;
 }
 
-interface ParentalCheckResult {
-  allowed: boolean;
-  reason?: string;
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
-// ---------------------------------------------------------------------------
-// Helper functions (module-private)
-// ---------------------------------------------------------------------------
-
-function getStreakMultiplier(streak: number): number {
+function streakMultiplier(streak: number): number {
   if (streak >= 10) return 3;
   if (streak >= 5) return 2;
   if (streak >= 3) return 1.5;
@@ -108,36 +185,26 @@ function calculateRoundScore(
   timeSpentMs: number,
   timerDurationMs: number,
   currentStreak: number,
-  _gameType: GameType,
 ): number {
   if (!isCorrect) return 0;
-
   let points = BASE_POINTS;
-
-  // Speed bonus: remaining time percentage × 50
   if (timerDurationMs > 0 && timeSpentMs < timerDurationMs) {
     const remaining = (timerDurationMs - timeSpentMs) / timerDurationMs;
     points += Math.round(remaining * SPEED_BONUS_MAX);
   }
-
-  // Streak multiplier
-  points = Math.round(points * getStreakMultiplier(currentStreak));
-
-  return points;
+  return Math.round(points * streakMultiplier(currentStreak));
 }
 
 function computeSrsRating(isCorrect: boolean, timeSpentMs: number, difficulty: GameDifficulty): number {
   if (!isCorrect) return 2;
-
-  // Fast and correct → higher rating
-  const thresholdMs = difficulty === 'EASY' ? 10000 : difficulty === 'MEDIUM' ? 7000 : 5000;
-  if (timeSpentMs <= thresholdMs * 0.5) return 5;
-  if (timeSpentMs <= thresholdMs) return 4;
+  const threshold = difficulty === 'EASY' ? 10000 : difficulty === 'MEDIUM' ? 7000 : 5000;
+  if (timeSpentMs <= threshold * 0.5) return 5;
+  if (timeSpentMs <= threshold) return 4;
   return 3;
 }
 
 function computeStars(score: number, maxScore: number): number {
-  if (maxScore === 0) return 0;
+  if (maxScore <= 0) return 0;
   const pct = score / maxScore;
   if (pct >= 0.9) return 3;
   if (pct >= 0.75) return 2;
@@ -145,17 +212,55 @@ function computeStars(score: number, maxScore: number): number {
   return 0;
 }
 
+function startOfDay(d: Date = new Date()): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
 function todayDateString(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function startOfDay(date: Date = new Date()): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
+function parseOptions(raw: unknown): string[] | null {
+  if (Array.isArray(raw) && raw.length > 0) return raw as string[];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch { /* not JSON */ }
+  }
+  return null;
 }
 
-/** Build content pool and select `roundCount` items, prioritising SRS-due → wrong → unseen → random. */
+/** Build MCQ options by drawing distractors from sibling items in the pool. */
+function buildOptions(
+  correct: string,
+  items: ContentItem[],
+  excludeId: string,
+  count: number,
+): string[] {
+  if (!correct) return [];
+  const distractors: string[] = [];
+  for (const it of items) {
+    if (it.contentId === excludeId) continue;
+    const c = it.content;
+    const cand: string = c.correctAnswer || c.back || c.translation || '';
+    if (cand && cand !== correct && !distractors.includes(cand)) {
+      distractors.push(cand);
+    }
+    if (distractors.length >= count - 1) break;
+  }
+  while (distractors.length < count - 1) {
+    distractors.push(`Option ${distractors.length + 2}`);
+  }
+  return shuffle([correct, ...distractors]);
+}
+
+// ---------------------------------------------------------------------------
+// Content selection
+// ---------------------------------------------------------------------------
+
 async function selectContent(
   gameType: GameType,
   memberId: string,
@@ -164,45 +269,35 @@ async function selectContent(
   difficulty: GameDifficulty,
   roundCount: number,
 ): Promise<ContentItem[]> {
-  const req = CONTENT_REQUIREMENTS[gameType];
-  if (!req) throw new BadRequestError(`Unknown game type: ${gameType}`);
+  const def = GAME_DEFS[gameType];
+  if (!def) throw new BadRequestError(`Unknown game type: ${gameType}`);
 
-  const items: ContentItem[] = [];
-
-  // Determine which unit IDs to scope content to
   let unitIds: string[] = [];
-  if (unitId) {
-    unitIds = [unitId];
-  } else if (courseId) {
+  if (unitId) unitIds = [unitId];
+  else if (courseId) {
     const units = await prisma.unit.findMany({ where: { courseId }, select: { id: true } });
     unitIds = units.map((u) => u.id);
   }
-
   const unitFilter = unitIds.length > 0 ? { unitId: { in: unitIds } } : {};
 
-  // ---------- Questions ----------
-  if (req.minQuestions > 0) {
-    // Try exact difficulty first, fallback to any difficulty if no match
-    let questions = await prisma.question.findMany({
+  const items: ContentItem[] = [];
+
+  // Questions
+  if (def.minQuestions > 0) {
+    let qs = await prisma.question.findMany({
       where: { ...unitFilter, difficulty: difficulty as string },
       orderBy: { createdAt: 'desc' },
       take: roundCount * 2,
     });
-    if (questions.length === 0) {
-      questions = await prisma.question.findMany({
-        where: unitFilter,
-        orderBy: { createdAt: 'desc' },
-        take: roundCount * 2,
+    if (qs.length === 0) {
+      qs = await prisma.question.findMany({
+        where: unitFilter, orderBy: { createdAt: 'desc' }, take: roundCount * 2,
       });
     }
-    // Fallback: if course-scoped query returns insufficient results, query globally
-    if (questions.length < req.minQuestions && unitIds.length > 0) {
-      questions = await prisma.question.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: roundCount * 2,
-      });
+    if (qs.length < def.minQuestions && unitIds.length > 0) {
+      qs = await prisma.question.findMany({ orderBy: { createdAt: 'desc' }, take: roundCount * 2 });
     }
-    for (const q of questions) {
+    for (const q of qs) {
       items.push({
         contentType: 'QUESTION',
         contentId: q.id,
@@ -217,11 +312,10 @@ async function selectContent(
     }
   }
 
-  // ---------- FlashCards ----------
-  if (req.minFlashcards > 0) {
-    // Prioritise SRS-due cards
+  // Flashcards (SRS-due first)
+  if (def.minFlashcards > 0) {
     const now = new Date();
-    const dueProgress = await prisma.flashCardProgress.findMany({
+    const due = await prisma.flashCardProgress.findMany({
       where: {
         memberId,
         nextReviewDate: { lte: now },
@@ -231,8 +325,7 @@ async function selectContent(
       orderBy: { nextReviewDate: 'asc' },
       take: roundCount,
     });
-
-    for (const p of dueProgress) {
+    for (const p of due) {
       items.push({
         contentType: 'FLASHCARD',
         contentId: p.flashCard.id,
@@ -244,22 +337,20 @@ async function selectContent(
         },
       });
     }
-
-    // Fill remaining with unseen / random flashcards
-    if (items.filter((i) => i.contentType === 'FLASHCARD').length < roundCount) {
+    const flashcardCount = items.filter((i) => i.contentType === 'FLASHCARD').length;
+    if (flashcardCount < roundCount) {
       const existingIds = items.filter((i) => i.contentType === 'FLASHCARD').map((i) => i.contentId);
       let extra = await prisma.flashCard.findMany({
         where: {
           ...(unitIds.length > 0 ? { unitId: { in: unitIds } } : {}),
           id: { notIn: existingIds },
         },
-        take: roundCount - existingIds.length,
+        take: roundCount - flashcardCount,
       });
-      // Fallback: if course-scoped query returns insufficient flashcards, query globally
-      if (extra.length + existingIds.length < req.minFlashcards && unitIds.length > 0) {
+      if (extra.length + flashcardCount < def.minFlashcards && unitIds.length > 0) {
         extra = await prisma.flashCard.findMany({
           where: { id: { notIn: existingIds } },
-          take: roundCount - existingIds.length,
+          take: roundCount - flashcardCount,
         });
       }
       for (const fc of extra) {
@@ -277,17 +368,11 @@ async function selectContent(
     }
   }
 
-  // ---------- Arabic Terms ----------
-  if (req.minArabicTerms > 0) {
-    let terms = await prisma.arabicTerm.findMany({
-      where: unitFilter,
-      take: roundCount * 2,
-    });
-    // Fallback: if course-scoped query returns insufficient results, query globally
-    if (terms.length < req.minArabicTerms && unitIds.length > 0) {
-      terms = await prisma.arabicTerm.findMany({
-        take: roundCount * 2,
-      });
+  // Arabic terms
+  if (def.minArabicTerms > 0) {
+    let terms = await prisma.arabicTerm.findMany({ where: unitFilter, take: roundCount * 2 });
+    if (terms.length < def.minArabicTerms && unitIds.length > 0) {
+      terms = await prisma.arabicTerm.findMany({ take: roundCount * 2 });
     }
     for (const t of terms) {
       items.push({
@@ -303,202 +388,145 @@ async function selectContent(
     }
   }
 
-  // For mixed-content games (e.g. KNOWLEDGE_EXPEDITION, ESCAPE_ROOM), items already contain both types
-
-  // Shuffle (Fisher-Yates) then take roundCount
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [items[i], items[j]] = [items[j], items[i]];
-  }
-
-  return items.slice(0, roundCount);
+  return shuffle(items).slice(0, roundCount);
 }
 
 // ---------------------------------------------------------------------------
-// Game-type-specific round formatting
+// Round formatting — one branch per of the 9 game types
 // ---------------------------------------------------------------------------
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-/**
- * Generate word search grid containing the given words.
- * Returns the grid (2D char array) and the placed words with positions.
- */
-// generateWordSearchGrid: previously used for aggregate WORD_SEARCH round metadata.
-// WORD_SEARCH is now per-item; the frontend builds its own grid client-side.
-// Function retained (prefixed _) for potential future server-side grid validation.
-function _generateWordSearchGrid(words: string[], gridSize: number): { grid: string[][]; placements: Array<{ word: string; row: number; col: number; direction: string }> } {
-  const grid: string[][] = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
-  const placements: Array<{ word: string; row: number; col: number; direction: string }> = [];
-  const directions = [
-    { dr: 0, dc: 1, name: 'RIGHT' },
-    { dr: 1, dc: 0, name: 'DOWN' },
-    { dr: 1, dc: 1, name: 'DIAGONAL_DOWN_RIGHT' },
-  ];
-
-  for (const rawWord of words) {
-    const word = rawWord.toUpperCase().replace(/[^A-Z]/g, '');
-    if (word.length === 0 || word.length > gridSize) continue;
-
-    let placed = false;
-    for (let attempts = 0; attempts < 50 && !placed; attempts++) {
-      const dir = directions[Math.floor(Math.random() * directions.length)];
-      const maxRow = gridSize - (dir.dr === 0 ? 1 : word.length);
-      const maxCol = gridSize - (dir.dc === 0 ? 1 : word.length);
-      if (maxRow < 0 || maxCol < 0) continue;
-
-      const startRow = Math.floor(Math.random() * (maxRow + 1));
-      const startCol = Math.floor(Math.random() * (maxCol + 1));
-
-      let canPlace = true;
-      for (let k = 0; k < word.length; k++) {
-        const r = startRow + k * dir.dr;
-        const c = startCol + k * dir.dc;
-        if (grid[r][c] !== '' && grid[r][c] !== word[k]) { canPlace = false; break; }
-      }
-
-      if (canPlace) {
-        for (let k = 0; k < word.length; k++) {
-          grid[startRow + k * dir.dr][startCol + k * dir.dc] = word[k];
-        }
-        placements.push({ word, row: startRow, col: startCol, direction: dir.name });
-        placed = true;
-      }
-    }
-  }
-
-  // Fill empty cells with random letters
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  for (let r = 0; r < gridSize; r++) {
-    for (let c = 0; c < gridSize; c++) {
-      if (grid[r][c] === '') grid[r][c] = alphabet[Math.floor(Math.random() * 26)];
-    }
-  }
-  return { grid, placements };
-}
-
-/**
- * Transform raw content items into game-type-specific round metadata.
- * Returns an array of round data objects with `metadata` shaped for the frontend.
- */
-function formatRoundsForGameType(
+function formatRounds(
   gameType: GameType,
   items: ContentItem[],
   difficulty: GameDifficulty,
+  presentationConfig?: any,
 ): Array<{ contentType: string; contentId: string; metadata: Record<string, unknown> }> {
-  switch (gameType) {
-    // ── TERM_MATCH: One round per pair (frontend iterates rounds to build cards) ──
-    case 'TERM_MATCH': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'TERM_MATCH',
-            id: item.contentId,
-            arabicText: c.arabicText || c.frontArabic || c.front || '',
-            transliteration: c.transliteration || '',
-            translation: c.translation || c.back || '',
-            front: c.front || c.arabicText || '',
-            frontArabic: c.frontArabic || c.arabicText || '',
-            back: c.back || c.translation || '',
-            backArabic: c.backArabic || '',
-          },
-        };
-      });
-    }
 
-    // ── SPEED_QUIZ: Timed multiple choice from Questions ──
-    case 'SPEED_QUIZ': {
+  switch (gameType) {
+
+    // ── G1. QUICK_RECALL ────────────────────────────────────────────────
+    // MCQ. If the source question has only 2 options (or correctAnswer is
+    // "True"/"False"), it becomes a true/false round. HARD uses 5 options.
+    case 'QUICK_RECALL': {
+      const optionCount = difficulty === 'HARD' ? 5 : 4;
       return items.map((item) => {
-        const c = item.content as any;
+        const c = item.content;
+        const correct: string = (c.correctAnswer || c.back || c.translation || '').toString();
+        let options = parseOptions(c.options);
+        const trueFalse =
+          (options && options.length === 2 &&
+           options.every((o) => /^(true|false)$/i.test(o))) ||
+          /^(true|false)$/i.test(correct);
+        let questionType: 'mcq' | 'true_false' = 'mcq';
+        if (trueFalse) {
+          options = ['True', 'False'];
+          questionType = 'true_false';
+        } else if (!options || options.length < 2) {
+          options = buildOptions(correct, items, item.contentId, optionCount);
+        } else if (options.length < optionCount) {
+          options = buildOptions(correct, items, item.contentId, optionCount);
+        }
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
-            gameMode: 'SPEED_QUIZ',
-            id: item.contentId,
+            gameMode: 'QUICK_RECALL',
+            questionType,
             questionText: c.questionText || c.front || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            options,
+            correctAnswer: correct,
             explanation: c.explanation || '',
             arabicText: c.frontArabic || c.arabicText || '',
-            transliteration: c.transliteration || '',
+            theme: presentationConfig?.theme ?? 'classic',
           },
         };
       });
     }
 
-    // ── FLASHCARD_FLIP: SRS-style self-rating review ──
-    case 'FLASHCARD_FLIP': {
+    // ── G2. PAIR_MATCH ──────────────────────────────────────────────────
+    // Collapse all items into a single round whose metadata carries the
+    // full pair list; the frontend renders the grid and submits per-pair
+    // matches against the same round.
+    case 'PAIR_MATCH': {
+      const pairs = items.map((item) => {
+        const c = item.content;
+        return {
+          id: item.contentId,
+          term: c.front || c.arabicText || c.frontArabic || '',
+          definition: c.back || c.translation || '',
+          termArabic: c.frontArabic || c.arabicText || '',
+        };
+      });
+      const mode = (presentationConfig?.mode === 'connect' ? 'connect' : 'memory') as
+        'memory' | 'connect';
+      const ids = items.map((i) => i.contentId).join(',');
+      return [{
+        contentType: 'FLASHCARD',
+        contentId: ids,
+        metadata: {
+          gameMode: 'PAIR_MATCH',
+          mode,
+          pairs,
+        },
+      }];
+    }
+
+    // ── G3. FLASHCARD_SPRINT ────────────────────────────────────────────
+    // One round per card. Player submits a self-rating 1–5.
+    case 'FLASHCARD_SPRINT': {
       return items.map((item) => {
-        const c = item.content as any;
+        const c = item.content;
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
-            gameMode: 'FLASHCARD_FLIP',
-            id: item.contentId,
-            front: c.front || c.arabicText || c.questionText || '',
+            gameMode: 'FLASHCARD_SPRINT',
+            front: c.front || c.arabicText || '',
+            back: c.back || c.translation || '',
             frontArabic: c.frontArabic || c.arabicText || '',
-            back: c.back || c.translation || c.correctAnswer || '',
             backArabic: c.backArabic || '',
           },
         };
       });
     }
 
-    // ── AYAH_COMPLETION: Fill in blanks from flashcard text ──
-    case 'AYAH_COMPLETION': {
+    // ── G4. CLOZE ───────────────────────────────────────────────────────
+    // Remove 1–3 words from the sentence based on difficulty; EASY shows
+    // a word bank, HARD requires exact match.
+    case 'CLOZE': {
+      const blanksCount = difficulty === 'EASY' ? 1 : difficulty === 'MEDIUM' ? 2 : 3;
+      const showWordBank = difficulty === 'EASY';
       return items.map((item) => {
-        const c = item.content as any;
-        const fullText: string = c.back || c.front || '';
-        const words = fullText.split(/\s+/);
-        // Remove 1-3 words based on difficulty
-        const blanksCount = difficulty === 'EASY' ? 1 : difficulty === 'MEDIUM' ? 2 : 3;
-        const blankIndices: number[] = [];
-        const removableIndices = words.map((_, i) => i).filter((i) => words[i].length > 2);
-        const shuffledIndices = shuffleArray(removableIndices);
-        for (let i = 0; i < Math.min(blanksCount, shuffledIndices.length); i++) {
-          blankIndices.push(shuffledIndices[i]);
-        }
-        blankIndices.sort((a, b) => a - b);
+        const c = item.content;
+        const sentence: string =
+          c.back || c.front || c.questionText || c.translation || '';
+        const words = sentence.split(/\s+/).filter(Boolean);
+        const candidateIdx = words
+          .map((_, i) => i)
+          .filter((i) => words[i].length > 2);
+        const chosen = shuffle(candidateIdx).slice(0, Math.min(blanksCount, candidateIdx.length))
+          .sort((a, b) => a - b);
+        const blanks = chosen.map((position) => ({ position, answer: words[position] }));
 
-        const missingWords = blankIndices.map((i) => words[i]);
-        const textWithBlanks = words.map((w, i) => blankIndices.includes(i) ? '______' : w).join(' ');
-
-        // Build distractor options including the first missing word
-        const firstMissing = missingWords[0] || '';
         const distractors = items
-          .filter((it) => it.contentId !== item.contentId)
-          .slice(0, 3)
-          .map((it) => {
-            const ic = it.content as any;
-            const t = (ic.back || ic.front || '').split(/\s+/).filter((w: string) => w.length > 2);
-            return t[Math.floor(Math.random() * t.length)] || 'option';
+          .filter((i) => i.contentId !== item.contentId)
+          .flatMap((i) => {
+            const t = (i.content.back || i.content.front || '') as string;
+            return t.split(/\s+/).filter((w) => w.length > 2);
           });
+        const wordBank = showWordBank
+          ? shuffle([...blanks.map((b) => b.answer), ...shuffle(distractors).slice(0, 3)])
+          : undefined;
 
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
-            gameMode: 'AYAH_COMPLETION',
-            id: item.contentId,
-            textWithBlanks,
-            missingWords,
-            options: shuffleArray([firstMissing, ...distractors]),
-            correctAnswer: firstMissing,
-            arabicText: c.frontArabic || c.backArabic || '',
-            questionText: textWithBlanks,
-            transliteration: c.front || '',
+            gameMode: 'CLOZE',
+            sentence,
+            blanks,
+            wordBank,
+            arabicText: c.frontArabic || c.backArabic || c.arabicText || '',
             hint: c.front || '',
             explanation: c.back || '',
           },
@@ -506,426 +534,102 @@ function formatRoundsForGameType(
       });
     }
 
-    // ── FIQH_SCENARIO: Scenario-based multiple choice ──
-    case 'FIQH_SCENARIO': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'FIQH_SCENARIO',
-            id: item.contentId,
-            scenario: c.questionText || '',
-            questionText: c.questionText || '',
-            front: c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || '',
-            explanation: c.explanation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-          },
-        };
-      });
-    }
-
-    // ── HADITH_CHAIN: One round per narrator (frontend reads each round's content) ──
-    case 'HADITH_CHAIN': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'HADITH_CHAIN',
-            id: item.contentId,
-            questionText: c.front || c.questionText || c.arabicText || '',
-            front: c.front || c.questionText || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            translation: c.translation || c.back || '',
-            back: c.back || c.translation || '',
-          },
-        };
-      });
-    }
-
-    // ── WORD_SEARCH: One round per word — frontend reads round.content.arabicText/front ──
+    // ── G5. WORD_SEARCH ─────────────────────────────────────────────────
+    // Aggregate round: build a single grid containing all words.
     case 'WORD_SEARCH': {
-      return items.map((item) => {
-        const c = item.content as any;
-        const word = (c.transliteration || c.front || c.translation || '').toUpperCase().replace(/[^A-Z]/g, '');
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'WORD_SEARCH',
-            id: item.contentId,
-            word,
-            arabicText: c.arabicText || c.frontArabic || '',
-            front: c.arabicText || c.front || '',
-            translation: c.translation || c.back || '',
-            transliteration: c.transliteration || '',
-            hint: c.translation || c.back || '',
-            correctAnswer: word,
-          },
-        };
-      });
+      const gridSize = difficulty === 'EASY' ? 8 : difficulty === 'MEDIUM' ? 12 : 16;
+      const allowReverseDiagonal = difficulty === 'HARD';
+      const words = items
+        .map((it) => (it.content.transliteration || it.content.front || it.content.translation || '')
+          .toString().toUpperCase().replace(/[^A-Z]/g, ''))
+        .filter((w) => w.length >= 3 && w.length <= gridSize);
+
+      const { grid, placements } = buildWordSearchGrid(words, gridSize, allowReverseDiagonal);
+      const ids = items.map((i) => i.contentId).join(',');
+      return [{
+        contentType: 'ARABIC_TERM',
+        contentId: ids,
+        metadata: {
+          gameMode: 'WORD_SEARCH',
+          grid,
+          words: placements.map((p) => p.word),
+          placements,
+          gridSize,
+          hints: items.map((it) => ({
+            word: (it.content.transliteration || it.content.front || '').toString().toUpperCase().replace(/[^A-Z]/g, ''),
+            arabic: it.content.arabicText || '',
+            translation: it.content.translation || '',
+          })),
+        },
+      }];
     }
 
-    // ── TRIVIA_BATTLE: Competitive-styled multiple choice ──
-    case 'TRIVIA_BATTLE': {
-      return items.map((item) => {
-        const c = item.content as any;
+    // ── G6. SEQUENCE_IT ─────────────────────────────────────────────────
+    // Drag items into the correct order. One aggregate round.
+    case 'SEQUENCE_IT': {
+      const mode = (
+        presentationConfig?.mode === 'isnad' || presentationConfig?.mode === 'timeline' ||
+        presentationConfig?.mode === 'syntax' || presentationConfig?.mode === 'narrative'
+      ) ? presentationConfig.mode : 'narrative';
+      const limit = difficulty === 'EASY' ? 3 : difficulty === 'MEDIUM' ? 5 : 8;
+      const chosen = items.slice(0, limit);
+      const sequenceItems = chosen.map((it, idx) => {
+        const c = it.content;
         return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'TRIVIA_BATTLE',
-            id: item.contentId,
-            questionText: c.questionText || c.front || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
-            explanation: c.explanation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            category: c.type || 'GENERAL',
-          },
+          id: it.contentId,
+          content: c.front || c.questionText || c.arabicText || c.translation || '',
+          arabicText: c.frontArabic || c.arabicText || '',
+          correctPosition: idx,
         };
       });
+      const ids = chosen.map((i) => i.contentId).join(',');
+      return [{
+        contentType: chosen[0]?.contentType ?? 'FLASHCARD',
+        contentId: ids,
+        metadata: {
+          gameMode: 'SEQUENCE_IT',
+          mode,
+          items: shuffle(sequenceItems),
+          correctOrder: chosen.map((i) => i.contentId),
+        },
+      }];
     }
 
-    // ── KNOWLEDGE_EXPEDITION: Multi-zone journey with mixed content ──
-    case 'KNOWLEDGE_EXPEDITION': {
-      const zones = ['Foundations', 'Arabic', 'Fiqh', 'History', 'Quran'];
-      return items.map((item, index) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'KNOWLEDGE_EXPEDITION',
-            id: item.contentId,
-            zone: zones[index % zones.length],
-            zoneIndex: index,
-            questionText: c.questionText || c.front || c.translation || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
-            explanation: c.explanation || c.back || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            hint: c.explanation || c.back || '',
-          },
-        };
-      });
-    }
-
-    // ── MOSQUE_BUILDER: Answer questions to earn building blocks ──
-    case 'MOSQUE_BUILDER': {
-      const parts = ['foundation', 'walls', 'dome', 'minaret', 'courtyard', 'mihrab', 'entrance', 'garden', 'fountain', 'balcony'];
-      return items.map((item, index) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'MOSQUE_BUILDER',
-            id: item.contentId,
-            questionText: c.questionText || c.front || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
-            explanation: c.explanation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            buildingPart: parts[index % parts.length],
-            buildProgress: index,
-          },
-        };
-      });
-    }
-
-    // ── PATTERN_CREATOR: Match and complete patterns ──
-    case 'PATTERN_CREATOR': {
-      return items.map((item) => {
-        const c = item.content as any;
-        const front = c.front || c.arabicText || '';
-        const back = c.back || c.translation || '';
-        const wrongOptions = items
-          .filter((i) => i.contentId !== item.contentId)
-          .slice(0, 3)
-          .map((i) => (i.content as any).back || (i.content as any).translation || '');
-        const allOptions = shuffleArray([back, ...wrongOptions]);
-
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'PATTERN_CREATOR',
-            id: item.contentId,
-            pattern: front,
-            questionText: front,
-            front,
-            arabicText: c.frontArabic || c.arabicText || '',
-            options: allOptions,
-            correctAnswer: back,
-            hint: c.backArabic || '',
-          },
-        };
-      });
-    }
-
-    // ── SEERAH_TIMELINE: One round per event (frontend iterates rounds) ──
-    case 'SEERAH_TIMELINE': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'SEERAH_TIMELINE',
-            id: item.contentId,
-            questionText: c.front || c.questionText || c.translation || '',
-            front: c.front || c.questionText || '',
-            translation: c.translation || c.back || '',
-            back: c.back || c.translation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-          },
-        };
-      });
-    }
-
-    // ── ESCAPE_ROOM: Multi-stage puzzle rooms ──
-    case 'ESCAPE_ROOM': {
-      const roomThemes = ['Library of Wisdom', 'Chamber of Sunnah', 'Garden of Fiqh', 'Hall of Quran'];
-      const roomName = roomThemes[Math.floor(Math.random() * roomThemes.length)];
-      return items.map((item, index) => {
-        const c = item.content as any;
-        const totalStages = items.length;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'ESCAPE_ROOM',
-            id: item.contentId,
-            roomName,
-            stage: index + 1,
-            totalStages,
-            puzzleType: item.contentType === 'QUESTION' ? 'RIDDLE' : item.contentType === 'FLASHCARD' ? 'DECODE' : 'TRANSLATE',
-            questionText: c.questionText || c.front || c.arabicText || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
-            explanation: c.explanation || c.back || c.translation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            hint: c.explanation || c.back || c.translation || '',
-            clue: `Solve puzzle ${index + 1} of ${totalStages} to escape the ${roomName}`,
-          },
-        };
-      });
-    }
-
-    // ── MAZE_NAVIGATOR: Answer at checkpoints to proceed ──
-    case 'MAZE_NAVIGATOR': {
-      const totalCheckpoints = items.length;
-      return items.map((item, index) => {
-        const c = item.content as any;
-        const directions = ['north', 'east', 'south', 'west'];
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'MAZE_NAVIGATOR',
-            id: item.contentId,
-            checkpoint: index + 1,
-            totalCheckpoints,
-            questionText: c.questionText || c.front || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
-            explanation: c.explanation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            direction: directions[index % directions.length],
-            progress: Math.round(((index + 1) / totalCheckpoints) * 100),
-          },
-        };
-      });
-    }
-
-    // ── WORD_SCRAMBLE: Scramble letters of a term for the player to unscramble ──
+    // ── G7. WORD_SCRAMBLE ───────────────────────────────────────────────
     case 'WORD_SCRAMBLE': {
+      const showFirstLetter = difficulty !== 'HARD';
       return items.map((item) => {
-        const c = item.content as any;
-        const word = (c.transliteration || c.front || c.translation || '').trim();
-        const letters = shuffleArray(word.split(''));
+        const c = item.content;
+        const word: string = (c.transliteration || c.front || c.translation || '').toString().trim();
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
             gameMode: 'WORD_SCRAMBLE',
-            id: item.contentId,
-            scrambledLetters: letters,
+            word,
+            scrambled: shuffle(word.split('')).join(''),
             hint: c.translation || c.back || '',
-            translation: c.translation || c.back || '',
+            firstLetter: showFirstLetter ? word.charAt(0) : null,
             arabicText: c.arabicText || c.frontArabic || '',
-            wordLength: word.length,
-            correctAnswer: word,
           },
         };
       });
     }
 
-    // ── FILL_IN_BLANK: Remove a word from a sentence for the player to fill ──
-    case 'FILL_IN_BLANK': {
-      return items.map((item) => {
-        const c = item.content as any;
-        const text: string = c.questionText || c.front || c.back || '';
-        const words = text.split(/\s+/);
-        const removable = words.map((_, i) => i).filter((i) => words[i].length > 3);
-        const blankIdx = removable.length > 0 ? removable[Math.floor(Math.random() * removable.length)] : 0;
-        const missingWord = words[blankIdx];
-        const sentence = words.map((w, i) => i === blankIdx ? '______' : w).join(' ');
-        const distractors = items
-          .filter((i) => i.contentId !== item.contentId)
-          .slice(0, 3)
-          .map((i) => {
-            const ic = i.content as any;
-            const t = ic.questionText || ic.front || ic.back || '';
-            const w = t.split(/\s+/).filter((x: string) => x.length > 3);
-            return w[Math.floor(Math.random() * w.length)] || 'option';
-          });
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'FILL_IN_BLANK',
-            id: item.contentId,
-            sentence,
-            questionText: sentence,
-            missingWord,
-            correctAnswer: missingWord,
-            options: shuffleArray([missingWord, ...distractors]),
-            explanation: c.explanation || '',
-          },
-        };
-      });
-    }
-
-    // ── MEMORY_MATCH: One round per pair (frontend iterates rounds) ──
-    case 'MEMORY_MATCH': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'MEMORY_MATCH',
-            id: item.contentId,
-            arabicText: c.arabicText || c.frontArabic || c.front || '',
-            front: c.front || c.arabicText || '',
-            frontArabic: c.frontArabic || c.arabicText || '',
-            transliteration: c.transliteration || '',
-            translation: c.translation || c.back || '',
-            back: c.back || c.translation || '',
-            correctAnswer: c.translation || c.back || '',
-          },
-        };
-      });
-    }
-
-    // ── TRUE_FALSE: Present a statement, player decides true or false ──
-    case 'TRUE_FALSE': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'TRUE_FALSE',
-            id: item.contentId,
-            statement: c.questionText || c.front || '',
-            questionText: c.questionText || c.front || '',
-            options: ['True', 'False'],
-            correctAnswer: c.correctAnswer || 'True',
-            explanation: c.explanation || c.back || '',
-          },
-        };
-      });
-    }
-
-    // ── MULTIPLE_CHOICE: Standard four-option question ──
-    case 'MULTIPLE_CHOICE': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'MULTIPLE_CHOICE',
-            id: item.contentId,
-            questionText: c.questionText || c.front || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
-            explanation: c.explanation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-          },
-        };
-      });
-    }
-
-    // ── SENTENCE_BUILD: Arrange words into the correct sentence ──
-    case 'SENTENCE_BUILD': {
-      return items.map((item) => {
-        const c = item.content as any;
-        const sentence: string = c.back || c.front || '';
-        const words = sentence.split(/\s+/).filter(Boolean);
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'SENTENCE_BUILD',
-            id: item.contentId,
-            scrambledWords: shuffleArray(words),
-            correctSentence: sentence,
-            correctAnswer: sentence,
-            wordCount: words.length,
-            hint: c.front || c.arabicText || '',
-            arabicText: c.frontArabic || c.backArabic || '',
-          },
-        };
-      });
-    }
-
-    // ── LISTENING_QUIZ: Listen to Arabic audio and answer ──
-    case 'LISTENING_QUIZ': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'LISTENING_QUIZ',
-            id: item.contentId,
-            audioUrl: c.audioUrl || '',
-            arabicText: c.arabicText || c.frontArabic || '',
-            options: generateOptions(c, items),
-            correctAnswer: c.translation || c.back || '',
-            transliteration: c.transliteration || '',
-            hint: c.transliteration || '',
-          },
-        };
-      });
-    }
-
-    // ── CALLIGRAPHY_TRACE: Trace Arabic letters/words ──
+    // ── G8. CALLIGRAPHY_TRACE ───────────────────────────────────────────
+    // Self-rated stroke quality (1–5).
     case 'CALLIGRAPHY_TRACE': {
       return items.map((item) => {
-        const c = item.content as any;
+        const c = item.content;
+        const letter: string = c.arabicText || c.frontArabic || '';
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
             gameMode: 'CALLIGRAPHY_TRACE',
-            id: item.contentId,
-            arabicText: c.arabicText || c.frontArabic || '',
+            letter,
+            strokeGuides: difficulty === 'EASY',
+            referenceImage: null,
             transliteration: c.transliteration || '',
             translation: c.translation || c.back || '',
           },
@@ -933,200 +637,149 @@ function formatRoundsForGameType(
       });
     }
 
-    // ── SPELLING_BEE: Read definition, spell the transliterated term ──
-    case 'SPELLING_BEE': {
-      return items.map((item) => {
-        const c = item.content as any;
-        const word = (c.transliteration || c.front || '').trim();
+    // ── G9. FIQH_SCENARIO ───────────────────────────────────────────────
+    // Branching decision tree. Until FiqhScenario content is authored we
+    // emit linear nodes derived from Question rows so the game stays
+    // playable. Each node carries `choices` with `nextNodeId` references.
+    case 'FIQH_SCENARIO': {
+      const nodeIds = items.map((_, i) => `node-${i}`);
+      return items.map((item, i) => {
+        const c = item.content;
+        const correct: string = c.correctAnswer || '';
+        let options = parseOptions(c.options) || buildOptions(correct, items, item.contentId, 4);
+        const isTerminal = i === items.length - 1;
+        const choices = options.map((text: string, idx: number) => ({
+          id: `${nodeIds[i]}-c${idx}`,
+          text,
+          // In the auto-generated fallback every choice progresses to the
+          // next node; the verdict is the cumulative correctness chain.
+          nextNodeId: isTerminal ? null : nodeIds[i + 1],
+          isCorrect: text === correct,
+        }));
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
-            gameMode: 'SPELLING_BEE',
-            id: item.contentId,
-            definition: c.translation || c.back || '',
-            translation: c.translation || c.back || '',
-            arabicText: c.arabicText || c.frontArabic || '',
-            wordLength: word.length,
-            firstLetter: word.charAt(0),
-            correctAnswer: word,
-          },
-        };
-      });
-    }
-
-    // ── STORY_PUZZLE: One round per segment (frontend reads round.content) ──
-    case 'STORY_PUZZLE': {
-      return items.map((item) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'STORY_PUZZLE',
-            id: item.contentId,
-            questionText: c.front || c.questionText || c.back || '',
-            front: c.front || c.questionText || '',
-            translation: c.translation || c.back || '',
-            back: c.back || c.translation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-          },
-        };
-      });
-    }
-
-    // ── MAZE_RUNNER: Similar to MAZE_NAVIGATOR with different theming ──
-    case 'MAZE_RUNNER': {
-      const totalGates = items.length;
-      return items.map((item, index) => {
-        const c = item.content as any;
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'MAZE_RUNNER',
-            id: item.contentId,
-            gate: index + 1,
-            totalGates,
-            questionText: c.questionText || c.front || '',
-            front: c.front || c.questionText || '',
-            options: parseOptions(c.options) || generateOptions(c, items),
-            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            gameMode: 'FIQH_SCENARIO',
+            nodeId: nodeIds[i],
+            prompt: c.questionText || c.front || '',
+            choices,
+            isTerminal,
+            correctAnswer: correct,
             explanation: c.explanation || '',
-            arabicText: c.frontArabic || c.arabicText || '',
-            progress: Math.round(((index + 1) / totalGates) * 100),
           },
         };
       });
     }
+  }
+}
 
-    // ── Fallback: generic round format ──
-    default: {
-      return items.map((item) => ({
-        contentType: item.contentType,
-        contentId: item.contentId,
-        metadata: {
-          gameMode: gameType,
-          id: item.contentId,
-          ...item.content,
-        },
-      }));
+/** Word-search grid generator. */
+function buildWordSearchGrid(
+  words: string[],
+  gridSize: number,
+  allowReverseDiagonal: boolean,
+): { grid: string[][]; placements: Array<{ word: string; row: number; col: number; direction: string }> } {
+  const grid: string[][] = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+  const placements: Array<{ word: string; row: number; col: number; direction: string }> = [];
+  const dirs = [
+    { dr: 0, dc: 1, name: 'RIGHT' },
+    { dr: 1, dc: 0, name: 'DOWN' },
+    { dr: 1, dc: 1, name: 'DIAGONAL_DR' },
+  ];
+  if (allowReverseDiagonal) {
+    dirs.push({ dr: 1, dc: -1, name: 'DIAGONAL_DL' });
+    dirs.push({ dr: 0, dc: -1, name: 'LEFT' });
+  }
+
+  for (const word of words) {
+    if (word.length === 0 || word.length > gridSize) continue;
+    let placed = false;
+    for (let attempt = 0; attempt < 60 && !placed; attempt++) {
+      const dir = dirs[Math.floor(Math.random() * dirs.length)];
+      const minRow = dir.dr < 0 ? word.length - 1 : 0;
+      const maxRow = gridSize - 1 - Math.max(0, (word.length - 1) * dir.dr);
+      const minCol = dir.dc < 0 ? word.length - 1 : 0;
+      const maxCol = gridSize - 1 - Math.max(0, (word.length - 1) * dir.dc);
+      if (maxRow < minRow || maxCol < minCol) continue;
+      const r0 = minRow + Math.floor(Math.random() * (maxRow - minRow + 1));
+      const c0 = minCol + Math.floor(Math.random() * (maxCol - minCol + 1));
+      let ok = true;
+      for (let k = 0; k < word.length; k++) {
+        const r = r0 + k * dir.dr, c = c0 + k * dir.dc;
+        if (grid[r][c] !== '' && grid[r][c] !== word[k]) { ok = false; break; }
+      }
+      if (!ok) continue;
+      for (let k = 0; k < word.length; k++) {
+        grid[r0 + k * dir.dr][c0 + k * dir.dc] = word[k];
+      }
+      placements.push({ word, row: r0, col: c0, direction: dir.name });
+      placed = true;
     }
   }
-}
-
-/**
- * Parse options that may be stored as a JSON string in the DB.
- */
-function parseOptions(raw: unknown): string[] | null {
-  if (Array.isArray(raw) && raw.length > 0) return raw as string[];
-  if (typeof raw === 'string') {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    } catch { /* not JSON */ }
-  }
-  return null;
-}
-
-/**
- * Generate multiple-choice options from content item, using other items as distractors.
- */
-function generateOptions(content: Record<string, unknown>, allItems: ContentItem[]): string[] {
-  const correctAnswer = (content.correctAnswer || content.back || content.translation || '') as string;
-  if (!correctAnswer) return [];
-
-  // Gather distractors from other items
-  const distractors: string[] = [];
-  for (const item of allItems) {
-    const c = item.content as any;
-    const candidate = c.correctAnswer || c.back || c.translation || '';
-    if (candidate && candidate !== correctAnswer && !distractors.includes(candidate)) {
-      distractors.push(candidate);
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      if (grid[r][c] === '') grid[r][c] = alpha[Math.floor(Math.random() * 26)];
     }
-    if (distractors.length >= 3) break;
   }
-
-  // If not enough distractors, add generic ones
-  while (distractors.length < 3) {
-    distractors.push(`Option ${distractors.length + 2}`);
-  }
-
-  return shuffleArray([correctAnswer, ...distractors.slice(0, 3)]);
+  return { grid, placements };
 }
+
+// ---------------------------------------------------------------------------
+// Content availability
+// ---------------------------------------------------------------------------
 
 async function checkContentAvailability(
   gameType: GameType,
   unitId?: string,
   courseId?: string,
-  _memberId?: string,
 ): Promise<{ available: boolean; missing?: string }> {
-  const req = CONTENT_REQUIREMENTS[gameType];
-  if (!req) return { available: false, missing: `Unknown game type: ${gameType}` };
+  const def = GAME_DEFS[gameType];
+  if (!def) return { available: false, missing: `Unknown game type: ${gameType}` };
 
   let unitIds: string[] = [];
-  if (unitId) {
-    unitIds = [unitId];
-  } else if (courseId) {
+  if (unitId) unitIds = [unitId];
+  else if (courseId) {
     const units = await prisma.unit.findMany({ where: { courseId }, select: { id: true } });
     unitIds = units.map((u) => u.id);
   }
-
   const unitFilter = unitIds.length > 0 ? { unitId: { in: unitIds } } : {};
 
-  if (req.minArabicTerms > 0) {
-    let count = await prisma.arabicTerm.count({ where: unitFilter });
-    // Fallback: if course-scoped content is insufficient, check global pool
-    if (count < req.minArabicTerms && unitIds.length > 0) {
-      count = await prisma.arabicTerm.count();
-    }
-    if (count < req.minArabicTerms) {
-      return { available: false, missing: `Need ${req.minArabicTerms} Arabic terms, found ${count}` };
-    }
-  }
-
-  if (req.minFlashcards > 0) {
-    let count = await prisma.flashCard.count({
-      where: unitIds.length > 0 ? { unitId: { in: unitIds } } : {},
-    });
-    // Fallback: if course-scoped content is insufficient, check global pool
-    if (count < req.minFlashcards && unitIds.length > 0) {
-      count = await prisma.flashCard.count();
-    }
-    if (count < req.minFlashcards) {
-      return { available: false, missing: `Need ${req.minFlashcards} flashcards, found ${count}` };
-    }
-  }
-
-  if (req.minQuestions > 0) {
+  if (def.minQuestions > 0) {
     let count = await prisma.question.count({ where: unitFilter });
-    // Fallback: if course-scoped content is insufficient, check global pool
-    if (count < req.minQuestions && unitIds.length > 0) {
-      count = await prisma.question.count();
-    }
-    if (count < req.minQuestions) {
-      return { available: false, missing: `Need ${req.minQuestions} questions, found ${count}` };
-    }
+    if (count < def.minQuestions && unitIds.length > 0) count = await prisma.question.count();
+    if (count < def.minQuestions) return { available: false, missing: `Need ${def.minQuestions} questions, found ${count}` };
   }
-
+  if (def.minFlashcards > 0) {
+    let count = await prisma.flashCard.count({ where: unitIds.length > 0 ? { unitId: { in: unitIds } } : {} });
+    if (count < def.minFlashcards && unitIds.length > 0) count = await prisma.flashCard.count();
+    if (count < def.minFlashcards) return { available: false, missing: `Need ${def.minFlashcards} flashcards, found ${count}` };
+  }
+  if (def.minArabicTerms > 0) {
+    let count = await prisma.arabicTerm.count({ where: unitFilter });
+    if (count < def.minArabicTerms && unitIds.length > 0) count = await prisma.arabicTerm.count();
+    if (count < def.minArabicTerms) return { available: false, missing: `Need ${def.minArabicTerms} Arabic terms, found ${count}` };
+  }
   return { available: true };
 }
 
+// ---------------------------------------------------------------------------
+// SRS / streak / time-budget helpers (kept lean)
+// ---------------------------------------------------------------------------
+
 async function writeSrsUpdates(
-  rounds: Array<{ contentType: string; contentId: string; isCorrect: boolean | null; timeSpentMs: number | null; srsRating: number | null }>,
+  rounds: Array<{ contentType: string; contentId: string; isCorrect: boolean | null; srsRating: number | null }>,
   memberId: string,
 ): Promise<void> {
-  // Skip aggregate rounds (SEERAH_TIMELINE, STORY_PUZZLE, etc.) whose contentId is a comma-joined list
-  const flashcardRounds = rounds.filter((r) => r.contentType === 'FLASHCARD' && r.isCorrect !== null && !r.contentId.includes(','));
-
-  for (const round of flashcardRounds) {
+  const flashRounds = rounds.filter(
+    (r) => r.contentType === 'FLASHCARD' && r.isCorrect !== null && !r.contentId.includes(','),
+  );
+  for (const round of flashRounds) {
     const rating = round.srsRating ?? (round.isCorrect ? 4 : 2);
-
-    // Get or create progress
     let progress = await prisma.flashCardProgress.findUnique({
       where: { memberId_flashCardId: { memberId, flashCardId: round.contentId } },
     });
-
     if (!progress) {
       progress = await prisma.flashCardProgress.create({
         data: {
@@ -1139,7 +792,6 @@ async function writeSrsUpdates(
         },
       });
     }
-
     const result = calculateNextReview({
       easeFactor: progress.easeFactor,
       interval: progress.interval,
@@ -1147,7 +799,6 @@ async function writeSrsUpdates(
       rating,
       currentStatus: progress.status,
     });
-
     await prisma.flashCardProgress.update({
       where: { id: progress.id },
       data: {
@@ -1166,42 +817,31 @@ async function writeSrsUpdates(
 
 async function updateStreak(memberId: string): Promise<void> {
   const today = startOfDay();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+  const twoAgo = new Date(today); twoAgo.setDate(twoAgo.getDate() - 2);
 
-  let streak = await prisma.userStreakRecord.findUnique({
-    where: { memberId },
-  });
-
-  if (!streak) {
-    streak = await prisma.userStreakRecord.create({
+  let rec = await prisma.userStreakRecord.findUnique({ where: { memberId } });
+  if (!rec) {
+    await prisma.userStreakRecord.create({
       data: { memberId, currentStreak: 1, longestStreak: 1, lastActivityDate: today },
     });
-    await prisma.familyMember.update({
-      where: { id: memberId },
-      data: { currentStreak: 1, longestStreak: { increment: 0 } },
-    });
+    await prisma.familyMember.update({ where: { id: memberId }, data: { currentStreak: 1 } });
     return;
   }
+  const last = startOfDay(rec.lastActivityDate);
+  if (last.getTime() === today.getTime()) return;
 
-  const lastDate = startOfDay(streak.lastActivityDate);
-
-  if (lastDate.getTime() === today.getTime()) {
-    // Already active today — no change
-    return;
-  }
-
-  if (lastDate.getTime() === yesterday.getTime()) {
-    // Consecutive day
-    const newStreak = streak.currentStreak + 1;
-    const newLongest = Math.max(newStreak, streak.longestStreak);
+  if (last.getTime() === yesterday.getTime() ||
+      (last.getTime() === twoAgo.getTime() && !rec.gracePeriodUsed)) {
+    const newStreak = rec.currentStreak + 1;
+    const newLongest = Math.max(newStreak, rec.longestStreak);
     await prisma.userStreakRecord.update({
-      where: { id: streak.id },
+      where: { id: rec.id },
       data: {
         currentStreak: newStreak,
         longestStreak: newLongest,
         lastActivityDate: today,
-        gracePeriodUsed: false,
+        gracePeriodUsed: last.getTime() === twoAgo.getTime() ? true : false,
       },
     });
     await prisma.familyMember.update({
@@ -1210,93 +850,45 @@ async function updateStreak(memberId: string): Promise<void> {
     });
     return;
   }
-
-  // Check if exactly 1 day gap and grace not yet used
-  const twoDaysAgo = new Date(today);
-  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-  if (lastDate.getTime() === twoDaysAgo.getTime() && !streak.gracePeriodUsed) {
-    // Grace period: keep streak, mark grace used
-    const newStreak = streak.currentStreak + 1;
-    const newLongest = Math.max(newStreak, streak.longestStreak);
-    await prisma.userStreakRecord.update({
-      where: { id: streak.id },
-      data: {
-        currentStreak: newStreak,
-        longestStreak: newLongest,
-        lastActivityDate: today,
-        gracePeriodUsed: true,
-      },
-    });
-    await prisma.familyMember.update({
-      where: { id: memberId },
-      data: { currentStreak: newStreak, longestStreak: newLongest },
-    });
-    return;
-  }
-
-  // 2+ day gap — reset streak to 1
   await prisma.userStreakRecord.update({
-    where: { id: streak.id },
-    data: {
-      currentStreak: 1,
-      longestStreak: streak.longestStreak,
-      lastActivityDate: today,
-      gracePeriodUsed: false,
-    },
+    where: { id: rec.id },
+    data: { currentStreak: 1, lastActivityDate: today, gracePeriodUsed: false },
   });
-  await prisma.familyMember.update({
-    where: { id: memberId },
-    data: { currentStreak: 1 },
-  });
+  await prisma.familyMember.update({ where: { id: memberId }, data: { currentStreak: 1 } });
 }
 
 async function checkParentalControls(
   memberId: string,
   gameType: GameType,
   difficulty: GameDifficulty,
-): Promise<ParentalCheckResult> {
-  const settings = await prisma.gameParentalSettings.findUnique({
-    where: { familyMemberId: memberId },
-  });
-
-  if (!settings || !settings.isActive) {
-    return { allowed: true };
-  }
-
-  // Check allowed game types
+): Promise<{ allowed: boolean; reason?: string }> {
+  const settings = await prisma.gameParentalSettings.findUnique({ where: { familyMemberId: memberId } });
+  if (!settings || !settings.isActive) return { allowed: true };
   if (settings.allowedGameTypes.length > 0 && !settings.allowedGameTypes.includes(gameType)) {
     return { allowed: false, reason: `Game type ${gameType} is not allowed by parental settings` };
   }
-
-  // Check max difficulty
-  const difficultyRank: Record<string, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
-  if (difficultyRank[difficulty] > difficultyRank[settings.maxDifficulty]) {
+  const rank: Record<GameDifficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
+  if (rank[difficulty] > rank[settings.maxDifficulty]) {
     return { allowed: false, reason: `Difficulty ${difficulty} exceeds max allowed ${settings.maxDifficulty}` };
   }
-
-  // Check time budget
   const remaining = await getRemainingTime(memberId);
   if (remaining !== null && remaining <= 0) {
     return { allowed: false, reason: 'Daily game time limit has been reached' };
   }
-
   return { allowed: true };
 }
 
-async function updateTimeLog(memberId: string, durationMinutes: number): Promise<void> {
-  const dateStr = todayDateString();
-
+async function updateTimeLog(memberId: string, minutes: number): Promise<void> {
+  const date = todayDateString();
   await prisma.gameTimeLog.upsert({
-    where: { familyMemberId_date: { familyMemberId: memberId, date: dateStr } },
+    where: { familyMemberId_date: { familyMemberId: memberId, date } },
     create: {
-      familyMemberId: memberId,
-      date: dateStr,
-      minutesPlayed: durationMinutes,
-      sessionsPlayed: 1,
+      familyMemberId: memberId, date,
+      minutesPlayed: minutes, sessionsPlayed: 1,
       lastSessionEndedAt: new Date(),
     },
     update: {
-      minutesPlayed: { increment: durationMinutes },
+      minutesPlayed: { increment: minutes },
       sessionsPlayed: { increment: 1 },
       lastSessionEndedAt: new Date(),
     },
@@ -1304,31 +896,24 @@ async function updateTimeLog(memberId: string, durationMinutes: number): Promise
 }
 
 async function getRemainingTime(memberId: string): Promise<number | null> {
-  const settings = await prisma.gameParentalSettings.findUnique({
-    where: { familyMemberId: memberId },
-  });
-
-  if (!settings || !settings.isActive) return null; // No limit
-
+  const settings = await prisma.gameParentalSettings.findUnique({ where: { familyMemberId: memberId } });
+  if (!settings || !settings.isActive) return null;
   const isWeekend = [0, 6].includes(new Date().getDay());
   const limit = isWeekend ? settings.weekendLimitMinutes : settings.dailyLimitMinutes;
-
   const log = await prisma.gameTimeLog.findUnique({
     where: { familyMemberId_date: { familyMemberId: memberId, date: todayDateString() } },
   });
-
-  const played = log?.minutesPlayed ?? 0;
-  return Math.max(0, limit - played);
+  return Math.max(0, limit - (log?.minutesPlayed ?? 0));
 }
 
 // ---------------------------------------------------------------------------
-// GameService
+// GameService — public surface (preserves /games/start, submitRound,
+// completeGame, getSession, getScores, getLeaderboard, getDailyChallenge,
+// submitDailyChallengeAttempt). New: getEligibleCourses(slug, memberId).
 // ---------------------------------------------------------------------------
 
 export class GameService {
-  /**
-   * List game templates with content availability, last played, and best score info.
-   */
+
   static async getAvailableGames(
     memberId: string,
     filters?: { courseId?: string; unitId?: string; category?: string },
@@ -1360,45 +945,35 @@ export class GameService {
     });
 
     const results = [];
-
-    for (const template of templates) {
-      const availability = await checkContentAvailability(
-        template.type,
-        filters?.unitId,
-        filters?.courseId,
-        memberId,
-      );
-
-      // Best score across all sessions for this game type
+    for (const t of templates) {
+      const availability = await checkContentAvailability(t.type, filters?.unitId, filters?.courseId);
       const bestScore = await prisma.gameScore.findFirst({
-        where: {
-          memberId,
-          session: { game: { template: { type: template.type } } },
-        },
+        where: { memberId, session: { game: { template: { type: t.type } } } },
         orderBy: { totalScore: 'desc' },
         select: { totalScore: true, accuracy: true, createdAt: true },
       });
-
-      const lastSession = template.games
+      const lastSession = t.games
         .flatMap((g) => g.sessions)
         .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())[0];
 
       results.push({
-        templateId: template.id,
-        type: template.type,
-        category: template.category,
-        name: template.name,
-        description: template.description,
-        iconUrl: template.iconUrl,
-        rules: template.rules,
+        templateId: t.id,
+        type: t.type,
+        slug: gameTypeToSlug(t.type),
+        category: t.category,
+        name: t.name,
+        description: t.description,
+        iconUrl: t.iconUrl,
+        rules: t.rules,
         available: availability.available,
         unavailableReason: availability.missing,
-        games: template.games.map((g) => ({
+        games: t.games.map((g) => ({
           id: g.id,
           difficulty: g.difficulty,
           courseId: g.courseId,
           courseName: (g as any).course?.title ?? null,
           unitId: g.unitId,
+          presentationConfig: g.presentationConfig ?? null,
         })),
         lastPlayed: lastSession?.startedAt ?? null,
         bestScore: bestScore
@@ -1406,34 +981,93 @@ export class GameService {
           : null,
       });
     }
-
     return results;
   }
 
-  /** Games available for a specific unit. */
   static async getGamesForUnit(unitId: string, memberId: string) {
     const unit = await prisma.unit.findUnique({ where: { id: unitId } });
     if (!unit) throw new NotFoundError(`Unit ${unitId} not found`);
-
     return GameService.getAvailableGames(memberId, { unitId });
   }
 
-  /** Games available for a course. */
   static async getGamesForCourse(courseId: string, memberId: string) {
     const course = await prisma.course.findUnique({ where: { id: courseId } });
     if (!course) throw new NotFoundError(`Course ${courseId} not found`);
-
     return GameService.getAvailableGames(memberId, { courseId });
   }
 
-  /** Standalone / hub games (no course/unit binding). */
   static async getStandaloneGames(memberId: string) {
     return GameService.getAvailableGames(memberId, { category: 'STANDALONE' });
   }
 
   /**
-   * Create a game session: check parental controls, select content, generate rounds.
+   * Courses compatible with a given game slug for a given member.
+   * Used by the launcher's course picker (per khaldun-game-redesign §3.3).
    */
+  static async getEligibleCourses(slug: string, memberId: string) {
+    const gameType = slugToGameType(slug);
+    if (!gameType) throw new NotFoundError(`Unknown game slug: ${slug}`);
+
+    // Find the canonical Game/Template for this type (templates store
+    // compatibility defaults; Games may override via courseCompatibility).
+    const template = await prisma.gameTemplate.findUnique({
+      where: { type: gameType },
+      include: {
+        games: {
+          where: { isActive: true },
+          select: { id: true, courseId: true, courseCompatibility: true, presentationConfig: true, difficulty: true },
+        },
+      },
+    });
+    if (!template) throw new NotFoundError(`No template for game type ${gameType}`);
+
+    const compatibility = GAME_DEFS[gameType].defaultCompatibility;
+
+    // Find courses the member is enrolled in
+    const enrollments = await prisma.courseEnrollment.findMany({
+      where: { memberId },
+      include: {
+        course: {
+          select: { id: true, title: true, category: true, isPublished: true },
+        },
+      },
+    });
+
+    const eligible = [];
+    for (const e of enrollments) {
+      if (!e.course || !e.course.isPublished) continue;
+      if (compatibility.courseCategory && e.course.category !== compatibility.courseCategory) continue;
+
+      // Confirm there is enough content for this game on this course.
+      const availability = await checkContentAvailability(gameType, undefined, e.course.id);
+      if (!availability.available) continue;
+
+      // Find the existing Game row (if any) for this course+template — frontend
+      // can use it as `gameId` for /start without re-creating one server-side.
+      const existingGame = template.games.find((g) => g.courseId === e.course.id);
+
+      eligible.push({
+        courseId: e.course.id,
+        courseTitle: e.course.title,
+        courseCategory: e.course.category,
+        gameId: existingGame?.id ?? null,
+        presentationConfig: existingGame?.presentationConfig ?? null,
+      });
+    }
+
+    return {
+      slug,
+      type: gameType,
+      template: {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+      },
+      compatibility,
+      eligibleCourses: eligible,
+    };
+  }
+
   static async startGame(params: {
     memberId: string;
     gameType?: GameType;
@@ -1445,7 +1079,7 @@ export class GameService {
     const { memberId, gameId, unitId, courseId, difficulty } = params;
     let { gameType } = params;
 
-    // 1. Resolve or find Game record
+    // Resolve Game record
     let game;
     if (gameId) {
       game = await prisma.game.findUnique({
@@ -1453,15 +1087,10 @@ export class GameService {
         include: { template: true },
       });
       if (!game) throw new NotFoundError(`Game ${gameId} not found`);
-      // Derive gameType from the game record when not explicitly provided
-      if (!gameType) {
-        gameType = game.template.type;
-      }
+      if (!gameType) gameType = game.template.type;
     } else if (gameType) {
-      // Find or create a matching Game for this template/unit/course/difficulty
       const template = await prisma.gameTemplate.findUnique({ where: { type: gameType } });
       if (!template) throw new NotFoundError(`Game template for type ${gameType} not found`);
-
       game = await prisma.game.findFirst({
         where: {
           templateId: template.id,
@@ -1472,7 +1101,6 @@ export class GameService {
         },
         include: { template: true },
       });
-
       if (!game) {
         game = await prisma.game.create({
           data: {
@@ -1488,41 +1116,25 @@ export class GameService {
       throw new BadRequestError('Either gameId or gameType is required');
     }
 
-    // 2. Parental controls (after gameType is resolved)
-    const parentalCheck = await checkParentalControls(memberId, gameType!, difficulty);
-    if (!parentalCheck.allowed) {
-      throw new ForbiddenError(parentalCheck.reason ?? 'Game not allowed by parental settings');
-    }
+    // Parental controls
+    const pc = await checkParentalControls(memberId, gameType!, difficulty);
+    if (!pc.allowed) throw new ForbiddenError(pc.reason ?? 'Game not allowed by parental settings');
 
-    // 3. Check content availability
-    // When starting by gameType (not gameId), only scope to course/unit if caller explicitly provided them
-    const effectiveUnitId = unitId ?? (gameId ? game.unitId ?? undefined : undefined);
-    const effectiveCourseId = courseId ?? (gameId ? game.courseId ?? undefined : undefined);
-    const availability = await checkContentAvailability(gameType, effectiveUnitId, effectiveCourseId, memberId);
+    // Effective scope
+    const effUnit = unitId ?? (gameId ? game.unitId ?? undefined : undefined);
+    const effCourse = courseId ?? (gameId ? game.courseId ?? undefined : undefined);
+
+    const availability = await checkContentAvailability(gameType!, effUnit, effCourse);
     if (!availability.available) {
       throw new BadRequestError(availability.missing ?? 'Not enough content for this game');
     }
 
-    // 4. Select content
-    const roundCount = ROUNDS_BY_DIFFICULTY[difficulty] ?? 10;
-    const contentItems = await selectContent(
-      gameType,
-      memberId,
-      effectiveUnitId,
-      effectiveCourseId,
-      difficulty,
-      roundCount,
-    );
+    const roundCount = ROUNDS_BY_DIFFICULTY[difficulty];
+    const items = await selectContent(gameType!, memberId, effUnit, effCourse, difficulty, roundCount);
+    if (items.length === 0) throw new BadRequestError('No content available for this game configuration');
 
-    if (contentItems.length === 0) {
-      throw new BadRequestError('No content available for this game configuration');
-    }
-
-    // 5. Format rounds per game type
-    const formattedRounds = formatRoundsForGameType(gameType, contentItems, difficulty);
-
-    // 6. Create session and rounds
-    const maxScore = formattedRounds.length * (BASE_POINTS + SPEED_BONUS_MAX) * 3; // theoretical max with highest streak
+    const rounds = formatRounds(gameType!, items, difficulty, game.presentationConfig as any);
+    const maxScore = rounds.length * (BASE_POINTS + SPEED_BONUS_MAX) * 3;
 
     const session = await prisma.gameSession.create({
       data: {
@@ -1535,41 +1147,34 @@ export class GameService {
         accuracy: 0,
         streakBest: 0,
         timeSpentMs: 0,
-        roundsTotal: formattedRounds.length,
+        roundsTotal: rounds.length,
         roundsCorrect: 0,
         livesUsed: 0,
         metadata: {},
         rounds: {
-          create: formattedRounds.map((round, index) => ({
-            roundIndex: index,
-            contentType: round.contentType,
-            contentId: round.contentId,
-            metadata: round.metadata as any,
+          create: rounds.map((r, idx) => ({
+            roundIndex: idx,
+            contentType: r.contentType,
+            contentId: r.contentId,
+            metadata: r.metadata as any,
           })),
         },
       },
-      include: {
-        rounds: { orderBy: { roundIndex: 'asc' } },
-      },
+      include: { rounds: { orderBy: { roundIndex: 'asc' } } },
     });
-
-    // Timer / lives config
-    const timerConfig = TIMER_CONFIGS[gameType]?.[difficulty] ?? { type: 'NONE', durationMs: 0 };
 
     return {
       session,
       config: {
-        timer: timerConfig,
-        totalRounds: contentItems.length,
+        timer: GAME_DEFS[gameType!].timers[difficulty],
+        totalRounds: rounds.length,
         difficulty,
         gameType,
+        presentationConfig: game.presentationConfig ?? null,
       },
     };
   }
 
-  /**
-   * Submit an answer for a single round.
-   */
   static async submitRound(
     sessionId: string,
     roundId: string,
@@ -1578,43 +1183,40 @@ export class GameService {
   ) {
     const session = await prisma.gameSession.findUnique({
       where: { id: sessionId },
-      include: { game: { include: { template: true } }, rounds: { orderBy: { roundIndex: 'asc' } } },
+      include: {
+        game: { include: { template: true } },
+        rounds: { orderBy: { roundIndex: 'asc' } },
+      },
     });
-
     if (!session) throw new NotFoundError(`Session ${sessionId} not found`);
     if (session.status !== 'IN_PROGRESS') {
       throw new BadRequestError(`Session is ${session.status}, cannot submit rounds`);
     }
 
     const round = /^round-\d+$/.test(roundId)
-      ? session.rounds.find((r) => r.roundIndex === parseInt(roundId.replace('round-', '')))
+      ? session.rounds.find((r) => r.roundIndex === parseInt(roundId.replace('round-', ''), 10))
       : session.rounds.find((r) => r.id === roundId);
     if (!round) throw new NotFoundError(`Round ${roundId} not found in session`);
-    if (round.playerAnswer !== null) {
-      throw new BadRequestError('Round already answered');
-    }
+    if (round.playerAnswer !== null) throw new BadRequestError('Round already answered');
 
-    // Grade the answer
-    const isCorrect = await gradeAnswer(round, answer, sessionId);
+    const isCorrect = await gradeAnswer(round, answer);
 
-    // Compute current streak from preceding rounds
+    // Current streak from preceding answered rounds
     let currentStreak = 0;
-    const sortedRounds = session.rounds.filter((r) => r.playerAnswer !== null).sort((a, b) => a.roundIndex - b.roundIndex);
-    for (let i = sortedRounds.length - 1; i >= 0; i--) {
-      if (sortedRounds[i].isCorrect) currentStreak++;
+    const prevAnswered = session.rounds
+      .filter((r) => r.playerAnswer !== null)
+      .sort((a, b) => a.roundIndex - b.roundIndex);
+    for (let i = prevAnswered.length - 1; i >= 0; i--) {
+      if (prevAnswered[i].isCorrect) currentStreak++;
       else break;
     }
     if (isCorrect) currentStreak++;
 
-    // Timer duration for speed bonus
     const gameType = session.game.template.type;
-    const timerConfig = TIMER_CONFIGS[gameType]?.[session.difficulty] ?? { type: 'NONE', durationMs: 0 };
-    const timerDurationMs = timerConfig.type === 'PER_QUESTION' ? timerConfig.durationMs : timerConfig.durationMs;
-
-    const points = calculateRoundScore(isCorrect, timeSpentMs, timerDurationMs, currentStreak, gameType);
+    const timer = GAME_DEFS[gameType].timers[session.difficulty];
+    const points = calculateRoundScore(isCorrect, timeSpentMs, timer.durationMs, currentStreak);
     const srsRating = computeSrsRating(isCorrect, timeSpentMs, session.difficulty);
 
-    // Update round
     const updatedRound = await prisma.gameRound.update({
       where: { id: round.id },
       data: {
@@ -1626,10 +1228,9 @@ export class GameService {
       },
     });
 
-    // Update session running totals
     const newScore = session.score + points;
     const newCorrect = session.roundsCorrect + (isCorrect ? 1 : 0);
-    const answeredCount = sortedRounds.length + 1;
+    const answeredCount = prevAnswered.length + 1;
     const newAccuracy = answeredCount > 0 ? (newCorrect / answeredCount) * 100 : 0;
     const newStreakBest = Math.max(session.streakBest, currentStreak);
     const newTimeSpent = session.timeSpentMs + timeSpentMs;
@@ -1665,9 +1266,6 @@ export class GameService {
     };
   }
 
-  /**
-   * Finalise a game session: score, SRS writeback, streak, activity, XP.
-   */
   static async completeGame(sessionId: string, reason?: string) {
     const session = await prisma.gameSession.findUnique({
       where: { id: sessionId },
@@ -1677,18 +1275,18 @@ export class GameService {
         member: true,
       },
     });
-
     if (!session) throw new NotFoundError(`Session ${sessionId} not found`);
+
     if (session.status === 'COMPLETED' || session.status === 'ABANDONED') {
-      const existingScore = await prisma.gameScore.findUnique({ where: { sessionId } });
+      const existing = await prisma.gameScore.findUnique({ where: { sessionId } });
       return {
         session,
-        gameScore: existingScore ? {
-          totalScore: existingScore.totalScore,
-          accuracy: existingScore.accuracy as number,
-          timeSpentMs: existingScore.timeSpentMs,
-          xpEarned: existingScore.xpEarned,
-          bonuses: existingScore.bonuses as Record<string, number>,
+        gameScore: existing ? {
+          totalScore: existing.totalScore,
+          accuracy: existing.accuracy as number,
+          timeSpentMs: existing.timeSpentMs,
+          xpEarned: existing.xpEarned,
+          bonuses: existing.bonuses as Record<string, number>,
         } : { totalScore: 0, accuracy: 0, timeSpentMs: 0, xpEarned: 0, bonuses: {} },
         achievements: [],
         streakUpdate: null,
@@ -1696,20 +1294,16 @@ export class GameService {
       };
     }
 
-    const finalStatus: GameSessionStatus = reason === 'TIMED_OUT' ? 'TIMED_OUT' : reason === 'ABANDONED' ? 'ABANDONED' : 'COMPLETED';
+    const finalStatus: GameSessionStatus =
+      reason === 'TIMED_OUT' ? 'TIMED_OUT' : reason === 'ABANDONED' ? 'ABANDONED' : 'COMPLETED';
     const stars = computeStars(session.score, session.maxScore);
     const xpEarned = Math.round(session.score * 0.1) + stars * 25;
 
-    // Update session
     const updatedSession = await prisma.gameSession.update({
       where: { id: sessionId },
-      data: {
-        status: finalStatus,
-        completedAt: new Date(),
-      },
+      data: { status: finalStatus, completedAt: new Date() },
     });
 
-    // Create or update GameScore (upsert to handle race conditions)
     const gameScore = await prisma.gameScore.upsert({
       where: { sessionId },
       create: {
@@ -1719,51 +1313,36 @@ export class GameService {
         accuracy: session.accuracy,
         timeSpentMs: session.timeSpentMs,
         xpEarned,
-        bonuses: {
-          stars,
-          streakBest: session.streakBest,
-          reason: reason ?? null,
-        },
+        bonuses: { stars, streakBest: session.streakBest, reason: reason ?? null },
       },
       update: {
         totalScore: session.score,
         accuracy: session.accuracy,
         timeSpentMs: session.timeSpentMs,
         xpEarned,
-        bonuses: {
-          stars,
-          streakBest: session.streakBest,
-          reason: reason ?? null,
-        },
+        bonuses: { stars, streakBest: session.streakBest, reason: reason ?? null },
       },
     });
 
-    // SRS writeback for flashcard rounds
     await writeSrsUpdates(
       session.rounds.map((r) => ({
         contentType: r.contentType,
         contentId: r.contentId,
         isCorrect: r.isCorrect,
-        timeSpentMs: r.timeSpentMs,
         srsRating: r.srsRating,
       })),
       session.memberId,
     );
 
-    // Update streak
     await updateStreak(session.memberId);
 
-    // Award XP
     await prisma.familyMember.update({
       where: { id: session.memberId },
       data: { totalPoints: { increment: xpEarned } },
     });
 
-    // Update time log
-    const durationMinutes = Math.ceil(session.timeSpentMs / 60000);
-    await updateTimeLog(session.memberId, durationMinutes);
+    await updateTimeLog(session.memberId, Math.ceil(session.timeSpentMs / 60000));
 
-    // Record activity event
     await recordActivity(session.memberId, session.member.familyId, ActivityEventType.GAME_PLAYED, {
       gameType: session.game.template.type,
       sessionId,
@@ -1782,13 +1361,12 @@ export class GameService {
         xpEarned: gameScore.xpEarned,
         bonuses: gameScore.bonuses as Record<string, number>,
       },
-      achievements: [],  // TODO: implement achievement checks
+      achievements: [],
       streakUpdate: null,
       srsUpdates: [],
     };
   }
 
-  /** Get a session with its rounds. */
   static async getSession(sessionId: string) {
     const session = await prisma.gameSession.findUnique({
       where: { id: sessionId },
@@ -1798,12 +1376,10 @@ export class GameService {
         gameScore: true,
       },
     });
-
     if (!session) throw new NotFoundError(`Session ${sessionId} not found`);
     return session;
   }
 
-  /** Paginated game scores for a member. */
   static async getScores(
     memberId: string,
     filters?: { gameType?: string; page?: number; limit?: number },
@@ -1811,19 +1387,15 @@ export class GameService {
     const page = filters?.page ?? 1;
     const limit = filters?.limit ?? 20;
     const skip = (page - 1) * limit;
-
     const where: any = { memberId };
     if (filters?.gameType) {
       where.session = { game: { template: { type: filters.gameType as GameType } } };
     }
-
     const [scores, total] = await Promise.all([
       prisma.gameScore.findMany({
         where,
         include: {
-          session: {
-            include: { game: { include: { template: { select: { type: true, name: true } } } } },
-          },
+          session: { include: { game: { include: { template: { select: { type: true, name: true } } } } } },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -1831,85 +1403,42 @@ export class GameService {
       }),
       prisma.gameScore.count({ where }),
     ]);
-
-    return {
-      scores,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return { scores, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
   }
 
-  /** Family leaderboard computed from GameScore aggregation. */
-  static async getLeaderboard(
-    gameType: string | null,
-    familyId: string,
-    period?: string,
-  ) {
-    // Date range by period
+  static async getLeaderboard(gameType: string | null, familyId: string, period?: string) {
     let dateFrom: Date | undefined;
     const now = new Date();
-    switch (period) {
-      case 'DAILY':
-        dateFrom = startOfDay(now);
-        break;
-      case 'WEEKLY': {
-        const d = new Date(now);
-        d.setDate(d.getDate() - 7);
-        dateFrom = startOfDay(d);
-        break;
-      }
-      case 'MONTHLY': {
-        const d = new Date(now);
-        d.setMonth(d.getMonth() - 1);
-        dateFrom = startOfDay(d);
-        break;
-      }
-      default:
-        // ALL_TIME
-        break;
-    }
+    if (period === 'DAILY') dateFrom = startOfDay(now);
+    else if (period === 'WEEKLY') { const d = new Date(now); d.setDate(d.getDate() - 7); dateFrom = startOfDay(d); }
+    else if (period === 'MONTHLY') { const d = new Date(now); d.setMonth(d.getMonth() - 1); dateFrom = startOfDay(d); }
 
-    // Get family members
     const members = await prisma.familyMember.findMany({
-      where: { familyId },
-      select: { id: true, name: true, avatarUrl: true },
+      where: { familyId }, select: { id: true, name: true, avatarUrl: true },
     });
-
-    const memberIds = members.map((m) => m.id);
-
-    const scoreWhere: any = { memberId: { in: memberIds } };
-    if (dateFrom) scoreWhere.createdAt = { gte: dateFrom };
-    if (gameType) scoreWhere.session = { game: { template: { type: gameType as GameType } } };
+    const where: any = { memberId: { in: members.map((m) => m.id) } };
+    if (dateFrom) where.createdAt = { gte: dateFrom };
+    if (gameType) where.session = { game: { template: { type: gameType as GameType } } };
 
     const scores = await prisma.gameScore.findMany({
-      where: scoreWhere,
-      select: { memberId: true, totalScore: true, accuracy: true },
+      where, select: { memberId: true, totalScore: true, accuracy: true },
     });
 
-    // Aggregate per member
     const agg = new Map<string, { totalScore: number; gamesPlayed: number; accuracySum: number }>();
     for (const s of scores) {
-      const entry = agg.get(s.memberId) ?? { totalScore: 0, gamesPlayed: 0, accuracySum: 0 };
-      entry.totalScore += s.totalScore;
-      entry.gamesPlayed += 1;
-      entry.accuracySum += s.accuracy;
-      agg.set(s.memberId, entry);
+      const e = agg.get(s.memberId) ?? { totalScore: 0, gamesPlayed: 0, accuracySum: 0 };
+      e.totalScore += s.totalScore; e.gamesPlayed += 1; e.accuracySum += s.accuracy;
+      agg.set(s.memberId, e);
     }
 
     const leaderboard = members
       .map((m) => {
-        const stats = agg.get(m.id);
+        const a = agg.get(m.id);
         return {
-          memberId: m.id,
-          name: m.name,
-          avatarUrl: m.avatarUrl,
-          totalScore: stats?.totalScore ?? 0,
-          gamesPlayed: stats?.gamesPlayed ?? 0,
-          averageAccuracy: stats && stats.gamesPlayed > 0 ? Math.round(stats.accuracySum / stats.gamesPlayed) : 0,
+          memberId: m.id, name: m.name, avatarUrl: m.avatarUrl,
+          totalScore: a?.totalScore ?? 0,
+          gamesPlayed: a?.gamesPlayed ?? 0,
+          averageAccuracy: a && a.gamesPlayed > 0 ? Math.round(a.accuracySum / a.gamesPlayed) : 0,
         };
       })
       .filter((e) => e.gamesPlayed > 0)
@@ -1919,64 +1448,42 @@ export class GameService {
     return { leaderboard, period: period ?? 'ALL_TIME', gameType };
   }
 
-  /** Get or create today's daily challenge. */
   static async getDailyChallenge(memberId: string) {
     const today = todayDateString();
     const todayDate = new Date(today);
-
-    // Deterministic seed from date
     const seed = parseInt(today.replace(/-/g, ''), 10);
 
     let challenge = await prisma.dailyChallenge.findFirst({
       where: { date: todayDate, isActive: true },
-      include: {
-        attempts: { where: { memberId }, take: 1 },
-      },
+      include: { attempts: { where: { memberId }, take: 1 } },
     });
 
     if (!challenge) {
-      // Create today's challenge — select content deterministically
-      const questions = await prisma.question.findMany({
-        orderBy: { createdAt: 'asc' },
-        take: 200,
-        select: { id: true },
+      const qs = await prisma.question.findMany({
+        orderBy: { createdAt: 'asc' }, take: 200, select: { id: true },
       });
-
-      // Seeded deterministic shuffle
-      const shuffled = [...questions];
+      const shuffled = [...qs];
       let s = seed;
       for (let i = shuffled.length - 1; i > 0; i--) {
         s = (s * 1103515245 + 12345) & 0x7fffffff;
         const j = s % (i + 1);
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-
-      const contentIds = shuffled.slice(0, 10).map((q) => q.id);
-      const difficulty: GameDifficulty = 'MEDIUM';
-
       challenge = await prisma.dailyChallenge.create({
         data: {
           date: todayDate,
-          difficulty,
-          contentIds: contentIds as any,
+          difficulty: 'MEDIUM' as GameDifficulty,
+          contentIds: shuffled.slice(0, 10).map((q) => q.id) as any,
           seed,
         },
-        include: {
-          attempts: { where: { memberId }, take: 1 },
-        },
+        include: { attempts: { where: { memberId }, take: 1 } },
       });
     }
 
     const attempted = challenge.attempts.length > 0;
-
-    // Streak info
     const streak = await prisma.userStreakRecord.findUnique({ where: { memberId } });
-
-    // Load content for the challenge
     const contentIds = challenge.contentIds as string[];
-    const questions = await prisma.question.findMany({
-      where: { id: { in: contentIds } },
-    });
+    const questions = await prisma.question.findMany({ where: { id: { in: contentIds } } });
 
     return {
       challenge: {
@@ -1990,7 +1497,6 @@ export class GameService {
         type: q.type,
         questionText: q.questionText,
         options: q.options,
-        // Don't send correctAnswer before submission
         ...(attempted ? { correctAnswer: q.correctAnswer, explanation: q.explanation } : {}),
       })),
       attempted,
@@ -2002,37 +1508,28 @@ export class GameService {
     };
   }
 
-  /** Submit a daily challenge attempt: grade, record, and update streak. */
   static async submitDailyChallengeAttempt(
     challengeId: string,
     memberId: string,
     answers: Array<{ contentId: string; answer: string; timeSpentMs: number }>,
   ) {
-    const challenge = await prisma.dailyChallenge.findUnique({
-      where: { id: challengeId },
-    });
+    const challenge = await prisma.dailyChallenge.findUnique({ where: { id: challengeId } });
     if (!challenge) throw new NotFoundError(`Daily challenge ${challengeId} not found`);
 
-    // Check for existing attempt
     const existing = await prisma.dailyChallengeAttempt.findUnique({
       where: { challengeId_memberId: { challengeId, memberId } },
     });
     if (existing) throw new BadRequestError('Daily challenge already attempted');
 
-    // Load questions for grading
     const contentIds = answers.map((a) => a.contentId);
-    const questions = await prisma.question.findMany({
-      where: { id: { in: contentIds } },
-    });
-    const questionMap = new Map(questions.map((q) => [q.id, q]));
+    const questions = await prisma.question.findMany({ where: { id: { in: contentIds } } });
+    const qMap = new Map(questions.map((q) => [q.id, q]));
 
     let correctCount = 0;
     let totalTimeMs = 0;
-    const gradedAnswers = answers.map((a) => {
-      const question = questionMap.get(a.contentId);
-      const isCorrect = question
-        ? a.answer.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
-        : false;
+    const graded = answers.map((a) => {
+      const q = qMap.get(a.contentId);
+      const isCorrect = q ? a.answer.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase() : false;
       if (isCorrect) correctCount++;
       totalTimeMs += a.timeSpentMs;
       return {
@@ -2040,218 +1537,157 @@ export class GameService {
         answer: a.answer,
         isCorrect,
         timeSpentMs: a.timeSpentMs,
-        correctAnswer: question?.correctAnswer ?? null,
+        correctAnswer: q?.correctAnswer ?? null,
       };
     });
-
     const score = Math.round((correctCount / Math.max(answers.length, 1)) * 100);
     const accuracy = answers.length > 0 ? (correctCount / answers.length) * 100 : 0;
 
     const attempt = await prisma.dailyChallengeAttempt.create({
       data: {
-        challengeId,
-        memberId,
-        score,
-        accuracy,
+        challengeId, memberId,
+        score, accuracy,
         timeSpentMs: totalTimeMs,
-        answers: gradedAnswers as any,
+        answers: graded as any,
         completedAt: new Date(),
       },
     });
 
-    // Update streak
     await updateStreak(memberId);
 
-    // Record activity
     const member = await prisma.familyMember.findUnique({
-      where: { id: memberId },
-      select: { familyId: true },
+      where: { id: memberId }, select: { familyId: true },
     });
     if (member) {
       await recordActivity(memberId, member.familyId, ActivityEventType.GAME_PLAYED, {
-        gameType: 'DAILY_CHALLENGE',
-        challengeId,
-        score,
-        accuracy,
+        gameType: 'QUICK_RECALL', // Daily Challenge wraps Quick Recall content
+        challengeId, score, accuracy,
       });
     }
 
-    return {
-      attempt,
-      results: gradedAnswers,
-      score,
-      accuracy,
-      correctCount,
-      totalQuestions: answers.length,
-    };
+    return { attempt, results: graded, score, accuracy, correctCount, totalQuestions: answers.length };
   }
 }
 
 // ---------------------------------------------------------------------------
-// Grading helper (module-private)
+// Grading — one branch per of the 9 game types. Answer shapes per redesign:
+//
+//   QUICK_RECALL      { selectedOption }  → string match vs correctAnswer
+//   PAIR_MATCH        { matches: [{ termId, definitionId }] }  → all-pairs check
+//   FLASHCARD_SPRINT  { rating: 1–5 }     → rating ≥ 3 counts as correct
+//   CLOZE             { answers: string[] }  → all blanks match
+//   WORD_SEARCH       { found: string[] }    → all words found
+//   SEQUENCE_IT       { order: string[] }    → order matches metadata.correctOrder
+//   WORD_SCRAMBLE     { answer: string }     → matches metadata.word
+//   CALLIGRAPHY_TRACE { rating: 1–5 }        → rating ≥ 3
+//   FIQH_SCENARIO     { choiceId } per round, OR { path: [choiceId,...] }
+//                                            → choice marked isCorrect
 // ---------------------------------------------------------------------------
 
 async function gradeAnswer(
   round: { contentType: string; contentId: string; metadata: unknown },
   answer: unknown,
-  sessionId?: string,
 ): Promise<boolean> {
-  const meta = (round.metadata ?? {}) as Record<string, unknown>;
-  const gameMode = meta?.gameMode as string | undefined;
+  const meta = (round.metadata ?? {}) as Record<string, any>;
+  const mode = meta.gameMode as GameType | undefined;
 
-  // Unwrap common answer envelopes that the frontend sends
-  let rawAnswer: unknown = answer;
+  // Unwrap common answer envelopes
+  let raw: any = answer;
   if (answer && typeof answer === 'object' && !Array.isArray(answer)) {
     const a = answer as Record<string, unknown>;
-    if ('selectedOption' in a) rawAnswer = a.selectedOption;
-    else if ('matchedTermId' in a) rawAnswer = a.matchedTermId;
-    else if ('answer' in a) rawAnswer = a.answer;
-    else if ('value' in a) rawAnswer = a.value;
+    if ('selectedOption' in a) raw = a.selectedOption;
+    else if ('answer' in a) raw = a.answer;
+    else if ('value' in a) raw = a.value;
+    else raw = answer;
   }
 
-  // ── TERM_MATCH / MEMORY_MATCH (per-pair rounds): the frontend submits the matched
-  // term's contentId. Trust the client-side match logic — any non-empty matchedTermId
-  // that exists in this session is considered correct. ──
-  if (gameMode === 'TERM_MATCH' || gameMode === 'MEMORY_MATCH') {
-    if (typeof rawAnswer === 'string' && rawAnswer.length > 0) return true;
-    return false;
-  }
+  switch (mode) {
 
-  // ── HADITH_CHAIN / SEERAH_TIMELINE / STORY_PUZZLE: aggregate ordering answer ──
-  // The frontend submits the order as an array of IDs (or a single answer on the
-  // first round). We compare against the original round order in the session.
-  if (gameMode === 'HADITH_CHAIN' || gameMode === 'SEERAH_TIMELINE' || gameMode === 'STORY_PUZZLE') {
-    if (Array.isArray(rawAnswer)) {
-      const playerOrder = (rawAnswer as unknown[]).map((v) => String(v));
-      if (!sessionId) return false;
-      const allRounds = await prisma.gameRound.findMany({
-        where: { sessionId },
-        orderBy: { roundIndex: 'asc' },
-        select: { contentId: true },
-      });
-      if (allRounds.length === 0) return false;
-      const correctOrder = allRounds.map((r) => r.contentId);
-      if (playerOrder.length !== correctOrder.length) return false;
-      return correctOrder.every((id, i) => id === playerOrder[i]);
+    case 'QUICK_RECALL': {
+      const expected = (meta.correctAnswer || '').toString().trim().toLowerCase();
+      if (!expected) return false;
+      const player = (typeof raw === 'string' ? raw : JSON.stringify(raw)).trim().toLowerCase();
+      return player === expected;
     }
-    // Single-shot non-array answer: treat as participation credit
-    return Boolean(rawAnswer);
-  }
 
-  // ── WORD_SEARCH (per-word rounds): answer is the found word string ──
-  if (gameMode === 'WORD_SEARCH') {
-    const expected = ((meta.word as string) || (meta.correctAnswer as string) || '').toUpperCase().replace(/[^A-Z]/g, '');
-    const playerStr = (typeof rawAnswer === 'string' ? rawAnswer : '').toUpperCase().replace(/[^A-Z]/g, '');
-    return expected.length > 0 && playerStr === expected;
-  }
+    case 'PAIR_MATCH': {
+      const matches = (answer as any)?.matches;
+      if (!Array.isArray(matches)) return false;
+      const pairs: Array<{ id: string }> = meta.pairs || [];
+      // Correct iff every submitted pair has termId === definitionId
+      // (the frontend uses the same id for both sides) and all pairs are covered.
+      const ids = new Set(pairs.map((p) => p.id));
+      if (matches.length < pairs.length) return false;
+      return matches.every((m: any) => m && m.termId && m.termId === m.definitionId && ids.has(m.termId));
+    }
 
-  // ── AYAH_COMPLETION: answer is array of missing words OR a single selected option ──
-  if (gameMode === 'AYAH_COMPLETION') {
-    const missingWords = (meta.missingWords as string[]) || [];
-    if (Array.isArray(rawAnswer)) {
-      return missingWords.every((w, i) =>
-        (rawAnswer as string[])[i] &&
-        (rawAnswer as string[])[i].trim().toLowerCase() === w.trim().toLowerCase()
+    case 'FLASHCARD_SPRINT':
+    case 'CALLIGRAPHY_TRACE': {
+      const rating = typeof raw === 'number' ? raw : parseInt(String(raw), 10);
+      return !isNaN(rating) && rating >= 3;
+    }
+
+    case 'CLOZE': {
+      const blanks: Array<{ position: number; answer: string }> = meta.blanks || [];
+      const playerAnswers: string[] = Array.isArray(raw)
+        ? raw.map(String)
+        : Array.isArray((answer as any)?.answers)
+          ? ((answer as any).answers as unknown[]).map(String)
+          : [];
+      if (playerAnswers.length < blanks.length) return false;
+      return blanks.every((b, i) =>
+        (playerAnswers[i] || '').trim().toLowerCase() === b.answer.trim().toLowerCase(),
       );
     }
-    if (typeof rawAnswer === 'string') {
-      const correct = (meta.correctAnswer as string) || missingWords[0] || '';
-      return rawAnswer.trim().toLowerCase() === correct.trim().toLowerCase();
-    }
-    return false;
-  }
 
-  // ── FLASHCARD_FLIP / CALLIGRAPHY_TRACE: answer is self-rating (1-5), >= 3 = correct ──
-  if (gameMode === 'FLASHCARD_FLIP' || gameMode === 'CALLIGRAPHY_TRACE') {
-    const rating = typeof rawAnswer === 'number' ? rawAnswer : parseInt(rawAnswer as string, 10);
-    return !isNaN(rating) && rating >= 3;
-  }
-
-  // ── WORD_SCRAMBLE: answer is the unscrambled word ──
-  if (gameMode === 'WORD_SCRAMBLE') {
-    const expected = ((meta.correctAnswer as string) || '').trim().toLowerCase();
-    if (expected) {
-      const playerAnswer = (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase();
-      return playerAnswer === expected;
+    case 'WORD_SEARCH': {
+      const expected: string[] = Array.isArray(meta.words) ? meta.words : [];
+      const found: string[] = Array.isArray(raw)
+        ? raw.map((w) => String(w).toUpperCase())
+        : Array.isArray((answer as any)?.found)
+          ? ((answer as any).found as unknown[]).map((w) => String(w).toUpperCase())
+          : [];
+      if (expected.length === 0) return false;
+      // Correct if at least 60% of placed words are found (EASY threshold);
+      // tighter thresholds would live in difficulty metadata if needed.
+      const hits = expected.filter((w) => found.includes(w)).length;
+      return hits / expected.length >= 0.6;
     }
-    // Fallback to DB lookup if metadata was missing
-    if (round.contentType === 'ARABIC_TERM') {
-      const term = await prisma.arabicTerm.findUnique({ where: { id: round.contentId } });
-      if (term) {
-        const e = (term.transliteration || term.translation).trim().toLowerCase();
-        return (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase() === e;
+
+    case 'SEQUENCE_IT': {
+      const expected: string[] = Array.isArray(meta.correctOrder) ? meta.correctOrder : [];
+      const player: string[] = Array.isArray(raw)
+        ? raw.map(String)
+        : Array.isArray((answer as any)?.order)
+          ? ((answer as any).order as unknown[]).map(String)
+          : [];
+      if (expected.length === 0 || player.length !== expected.length) return false;
+      return expected.every((id, i) => id === player[i]);
+    }
+
+    case 'WORD_SCRAMBLE': {
+      const expected = (meta.word || '').toString().trim().toLowerCase();
+      const player = (typeof raw === 'string' ? raw : '').trim().toLowerCase();
+      return expected.length > 0 && player === expected;
+    }
+
+    case 'FIQH_SCENARIO': {
+      // Single-node submission: { choiceId }
+      const choiceId = (answer as any)?.choiceId ?? raw;
+      const choices: Array<{ id: string; isCorrect: boolean }> = meta.choices || [];
+      const chosen = choices.find((c) => c.id === choiceId);
+      if (chosen) return chosen.isCorrect;
+      // Path submission: { path: [choiceId,...] } — correct if final choice was correct
+      const path = (answer as any)?.path;
+      if (Array.isArray(path) && path.length > 0) {
+        const last = path[path.length - 1];
+        const c = choices.find((x) => x.id === last);
+        return !!c?.isCorrect;
       }
+      return false;
     }
-    return false;
+
+    default:
+      return false;
   }
-
-  // ── SPELLING_BEE: answer is the spelled-out transliteration ──
-  if (gameMode === 'SPELLING_BEE') {
-    const expected = ((meta.correctAnswer as string) || '').trim().toLowerCase();
-    if (expected) {
-      const playerAnswer = (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase();
-      return playerAnswer === expected;
-    }
-    if (round.contentType === 'ARABIC_TERM') {
-      const term = await prisma.arabicTerm.findUnique({ where: { id: round.contentId } });
-      if (term) {
-        const e = (term.transliteration || '').trim().toLowerCase();
-        return (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase() === e;
-      }
-    }
-    return false;
-  }
-
-  // ── SENTENCE_BUILD: answer is array of words in order ──
-  if (gameMode === 'SENTENCE_BUILD') {
-    if (!Array.isArray(rawAnswer)) return false;
-    const expectedSentence = (meta.correctSentence as string) || (meta.correctAnswer as string) || '';
-    let expected = expectedSentence.split(/\s+/).filter(Boolean);
-    if (expected.length === 0) {
-      const fc = await prisma.flashCard.findUnique({ where: { id: round.contentId } });
-      if (!fc) return false;
-      expected = (fc.back || fc.front || '').split(/\s+/).filter(Boolean);
-    }
-    const playerWords = rawAnswer as string[];
-    return expected.length === playerWords.length &&
-      expected.every((w, i) => w.toLowerCase() === (playerWords[i] || '').toLowerCase());
-  }
-
-  // ── FILL_IN_BLANK: answer is the missing word ──
-  if (gameMode === 'FILL_IN_BLANK') {
-    const missingWord = ((meta.correctAnswer as string) || (meta.missingWord as string) || '').trim().toLowerCase();
-    const playerAnswer = (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase();
-    return playerAnswer === missingWord;
-  }
-
-  // ── Prefer metadata.correctAnswer for all remaining MCQ-style games ──
-  if (typeof meta.correctAnswer === 'string' && meta.correctAnswer.length > 0) {
-    const playerStr = (typeof rawAnswer === 'string' ? rawAnswer : JSON.stringify(rawAnswer)).trim().toLowerCase();
-    return playerStr === (meta.correctAnswer as string).trim().toLowerCase();
-  }
-
-  // ── Final fallback: lookup canonical content for comparison ──
-  const answerStr = typeof rawAnswer === 'string' ? rawAnswer.trim().toLowerCase() : JSON.stringify(rawAnswer);
-
-  if (round.contentType === 'QUESTION') {
-    const question = await prisma.question.findUnique({ where: { id: round.contentId } });
-    if (!question) return false;
-    return answerStr === question.correctAnswer.trim().toLowerCase();
-  }
-
-  if (round.contentType === 'FLASHCARD') {
-    const flashcard = await prisma.flashCard.findUnique({ where: { id: round.contentId } });
-    if (!flashcard) return false;
-    const acceptable = [flashcard.back, flashcard.backArabic].filter(Boolean).map((s) => s!.trim().toLowerCase());
-    return acceptable.includes(answerStr);
-  }
-
-  if (round.contentType === 'ARABIC_TERM') {
-    const term = await prisma.arabicTerm.findUnique({ where: { id: round.contentId } });
-    if (!term) return false;
-    const acceptable = [term.translation, term.transliteration].map((s) => s.trim().toLowerCase());
-    return acceptable.includes(answerStr);
-  }
-
-  return false;
 }
