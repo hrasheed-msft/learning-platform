@@ -3,11 +3,15 @@ import { param, body, query } from 'express-validator';
 import { GameController } from '../controllers/game.controller';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate, requireParent } from '../middleware/auth.middleware';
+import { requireActiveMember } from '../middleware/requireActiveMember.middleware';
 
 const router = Router();
 
 // All game routes require authentication (parent or child JWT)
 router.use(authenticate);
+
+// Require an active learner profile for all game routes
+router.use(requireActiveMember);
 
 // ---------------------------------------------------------------------------
 // Validation schemas
@@ -76,6 +80,12 @@ router.get(
 );
 
 router.get('/standalone', GameController.getStandaloneGames);
+
+router.get(
+  '/:slug/eligible-courses',
+  validate([param('slug').isString().notEmpty().withMessage('slug is required')]),
+  GameController.getEligibleCourses,
+);
 
 // ---------------------------------------------------------------------------
 // Session Lifecycle

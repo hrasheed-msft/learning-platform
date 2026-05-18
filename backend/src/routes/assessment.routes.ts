@@ -3,11 +3,15 @@ import { param, body } from 'express-validator';
 import { AssessmentController } from '../controllers/assessment.controller';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate } from '../middleware/auth.middleware';
+import { requireActiveMember } from '../middleware/requireActiveMember.middleware';
 
 const router = Router();
 
 // All assessment routes require authentication
 router.use(authenticate);
+
+// Require an active learner profile for assessment routes
+router.use(requireActiveMember);
 
 // Validation schemas
 const unitIdValidation = [

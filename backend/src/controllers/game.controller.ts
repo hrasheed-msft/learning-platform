@@ -1,22 +1,24 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { ActiveMemberRequest } from '../middleware/requireActiveMember.middleware';
 import { GameService } from '../services/game.service';
 import { AchievementService } from '../services/achievement.service';
 import { BadRequestError } from '../middleware/error.middleware';
 import { GameType, GameDifficulty } from '@prisma/client';
 
 /**
- * Resolve the acting memberId from either a child JWT or request body/query.
- * Child tokens carry memberId directly; parent tokens require it in the request.
+ * Resolve the acting memberId from either the requireActiveMember middleware
+ * or, as a fallback for child JWTs, from the request directly.
+ * Returns a guaranteed non-undefined memberId or throws.
  */
-function resolveMemberId(req: AuthenticatedRequest, fromBody = false): string {
+function resolveMemberId(req: ActiveMemberRequest, _fromBody = false): string {
+  // The requireActiveMember middleware sets this for all requests
+  if (req.activeMemberId) return req.activeMemberId;
+  // Child tokens also get it via the middleware, but double-check
   if (req.child) return req.child.memberId;
-  const memberId = fromBody ? req.body?.memberId : (req.query?.memberId as string);
-  if (!memberId) throw new BadRequestError('memberId is required');
-  return memberId;
+  throw new BadRequestError('No active learner profile selected. Please choose a learner profile before playing.');
 }
 
-function resolveFamilyId(req: AuthenticatedRequest): string {
+function resolveFamilyId(req: ActiveMemberRequest): string {
   if (req.child) return req.child.familyId;
   if (req.user) return req.user.familyId;
   throw new BadRequestError('Cannot determine familyId');
@@ -27,7 +29,7 @@ export class GameController {
   // Game Discovery
   // -----------------------------------------------------------------------
 
-  static async getAvailableGames(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getAvailableGames(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const { courseId, unitId, category } = req.query as Record<string, string>;
@@ -36,7 +38,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getGamesForUnit(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getGamesForUnit(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const games = await GameService.getGamesForUnit(req.params.unitId, memberId);
@@ -44,7 +46,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getGamesForCourse(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getGamesForCourse(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const games = await GameService.getGamesForCourse(req.params.courseId, memberId);
@@ -52,7 +54,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getStandaloneGames(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getStandaloneGames(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const games = await GameService.getStandaloneGames(memberId);
@@ -60,11 +62,20 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
+  static async getEligibleCourses(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const memberId = resolveMemberId(req);
+      const slug = req.params.slug;
+      const courses = await GameService.getEligibleCourses(slug, memberId);
+      res.json({ success: true, data: courses });
+    } catch (error) { next(error); }
+  }
+
   // -----------------------------------------------------------------------
   // Session Lifecycle
   // -----------------------------------------------------------------------
 
-  static async startGame(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async startGame(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req, true);
       const { gameType, gameId, unitId, courseId, difficulty } = req.body;
@@ -82,7 +93,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async submitRound(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async submitRound(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { sessionId, roundId } = req.params;
       const { answer, timeSpentMs } = req.body;
@@ -92,7 +103,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async completeGame(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async completeGame(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { sessionId } = req.params;
       const { reason } = req.body;
@@ -113,7 +124,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getSession(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getSession(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const session = await GameService.getSession(req.params.sessionId);
       res.json({ success: true, data: session });
@@ -124,7 +135,7 @@ export class GameController {
   // Scores & Leaderboard
   // -----------------------------------------------------------------------
 
-  static async getScores(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getScores(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const { gameType, page, limit } = req.query as Record<string, string>;
@@ -137,7 +148,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getLeaderboard(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getLeaderboard(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const familyId = resolveFamilyId(req);
       const gameType = req.params.gameType === 'all' ? null : req.params.gameType;
@@ -151,7 +162,7 @@ export class GameController {
   // Achievements
   // -----------------------------------------------------------------------
 
-  static async getAchievements(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getAchievements(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const achievements = await AchievementService.getAll(memberId);
@@ -159,7 +170,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getRecentAchievements(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getRecentAchievements(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const recent = await AchievementService.getRecent(memberId);
@@ -171,7 +182,7 @@ export class GameController {
   // Daily Challenge
   // -----------------------------------------------------------------------
 
-  static async getDailyChallenge(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getDailyChallenge(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req);
       const result = await GameService.getDailyChallenge(memberId);
@@ -179,7 +190,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async submitDailyChallengeAttempt(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async submitDailyChallengeAttempt(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const memberId = resolveMemberId(req, true);
       const { challengeId, answers } = req.body;
@@ -207,7 +218,7 @@ export class GameController {
   // Parental Controls
   // -----------------------------------------------------------------------
 
-  static async getGameSettings(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getGameSettings(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { memberId } = req.params;
       const settings = await import('../config/database').then((db) =>
@@ -217,7 +228,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async updateGameSettings(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async updateGameSettings(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { memberId } = req.params;
       const userId = req.user?.id;
@@ -260,7 +271,7 @@ export class GameController {
     } catch (error) { next(error); }
   }
 
-  static async getGameTime(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getGameTime(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { memberId } = req.params;
       const db = (await import('../config/database')).default;

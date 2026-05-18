@@ -115,6 +115,25 @@ async function main() {
   ]);
   console.log('✅ Created demo family members:', demoMembers.map(m => m.name).join(', '));
 
+  // Create a self-member for the demo user (parent's own learner profile)
+  const selfMember = await prisma.familyMember.create({
+    data: {
+      familyId: demoFamily.id,
+      name: 'Demo Parent',
+      age: 30,
+      ageCategory: 'ADULT',
+      isAccountOwner: true,
+      currentStreak: 0,
+      longestStreak: 0,
+      totalPoints: 0,
+    },
+  });
+  await prisma.user.update({
+    where: { id: demoUser.id },
+    data: { selfMemberId: selfMember.id },
+  });
+  console.log('✅ Created self-member for demo user:', selfMember.name);
+
   // Create comprehensive demo courses with rich content
   console.log('');
   console.log('📚 Creating courses with rich content...');

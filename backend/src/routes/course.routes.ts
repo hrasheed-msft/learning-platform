@@ -3,6 +3,7 @@ import { param, query, body } from 'express-validator';
 import { CourseController } from '../controllers/course.controller';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate, optionalAuth, requireParentRole } from '../middleware/auth.middleware';
+import { requireActiveMember } from '../middleware/requireActiveMember.middleware';
 
 const router = Router();
 
@@ -36,17 +37,17 @@ router.get('/:courseId', validate(courseIdValidation), optionalAuth, CourseContr
 // Protected routes
 router.use(authenticate);
 
-// Course units
+// Course units (browsing doesn't require active member)
 router.get('/:courseId/units', validate(courseIdValidation), CourseController.getUnits);
 router.get('/:courseId/units/:unitId', validate(unitIdValidation), CourseController.getUnit);
 
-// Enrollments (parent only for enrolling)
-router.post('/enrollments', requireParentRole, validate(enrollmentValidation), CourseController.enrollMember);
-router.get('/enrollments/member/:memberId', CourseController.getMemberEnrollments);
-router.delete('/enrollments/:enrollmentId', requireParentRole, CourseController.unenrollMember);
+// Enrollments (require active member)
+router.post('/enrollments', requireActiveMember, requireParentRole, validate(enrollmentValidation), CourseController.enrollMember);
+router.get('/enrollments/member/:memberId', requireActiveMember, CourseController.getMemberEnrollments);
+router.delete('/enrollments/:enrollmentId', requireActiveMember, requireParentRole, CourseController.unenrollMember);
 
-// Progress tracking
-router.post('/progress', validate(progressUpdateValidation), CourseController.updateProgress);
-router.get('/progress/member/:memberId', CourseController.getMemberProgress);
+// Progress tracking (require active member)
+router.post('/progress', requireActiveMember, validate(progressUpdateValidation), CourseController.updateProgress);
+router.get('/progress/member/:memberId', requireActiveMember, CourseController.getMemberProgress);
 
 export default router;

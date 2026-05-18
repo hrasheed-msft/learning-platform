@@ -33,6 +33,10 @@ const memberIdValidation = [
 
 // Routes
 
+// Learner picker endpoints (no requireActiveMember — these help the user pick one)
+router.get('/learners', FamilyController.getLearners);
+router.post('/self-enroll', FamilyController.selfEnroll);
+
 // Get family info
 router.get('/', FamilyController.getFamily);
 
