@@ -1,8 +1,8 @@
 # Decisions Archive
 
-**Last Updated:** 2026-05-17T14:57:13Z  
-**Total Decisions:** 16  
-**Source:** Merged from .squad/decisions/inbox/ on 2026-05-17
+**Last Updated:** 2026-05-18T19:48:40Z  
+**Total Decisions:** 23  
+**Source:** Merged from .squad/decisions/inbox/ on 2026-05-18
 
 ---
 
@@ -457,4 +457,434 @@ selectContent was filtering questions by exact difficulty match while checkConte
 - Ibn Sina: All 15 frontend game UIs now have working backend support
 - Seed: 26 templates, 60+ course-linked games, 9 standalone games
 - API: /games/available returns all 26 types with availability status
+
+---
+
+## Decision: Azure Deployment Architecture
+
+**Date:** 2026-05-17  
+**Author:** Khaldun (Lead Architect)  
+**Status:** DOCUMENTED
+
+### Summary
+
+Comprehensive Azure deployment guide written at `docs/azure-deployment-guide.md` covering full production path for the Islamic Learning Platform.
+
+### Key Architectural Decisions
+
+1. **App Service over Container Apps** for now — no Dockerfile maintenance, native Node.js runtime, simpler operations. Container Apps is the future path when we split services.
+
+2. **Key Vault for all secrets** — no raw secrets in App Service settings. Uses managed identity + `@Microsoft.KeyVault(...)` references.
+
+3. **VNet + Private Endpoints for production** — PostgreSQL and Redis isolated from public internet. App Service integrates via VNet.
+
+4. **CI/CD via GitHub Actions** — separate workflows for frontend (Static Web Apps) and backend (App Service ZIP deploy). Migrations run in CI before deployment.
+
+5. **Cost tiers documented:** ~$43/mo dev, ~$487/mo production. Growth milestones mapped to infrastructure upgrades.
+
+### Trade-offs
+
+- **No Dockerfile yet:** Simpler ops now, but limits containerization options. Migration path documented for when scale demands it.
+- **Static Web Apps Free tier:** Sufficient for now but Standard ($9/mo) needed for custom auth providers or >2 custom domains.
+- **Seeds run manually:** Large seed corpus (20+ files) makes automated seeding slow. Recommend tracking which seeds have been applied.
+
+### Impact
+
+All team members should reference this guide for deployments. The existing `docs/AZURE_DEPLOYMENT.md` (older, less comprehensive) remains for quick reference but the new guide is canonical.
+
+---
+
+## Decision: useActiveMemberId Hook for Game Components
+
+**Date:** 2026-05-17  
+**Author:** Ibn Sina (Frontend Dev)  
+**Status:** Implemented
+
+### Context
+
+All 26 game components relied on `selectedMember?.id` from `useFamilyStore()`, but `selectedMember` is only populated when `selectMember()` is explicitly called. No code path calls it before game start. Result: every "Start Game" button silently failed.
+
+GamesHub already worked around this with `activeMemberId = selectedMember?.id || members[0]?.id` inline.
+
+### Decision
+
+Created a reusable hook `useActiveMemberId()` at `frontend/src/hooks/useActiveMemberId.ts` that:
+1. Returns `selectedMember?.id || members[0]?.id` (fallback to first member)
+2. Auto-fetches family members from authStore's `family.id` if not yet loaded
+
+All 26 game components now use this hook instead of directly destructuring `selectedMember`.
+
+### Impact
+
+- **All game files in `frontend/src/pages/games/`** now import from `@/hooks/useActiveMemberId`
+- Any future game component should use `useActiveMemberId()` — never raw `selectedMember`
+- GamesHub itself still uses its own inline pattern (no change needed; it already worked)
+
+### Also Fixed
+
+- GamesHub `filteredGames.map` key changed from `game.id` to `${game.id}-${game.template.type}-${index}` to prevent React key warnings when template flattening produces duplicate IDs.
+
+---
+
+## Decision: Game System Redesign — From 26 Quiz Reskins to 10 Distinct Mechanics
+
+**Author:** Khaldun (Lead Architect)  
+**Date:** 2026-05-18  
+**Status:** PROPOSAL — Pending review  
+**Supersedes (in part):** Decision #7 (Games Engine Detailed Design, 2026-05-17)
+
+### Summary
+
+After auditing `game.service.ts`, confirmed that more than half the game types produce **byte-identical round payloads** with only cosmetic flavor text. We have built one game and shipped it 15 times.
+
+### Current State Audit: 26 Game Types Categorized by Actual Mechanic
+
+#### Group A — Pure MCQ Reskins (10 types, all identical)
+- MULTIPLE_CHOICE, SPEED_QUIZ, TRIVIA_BATTLE, FIQH_SCENARIO (broken), ESCAPE_ROOM, MAZE_NAVIGATOR, MAZE_RUNNER, KNOWLEDGE_EXPEDITION, MOSQUE_BUILDER, PATTERN_CREATOR
+- All generate: `{ questionText, options[], correctAnswer, explanation }`
+- **Verdict:** Collapse to **one** game (MCQ) with skinnable presentation themes.
+
+#### Group B — Flashcard Reskins (3 types, all identical)
+- FLASHCARD_FLIP, MEMORY_MATCH, TERM_MATCH
+- MEMORY_MATCH and TERM_MATCH are the same mechanic (pair-matching)
+- **Verdict:** Collapse to one **Pair Match** game. Keep **Flashcard Sprint** separate (self-rated recall).
+
+#### Group C — Fill-in-the-blank Variants (4 types)
+- FILL_IN_BLANK, AYAH_COMPLETION (same mechanic), WORD_SCRAMBLE, SPELLING_BEE
+- **Verdict:** Merge FILL_IN_BLANK + AYAH_COMPLETION into one **Cloze** game. Keep WORD_SCRAMBLE and SPELLING_BEE distinct.
+
+#### Group D — Sequencing Games (4 types)
+- HADITH_CHAIN, SEERAH_TIMELINE, SENTENCE_BUILD, STORY_PUZZLE
+- Same mechanic (drag items into correct order), different content.
+- **Verdict:** Keep as **one Ordering game** with content-type variants.
+
+#### Group E — Special Mechanics (5 types, genuinely distinct)
+- WORD_SEARCH (keep), TRUE_FALSE (keep but reframe), LISTENING_QUIZ (merge into MCQ), CALLIGRAPHY_TRACE (keep), DAILY_CHALLENGE (delivery wrapper, not a game type)
+
+### Proposed 10-Mechanic Taxonomy
+
+**Core Engine (4):**
+1. **Quick Recall** (replaces 10 MCQ reskins) — 4-option MCQ with themes
+2. **Pair Match** (replaces MEMORY_MATCH + TERM_MATCH) — reveal/match pairs in grid
+3. **Flashcard Sprint** (keep) — self-rated recall, feeds SRS
+4. **Cloze (Fill the Gap)** (replaces FILL_IN_BLANK + AYAH_COMPLETION) — type missing text
+
+**Specialized (6):**
+5. **Word Search** — find words in letter grid
+6. **Sequence It** (replaces HADITH_CHAIN + SEERAH_TIMELINE + SENTENCE_BUILD + STORY_PUZZLE) — drag items into order
+7. **Word Scramble** — unscramble jumbled letters
+8. **Verify** (reframed TRUE_FALSE) — binary statement judgment with context labels (Halal/Haram/True/False/etc)
+9. **Calligraphy Trace** — trace Arabic letterforms on canvas
+10. **Fiqh Scenario Tree** ⚡ NEW — **branching decision tree** (replaces broken FIQH_SCENARIO). Player given real-life situation, chooses actions, story continues. After 3–5 decisions, gets verdict on fiqh soundness at each step.
+
+### Games Hub UX Redesign
+
+**Step 1: Hub view** (`/games`) — Shows 10 game cards, no course/difficulty picker on cards
+**Step 2: Game launcher** (`/games/:gameSlug/launch`) — Course picker (filtered by content compatibility), unit picker, difficulty picker (3 buttons), Start button
+**Step 3: Play** (`/games/:gameSlug/play?...`) — Existing pattern, no changes
+
+### Course-Compatibility Matrix
+
+New `contentRequirements` metadata on Game model:
+```ts
+{
+  slug: 'fiqh-scenario',
+  contentRequirements: {
+    contentType: 'FIQH_SCENARIO',
+    courseCategory: 'FIQH',
+    minItems: 3,
+  }
+}
+```
+
+Hub card always appears, but launcher filters courses by this query.
+
+### Migration Path — 26 → 10 Without Data Loss
+
+**Principle:** Game type collapse, score preservation. Rename/merge GameType enum values, preserve all existing `GameScore` and `GameSession` rows via mapping.
+
+**Schema Changes:**
+- New enum: `QUICK_RECALL, PAIR_MATCH, FLASHCARD_SPRINT, CLOZE, WORD_SEARCH, SEQUENCE_IT, WORD_SCRAMBLE, VERIFY, CALLIGRAPHY_TRACE, FIQH_SCENARIO`
+- New content models: `OrderedSequence`, `FiqhScenario` + `FiqhScenarioNode`
+- Add `presentationConfig: Json?` to `Game` (themes/modes become data, not new types)
+
+**Code Migration:**
+- Backend: `generateRoundsForGameType()` switch 26 cases → 10
+- Frontend: Delete ~17 redundant game components, keep 10 core ones
+- Migration script: Prisma migration with raw SQL remapping old GameTypes to new ones
+
+### Rollout Plan
+
+1. **Phase A (1 sprint):** Backend enum + schema migration
+2. **Phase B (1 sprint):** New Games Hub UI + Launcher page
+3. **Phase C (1–2 sprints):** Author FiqhScenario content (manual)
+4. **Phase D (optional):** OrderedSequence content authoring
+
+### Recommendation
+
+Proceed with Phase A immediately. It is reversible, ships value (less code = fewer bugs), and unblocks the real prize: a working Fiqh Scenario Tree in Phase C.
+
+---
+
+## Decision: Family Account vs. Learner Member — Auth & Game Identity
+
+**Author:** Khaldun (Lead)  
+**Date:** 2026-05-18  
+**Status:** Proposed  
+**Audience:** Ibn Sina (backend), Biruni (frontend), Khwarizmi (schema/migrations), Scribe (docs)
+
+### Current State
+
+**Data Model:** Schema cleanly splits **account holder** from **learner**:
+- `Family` ──< `User` (parent login: email + password, role=PARENT)
+- `Family` ──< `FamilyMember` (learner: name, age, optional PIN/username, streaks, points)
+- Every learning/gameplay relation is hung off `FamilyMember`, **not** `User`
+
+**At Login:**
+- `register()` creates a `Family` and a `User` (PARENT). **No `FamilyMember` is created.**
+- `login()` returns `{ accessToken, refreshToken, user: {id, email, role}, family: {id, name} }`
+- JWT payload contains `userId, familyId, email, role` — **no `memberId`**
+
+**Frontend State After Login:**
+- `authStore` persists `{ user, family, accessToken, refreshToken }`
+- `familyStore` tracks `members[]` and `selectedMember`, but is **not populated automatically** at login
+- Active learner resolved by `useActiveMemberId()`: `selectedMember?.id || members[0]?.id` (can be undefined)
+- **No member-picker UI exists**. App silently defaults to first member in array.
+
+### Where the Game Flow Breaks
+
+For a parent who has just registered and has **zero `FamilyMember` records**:
+1. `members[]` is empty after `fetchMembers()` resolves
+2. `activeMemberId` is `undefined` forever
+3. `GameLauncher` shows a spinner that never resolves (loading is never cleared), OR
+4. If user reaches `GamePlay` directly, `useGameRunner` quietly never auto-starts
+5. If undefined memberId forwards to API, backend `startGame` → `checkParentalControls(undefined, …)` → Prisma validation error → 500 error
+
+This matches the symptom: logged in as parent, no members, every game launch fails.
+
+### Problems Identified
+
+1. **No member is created for the parent at signup.** The schema expects at least one `FamilyMember`, but `register()` never creates one.
+2. **No member-picker UI.** Even families with multiple members rely on `members[0]` — no way to pick who is playing.
+3. **`useActiveMemberId()` can return `undefined`** and downstream callers don't all handle it. `GameLauncher` stuck-loads. `useGameRunner` silently no-ops.
+4. **No backend guard.** `startGame()` accepts whatever `memberId` the controller hands it. Undefined/garbage values yield Prisma 500.
+5. **JWT does not carry a `memberId`.** Frontend has to thread `memberId` through every request; nothing validates it belongs to the family.
+
+### Recommended Solution: Option B — "Who's Learning Today?" Profile Picker
+
+Reject:
+- **Option A** (auto-create member for parent's email): Parent shouldn't silently become a "learner" with streaks/rank. Doesn't address multi-member case.
+- **Option C** (admin-only family account): Many users *are* the primary learner (adult self-study). Forcing "add yourself" is bureaucratic and confusing.
+
+**Option B captures both audiences:**
+
+1. After login, route through `/select-learner` (Netflix-style picker) before dashboard
+2. Picker shows every `FamilyMember` as tile, plus "Just me (myself)" tile and "+ Add a learner" tile
+3. Picking "Just me" first time **prompts:** "Looks like you'd like to take courses yourself. We'll set up a learner profile in your name." → creates `FamilyMember` (linked to user) and selects it
+4. Selected member persisted (zustand + localStorage), surfaced as `useActiveMemberId()`
+5. "Switch learner" button lives in header
+6. Every game/quiz/flashcard route asserts selected member; otherwise redirects to `/select-learner`
+
+### Schema Changes
+
+Minimal, additive, backward-compatible:
+
+```prisma
+model User {
+  // ...existing fields...
+  selfMemberId String? @unique
+  selfMember   FamilyMember? @relation("UserSelfMember", fields: [selfMemberId], references: [id], onDelete: SetNull)
+}
+
+model FamilyMember {
+  // ...existing fields...
+  isAccountOwner Boolean @default(false)
+  ownerUser      User?    @relation("UserSelfMember")
+}
+```
+
+- `isAccountOwner=true` badges tile ("You") and protects from accidental deletion
+- `selfMemberId` makes "is logged-in parent also a learner?" check a single lookup
+- No existing data touched. Existing families keep working; new column defaults to `false`
+
+### Backend Changes (Ibn Sina)
+
+1. **`AuthService.register`** stays as-is — don't auto-create member. We want explicit picker moment.
+2. **New endpoint `POST /api/families/:familyId/members/self`** — creates `FamilyMember` with `isAccountOwner=true`, links `User.selfMemberId`, defaults `age` from form. Idempotent.
+3. **Guard `startGame` (and `submitRound`, `completeGame`, etc.):**
+   - Verify `memberId` is valid UUID
+   - Verify member exists and `familyId === req.user.familyId`
+   - Return `400 Invalid member` on failure (not 500)
+4. **JWT enrichment (optional, phase 2):** add `lastMemberId` to access token on refresh
+
+### Frontend Changes (Biruni)
+
+1. **New page `/select-learner`** (`pages/auth/SelectLearner.tsx`)
+2. **Routing guard** in `App.tsx`: if `isAuthenticated && !selectedMember && route is not /select-learner`, redirect
+3. **`familyStore`:** Persist `selectedMember` to localStorage, add `createSelfMember(age)` action
+4. **`useActiveMemberId`:** Stop falling back to `members[0]`. Return `selectedMember?.id ?? undefined`
+5. **`GameLauncher` + `useGameRunner`:** When `activeMemberId` is undefined, show friendly "Pick a learner to play" CTA linking to `/select-learner`
+6. **Header:** Add "Playing as: <name> · switch" control on authenticated pages
+
+### Migration Path for Existing Accounts
+
+- New columns default safely; nothing breaks
+- On next login, if `User.selfMemberId == null` AND `family.members.length == 0`, treat as brand-new; surface "Add a learner / Just me" prominently
+- If `family.members.length >= 1` and `User.selfMemberId == null`, just show existing members (no auto-claim)
+- No one-time backfill script needed
+
+### Impact on Games
+
+**How this fixes current errors:**
+- Parent currently: Logs in → no `FamilyMember` exists → clicks game → `activeMemberId` undefined → stuck spinner or undefined propagates to API → 500
+- After fix: Logs in → forced through `/select-learner` → picks "Just me" → backend creates `FamilyMember` → store selects it → clicks game → `activeMemberId` is real UUID → session created → game plays
+
+**Game-system Validation to Add (defensive depth):**
+1. Backend middleware `requireMember` on every `/api/games/*` route taking memberId
+2. Frontend `gameService` interceptor: if `memberId === undefined`, abort and show toast
+3. `gameStore.startGame`: add early `if (!memberId) throw`
+4. `GameLauncher` early-return: call `setLoading(false)` so page renders friendly empty-state
+5. Leaderboard/achievement pages: replace empty state with "Pick a learner" component
+
+### Proposed Sequencing
+
+1. **Sprint 1 (unblocks current errors):** Backend `requireMember` middleware + frontend `gameService` interceptor + `GameLauncher` `setLoading(false)` fix. Ships in a day; converts 500s into clear UX.
+2. **Sprint 2 (real fix):** Schema migration, endpoint, `/select-learner` page, routing guard, header switcher
+3. **Sprint 3 (polish):** Persist `selectedMember`, switch-learner animation, badge/streak audit, docs
+
+---
+
+## Decision: User Directive — Game Type Consolidation
+
+**Date:** 2026-05-18T09:35:44Z  
+**Author:** hrasheed (via Copilot)  
+**Status:** Captured for team implementation
+
+### Directive
+
+Merge G8 (True/False / Verify) into G1 (Quick Recall) as a question type variant (True/False questions alongside MCQ). Final game count is 9 distinct mechanics, not 10.
+
+### Rationale
+
+User request — reduces redundancy further; binary judgment is just a 2-option MCQ.
+
+---
+
+## Decision: Games frontend rebuilt to 9-mechanic taxonomy
+
+**Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-05-18  
+**Status:** Implemented (build ✓)  
+**Implements:** `khaldun-game-redesign.md` + user directive (merge True/False into Quick Recall → 9, not 10)
+
+### What Changed
+
+Collapsed 26 redundant game components into **9 distinct mechanics**:
+
+| Slug | ActiveGameType | What it tests |
+|---|---|---|
+| `quick-recall` | QUICK_RECALL | Recall (MCQ + T/F merged) |
+| `pair-match` | PAIR_MATCH | Association (memory & connect) |
+| `flashcard-sprint` | FLASHCARD_SPRINT | Self-rated recall (SRS) |
+| `cloze` | CLOZE | Productive recall (fill the gap) |
+| `word-search` | WORD_SEARCH | Vocabulary recognition |
+| `sequence-it` | SEQUENCE_IT | Order (timeline / isnad / syntax / narrative) |
+| `word-scramble` | WORD_SCRAMBLE | Spelling |
+| `calligraphy-trace` | CALLIGRAPHY_TRACE | Handwriting (Arabic only) |
+| `fiqh-scenario` | FIQH_SCENARIO | Applied jurisprudence (Fiqh only) |
+
+### Architectural Decisions
+
+1. **Routing pattern:** `/games` → `/games/:gameSlug/launch` → `/games/:gameSlug/play?gameId=X&difficulty=Y`. Hub no longer launches games. Launcher is separate page picking course + difficulty.
+
+2. **`useGameRunner` hook** in `frontend/src/hooks/useGameRunner.ts` DRYs the auto-start / submit / completeGame / playAgain / exit lifecycle for all 9 games. Each component now ~100-300 lines presentation only.
+
+3. **Legacy back-compat via `mapToActiveType()`** in `utils/gameHelpers.ts` — backend records with old GameType values (MULTIPLE_CHOICE, SPEED_QUIZ, etc.) collapsed into 9 new types client-side. No backend migration required.
+
+4. **Game content shapes preserved** — `startGame → submitRound → completeGame` API unchanged. New components consume existing payload shapes (pairs, narrators, events, segments, words, grid, scrambledWord, letter, tree, etc).
+
+### Backend Ask (Khwarizmi)
+
+Frontend expects new endpoint:
+```
+GET /api/v1/games/:gameSlug/eligible-courses?memberId=...
+→ [{ gameId, courseId, courseName, contentCount, suggestedDifficulty }]
+```
+
+**Fallback active in meantime:** `gameService.getEligibleCourses()` catches 404 and falls back to filtering `/games/available` client-side. Functional but extra work — please add dedicated endpoint when convenient.
+
+### Files
+
+- **New:** `pages/games/{GameLauncher,QuickRecall,PairMatch,FlashcardSprint,Cloze,WordSearch,SequenceIt,WordScramble,CalligraphyTrace,FiqhScenario}Game.tsx`, `hooks/useGameRunner.ts`
+- **Rewritten:** `pages/games/{GamesHub,GamePlay,index}.tsx`
+- **Modified:** `types/game.ts`, `utils/gameHelpers.ts`, `stores/gameStore.ts`, `services/gameService.ts`, `App.tsx`
+- **Deleted:** 26 old game components
+
+### Verification
+
+`npm run build` ✓ — 1531 modules transformed, no TS errors.
+
+---
+
+## Decision: Game Engine Collapse — 26 → 9 GameTypes
+
+**Author:** Khwarizmi (Backend Dev)  
+**Date:** 2026-05-18  
+**Status:** Implemented (migration written, not yet applied to prod)  
+**Implements:** `khaldun-game-redesign.md` + user directive
+
+### What Changed
+
+The game engine collapsed from **26 GameType enum values** to **9 canonical types**. G8 (Verify / True-False) was merged into G1 (Quick Recall) as a 2-option MCQ variant per user directive.
+
+### Final 9 GameTypes
+
+| Slug | Enum | Aggregates |
+|---|---|---|
+| `quick-recall` | `QUICK_RECALL` | SPEED_QUIZ, MULTIPLE_CHOICE, TRUE_FALSE, LISTENING_QUIZ, TRIVIA_BATTLE, DAILY_CHALLENGE |
+| `pair-match` | `PAIR_MATCH` | TERM_MATCH, MEMORY_MATCH |
+| `flashcard-sprint` | `FLASHCARD_SPRINT` | FLASHCARD_FLIP |
+| `cloze` | `CLOZE` | FILL_IN_BLANK, AYAH_COMPLETION |
+| `word-search` | `WORD_SEARCH` | WORD_SEARCH, MAZE_RUNNER, MAZE_NAVIGATOR |
+| `sequence-it` | `SEQUENCE_IT` | SENTENCE_BUILD, HADITH_CHAIN, SEERAH_TIMELINE, STORY_PUZZLE |
+| `word-scramble` | `WORD_SCRAMBLE` | WORD_SCRAMBLE, SPELLING_BEE |
+| `calligraphy-trace` | `CALLIGRAPHY_TRACE` | CALLIGRAPHY_TRACE, PATTERN_CREATOR, MOSQUE_BUILDER |
+| `fiqh-scenario` | `FIQH_SCENARIO` | FIQH_SCENARIO, ESCAPE_ROOM, KNOWLEDGE_EXPEDITION |
+
+### Files Modified
+
+- `backend/prisma/schema.prisma` — GameType enum (9 values); `Game.presentationConfig Json?` and `Game.courseCompatibility Json?` added
+- `backend/prisma/migrations/20260518093544_collapse_game_types_to_9/migration.sql` — NEW raw-SQL migration with CASE mapping, deduplication, index fixes
+- `backend/src/services/game.service.ts` — REWRITTEN: 2047 → ~1500 lines. New `GAME_DEFS` table, single `selectContent`, single `formatRounds` switch (9 branches), single `gradeAnswer`. New `getEligibleCourses(slug, memberId)` method.
+- `backend/src/services/achievement.service.ts` — Updated GameType references
+- `backend/src/controllers/game.controller.ts` — Added `getEligibleCourses` method
+- `backend/src/routes/game.routes.ts` — Added `GET /games/:slug/eligible-courses`
+- `backend/prisma/seed-games.ts` — REWRITTEN: 9 templates, one Game per template, badges remapped
+
+### New API Endpoint
+
+```
+GET /api/games/:slug/eligible-courses
+→ { success: true, data: [{ courseId, title, category }] }
+```
+
+Returns courses authenticated member is enrolled in satisfying game's `courseCompatibility.requires` checks. Used by launcher where users pick game first, then course.
+
+### Migration Safety
+
+- **GameSession FKs preserved:** Migration never deletes Game rows, only re-points `templateId` during dedup. Existing sessions/scores survive.
+- **Enum swap pattern:** Create new enum, ALTER each referencing column with USING+CASE, drop old, rename.
+- **Array column gotcha:** `game_parental_settings.allowedGameTypes` is `GameType[]` — must ALTER COLUMN before type swap and re-add after.
+
+### Verification
+
+- `npx prisma generate` ✅
+- `npx tsc --noEmit` ✅ (zero errors)
+- Migration SQL written but **not applied** — apply with `npx prisma migrate deploy`
+
+### Follow-ups
+
+- **Frontend (Ibn Sina):** Update launcher UI to call `/games/:slug/eligible-courses` after game selection
+- **Ops:** Plan for downtime during migration — enum swap is brief table rewrite on 3 columns
+- **QA:** Each 9 round formatters needs end-to-end test; old integration tests need slug+enum renames
 

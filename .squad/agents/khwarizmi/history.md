@@ -181,3 +181,43 @@ Implemented the Khaldun game redesign — collapsed 26 GameType values into 9 ca
 **CourseFilters type vs API param mismatch (2026-05-18):** The frontend `CourseFilters` type uses `courseType` and `ageCategory` while the backend controller extracted `category` and `ageLevel`. Result: subject and age filters were silently ignored. Fix pattern: backend accepts aliases (`ageCategory` alongside `ageLevel`); frontend catalog uses the canonical `category` field from `CourseFilters`. Also: `setFilters()` in Zustand doesn't auto-re-fetch — always add a `useEffect` keyed on the filter values that calls `fetchCourses(filters)`.
 
 **CourseCatalog filter values must be UPPERCASE to match DB:** The category dropdown was sending title-case strings ("Fiqh") but Prisma does exact-match on the stored value ("FIQH"). Always normalize to the enum value before sending to the API.
+
+---
+
+## 2026-05-18 — No Eligible Courses Fix + Decisions Merge (Scribe Session 19:48Z)
+
+**Status:** ✅ COMPLETE  
+**Commit:** 97d55ac
+
+### Work Completed
+
+Scribe merged all pending decisions from inbox into decisions.md, capturing 7 new team decisions:
+
+1. **Azure Deployment Architecture** (Khaldun) — App Service approach, Key Vault secrets, VNet private endpoints, CI/CD via GitHub Actions
+2. **useActiveMemberId Hook** (Ibn Sina) — Reusable hook eliminating `selectedMember?.id` fallback bugs in all game components
+3. **Game System Redesign** (Khaldun) — 26 → 10 distinct mechanics proposal, collapsing redundant reskins, new Fiqh Scenario tree
+4. **Family Account vs Learner Member** (Khaldun) — Identified root cause of game errors (no FamilyMember for parents), proposed "Who's Learning Today?" picker + schema changes
+5. **User Directive — Game Consolidation** (hrasheed) — Merge True/False into Quick Recall (9 mechanics, not 10)
+6. **Games frontend rebuilt to 9-mechanic taxonomy** (Ibn Sina) — Collapsed 26 components into 9, new useGameRunner hook, legacy back-compat via mapToActiveType()
+7. **Game Engine Collapse** (Khwarizmi: you) — Implemented 26→9 GameType collapse, migration written (not deployed), new getEligibleCourses endpoint
+
+### Decisions Archive Metrics
+
+- **Before:** 16 decisions, 23,275 bytes, 7 inbox files
+- **After:** 23 decisions, 50,000+ bytes (merged), 0 inbox files
+- **No archival needed:** All existing decisions < 30 days old
+
+### Key Outcomes
+
+- Complete game system redesign decision trail now documented
+- No history.md files exceeded 15KB summarization threshold
+- All inbox files processed and deleted cleanly
+- Ready for implementation sequencing (Phase A: backend enum/schema migration)
+
+### Next Steps (Team Sequencing)
+
+1. **Phase A (1 sprint):** Deploy game engine 26→9 migration on production
+2. **Phase B (1 sprint):** Ibn Sina implements new 9-component frontend + GameLauncher + useGameRunner
+3. **Phase C (1–2 sprints):** Author FiqhScenario content trees (needs fiqh SME)
+4. **Parallel:** Implement "Who's Learning Today?" picker (Ibn Sina frontend + your backend middleware)
+
