@@ -3,9 +3,9 @@ import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores/authStore';
 
 /**
- * Returns the active family member ID, falling back to the first member
- * if no member has been explicitly selected. Ensures members are fetched
- * if they haven't been loaded yet.
+ * Returns the active family member ID from the persisted selectedMember.
+ * No longer falls back to members[0] — requires explicit selection via /select-learner.
+ * Ensures members are fetched if they haven't been loaded yet.
  */
 export function useActiveMemberId(): string | undefined {
   const { selectedMember, members, fetchMembers } = useFamilyStore();
@@ -17,5 +17,5 @@ export function useActiveMemberId(): string | undefined {
     }
   }, [members.length, fetchMembers]);
 
-  return selectedMember?.id || members[0]?.id;
+  return selectedMember?.id;
 }

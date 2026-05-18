@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Family, LoginRequest, RegisterRequest, AuthResponse } from '@/types';
 import { authService } from '@/services/authService';
+import { useFamilyStore } from '@/stores/familyStore';
 
 interface AuthState {
   user: User | null;
@@ -76,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         authService.logout();
+        useFamilyStore.getState().clearSelectedMember();
         set({
           user: null,
           family: null,

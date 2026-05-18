@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useFamilyStore } from '@/stores/familyStore';
 import {
   Home,
   BookOpen,
@@ -12,6 +13,7 @@ import {
   Brain,
   BarChart3,
   Gamepad2,
+  ArrowLeftRight,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -29,6 +31,7 @@ export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, family, logout } = useAuthStore();
+  const { selectedMember } = useFamilyStore();
 
   const handleLogout = () => {
     logout();
@@ -130,6 +133,25 @@ export default function MainLayout() {
           </button>
 
           <div className="flex-1 lg:flex-none" />
+
+          {/* Active Learner Switcher */}
+          {selectedMember && (
+            <button
+              onClick={() => navigate('/select-learner')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors mr-2"
+              title="Switch learner"
+            >
+              <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center">
+                <span className="text-white text-xs font-bold">
+                  {selectedMember.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <span className="text-sm font-medium text-primary-800 hidden sm:inline max-w-[100px] truncate">
+                {selectedMember.name}
+              </span>
+              <ArrowLeftRight className="w-3.5 h-3.5 text-primary-500" />
+            </button>
+          )}
 
           {/* User menu */}
           <div className="flex items-center space-x-4">

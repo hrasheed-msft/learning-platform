@@ -83,4 +83,14 @@ export const familyService = {
     console.warn('acceptAdminInvite: endpoint not yet implemented in backend');
     return { message: 'Not implemented' };
   },
+
+  async getLearners(): Promise<FamilyMember[]> {
+    const response = await api.get<ApiResponse<FamilyMember[]>>('/family/learners');
+    return response.data.data;
+  },
+
+  async selfEnroll(): Promise<FamilyMember> {
+    const response = await api.post<ApiResponse<FamilyMember>>('/family/self-enroll');
+    return response.data.data;
+  },
 };

@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useFamilyStore } from '@/stores/familyStore';
 import { useChildAuthStore } from '@/stores/childAuthStore';
 
 // Layouts
@@ -14,6 +15,9 @@ import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import VerifyEmailPage from '@/pages/auth/VerifyEmailPage';
 import ChildLoginPage from '@/pages/auth/ChildLoginPage';
+
+// Learner Picker
+import SelectLearner from '@/pages/SelectLearner';
 
 // Dashboard Pages
 import FamilyDashboard from '@/pages/dashboard/FamilyDashboard';
@@ -37,6 +41,7 @@ import CourseFlashCardsPage from '@/pages/flashcards/CourseFlashCardsPage';
 
 // Games Pages
 import GamesHub from '@/pages/games/GamesHub';
+import GameLauncher from '@/pages/games/GameLauncher';
 import GamePlay from '@/pages/games/GamePlay';
 import ScoreHistory from '@/pages/games/ScoreHistory';
 import AchievementGallery from '@/pages/games/AchievementGallery';
@@ -54,6 +59,8 @@ import ChildAchievementsPage from '@/pages/child/ChildAchievementsPage';
 // Protected Route Component (parent/admin users)
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
+  const { selectedMember } = useFamilyStore();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -65,6 +72,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to learner picker if no active member is selected
+  if (!selectedMember && location.pathname !== '/select-learner') {
+    return <Navigate to="/select-learner" replace />;
   }
 
   return <>{children}</>;
@@ -100,11 +112,40 @@ function ChildProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Requires authentication only (no active member needed — used by learner picker)
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <Routes>
       {/* Child Login — standalone page, not inside AuthLayout */}
       <Route path="/child-login" element={<ChildLoginPage />} />
+
+      {/* Learner Picker — requires auth but not an active member */}
+      <Route
+        path="/select-learner"
+        element={
+          <RequireAuth>
+            <SelectLearner />
+          </RequireAuth>
+        }
+      />
 
       {/* Public Auth Routes */}
       <Route
@@ -137,7 +178,8 @@ function App() {
         <Route path="flashcards" element={<ChildFlashcardsPage />} />
         <Route path="achievements" element={<ChildAchievementsPage />} />
         <Route path="games" element={<GamesHub />} />
-        <Route path="games/play/:gameType" element={<GamePlay />} />
+        <Route path="games/:gameSlug/launch" element={<GameLauncher />} />
+        <Route path="games/:gameSlug/play" element={<GamePlay />} />
         <Route path="games/scores" element={<ScoreHistory />} />
         <Route path="games/achievements" element={<AchievementGallery />} />
         <Route path="games/leaderboard" element={<LeaderboardPage />} />
@@ -179,7 +221,8 @@ function App() {
 
         {/* Games */}
         <Route path="games" element={<GamesHub />} />
-        <Route path="games/play/:gameType" element={<GamePlay />} />
+        <Route path="games/:gameSlug/launch" element={<GameLauncher />} />
+        <Route path="games/:gameSlug/play" element={<GamePlay />} />
         <Route path="games/scores" element={<ScoreHistory />} />
         <Route path="games/achievements" element={<AchievementGallery />} />
         <Route path="games/leaderboard" element={<LeaderboardPage />} />
