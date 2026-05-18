@@ -42,10 +42,10 @@ export const GameTimer: React.FC<GameTimerProps> = ({
     intervalRef.current = setInterval(() => {
       setRemainingMs((prev) => {
         const next = Math.max(0, prev - 100);
-        onTickRef.current?.(next);
         if (next === 0) {
           clearInterval(intervalRef.current);
-          onTimeUpRef.current?.();
+          // Defer onTimeUp to avoid setState-in-render
+          setTimeout(() => onTimeUpRef.current?.(), 0);
         }
         return next;
       });

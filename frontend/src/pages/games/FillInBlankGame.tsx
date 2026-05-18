@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
@@ -98,7 +99,7 @@ export default function FillInBlankGame({ gameId, difficulty: initialDifficulty 
   const rawQuestion = currentQuestion.content.questionText || currentQuestion.content.front || '';
   const hasBlank = rawQuestion.includes('___');
   const displayQuestion = hasBlank ? rawQuestion : `What is: ${rawQuestion}?`;
-  const options = currentQuestion.content.options || [];
+  const options = getOptions(currentQuestion.content.options);
   const correctAnswer = currentQuestion.content.correctAnswer || '';
   const results = submittedRounds.map((r) => r.isCorrect);
 

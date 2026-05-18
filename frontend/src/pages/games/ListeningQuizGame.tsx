@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
@@ -112,7 +113,7 @@ export default function ListeningQuizGame({ gameId, difficulty: initialDifficult
 
   const audioContent = currentQuestion.content.arabicText || currentQuestion.content.front || '';
   const questionText = currentQuestion.content.questionText || 'What did you hear?';
-  const options = currentQuestion.content.options || [];
+  const options = getOptions(currentQuestion.content.options);
   const results = submittedRounds.map((r) => r.isCorrect);
 
   return (

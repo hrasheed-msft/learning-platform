@@ -31,10 +31,20 @@ interface ApiResponse<T> {
  * This maps metadata → content so all 26 game components work without changes.
  */
 function transformRounds(rounds: any[]): GameRound[] {
-  return rounds.map((r: any) => ({
-    ...r,
-    content: r.metadata ?? r.content ?? {},
-  }));
+  return rounds.map((r: any) => {
+    const raw = r.metadata ?? r.content ?? {};
+    // Some JSON fields are double-encoded as strings in the DB — parse them
+    const content = typeof raw === 'string' ? safeParse(raw) : { ...raw };
+    // Fix options that got stored as stringified JSON
+    if (typeof content.options === 'string') {
+      content.options = safeParse(content.options) || [];
+    }
+    return { ...r, content };
+  });
+}
+
+function safeParse(val: string): any {
+  try { return JSON.parse(val); } catch { return val; }
 }
 
 export const gameService = {
@@ -105,25 +115,52 @@ export const gameService = {
   // --- Session Lifecycle ---
 
   async startGame(gameId: string, memberId: string, difficulty: GameDifficulty): Promise<{ session: GameSession }> {
-    const response = await api.post<ApiResponse<{ session: GameSession }>>('/games/start', {
+    const response = await api.post<ApiResponse<any>>('/games/start', {
       gameId,
       memberId,
       difficulty,
     });
     const data = response.data.data;
-    if (data.session?.rounds) {
-      data.session.rounds = transformRounds(data.session.rounds);
+    const session: any = data.session ?? {};
+    if (session.rounds) {
+      session.rounds = transformRounds(session.rounds);
     }
-    return data;
+    // Backend persists `roundsTotal` but frontend reads `totalRounds`.
+    // Backend also returns timer config under `data.config.timer`, not on session.
+    session.totalRounds = session.totalRounds ?? session.roundsTotal ?? data.config?.totalRounds ?? session.rounds?.length ?? 0;
+    session.timerConfig = session.timerConfig ?? data.config?.timer ?? { type: 'NONE', durationMs: 0 };
+    session.livesConfig = session.livesConfig ?? { enabled: false, initial: 0 };
+    return { session };
   },
 
   async submitRound(sessionId: string, roundIndex: number, answer: unknown, timeSpentMs: number): Promise<RoundResult> {
     const roundId = `round-${roundIndex}`;
-    const response = await api.post<ApiResponse<RoundResult>>(`/games/sessions/${sessionId}/rounds/${roundId}/submit`, {
+    const response = await api.post<ApiResponse<any>>(`/games/sessions/${sessionId}/rounds/${roundId}/submit`, {
       answer,
       timeSpentMs,
     });
-    return response.data.data;
+    const raw = response.data.data;
+    // Backend returns { round, isCorrect, pointsEarned, currentStreak, runningScore, roundsRemaining }.
+    // Frontend expects RoundResult with a `sessionState` block.
+    if (raw && raw.sessionState) {
+      return raw as RoundResult;
+    }
+    const roundsRemaining = typeof raw?.roundsRemaining === 'number' ? raw.roundsRemaining : 0;
+    const roundsCompleted = roundIndex + 1;
+    const roundsTotal = roundsCompleted + roundsRemaining;
+    return {
+      isCorrect: Boolean(raw?.isCorrect),
+      pointsEarned: raw?.pointsEarned ?? 0,
+      srsRating: raw?.round?.srsRating ?? 0,
+      explanation: raw?.round?.explanation,
+      sessionState: {
+        score: raw?.runningScore ?? 0,
+        streak: raw?.currentStreak ?? 0,
+        livesRemaining: raw?.livesRemaining ?? null,
+        roundsCompleted,
+        roundsTotal,
+      },
+    };
   },
 
   async completeGame(sessionId: string, reason: 'FINISHED' | 'ABANDONED' | 'TIMED_OUT'): Promise<GameCompletionResult> {
@@ -138,12 +175,17 @@ export const gameService = {
   },
 
   async getSession(sessionId: string): Promise<GameSession> {
-    const response = await api.get<ApiResponse<GameSession>>(`/games/sessions/${sessionId}`);
-    const session = response.data.data;
+    const response = await api.get<ApiResponse<any>>(`/games/sessions/${sessionId}`);
+    const session: any = response.data.data;
     if (session?.rounds) {
       session.rounds = transformRounds(session.rounds);
     }
-    return session;
+    if (session) {
+      session.totalRounds = session.totalRounds ?? session.roundsTotal ?? session.rounds?.length ?? 0;
+      session.timerConfig = session.timerConfig ?? { type: 'NONE', durationMs: 0 };
+      session.livesConfig = session.livesConfig ?? { enabled: false, initial: 0 };
+    }
+    return session as GameSession;
   },
 
   // --- Daily Challenge ---

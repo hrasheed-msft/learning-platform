@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
@@ -71,7 +72,7 @@ export default function MultipleChoiceGame({ gameId, difficulty: initialDifficul
   const handleHint = () => {
     if (hintsRemaining <= 0 || !currentQuestion) return;
     const correctAnswer = currentQuestion.content.correctAnswer || '';
-    const options = currentQuestion.content.options || [];
+    const options = getOptions(currentQuestion.content.options);
     const wrongOptions = options.filter((o) => o !== correctAnswer && !eliminatedOptions.includes(o));
     if (wrongOptions.length > 0) {
       const toEliminate = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
@@ -114,7 +115,7 @@ export default function MultipleChoiceGame({ gameId, difficulty: initialDifficul
   }
 
   const questionText = currentQuestion.content.questionText || currentQuestion.content.front || '';
-  const options = currentQuestion.content.options || [];
+  const options = getOptions(currentQuestion.content.options);
   const correctAnswer = currentQuestion.content.correctAnswer || '';
   const results = submittedRounds.map((r) => r.isCorrect);
 

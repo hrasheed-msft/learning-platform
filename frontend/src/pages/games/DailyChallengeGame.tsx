@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
@@ -147,7 +148,7 @@ export default function DailyChallengeGame({ gameId, difficulty: initialDifficul
     return <div className="flex justify-center py-16"><Spinner size="lg" /></div>;
   }
 
-  const options = currentQuestion.content.options || [];
+  const options = getOptions(currentQuestion.content.options);
   const questionText = currentQuestion.content.questionText || currentQuestion.content.front || '';
   const results = _submittedRounds.map((r: RoundResult) => r.isCorrect);
 

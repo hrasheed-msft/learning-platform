@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -721,7 +721,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitFiqh.id,
         type: 'FILL_BLANK',
         questionText: 'The three farāʾiḍ of ghusl are: rinsing the mouth, rinsing the ____, and washing the entire body.',
-        options: null,
+        options: undefined,
         correctAnswer: 'nose',
         explanation: 'The three farāʾiḍ are maḍmaḍah (mouth), istinshāq (nose), and washing the whole body.',
         difficulty: 'EASY',
@@ -771,7 +771,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitAhadith.id,
         type: 'FILL_BLANK',
         questionText: '"The best of you are those who learn the ____ and teach it." — Bukhārī',
-        options: null,
+        options: undefined,
         correctAnswer: 'Qurʾān',
         explanation: 'Learning and teaching the Qurʾān is the noblest deed.',
         difficulty: 'EASY',
@@ -857,7 +857,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitSirah.id,
         type: 'FILL_BLANK',
         questionText: 'The Prophet ﷺ and Abū Bakr hid in the cave of ____ during the Hijrah.',
-        options: null,
+        options: undefined,
         correctAnswer: 'Thawr',
         explanation: 'They hid in the cave of Thawr, south of Makkah, for three nights.',
         difficulty: 'EASY',
@@ -907,7 +907,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitTarikh.id,
         type: 'FILL_BLANK',
         questionText: 'The scripture revealed to Dāwūd عليه السلام is called the ____.',
-        options: null,
+        options: undefined,
         correctAnswer: 'Zabūr',
         explanation: 'The Zabūr (Psalms) was revealed to Dāwūd عليه السلام.',
         difficulty: 'EASY',
@@ -993,7 +993,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitAqaid.id,
         type: 'FILL_BLANK',
         questionText: 'The night journey from Makkah to Bayt al-Maqdis is called al-____.',
-        options: null,
+        options: undefined,
         correctAnswer: 'Isrāʾ',
         explanation: 'Al-Isrāʾ refers to the journey from Makkah to Jerusalem.',
         difficulty: 'EASY',
@@ -1053,7 +1053,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitAkhlaq.id,
         type: 'FILL_BLANK',
         questionText: 'The opposite of pride (kibr) is ____ (humility).',
-        options: null,
+        options: undefined,
         correctAnswer: 'tawāḍuʿ',
         explanation: 'Tawāḍuʿ (humility) is the cure for the disease of kibr.',
         difficulty: 'MEDIUM',
@@ -1113,7 +1113,7 @@ export async function seedMaktabCoursebook6Girls() {
         unitId: unitAdab.id,
         type: 'FILL_BLANK',
         questionText: 'The sunan al-fiṭrah should not be neglected for more than ____ days.',
-        options: null,
+        options: undefined,
         correctAnswer: '40',
         explanation: 'Forty days is the maximum period mentioned in the authentic ḥadīth for these practices.',
         difficulty: 'MEDIUM',

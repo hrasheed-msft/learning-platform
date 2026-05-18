@@ -32,7 +32,7 @@ const startGameValidation = [
 
 const submitRoundValidation = [
   uuidParam('sessionId'),
-  uuidParam('roundId'),
+  param('roundId').isString().withMessage('roundId is required'),
   body('answer').exists().withMessage('answer is required'),
   body('timeSpentMs').optional().isInt({ min: 0 }),
 ];

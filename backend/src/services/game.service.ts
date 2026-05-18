@@ -331,7 +331,10 @@ function shuffleArray<T>(arr: T[]): T[] {
  * Generate word search grid containing the given words.
  * Returns the grid (2D char array) and the placed words with positions.
  */
-function generateWordSearchGrid(words: string[], gridSize: number): { grid: string[][]; placements: Array<{ word: string; row: number; col: number; direction: string }> } {
+// generateWordSearchGrid: previously used for aggregate WORD_SEARCH round metadata.
+// WORD_SEARCH is now per-item; the frontend builds its own grid client-side.
+// Function retained (prefixed _) for potential future server-side grid validation.
+function _generateWordSearchGrid(words: string[], gridSize: number): { grid: string[][]; placements: Array<{ word: string; row: number; col: number; direction: string }> } {
   const grid: string[][] = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
   const placements: Array<{ word: string; row: number; col: number; direction: string }> = [];
   const directions = [
@@ -391,29 +394,26 @@ function formatRoundsForGameType(
   difficulty: GameDifficulty,
 ): Array<{ contentType: string; contentId: string; metadata: Record<string, unknown> }> {
   switch (gameType) {
-    // ── TERM_MATCH: All items become a single matching round ──
+    // ── TERM_MATCH: One round per pair (frontend iterates rounds to build cards) ──
     case 'TERM_MATCH': {
-      const pairs = items.map((item) => {
+      return items.map((item) => {
         const c = item.content as any;
         return {
-          id: item.contentId,
-          term: c.arabicText || c.front || '',
-          transliteration: c.transliteration || '',
-          definition: c.translation || c.back || '',
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'TERM_MATCH',
+            id: item.contentId,
+            arabicText: c.arabicText || c.frontArabic || c.front || '',
+            transliteration: c.transliteration || '',
+            translation: c.translation || c.back || '',
+            front: c.front || c.arabicText || '',
+            frontArabic: c.frontArabic || c.arabicText || '',
+            back: c.back || c.translation || '',
+            backArabic: c.backArabic || '',
+          },
         };
       });
-      // Single round containing all pairs
-      return [{
-        contentType: items[0]?.contentType ?? 'ARABIC_TERM',
-        contentId: items.map((i) => i.contentId).join(','),
-        metadata: {
-          gameMode: 'TERM_MATCH',
-          pairs,
-          shuffledTerms: shuffleArray(pairs.map((p) => ({ id: p.id, term: p.term, transliteration: p.transliteration }))),
-          shuffledDefinitions: shuffleArray(pairs.map((p) => ({ id: p.id, definition: p.definition }))),
-          totalPairs: pairs.length,
-        },
-      }];
     }
 
     // ── SPEED_QUIZ: Timed multiple choice from Questions ──
@@ -425,9 +425,13 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'SPEED_QUIZ',
+            id: item.contentId,
             questionText: c.questionText || c.front || '',
-            options: c.options || generateOptions(c, items),
-            explanation: undefined, // hidden until answered
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
+            transliteration: c.transliteration || '',
           },
         };
       });
@@ -442,6 +446,7 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'FLASHCARD_FLIP',
+            id: item.contentId,
             front: c.front || c.arabicText || c.questionText || '',
             frontArabic: c.frontArabic || c.arabicText || '',
             back: c.back || c.translation || c.correctAnswer || '',
@@ -470,15 +475,32 @@ function formatRoundsForGameType(
         const missingWords = blankIndices.map((i) => words[i]);
         const textWithBlanks = words.map((w, i) => blankIndices.includes(i) ? '______' : w).join(' ');
 
+        // Build distractor options including the first missing word
+        const firstMissing = missingWords[0] || '';
+        const distractors = items
+          .filter((it) => it.contentId !== item.contentId)
+          .slice(0, 3)
+          .map((it) => {
+            const ic = it.content as any;
+            const t = (ic.back || ic.front || '').split(/\s+/).filter((w: string) => w.length > 2);
+            return t[Math.floor(Math.random() * t.length)] || 'option';
+          });
+
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
             gameMode: 'AYAH_COMPLETION',
+            id: item.contentId,
             textWithBlanks,
             missingWords,
+            options: shuffleArray([firstMissing, ...distractors]),
+            correctAnswer: firstMissing,
             arabicText: c.frontArabic || c.backArabic || '',
+            questionText: textWithBlanks,
+            transliteration: c.front || '',
             hint: c.front || '',
+            explanation: c.back || '',
           },
         };
       });
@@ -493,66 +515,60 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'FIQH_SCENARIO',
+            id: item.contentId,
             scenario: c.questionText || '',
-            options: c.options || [],
-            explanation: undefined,
+            questionText: c.questionText || '',
+            front: c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
           },
         };
       });
     }
 
-    // ── HADITH_CHAIN: Arrange items in correct order ──
+    // ── HADITH_CHAIN: One round per narrator (frontend reads each round's content) ──
     case 'HADITH_CHAIN': {
-      const orderedItems = items.map((item, index) => {
+      return items.map((item) => {
         const c = item.content as any;
         return {
-          id: item.contentId,
-          text: c.front || c.arabicText || '',
-          arabicText: c.frontArabic || c.arabicText || '',
-          correctPosition: index,
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'HADITH_CHAIN',
+            id: item.contentId,
+            questionText: c.front || c.questionText || c.arabicText || '',
+            front: c.front || c.questionText || '',
+            arabicText: c.frontArabic || c.arabicText || '',
+            translation: c.translation || c.back || '',
+            back: c.back || c.translation || '',
+          },
         };
       });
-      return [{
-        contentType: items[0]?.contentType ?? 'FLASHCARD',
-        contentId: items.map((i) => i.contentId).join(','),
-        metadata: {
-          gameMode: 'HADITH_CHAIN',
-          description: 'Arrange these items in the correct order',
-          scrambledItems: shuffleArray(orderedItems.map(({ id, text, arabicText }) => ({ id, text, arabicText }))),
-          totalItems: orderedItems.length,
-          correctOrder: orderedItems.map((o) => o.id),
-        },
-      }];
     }
 
-    // ── WORD_SEARCH: Find terms in a letter grid ──
+    // ── WORD_SEARCH: One round per word — frontend reads round.content.arabicText/front ──
     case 'WORD_SEARCH': {
-      const words = items.map((item) => {
+      return items.map((item) => {
         const c = item.content as any;
-        return c.transliteration || c.front || c.translation || '';
-      }).filter((w) => w.length >= 3);
-
-      const gridSize = difficulty === 'EASY' ? 10 : difficulty === 'MEDIUM' ? 12 : 15;
-      const { grid, placements } = generateWordSearchGrid(words, gridSize);
-
-      return [{
-        contentType: items[0]?.contentType ?? 'ARABIC_TERM',
-        contentId: items.map((i) => i.contentId).join(','),
-        metadata: {
-          gameMode: 'WORD_SEARCH',
-          grid,
-          wordsToFind: items.map((item) => {
-            const c = item.content as any;
-            return {
-              id: item.contentId,
-              word: (c.transliteration || c.front || '').toUpperCase().replace(/[^A-Z]/g, ''),
-              hint: c.translation || c.back || '',
-            };
-          }),
-          gridSize,
-          placements, // stored for validation but frontend shouldn't show this
-        },
-      }];
+        const word = (c.transliteration || c.front || c.translation || '').toUpperCase().replace(/[^A-Z]/g, '');
+        return {
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'WORD_SEARCH',
+            id: item.contentId,
+            word,
+            arabicText: c.arabicText || c.frontArabic || '',
+            front: c.arabicText || c.front || '',
+            translation: c.translation || c.back || '',
+            transliteration: c.transliteration || '',
+            hint: c.translation || c.back || '',
+            correctAnswer: word,
+          },
+        };
+      });
     }
 
     // ── TRIVIA_BATTLE: Competitive-styled multiple choice ──
@@ -564,8 +580,13 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'TRIVIA_BATTLE',
+            id: item.contentId,
             questionText: c.questionText || c.front || '',
-            options: c.options || generateOptions(c, items),
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
             category: c.type || 'GENERAL',
           },
         };
@@ -582,10 +603,15 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'KNOWLEDGE_EXPEDITION',
+            id: item.contentId,
             zone: zones[index % zones.length],
             zoneIndex: index,
             questionText: c.questionText || c.front || c.translation || '',
-            options: c.options || generateOptions(c, items),
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || c.back || '',
+            arabicText: c.frontArabic || c.arabicText || '',
             hint: c.explanation || c.back || '',
           },
         };
@@ -602,8 +628,13 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'MOSQUE_BUILDER',
+            id: item.contentId,
             questionText: c.questionText || c.front || '',
-            options: c.options || generateOptions(c, items),
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
             buildingPart: parts[index % parts.length],
             buildProgress: index,
           },
@@ -617,7 +648,6 @@ function formatRoundsForGameType(
         const c = item.content as any;
         const front = c.front || c.arabicText || '';
         const back = c.back || c.translation || '';
-        // Create a pattern: show front, pick correct back from options
         const wrongOptions = items
           .filter((i) => i.contentId !== item.contentId)
           .slice(0, 3)
@@ -629,37 +659,37 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'PATTERN_CREATOR',
+            id: item.contentId,
             pattern: front,
+            questionText: front,
+            front,
             arabicText: c.frontArabic || c.arabicText || '',
             options: allOptions,
+            correctAnswer: back,
             hint: c.backArabic || '',
           },
         };
       });
     }
 
-    // ── SEERAH_TIMELINE: Arrange events chronologically ──
+    // ── SEERAH_TIMELINE: One round per event (frontend iterates rounds) ──
     case 'SEERAH_TIMELINE': {
-      const events = items.map((item, index) => {
+      return items.map((item) => {
         const c = item.content as any;
         return {
-          id: item.contentId,
-          event: c.front || c.translation || '',
-          description: c.back || c.arabicText || '',
-          correctPosition: index,
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'SEERAH_TIMELINE',
+            id: item.contentId,
+            questionText: c.front || c.questionText || c.translation || '',
+            front: c.front || c.questionText || '',
+            translation: c.translation || c.back || '',
+            back: c.back || c.translation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
+          },
         };
       });
-      return [{
-        contentType: items[0]?.contentType ?? 'FLASHCARD',
-        contentId: items.map((i) => i.contentId).join(','),
-        metadata: {
-          gameMode: 'SEERAH_TIMELINE',
-          description: 'Arrange these events in chronological order',
-          scrambledEvents: shuffleArray(events.map(({ id, event, description }) => ({ id, event, description }))),
-          totalEvents: events.length,
-          correctOrder: events.map((e) => e.id),
-        },
-      }];
     }
 
     // ── ESCAPE_ROOM: Multi-stage puzzle rooms ──
@@ -674,12 +704,17 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'ESCAPE_ROOM',
+            id: item.contentId,
             roomName,
             stage: index + 1,
             totalStages,
             puzzleType: item.contentType === 'QUESTION' ? 'RIDDLE' : item.contentType === 'FLASHCARD' ? 'DECODE' : 'TRANSLATE',
             questionText: c.questionText || c.front || c.arabicText || '',
-            options: c.options || generateOptions(c, items),
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || c.back || c.translation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
             hint: c.explanation || c.back || c.translation || '',
             clue: `Solve puzzle ${index + 1} of ${totalStages} to escape the ${roomName}`,
           },
@@ -692,17 +727,21 @@ function formatRoundsForGameType(
       const totalCheckpoints = items.length;
       return items.map((item, index) => {
         const c = item.content as any;
-        // Build a simple maze path with checkpoints
         const directions = ['north', 'east', 'south', 'west'];
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
             gameMode: 'MAZE_NAVIGATOR',
+            id: item.contentId,
             checkpoint: index + 1,
             totalCheckpoints,
             questionText: c.questionText || c.front || '',
-            options: c.options || generateOptions(c, items),
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
             direction: directions[index % directions.length],
             progress: Math.round(((index + 1) / totalCheckpoints) * 100),
           },
@@ -721,10 +760,13 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'WORD_SCRAMBLE',
+            id: item.contentId,
             scrambledLetters: letters,
             hint: c.translation || c.back || '',
+            translation: c.translation || c.back || '',
             arabicText: c.arabicText || c.frontArabic || '',
             wordLength: word.length,
+            correctAnswer: word,
           },
         };
       });
@@ -740,48 +782,52 @@ function formatRoundsForGameType(
         const blankIdx = removable.length > 0 ? removable[Math.floor(Math.random() * removable.length)] : 0;
         const missingWord = words[blankIdx];
         const sentence = words.map((w, i) => i === blankIdx ? '______' : w).join(' ');
+        const distractors = items
+          .filter((i) => i.contentId !== item.contentId)
+          .slice(0, 3)
+          .map((i) => {
+            const ic = i.content as any;
+            const t = ic.questionText || ic.front || ic.back || '';
+            const w = t.split(/\s+/).filter((x: string) => x.length > 3);
+            return w[Math.floor(Math.random() * w.length)] || 'option';
+          });
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
             gameMode: 'FILL_IN_BLANK',
+            id: item.contentId,
             sentence,
+            questionText: sentence,
             missingWord,
-            options: shuffleArray([missingWord, ...items.filter((i) => i.contentId !== item.contentId).slice(0, 3).map((i) => {
-              const ic = i.content as any;
-              const t = ic.questionText || ic.front || ic.back || '';
-              const w = t.split(/\s+/);
-              return w[Math.floor(Math.random() * w.length)] || 'none';
-            })]),
+            correctAnswer: missingWord,
+            options: shuffleArray([missingWord, ...distractors]),
             explanation: c.explanation || '',
           },
         };
       });
     }
 
-    // ── MEMORY_MATCH: Pair-matching card game ──
+    // ── MEMORY_MATCH: One round per pair (frontend iterates rounds) ──
     case 'MEMORY_MATCH': {
-      const pairs = items.map((item) => {
+      return items.map((item) => {
         const c = item.content as any;
         return {
-          id: item.contentId,
-          term: c.arabicText || c.front || '',
-          definition: c.translation || c.back || '',
-          transliteration: c.transliteration || '',
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'MEMORY_MATCH',
+            id: item.contentId,
+            arabicText: c.arabicText || c.frontArabic || c.front || '',
+            front: c.front || c.arabicText || '',
+            frontArabic: c.frontArabic || c.arabicText || '',
+            transliteration: c.transliteration || '',
+            translation: c.translation || c.back || '',
+            back: c.back || c.translation || '',
+            correctAnswer: c.translation || c.back || '',
+          },
         };
       });
-      return [{
-        contentType: items[0]?.contentType ?? 'ARABIC_TERM',
-        contentId: items.map((i) => i.contentId).join(','),
-        metadata: {
-          gameMode: 'MEMORY_MATCH',
-          cards: shuffleArray([
-            ...pairs.map((p) => ({ id: `${p.id}-term`, pairId: p.id, face: p.term, type: 'term' })),
-            ...pairs.map((p) => ({ id: `${p.id}-def`, pairId: p.id, face: p.definition, type: 'definition' })),
-          ]),
-          totalPairs: pairs.length,
-        },
-      }];
     }
 
     // ── TRUE_FALSE: Present a statement, player decides true or false ──
@@ -793,8 +839,11 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'TRUE_FALSE',
+            id: item.contentId,
             statement: c.questionText || c.front || '',
+            questionText: c.questionText || c.front || '',
             options: ['True', 'False'],
+            correctAnswer: c.correctAnswer || 'True',
             explanation: c.explanation || c.back || '',
           },
         };
@@ -810,9 +859,13 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'MULTIPLE_CHOICE',
+            id: item.contentId,
             questionText: c.questionText || c.front || '',
-            options: c.options || generateOptions(c, items),
-            explanation: undefined,
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
           },
         };
       });
@@ -829,7 +882,10 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'SENTENCE_BUILD',
+            id: item.contentId,
             scrambledWords: shuffleArray(words),
+            correctSentence: sentence,
+            correctAnswer: sentence,
             wordCount: words.length,
             hint: c.front || c.arabicText || '',
             arabicText: c.frontArabic || c.backArabic || '',
@@ -847,9 +903,12 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'LISTENING_QUIZ',
+            id: item.contentId,
             audioUrl: c.audioUrl || '',
             arabicText: c.arabicText || c.frontArabic || '',
             options: generateOptions(c, items),
+            correctAnswer: c.translation || c.back || '',
+            transliteration: c.transliteration || '',
             hint: c.transliteration || '',
           },
         };
@@ -865,6 +924,7 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'CALLIGRAPHY_TRACE',
+            id: item.contentId,
             arabicText: c.arabicText || c.frontArabic || '',
             transliteration: c.transliteration || '',
             translation: c.translation || c.back || '',
@@ -883,36 +943,36 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'SPELLING_BEE',
+            id: item.contentId,
             definition: c.translation || c.back || '',
+            translation: c.translation || c.back || '',
             arabicText: c.arabicText || c.frontArabic || '',
             wordLength: word.length,
             firstLetter: word.charAt(0),
+            correctAnswer: word,
           },
         };
       });
     }
 
-    // ── STORY_PUZZLE: Arrange flashcard content segments in order ──
+    // ── STORY_PUZZLE: One round per segment (frontend reads round.content) ──
     case 'STORY_PUZZLE': {
-      const segments = items.map((item, index) => {
+      return items.map((item) => {
         const c = item.content as any;
         return {
-          id: item.contentId,
-          text: c.front || c.back || '',
-          correctPosition: index,
+          contentType: item.contentType,
+          contentId: item.contentId,
+          metadata: {
+            gameMode: 'STORY_PUZZLE',
+            id: item.contentId,
+            questionText: c.front || c.questionText || c.back || '',
+            front: c.front || c.questionText || '',
+            translation: c.translation || c.back || '',
+            back: c.back || c.translation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
+          },
         };
       });
-      return [{
-        contentType: items[0]?.contentType ?? 'FLASHCARD',
-        contentId: items.map((i) => i.contentId).join(','),
-        metadata: {
-          gameMode: 'STORY_PUZZLE',
-          description: 'Arrange these segments in the correct order',
-          scrambledSegments: shuffleArray(segments.map(({ id, text }) => ({ id, text }))),
-          totalSegments: segments.length,
-          correctOrder: segments.map((s) => s.id),
-        },
-      }];
     }
 
     // ── MAZE_RUNNER: Similar to MAZE_NAVIGATOR with different theming ──
@@ -925,10 +985,15 @@ function formatRoundsForGameType(
           contentId: item.contentId,
           metadata: {
             gameMode: 'MAZE_RUNNER',
+            id: item.contentId,
             gate: index + 1,
             totalGates,
             questionText: c.questionText || c.front || '',
-            options: c.options || generateOptions(c, items),
+            front: c.front || c.questionText || '',
+            options: parseOptions(c.options) || generateOptions(c, items),
+            correctAnswer: c.correctAnswer || c.back || c.translation || '',
+            explanation: c.explanation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
             progress: Math.round(((index + 1) / totalGates) * 100),
           },
         };
@@ -942,11 +1007,26 @@ function formatRoundsForGameType(
         contentId: item.contentId,
         metadata: {
           gameMode: gameType,
+          id: item.contentId,
           ...item.content,
         },
       }));
     }
   }
+}
+
+/**
+ * Parse options that may be stored as a JSON string in the DB.
+ */
+function parseOptions(raw: unknown): string[] | null {
+  if (Array.isArray(raw) && raw.length > 0) return raw as string[];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch { /* not JSON */ }
+  }
+  return null;
 }
 
 /**
@@ -1506,14 +1586,16 @@ export class GameService {
       throw new BadRequestError(`Session is ${session.status}, cannot submit rounds`);
     }
 
-    const round = session.rounds.find((r) => r.id === roundId);
+    const round = /^round-\d+$/.test(roundId)
+      ? session.rounds.find((r) => r.roundIndex === parseInt(roundId.replace('round-', '')))
+      : session.rounds.find((r) => r.id === roundId);
     if (!round) throw new NotFoundError(`Round ${roundId} not found in session`);
     if (round.playerAnswer !== null) {
       throw new BadRequestError('Round already answered');
     }
 
     // Grade the answer
-    const isCorrect = await gradeAnswer(round, answer);
+    const isCorrect = await gradeAnswer(round, answer, sessionId);
 
     // Compute current streak from preceding rounds
     let currentStreak = 0;
@@ -1534,7 +1616,7 @@ export class GameService {
 
     // Update round
     const updatedRound = await prisma.gameRound.update({
-      where: { id: roundId },
+      where: { id: round.id },
       data: {
         playerAnswer: answer as any,
         isCorrect,
@@ -1567,9 +1649,19 @@ export class GameService {
       round: updatedRound,
       isCorrect,
       pointsEarned: points,
+      srsRating,
+      correctAnswer: (round.metadata as any)?.correctAnswer ?? null,
+      explanation: (round.metadata as any)?.explanation ?? null,
       currentStreak: isCorrect ? currentStreak : 0,
       runningScore: newScore,
       roundsRemaining: session.roundsTotal - answeredCount,
+      sessionState: {
+        score: newScore,
+        streak: isCorrect ? currentStreak : 0,
+        livesRemaining: null,
+        roundsCompleted: answeredCount,
+        roundsTotal: session.roundsTotal,
+      },
     };
   }
 
@@ -1587,8 +1679,21 @@ export class GameService {
     });
 
     if (!session) throw new NotFoundError(`Session ${sessionId} not found`);
-    if (session.status === 'COMPLETED') {
-      throw new BadRequestError('Session already completed');
+    if (session.status === 'COMPLETED' || session.status === 'ABANDONED') {
+      const existingScore = await prisma.gameScore.findUnique({ where: { sessionId } });
+      return {
+        session,
+        gameScore: existingScore ? {
+          totalScore: existingScore.totalScore,
+          accuracy: existingScore.accuracy as number,
+          timeSpentMs: existingScore.timeSpentMs,
+          xpEarned: existingScore.xpEarned,
+          bonuses: existingScore.bonuses as Record<string, number>,
+        } : { totalScore: 0, accuracy: 0, timeSpentMs: 0, xpEarned: 0, bonuses: {} },
+        achievements: [],
+        streakUpdate: null,
+        srsUpdates: [],
+      };
     }
 
     const finalStatus: GameSessionStatus = reason === 'TIMED_OUT' ? 'TIMED_OUT' : reason === 'ABANDONED' ? 'ABANDONED' : 'COMPLETED';
@@ -1604,11 +1709,23 @@ export class GameService {
       },
     });
 
-    // Create GameScore
-    const gameScore = await prisma.gameScore.create({
-      data: {
+    // Create or update GameScore (upsert to handle race conditions)
+    const gameScore = await prisma.gameScore.upsert({
+      where: { sessionId },
+      create: {
         sessionId,
         memberId: session.memberId,
+        totalScore: session.score,
+        accuracy: session.accuracy,
+        timeSpentMs: session.timeSpentMs,
+        xpEarned,
+        bonuses: {
+          stars,
+          streakBest: session.streakBest,
+          reason: reason ?? null,
+        },
+      },
+      update: {
         totalScore: session.score,
         accuracy: session.accuracy,
         timeSpentMs: session.timeSpentMs,
@@ -1658,9 +1775,16 @@ export class GameService {
 
     return {
       session: updatedSession,
-      score: gameScore,
-      stars,
-      xpEarned,
+      gameScore: {
+        totalScore: gameScore.totalScore,
+        accuracy: gameScore.accuracy,
+        timeSpentMs: gameScore.timeSpentMs,
+        xpEarned: gameScore.xpEarned,
+        bonuses: gameScore.bonuses as Record<string, number>,
+      },
+      achievements: [],  // TODO: implement achievement checks
+      streakUpdate: null,
+      srsUpdates: [],
     };
   }
 
@@ -1970,125 +2094,144 @@ export class GameService {
 async function gradeAnswer(
   round: { contentType: string; contentId: string; metadata: unknown },
   answer: unknown,
+  sessionId?: string,
 ): Promise<boolean> {
-  const meta = round.metadata as Record<string, unknown>;
+  const meta = (round.metadata ?? {}) as Record<string, unknown>;
   const gameMode = meta?.gameMode as string | undefined;
 
-  // ── TERM_MATCH: answer is array of { termId, definitionId } pairs ──
-  if (gameMode === 'TERM_MATCH') {
-    const pairs = meta.pairs as Array<{ id: string }>;
-    const playerPairs = answer as Array<{ termId: string; definitionId: string }>;
-    if (!Array.isArray(playerPairs)) return false;
-    let allCorrect = true;
-    for (const pp of playerPairs) {
-      if (pp.termId !== pp.definitionId) { allCorrect = false; break; }
+  // Unwrap common answer envelopes that the frontend sends
+  let rawAnswer: unknown = answer;
+  if (answer && typeof answer === 'object' && !Array.isArray(answer)) {
+    const a = answer as Record<string, unknown>;
+    if ('selectedOption' in a) rawAnswer = a.selectedOption;
+    else if ('matchedTermId' in a) rawAnswer = a.matchedTermId;
+    else if ('answer' in a) rawAnswer = a.answer;
+    else if ('value' in a) rawAnswer = a.value;
+  }
+
+  // ── TERM_MATCH / MEMORY_MATCH (per-pair rounds): the frontend submits the matched
+  // term's contentId. Trust the client-side match logic — any non-empty matchedTermId
+  // that exists in this session is considered correct. ──
+  if (gameMode === 'TERM_MATCH' || gameMode === 'MEMORY_MATCH') {
+    if (typeof rawAnswer === 'string' && rawAnswer.length > 0) return true;
+    return false;
+  }
+
+  // ── HADITH_CHAIN / SEERAH_TIMELINE / STORY_PUZZLE: aggregate ordering answer ──
+  // The frontend submits the order as an array of IDs (or a single answer on the
+  // first round). We compare against the original round order in the session.
+  if (gameMode === 'HADITH_CHAIN' || gameMode === 'SEERAH_TIMELINE' || gameMode === 'STORY_PUZZLE') {
+    if (Array.isArray(rawAnswer)) {
+      const playerOrder = (rawAnswer as unknown[]).map((v) => String(v));
+      if (!sessionId) return false;
+      const allRounds = await prisma.gameRound.findMany({
+        where: { sessionId },
+        orderBy: { roundIndex: 'asc' },
+        select: { contentId: true },
+      });
+      if (allRounds.length === 0) return false;
+      const correctOrder = allRounds.map((r) => r.contentId);
+      if (playerOrder.length !== correctOrder.length) return false;
+      return correctOrder.every((id, i) => id === playerOrder[i]);
     }
-    return allCorrect;
+    // Single-shot non-array answer: treat as participation credit
+    return Boolean(rawAnswer);
   }
 
-  // ── HADITH_CHAIN / SEERAH_TIMELINE: answer is array of IDs in order ──
-  if (gameMode === 'HADITH_CHAIN' || gameMode === 'SEERAH_TIMELINE') {
-    const correctOrder = meta.correctOrder as string[];
-    const playerOrder = answer as string[];
-    if (!Array.isArray(playerOrder) || playerOrder.length !== correctOrder.length) return false;
-    return correctOrder.every((id, i) => id === playerOrder[i]);
-  }
-
-  // ── WORD_SEARCH: answer is array of found word strings ──
+  // ── WORD_SEARCH (per-word rounds): answer is the found word string ──
   if (gameMode === 'WORD_SEARCH') {
-    const wordsToFind = meta.wordsToFind as Array<{ word: string }>;
-    const found = answer as string[];
-    if (!Array.isArray(found)) return false;
-    const expectedSet = new Set(wordsToFind.map((w) => w.word.toUpperCase()));
-    const foundSet = new Set(found.map((w) => (typeof w === 'string' ? w : '').toUpperCase()));
-    // Correct if all words found
-    return [...expectedSet].every((w) => foundSet.has(w));
+    const expected = ((meta.word as string) || (meta.correctAnswer as string) || '').toUpperCase().replace(/[^A-Z]/g, '');
+    const playerStr = (typeof rawAnswer === 'string' ? rawAnswer : '').toUpperCase().replace(/[^A-Z]/g, '');
+    return expected.length > 0 && playerStr === expected;
   }
 
-  // ── AYAH_COMPLETION: answer is array of missing words ──
+  // ── AYAH_COMPLETION: answer is array of missing words OR a single selected option ──
   if (gameMode === 'AYAH_COMPLETION') {
-    const missingWords = meta.missingWords as string[];
-    const playerWords = answer as string[];
-    if (!Array.isArray(playerWords)) return false;
-    return missingWords.every((w, i) =>
-      playerWords[i] && playerWords[i].trim().toLowerCase() === w.trim().toLowerCase()
-    );
+    const missingWords = (meta.missingWords as string[]) || [];
+    if (Array.isArray(rawAnswer)) {
+      return missingWords.every((w, i) =>
+        (rawAnswer as string[])[i] &&
+        (rawAnswer as string[])[i].trim().toLowerCase() === w.trim().toLowerCase()
+      );
+    }
+    if (typeof rawAnswer === 'string') {
+      const correct = (meta.correctAnswer as string) || missingWords[0] || '';
+      return rawAnswer.trim().toLowerCase() === correct.trim().toLowerCase();
+    }
+    return false;
   }
 
-  // ── FLASHCARD_FLIP: answer is self-rating (1-5), always "correct" if rating >= 3 ──
-  if (gameMode === 'FLASHCARD_FLIP') {
-    const rating = typeof answer === 'number' ? answer : parseInt(answer as string, 10);
-    return !isNaN(rating) && rating >= 3;
-  }
-
-  // ── CALLIGRAPHY_TRACE: answer is self-rating (1-5), like flashcard flip ──
-  if (gameMode === 'CALLIGRAPHY_TRACE') {
-    const rating = typeof answer === 'number' ? answer : parseInt(answer as string, 10);
+  // ── FLASHCARD_FLIP / CALLIGRAPHY_TRACE: answer is self-rating (1-5), >= 3 = correct ──
+  if (gameMode === 'FLASHCARD_FLIP' || gameMode === 'CALLIGRAPHY_TRACE') {
+    const rating = typeof rawAnswer === 'number' ? rawAnswer : parseInt(rawAnswer as string, 10);
     return !isNaN(rating) && rating >= 3;
   }
 
   // ── WORD_SCRAMBLE: answer is the unscrambled word ──
   if (gameMode === 'WORD_SCRAMBLE') {
-    const term = round.contentType === 'ARABIC_TERM'
-      ? await prisma.arabicTerm.findUnique({ where: { id: round.contentId } })
-      : null;
-    if (term) {
-      const expected = (term.transliteration || term.translation).trim().toLowerCase();
-      const playerAnswer = (typeof answer === 'string' ? answer : '').trim().toLowerCase();
+    const expected = ((meta.correctAnswer as string) || '').trim().toLowerCase();
+    if (expected) {
+      const playerAnswer = (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase();
       return playerAnswer === expected;
     }
+    // Fallback to DB lookup if metadata was missing
+    if (round.contentType === 'ARABIC_TERM') {
+      const term = await prisma.arabicTerm.findUnique({ where: { id: round.contentId } });
+      if (term) {
+        const e = (term.transliteration || term.translation).trim().toLowerCase();
+        return (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase() === e;
+      }
+    }
+    return false;
   }
 
   // ── SPELLING_BEE: answer is the spelled-out transliteration ──
   if (gameMode === 'SPELLING_BEE') {
-    const term = round.contentType === 'ARABIC_TERM'
-      ? await prisma.arabicTerm.findUnique({ where: { id: round.contentId } })
-      : null;
-    if (term) {
-      const expected = (term.transliteration || '').trim().toLowerCase();
-      const playerAnswer = (typeof answer === 'string' ? answer : '').trim().toLowerCase();
+    const expected = ((meta.correctAnswer as string) || '').trim().toLowerCase();
+    if (expected) {
+      const playerAnswer = (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase();
       return playerAnswer === expected;
     }
+    if (round.contentType === 'ARABIC_TERM') {
+      const term = await prisma.arabicTerm.findUnique({ where: { id: round.contentId } });
+      if (term) {
+        const e = (term.transliteration || '').trim().toLowerCase();
+        return (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase() === e;
+      }
+    }
+    return false;
   }
 
-  // ── MEMORY_MATCH: answer is array of matched pair IDs; correct if all pairs matched ──
-  if (gameMode === 'MEMORY_MATCH') {
-    const totalPairs = (meta.totalPairs as number) || 0;
-    const matched = answer as string[];
-    if (!Array.isArray(matched)) return false;
-    return matched.length >= totalPairs;
-  }
-
-  // ── SENTENCE_BUILD / STORY_PUZZLE: answer is array of IDs or words in order ──
+  // ── SENTENCE_BUILD: answer is array of words in order ──
   if (gameMode === 'SENTENCE_BUILD') {
-    const c = meta as any;
-    const correctSentence = (c.scrambledWords as string[])?.sort()?.join(' ');
-    // For sentence build the "correct" check is done by comparing reconstructed sentence
-    // Player submits words in order; we compare to original sentence
-    const playerWords = answer as string[];
-    if (!Array.isArray(playerWords)) return false;
-    const fc = await prisma.flashCard.findUnique({ where: { id: round.contentId } });
-    if (!fc) return false;
-    const expected = (fc.back || fc.front || '').split(/\s+/).filter(Boolean);
-    return expected.length === playerWords.length && expected.every((w, i) => w.toLowerCase() === (playerWords[i] || '').toLowerCase());
-  }
-
-  if (gameMode === 'STORY_PUZZLE') {
-    const correctOrder = meta.correctOrder as string[];
-    const playerOrder = answer as string[];
-    if (!Array.isArray(playerOrder) || playerOrder.length !== correctOrder.length) return false;
-    return correctOrder.every((id, i) => id === playerOrder[i]);
+    if (!Array.isArray(rawAnswer)) return false;
+    const expectedSentence = (meta.correctSentence as string) || (meta.correctAnswer as string) || '';
+    let expected = expectedSentence.split(/\s+/).filter(Boolean);
+    if (expected.length === 0) {
+      const fc = await prisma.flashCard.findUnique({ where: { id: round.contentId } });
+      if (!fc) return false;
+      expected = (fc.back || fc.front || '').split(/\s+/).filter(Boolean);
+    }
+    const playerWords = rawAnswer as string[];
+    return expected.length === playerWords.length &&
+      expected.every((w, i) => w.toLowerCase() === (playerWords[i] || '').toLowerCase());
   }
 
   // ── FILL_IN_BLANK: answer is the missing word ──
   if (gameMode === 'FILL_IN_BLANK') {
-    const missingWord = (meta.missingWord as string) || '';
-    const playerAnswer = (typeof answer === 'string' ? answer : '').trim().toLowerCase();
-    return playerAnswer === missingWord.trim().toLowerCase();
+    const missingWord = ((meta.correctAnswer as string) || (meta.missingWord as string) || '').trim().toLowerCase();
+    const playerAnswer = (typeof rawAnswer === 'string' ? rawAnswer : '').trim().toLowerCase();
+    return playerAnswer === missingWord;
   }
 
-  // ── Generic multiple-choice types: SPEED_QUIZ, FIQH_SCENARIO, TRIVIA_BATTLE, KNOWLEDGE_EXPEDITION, MOSQUE_BUILDER, PATTERN_CREATOR, ESCAPE_ROOM, MAZE_NAVIGATOR ──
-  const answerStr = typeof answer === 'string' ? answer.trim().toLowerCase() : JSON.stringify(answer);
+  // ── Prefer metadata.correctAnswer for all remaining MCQ-style games ──
+  if (typeof meta.correctAnswer === 'string' && meta.correctAnswer.length > 0) {
+    const playerStr = (typeof rawAnswer === 'string' ? rawAnswer : JSON.stringify(rawAnswer)).trim().toLowerCase();
+    return playerStr === (meta.correctAnswer as string).trim().toLowerCase();
+  }
+
+  // ── Final fallback: lookup canonical content for comparison ──
+  const answerStr = typeof rawAnswer === 'string' ? rawAnswer.trim().toLowerCase() : JSON.stringify(rawAnswer);
 
   if (round.contentType === 'QUESTION') {
     const question = await prisma.question.findUnique({ where: { id: round.contentId } });

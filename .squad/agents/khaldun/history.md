@@ -26,8 +26,19 @@
 - **Orchestration Logs:** .squad/orchestration-log/ for all agent work summaries
 - **Session Logs:** .squad/log/ for team documentation
 
+## Learnings
+
+- **Azure deployment architecture:** App Service (backend) + Static Web Apps (frontend) + PostgreSQL Flexible Server + Redis Cache + Key Vault + Blob Storage. Documented in `docs/azure-deployment-guide.md`.
+- **Key Vault references:** App Service supports `@Microsoft.KeyVault(SecretUri=...)` syntax in app settings — requires managed identity + access policy. Preferred over raw secrets in env vars.
+- **Azure Redis quirk:** Requires TLS (`rediss://` protocol) on port 6380, not 6379. The ioredis library handles this natively.
+- **Prisma in Azure:** Must include `prisma/` directory in deployment package. Migrations run via `prisma migrate deploy` (non-interactive, safe for CI). Seeds are idempotent (upsert pattern).
+- **Existing deployment doc:** `docs/AZURE_DEPLOYMENT.md` (491 lines) — covers basics but lacks Key Vault, VNet, cost estimates, scaling guidance. New comprehensive guide at `docs/azure-deployment-guide.md`.
+- **Static Web Apps config:** Needs `staticwebapp.config.json` with `navigationFallback` for SPA routing (React Router).
+- **Port mapping:** Azure App Service expects port 8080 (not 3000). Set `PORT=8080` in production env.
+
 ## Next Steps
 
 - Parent Dashboard + Child Auth implementation
 - Phase 2 games planning and scope management
 - Integration testing: Full backend/frontend flow
+- Consider adding Dockerfile for future Container Apps migration path

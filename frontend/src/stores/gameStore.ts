@@ -160,7 +160,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         score: 0,
         streak: 0,
         lives: session.livesConfig?.enabled ? session.livesConfig.initial : null,
-        timeRemainingMs: session.timerConfig?.type !== 'NONE' ? session.timerConfig.durationMs : null,
+        timeRemainingMs: session.timerConfig?.type !== 'NONE' ? session.timerConfig?.durationMs ?? null : null,
         rounds: [],
         isLoading: false,
       });
@@ -179,13 +179,19 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     try {
       const result = await gameService.submitRound(activeSession.id, roundIndex, answer, timeSpentMs);
-      set((state) => ({
-        rounds: [...state.rounds, result],
-        currentRound: result.sessionState.roundsCompleted,
-        score: result.sessionState.score,
-        streak: result.sessionState.streak,
-        lives: result.sessionState.livesRemaining,
-      }));
+      set((state) => {
+        const newRounds = [...state.rounds, result];
+        const ss = result.sessionState ?? ({} as any);
+        return {
+          rounds: newRounds,
+          // Prefer backend value, but fall back to client-side count so the
+          // component never gets stuck if the server response is malformed.
+          currentRound: typeof ss.roundsCompleted === 'number' ? ss.roundsCompleted : newRounds.length,
+          score: typeof ss.score === 'number' ? ss.score : state.score + (result.pointsEarned ?? 0),
+          streak: typeof ss.streak === 'number' ? ss.streak : (result.isCorrect ? state.streak + 1 : 0),
+          lives: ss.livesRemaining ?? state.lives,
+        };
+      });
       return result;
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to submit answer' });
@@ -194,7 +200,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   completeGame: async (reason) => {
-    const { activeSession } = get();
+    const { activeSession, score, rounds } = get();
     if (!activeSession) throw new Error('No active session');
 
     set({ isLoading: true });
@@ -207,11 +213,25 @@ export const useGameStore = create<GameState>((set, get) => ({
       });
       return result;
     } catch (error) {
+      // Build a fallback result so GameOverScreen still renders
+      const fallbackResult = {
+        session: {
+          ...activeSession,
+          accuracy: rounds.length > 0 ? rounds.filter(r => r.isCorrect).length / rounds.length : 0,
+          streakBest: 0,
+          timeSpentMs: 0,
+        },
+        gameScore: { totalScore: score, xpEarned: 0, bonuses: {} },
+        achievements: [],
+        streakUpdate: null,
+        srsUpdates: [],
+      };
       set({
-        error: error instanceof Error ? error.message : 'Failed to complete game',
+        lastResult: fallbackResult as any,
+        activeSession: null,
         isLoading: false,
       });
-      throw error;
+      return fallbackResult as any;
     }
   },
 

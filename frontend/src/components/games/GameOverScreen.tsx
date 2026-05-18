@@ -18,11 +18,20 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
   className = '',
 }) => {
   const navigate = useNavigate();
-  const { session, gameScore, achievements, streakUpdate } = result;
 
-  const accuracy = Math.round(session.accuracy * 100);
+  if (!result) {
+    return <div className="text-center py-8"><p>Loading results...</p></div>;
+  }
+
+  const { session, gameScore, achievements = [], streakUpdate } = result;
+
+  // Handle missing gameScore gracefully
+  const safeScore = gameScore ?? { totalScore: session?.score ?? 0, xpEarned: 0, bonuses: {} };
+  const safeSession = session ?? { accuracy: 0, streakBest: 0, timeSpentMs: 0 };
+
+  const accuracy = Math.round((safeSession.accuracy ?? 0) * 100);
   const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : accuracy >= 50 ? 1 : 0;
-  const timeSeconds = Math.round(session.timeSpentMs / 1000);
+  const timeSeconds = Math.round((safeSession.timeSpentMs ?? 0) / 1000);
   const minutes = Math.floor(timeSeconds / 60);
   const secs = timeSeconds % 60;
 
@@ -35,7 +44,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 
       {/* Score */}
       <h2 className="text-4xl font-bold text-gray-900 mb-1">
-        {gameScore.totalScore.toLocaleString()}
+        {safeScore.totalScore.toLocaleString()}
       </h2>
       <p className="text-gray-500 mb-6">points earned</p>
 
@@ -48,7 +57,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
         </div>
         <div className="bg-amber-50 rounded-xl p-3">
           <Zap className="w-5 h-5 text-amber-600 mx-auto mb-1" />
-          <p className="text-lg font-bold text-amber-700">{session.streakBest}</p>
+          <p className="text-lg font-bold text-amber-700">{safeSession.streakBest}</p>
           <p className="text-xs text-amber-600">Best Streak</p>
         </div>
         <div className="bg-blue-50 rounded-xl p-3">
@@ -59,19 +68,19 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
       </div>
 
       {/* XP Earned */}
-      {gameScore.xpEarned > 0 && (
+      {safeScore.xpEarned > 0 && (
         <div className="bg-primary-50 rounded-xl p-3 mb-4 inline-flex items-center gap-2">
           <Zap className="w-5 h-5 text-primary-600" />
-          <span className="font-bold text-primary-700">+{gameScore.xpEarned} XP</span>
+          <span className="font-bold text-primary-700">+{safeScore.xpEarned} XP</span>
         </div>
       )}
 
       {/* Bonuses */}
-      {gameScore.bonuses && Object.keys(gameScore.bonuses).length > 0 && (
+      {safeScore.bonuses && Object.keys(safeScore.bonuses).length > 0 && (
         <div className="mb-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Bonuses</p>
           <div className="flex flex-wrap gap-2 justify-center">
-            {Object.entries(gameScore.bonuses).map(([key, value]) => (
+            {Object.entries(safeScore.bonuses).map(([key, value]) => (
               <span key={key} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
                 {key}: +{value}
               </span>

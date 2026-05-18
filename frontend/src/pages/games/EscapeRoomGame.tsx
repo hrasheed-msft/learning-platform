@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
@@ -190,7 +191,7 @@ export default function EscapeRoomGame({ gameId, difficulty: initialDifficulty }
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {(currentChallenge.content.options || []).map((option, idx) => {
+            {getOptions(currentChallenge.content.options).map((option, idx) => {
               const isSelected = selectedOption === option;
               const showCorrectness = showFeedback && isSelected;
               return (

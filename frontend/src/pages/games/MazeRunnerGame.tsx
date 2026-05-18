@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
@@ -365,7 +366,7 @@ export default function MazeRunnerGame({ gameId, difficulty: initialDifficulty }
               </p>
             )}
             <div className="space-y-2">
-              {(gateQuestion.content.options || []).map((option, idx) => {
+              {getOptions(gateQuestion.content.options).map((option, idx) => {
                 const isSelected = selectedOption === option;
                 const showCorrectness = showFeedback && isSelected;
                 return (

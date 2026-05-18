@@ -41,27 +41,58 @@ export default function TermMatchGame({ gameId, difficulty: initialDifficulty }:
   const [hintsRemaining, setHintsRemaining] = useState(difficulty === 'EASY' ? 2 : difficulty === 'MEDIUM' ? 1 : 0);
 
   const grid = GRID_CONFIG[difficulty];
-  const totalPairs = grid.pairs;
+  // Derive actual pair count from the cards (may be less than grid.pairs if backend has fewer items)
+  const totalPairs = cards.length > 0 ? cards.length / 2 : grid.pairs;
+  // Track matched pair IDs so we can submit one final answer (backend uses a single round)
+  const [matchedPairIds, setMatchedPairIds] = useState<string[]>([]);
 
   // Initialize game cards from session rounds
   useEffect(() => {
-    if (activeSession?.rounds) {
+    if (activeSession?.rounds && activeSession.rounds.length > 0) {
+      // Backend produces a SINGLE round for TERM_MATCH with a `pairs` array
+      // (id, term, transliteration, definition). Older shapes used per-round
+      // arabicText/translation. Support both.
+      const firstRound = activeSession.rounds[0];
+      const c: any = firstRound?.content ?? {};
+      type Pair = { id: string; term: string; definition: string };
+      let pairs: Pair[] = [];
+
+      if (Array.isArray(c.pairs) && c.pairs.length > 0) {
+        pairs = c.pairs.map((p: any) => ({
+          id: String(p.id),
+          term: p.term || p.arabicText || p.front || '',
+          definition: p.definition || p.translation || p.back || '',
+        }));
+      } else {
+        // Fallback: each round represents one pair
+        pairs = activeSession.rounds.map((round) => {
+          const rc: any = round.content ?? {};
+          return {
+            id: String(rc.id),
+            term: rc.arabicText || rc.frontArabic || rc.front || '',
+            definition: rc.translation || rc.back || '',
+          };
+        });
+      }
+
+      // Filter out empty pairs to avoid blank cards
+      pairs = pairs.filter((p) => p.id && p.term && p.definition);
+
       const newCards: CardState[] = [];
-      activeSession.rounds.forEach((round) => {
-        const c = round.content;
+      pairs.forEach((p) => {
         newCards.push({
-          id: `${c.id}-arabic`,
-          content: c.arabicText || c.frontArabic || c.front || '',
+          id: `${p.id}-arabic`,
+          content: p.term,
           type: 'arabic',
-          termId: c.id,
+          termId: p.id,
           isFlipped: false,
           isMatched: false,
         });
         newCards.push({
-          id: `${c.id}-trans`,
-          content: c.translation || c.back || '',
+          id: `${p.id}-trans`,
+          content: p.definition,
           type: 'translation',
-          termId: c.id,
+          termId: p.id,
           isFlipped: false,
           isMatched: false,
         });
@@ -84,6 +115,7 @@ export default function TermMatchGame({ gameId, difficulty: initialDifficulty }:
     await startGame(gameId, activeMemberId, difficulty);
     setGameStarted(true);
     setMatchedCount(0);
+    setMatchedPairIds([]);
     setFlippedIds([]);
   };
 
@@ -109,16 +141,16 @@ export default function TermMatchGame({ gameId, difficulty: initialDifficulty }:
           ));
           const newMatched = matchedCount + 1;
           setMatchedCount(newMatched);
+          const newMatchedIds = [...matchedPairIds, first.termId];
+          setMatchedPairIds(newMatchedIds);
 
-          if (activeSession) {
+          if (newMatched >= totalPairs && activeSession) {
+            // Submit ALL matches once to round 0, then complete.
             const timeSpent = Date.now() - roundStartTime;
+            const pairsAnswer = newMatchedIds.map((id) => ({ termId: id, definitionId: id }));
             try {
-              await submitAnswer(newMatched - 1, { matchedTermId: first.termId }, timeSpent);
-            } catch { /* continue */ }
-            setRoundStartTime(Date.now());
-          }
-
-          if (newMatched >= totalPairs) {
+              await submitAnswer(0, { pairs: pairsAnswer }, timeSpent);
+            } catch { /* continue to completion regardless */ }
             setTimeout(() => completeGame('FINISHED'), 500);
           }
         } else {
@@ -133,7 +165,7 @@ export default function TermMatchGame({ gameId, difficulty: initialDifficulty }:
         setIsChecking(false);
       }, 300);
     }
-  }, [cards, flippedIds, isChecking, matchedCount, activeSession, totalPairs]);
+  }, [cards, flippedIds, isChecking, matchedCount, matchedPairIds, activeSession, totalPairs, roundStartTime, submitAnswer, completeGame]);
 
   const handleHint = () => {
     if (hintsRemaining <= 0) return;
@@ -160,6 +192,7 @@ export default function TermMatchGame({ gameId, difficulty: initialDifficulty }:
     setGameStarted(false);
     setCards([]);
     setMatchedCount(0);
+    setMatchedPairIds([]);
   };
 
   const handleTimeUp = () => {

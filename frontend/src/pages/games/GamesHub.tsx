@@ -246,8 +246,8 @@ export default function GamesHub() {
           </div>
           {leaderboardEntries.length > 0 ? (
             <div className="space-y-3">
-              {leaderboardEntries.slice(0, 5).map((entry) => (
-                <div key={entry.member.id} className="flex items-center gap-3">
+              {leaderboardEntries.slice(0, 5).map((entry, idx) => (
+                <div key={entry.member?.id || `lb-${entry.rank}-${idx}`} className="flex items-center gap-3">
                   <span className={clsx(
                     'w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold',
                     entry.rank === 1 ? 'bg-yellow-100 text-yellow-700'
@@ -280,8 +280,8 @@ export default function GamesHub() {
           </div>
           {achievements.length > 0 ? (
             <div className="space-y-3">
-              {achievements.slice(0, 3).map((a) => (
-                <div key={a.id} className="flex items-center gap-3 bg-amber-50 rounded-lg p-3">
+              {achievements.slice(0, 3).map((a, idx) => (
+                <div key={a.id || `ach-${a.type || 'unknown'}-${idx}`} className="flex items-center gap-3 bg-amber-50 rounded-lg p-3">
                   <Medal className="w-6 h-6 text-amber-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-800 text-sm">{a.name}</p>

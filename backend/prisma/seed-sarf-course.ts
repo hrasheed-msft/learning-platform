@@ -30,13 +30,9 @@ export async function seedSarfCourse() {
     data: {
       title: 'Advanced Sarf - Arabic Morphology',
       description: 'A comprehensive study of Arabic morphology (Sarf) covering verb forms (awzan), weak letters, and conjugation patterns for alimiyyah students.',
-      descriptionArabic: 'دراسة شاملة لعلم الصرف تغطي أوزان الأفعال وحروف العلة وأنماط التصريف لطلاب العلوم الشرعية',
-      level: 'ADVANCED',
-      ageCategory: 'ADULT',
       isPublished: true,
-      imageUrl: '/images/courses/sarf.jpg',
-      category: 'LANGUAGE',
-      estimatedHours: 40,
+      category: 'ARABIC',
+      ageLevels: ['ADULT'],
     },
   });
 
@@ -47,7 +43,6 @@ export async function seedSarfCourse() {
     data: {
       courseId: sarfCourse.id,
       title: 'Introduction to Sarf & The Trilateral Root System',
-      titleArabic: 'مقدمة في علم الصرف والميزان الصرفي',
       description: 'Understanding the foundation of Arabic morphology and the three-letter root system',
       orderIndex: 1,
       content: `
@@ -152,7 +147,6 @@ export async function seedSarfCourse() {
     data: {
       courseId: sarfCourse.id,
       title: 'The Ten Verb Forms (I-V) - Meanings and Patterns',
-      titleArabic: 'الأوزان العشرة (من الأول إلى الخامس)',
       description: 'Deep study of verb forms I through V with their meanings and usage',
       orderIndex: 2,
       content: `

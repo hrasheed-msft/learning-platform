@@ -22,6 +22,7 @@ import { seedSarfCoursePart4 } from './seed-sarf-course-part4';
 import { seedSarfCoursePart5 } from './seed-sarf-course-part5';
 import { seedSarfQuizzes } from './seed-sarf-quizzes';
 import { seedSarfFlashcards } from './seed-sarf-flashcards';
+import { seedGames } from './seed-games';
 
 const prisma = new PrismaClient();
 
@@ -2740,6 +2741,9 @@ async function main() {
   await seedSarfQuizzes();
   await seedSarfFlashcards();
 
+  // Games — must run after courses exist
+  await seedGames();
+
   console.log('');
   console.log('🎉 Database seed completed successfully!');
   console.log('');
@@ -2754,6 +2758,7 @@ async function main() {
   console.log('   - Unit progress records');
   console.log('   - Achievement badges');
   console.log('   - SRS memorization items (some due today!)');
+  console.log('   - Game templates, games, and badge definitions');
   console.log('');
   console.log('📧 Demo login credentials:');
   console.log('   Email: demo@example.com');

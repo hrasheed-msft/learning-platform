@@ -28,7 +28,6 @@ export async function seedSarfCoursePart2() {
     data: {
       courseId: sarfCourse.id,
       title: 'The Ten Verb Forms (VI-X) - Advanced Patterns',
-      titleArabic: 'الأوزان العشرة (من السادس إلى العاشر)',
       description: 'Mastering the advanced verb forms VI through X with nuanced meanings',
       orderIndex: 3,
       content: `
@@ -329,7 +328,6 @@ export async function seedSarfCoursePart2() {
     data: {
       courseId: sarfCourse.id,
       title: 'Weak Verbs: Mithal (First Radical Weak)',
-      titleArabic: 'الفعل المعتل - المثال',
       description: 'Understanding verbs with و or ي as the first radical letter',
       orderIndex: 4,
       content: `

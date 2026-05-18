@@ -28,7 +28,6 @@ export async function seedSarfCoursePart3() {
     data: {
       courseId: sarfCourse.id,
       title: 'Weak Verbs: Ajwaf (Middle Radical Weak)',
-      titleArabic: 'الفعل المعتل - الأجوف',
       description: 'Mastering verbs with و or ي as the middle (second) radical',
       orderIndex: 5,
       content: `
@@ -355,7 +354,6 @@ export async function seedSarfCoursePart3() {
     data: {
       courseId: sarfCourse.id,
       title: 'Weak Verbs: Naqis (Final Radical Weak)',
-      titleArabic: 'الفعل المعتل - الناقص',
       description: 'Understanding verbs with و or ي as the final (third) radical',
       orderIndex: 6,
       content: `

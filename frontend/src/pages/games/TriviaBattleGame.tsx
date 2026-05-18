@@ -1,3 +1,4 @@
+import { getOptions } from '../../utils/gameHelpers';
 import { useState, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
@@ -151,7 +152,7 @@ export default function TriviaBattleGame({ gameId, difficulty: initialDifficulty
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {(round.content.options || []).map((option, idx) => {
+        {getOptions(round.content.options).map((option, idx) => {
           const isSelected = selectedOption === option;
           const correct = showFeedback && option === round.content.correctAnswer;
           const wrong = showFeedback && isSelected && !isCorrect;

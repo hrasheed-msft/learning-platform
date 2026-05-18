@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useGameStore } from '@/stores/gameStore';
 import { useActiveMemberId } from '@/hooks/useActiveMemberId';
 import { GameTimer, ScoreDisplay, GameProgressBar, StreakIndicator, GameOverScreen, DifficultySelector } from '@/components/games';
+import { getOptions } from '../../utils/gameHelpers';
 import { Button } from '@/components/ui/Button';
 import type { GameDifficulty, GameRound } from '@/types/game';
 
@@ -27,6 +28,7 @@ export default function SpeedQuizGame({ gameId, difficulty: initialDifficulty }:
   const [isCorrect, setIsCorrect] = useState(false);
   const [roundStartTime, setRoundStartTime] = useState(Date.now());
   const [timerKey, setTimerKey] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const currentQuestion: GameRound | undefined = activeSession?.rounds?.[currentRound];
   const totalRounds = activeSession?.totalRounds || 0;
@@ -44,8 +46,9 @@ export default function SpeedQuizGame({ gameId, difficulty: initialDifficulty }:
   };
 
   const handleAnswer = useCallback(async (answer: string) => {
-    if (showFeedback || !activeSession) return;
+    if (showFeedback || !activeSession || submitting) return;
 
+    setSubmitting(true);
     setSelectedOption(answer);
     setShowFeedback(true);
 
@@ -57,6 +60,7 @@ export default function SpeedQuizGame({ gameId, difficulty: initialDifficulty }:
       setTimeout(() => {
         setShowFeedback(false);
         setSelectedOption(null);
+        setSubmitting(false);
         setRoundStartTime(Date.now());
         setTimerKey((k) => k + 1);
 
@@ -67,14 +71,15 @@ export default function SpeedQuizGame({ gameId, difficulty: initialDifficulty }:
     } catch {
       setShowFeedback(false);
       setSelectedOption(null);
+      setSubmitting(false);
     }
-  }, [showFeedback, activeSession, currentRound, roundStartTime, totalRounds]);
+  }, [showFeedback, activeSession, submitting, currentRound, roundStartTime, totalRounds]);
 
   const handleTimeUp = useCallback(() => {
-    if (!showFeedback) {
+    if (!showFeedback && !submitting) {
       handleAnswer('__TIMEOUT__');
     }
-  }, [showFeedback, handleAnswer]);
+  }, [showFeedback, submitting, handleAnswer]);
 
   const handlePlayAgain = () => {
     resetSession();
@@ -112,7 +117,7 @@ export default function SpeedQuizGame({ gameId, difficulty: initialDifficulty }:
     return <div className="text-center py-16 text-gray-500">Loading question...</div>;
   }
 
-  const options = currentQuestion.content.options || [];
+  const options = getOptions(currentQuestion.content.options);
   const questionText = currentQuestion.content.questionText || currentQuestion.content.front || '';
   const results = submittedRounds.map((r) => r.isCorrect);
 

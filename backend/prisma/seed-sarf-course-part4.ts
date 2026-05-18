@@ -28,7 +28,6 @@ export async function seedSarfCoursePart4() {
     data: {
       courseId: sarfCourse.id,
       title: 'Weak Verbs: Lafeef (Doubly Weak)',
-      titleArabic: 'الفعل المعتل - اللفيف',
       description: 'Mastering verbs with two weak radicals',
       orderIndex: 7,
       content: `
@@ -316,7 +315,6 @@ export async function seedSarfCoursePart4() {
     data: {
       courseId: sarfCourse.id,
       title: 'Comprehensive Practice & Conjugation Mastery',
-      titleArabic: 'التطبيق الشامل وإتقان التصريف',
       description: 'Practical exercises for mastering all verb types and forms',
       orderIndex: 8,
       content: `
