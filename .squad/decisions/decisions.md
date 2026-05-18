@@ -1,7 +1,7 @@
 # Decisions Archive
 
-**Last Updated:** 2026-05-18T19:48:40Z  
-**Total Decisions:** 23  
+**Last Updated:** 2026-05-18T15:52:28Z  
+**Total Decisions:** 25  
 **Source:** Merged from .squad/decisions/inbox/ on 2026-05-18
 
 ---
@@ -602,6 +602,71 @@ Hub card always appears, but launcher filters courses by this query.
 ### Migration Path — 26 → 10 Without Data Loss
 
 **Principle:** Game type collapse, score preservation. Rename/merge GameType enum values, preserve all existing `GameScore` and `GameSession` rows via mapping.
+
+---
+
+## Decision: Eligible Courses Response Shape + Simple Enroll Endpoint
+
+**Author:** Khwarizmi  
+**Date:** 2026-05-18  
+**Status:** IMPLEMENTED
+
+### Context
+
+Frontend `GameLauncher` calls `GET /games/:slug/eligible-courses?memberId=X` and extracts results via `raw.courses`. Backend was returning `raw.eligibleCourses` — key mismatch caused "No eligible courses" bug.
+
+### Decisions
+
+#### 1. Response key renamed: `eligibleCourses` → `courses`
+
+Matches the frontend extraction pattern. Added fields per frontend contract:
+- `courseName` (alias of `courseTitle`)
+- `contentCount` (total content items for this game type on the course)
+- `suggestedDifficulty` (≤8 items → EASY, ≤15 → MEDIUM, else HARD)
+
+#### 2. New endpoint: `POST /api/v1/courses/:courseId/enroll`
+
+- Reads `x-active-member-id` header (same pattern as games)
+- Idempotent: returns 200 with existing enrollment if already enrolled
+- No `requireParentRole` — any authenticated member can self-enroll via the learner picker
+- Old `POST /enrollments` (body-based, parent-only) preserved for backward compat
+
+#### 3. Self-member enrollment is already handled
+
+The `selfMemberId` from the learner picker is a real `FamilyMember.id`. No special-casing needed — the enrollment query works by `memberId` directly.
+
+### Impact
+
+- **Ibn Sina (Frontend):** Can now use `raw.courses` extraction as-is. `courseName`, `contentCount`, `suggestedDifficulty` available for UI rendering.
+- **Breaking:** Any code reading `response.data.data.eligibleCourses` must switch to `.courses`. Since this is fresh code from the 9-type collapse, no legacy consumers exist.
+
+---
+
+## Enrollment UX Simplification
+
+**Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-05-18  
+**Status:** IMPLEMENTED
+
+### Decision
+
+Simplified the CourseDetail enrollment flow to auto-use the active learner from `useFamilyStore().selectedMember` instead of always requiring a dropdown selection.
+
+### Rationale
+
+With the learner picker already selecting an active family member at the top of the app, forcing users to re-select the same member in a dropdown on CourseDetail was redundant friction. The dropdown remains as a fallback for the edge case where no active member is set.
+
+### Implementation
+
+- If `selectedMember` exists: show single "Enroll {name}" button
+- If no `selectedMember`: show the dropdown (original behavior)
+- Success message now includes member name for clarity
+
+### Impact
+
+- **UX:** One-click enrollment instead of select-then-click (saves a step for the common case)
+- **Backward compatible:** Dropdown fallback ensures no regression if selectedMember is null
+- **Pattern:** Other pages needing member context should follow the same pattern — prefer `selectedMember` from store, fallback to manual selection
 
 **Schema Changes:**
 - New enum: `QUICK_RECALL, PAIR_MATCH, FLASHCARD_SPRINT, CLOZE, WORD_SEARCH, SEQUENCE_IT, WORD_SCRAMBLE, VERIFY, CALLIGRAPHY_TRACE, FIQH_SCENARIO`
