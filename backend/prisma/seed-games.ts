@@ -11,6 +11,11 @@ export async function seedGames() {
   console.log('🎮 Starting games seed...');
   console.log('');
 
+  // Clean up orphaned games and sessions from previous seeds
+  await prisma.gameRound.deleteMany();
+  await prisma.gameSession.deleteMany();
+  await prisma.game.deleteMany();
+
   // ─── 1. GAME TEMPLATES ────────────────────────────────────────────────────
 
   const templateDefs = [
@@ -266,6 +271,10 @@ export async function seedGames() {
     { type: GameType.LISTENING_QUIZ,   difficulty: GameDifficulty.MEDIUM },
     { type: GameType.CALLIGRAPHY_TRACE, difficulty: GameDifficulty.EASY  },
     { type: GameType.SPELLING_BEE,     difficulty: GameDifficulty.MEDIUM },
+    { type: GameType.AYAH_COMPLETION,  difficulty: GameDifficulty.MEDIUM },
+    { type: GameType.FIQH_SCENARIO,    difficulty: GameDifficulty.HARD   },
+    { type: GameType.HADITH_CHAIN,     difficulty: GameDifficulty.HARD   },
+    { type: GameType.WORD_SEARCH,      difficulty: GameDifficulty.EASY   },
   ];
 
   let createdGames = 0;
@@ -287,6 +296,40 @@ export async function seedGames() {
     }
   }
 
+  // ─── Flashcard-rich course games ───────────────────────────────────────────
+  // Some game types need flashcards but the first 5 courses have none.
+  // Find courses with enough flashcard content and create games for FC-dependent types.
+  const flashcardTypes: { type: GameType; difficulty: GameDifficulty; minFC: number }[] = [
+    { type: GameType.FLASHCARD_FLIP, difficulty: GameDifficulty.EASY,   minFC: 5 },
+    { type: GameType.SENTENCE_BUILD, difficulty: GameDifficulty.MEDIUM, minFC: 4 },
+    { type: GameType.AYAH_COMPLETION, difficulty: GameDifficulty.MEDIUM, minFC: 3 },
+    { type: GameType.HADITH_CHAIN,   difficulty: GameDifficulty.HARD,   minFC: 4 },
+  ];
+
+  const fcRichCourses = await prisma.course.findMany({
+    where: {
+      units: { some: { flashCards: { some: {} } } },
+    },
+    select: { id: true, title: true },
+    orderBy: { createdAt: 'asc' },
+    take: 3,
+  });
+
+  for (const course of fcRichCourses) {
+    for (const { type, difficulty } of flashcardTypes) {
+      const templateId = templateMap[type];
+      if (!templateId) continue;
+      const existing = await prisma.game.findFirst({
+        where: { templateId, courseId: course.id, difficulty },
+      });
+      if (existing) continue;
+      await prisma.game.create({
+        data: { templateId, courseId: course.id, difficulty, isActive: true },
+      });
+      createdGames++;
+    }
+  }
+
   // Standalone games (no courseId)
   const standaloneSpecs: { type: GameType; difficulty: GameDifficulty }[] = [
     { type: GameType.DAILY_CHALLENGE,      difficulty: GameDifficulty.MEDIUM },
@@ -298,6 +341,7 @@ export async function seedGames() {
     { type: GameType.STORY_PUZZLE,         difficulty: GameDifficulty.MEDIUM },
     { type: GameType.MOSQUE_BUILDER,       difficulty: GameDifficulty.EASY   },
     { type: GameType.SEERAH_TIMELINE,      difficulty: GameDifficulty.MEDIUM },
+    { type: GameType.PATTERN_CREATOR,      difficulty: GameDifficulty.MEDIUM },
   ];
 
   for (const { type, difficulty } of standaloneSpecs) {
@@ -435,17 +479,15 @@ export async function seedGames() {
   console.log('🎮 Games seed completed!');
 }
 
-// ─── Standalone entrypoint ───────────────────────────────────────────────────
+// ─── Standalone entrypoint (only when run directly) ─────────────────────────
 
-async function main() {
-  await seedGames();
+if (require.main === module) {
+  seedGames()
+    .catch((e) => {
+      console.error('❌ Games seed failed:', e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
 }
-
-main()
-  .catch((e) => {
-    console.error('❌ Games seed failed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

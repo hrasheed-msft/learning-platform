@@ -16,12 +16,18 @@ router.use(authenticate);
 const uuidParam = (name: string) => param(name).isUUID().withMessage(`Valid ${name} is required`);
 
 const startGameValidation = [
-  body('gameId').isUUID().withMessage('Valid gameId is required'),
+  body('gameId').optional().isUUID().withMessage('gameId must be a valid UUID'),
   body('memberId').isUUID().withMessage('Valid memberId is required'),
   body('gameType').optional().isString(),
   body('difficulty').optional().isIn(['EASY', 'MEDIUM', 'HARD']).withMessage('difficulty must be EASY, MEDIUM, or HARD'),
   body('unitId').optional().isUUID(),
   body('courseId').optional().isUUID(),
+  body().custom((_, { req }) => {
+    if (!req.body.gameId && !req.body.gameType) {
+      throw new Error('Either gameId or gameType is required');
+    }
+    return true;
+  }),
 ];
 
 const submitRoundValidation = [

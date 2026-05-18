@@ -1383,7 +1383,10 @@ export class GameService {
     }
 
     // 3. Check content availability
-    const availability = await checkContentAvailability(gameType, unitId ?? game.unitId ?? undefined, courseId ?? game.courseId ?? undefined, memberId);
+    // When starting by gameType (not gameId), only scope to course/unit if caller explicitly provided them
+    const effectiveUnitId = unitId ?? (gameId ? game.unitId ?? undefined : undefined);
+    const effectiveCourseId = courseId ?? (gameId ? game.courseId ?? undefined : undefined);
+    const availability = await checkContentAvailability(gameType, effectiveUnitId, effectiveCourseId, memberId);
     if (!availability.available) {
       throw new BadRequestError(availability.missing ?? 'Not enough content for this game');
     }
@@ -1393,8 +1396,8 @@ export class GameService {
     const contentItems = await selectContent(
       gameType,
       memberId,
-      unitId ?? game.unitId ?? undefined,
-      courseId ?? game.courseId ?? undefined,
+      effectiveUnitId,
+      effectiveCourseId,
       difficulty,
       roundCount,
     );
