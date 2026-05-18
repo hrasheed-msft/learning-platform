@@ -126,11 +126,11 @@ export const gameService = {
         params: { memberId },
       });
       const raw = response.data.data;
-      const list = Array.isArray(raw) ? raw : raw?.courses ?? [];
+      const list = Array.isArray(raw) ? raw : raw?.eligibleCourses ?? raw?.courses ?? [];
       return list.map((c: any) => ({
         gameId: c.gameId ?? c.id,
         courseId: c.courseId,
-        courseName: c.courseName ?? c.course?.title ?? 'Untitled',
+        courseName: c.courseName ?? c.courseTitle ?? c.course?.title ?? 'Untitled',
         contentCount: c.contentCount ?? 0,
         suggestedDifficulty: c.suggestedDifficulty ?? 'MEDIUM',
       }));

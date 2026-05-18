@@ -766,6 +766,33 @@ async function checkContentAvailability(
   return { available: true };
 }
 
+/**
+ * Count total content items available for a game type on a given course.
+ * Used to populate contentCount and drive suggestedDifficulty.
+ */
+async function countContentForGame(gameType: GameType, courseId: string): Promise<number> {
+  const def = GAME_DEFS[gameType];
+  if (!def) return 0;
+
+  const units = await prisma.unit.findMany({ where: { courseId }, select: { id: true } });
+  const unitIds = units.map((u) => u.id);
+  if (unitIds.length === 0) return 0;
+
+  const unitFilter = { unitId: { in: unitIds } };
+
+  let count = 0;
+  if (def.minQuestions > 0) {
+    count += await prisma.question.count({ where: unitFilter });
+  }
+  if (def.minFlashcards > 0) {
+    count += await prisma.flashCard.count({ where: { unitId: { in: unitIds } } });
+  }
+  if (def.minArabicTerms > 0) {
+    count += await prisma.arabicTerm.count({ where: unitFilter });
+  }
+  return count;
+}
+
 // ---------------------------------------------------------------------------
 // SRS / streak / time-budget helpers (kept lean)
 // ---------------------------------------------------------------------------
@@ -1044,6 +1071,13 @@ export class GameService {
       const availability = await checkContentAvailability(gameType, undefined, e.course.id);
       if (!availability.available) continue;
 
+      // Count available content items for this game type on this course
+      const contentCount = await countContentForGame(gameType, e.course.id);
+
+      // Suggest difficulty based on content count: ≤8 EASY, ≤15 MEDIUM, else HARD
+      const suggestedDifficulty: 'EASY' | 'MEDIUM' | 'HARD' =
+        contentCount <= 8 ? 'EASY' : contentCount <= 15 ? 'MEDIUM' : 'HARD';
+
       // Find the existing Game row (if any) for this course+template — frontend
       // can use it as `gameId` for /start without re-creating one server-side.
       const existingGame = template.games.find((g) => g.courseId === e.course.id);
@@ -1051,7 +1085,10 @@ export class GameService {
       eligible.push({
         courseId: e.course.id,
         courseTitle: e.course.title,
+        courseName: e.course.title, // alias for frontend compatibility
         courseCategory: e.course.category,
+        contentCount,
+        suggestedDifficulty,
         gameId: existingGame?.id ?? null,
         presentationConfig: existingGame?.presentationConfig ?? null,
       });
@@ -1066,7 +1103,7 @@ export class GameService {
         description: template.description,
       },
       compatibility,
-      eligibleCourses: eligible,
+      courses: eligible, // renamed from eligibleCourses for frontend compat
     };
   }
 

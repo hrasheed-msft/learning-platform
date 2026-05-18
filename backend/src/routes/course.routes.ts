@@ -43,6 +43,7 @@ router.get('/:courseId/units/:unitId', validate(unitIdValidation), CourseControl
 
 // Enrollments (require active member)
 router.post('/enrollments', requireActiveMember, requireParentRole, validate(enrollmentValidation), CourseController.enrollMember);
+router.post('/:courseId/enroll', validate(courseIdValidation), requireActiveMember, CourseController.enrollActiveMember);
 router.get('/enrollments/member/:memberId', requireActiveMember, CourseController.getMemberEnrollments);
 router.delete('/enrollments/:enrollmentId', requireActiveMember, requireParentRole, CourseController.unenrollMember);
 

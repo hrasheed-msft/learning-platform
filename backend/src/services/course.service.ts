@@ -180,6 +180,53 @@ export class CourseService {
     return enrollment;
   }
 
+  /**
+   * Idempotent enrollment: if already enrolled, returns existing enrollment.
+   * Used by the simplified POST /courses/:courseId/enroll endpoint.
+   */
+  static async enrollMemberIdempotent(familyId: string, memberId: string, courseId: string) {
+    // Verify member belongs to family
+    const member = await prisma.familyMember.findFirst({
+      where: { id: memberId, familyId },
+    });
+
+    if (!member) {
+      throw new ForbiddenError('Member not found or does not belong to your family');
+    }
+
+    // Verify course exists and is published
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw new NotFoundError('Course not found');
+    }
+
+    // Return existing enrollment if present (idempotent)
+    const existing = await prisma.courseEnrollment.findUnique({
+      where: { memberId_courseId: { memberId, courseId } },
+      include: { course: true },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    // Create enrollment
+    const enrollment = await prisma.courseEnrollment.create({
+      data: {
+        memberId,
+        courseId,
+        status: 'ACTIVE',
+        progress: 0,
+      },
+      include: { course: true },
+    });
+
+    return enrollment;
+  }
+
   static async getMemberEnrollments(familyId: string, memberId: string) {
     // Verify member belongs to family
     const member = await prisma.familyMember.findFirst({

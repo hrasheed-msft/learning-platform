@@ -9,10 +9,11 @@ export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const { family } = useAuthStore();
   const { selectedCourse, units, fetchCourse, fetchUnits, enrollMember, isLoading } = useCourseStore();
-  const { members, fetchMembers } = useFamilyStore();
+  const { members, selectedMember, fetchMembers } = useFamilyStore();
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [enrolling, setEnrolling] = useState(false);
   const [enrollSuccess, setEnrollSuccess] = useState(false);
+  const [enrollSuccessName, setEnrollSuccessName] = useState<string>('');
   const [enrollError, setEnrollError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,15 +44,18 @@ export default function CourseDetail() {
   }
 
   const handleEnroll = async () => {
-    if (!selectedMemberId || !courseId) return;
+    const memberId = selectedMember?.id || selectedMemberId;
+    if (!memberId || !courseId) return;
     
     setEnrolling(true);
     setEnrollError(null);
     setEnrollSuccess(false);
     
     try {
-      await enrollMember(selectedMemberId, courseId);
+      await enrollMember(memberId, courseId);
+      const memberName = selectedMember?.name || members.find(m => m.id === memberId)?.name || 'Member';
       setEnrollSuccess(true);
+      setEnrollSuccessName(memberName);
       setSelectedMemberId('');
       // Refresh course data to update enrollment count
       fetchCourse(courseId);
@@ -131,7 +135,7 @@ export default function CourseDetail() {
         {enrollSuccess && (
           <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm flex items-center">
             <CheckCircle className="w-4 h-4 mr-2" />
-            Successfully enrolled in course!
+            Successfully enrolled {enrollSuccessName} in course!
           </div>
         )}
         
@@ -141,23 +145,10 @@ export default function CourseDetail() {
           </div>
         )}
         
-        <div className="flex flex-col sm:flex-row gap-4">
-          <select
-            value={selectedMemberId}
-            onChange={(e) => setSelectedMemberId(e.target.value)}
-            disabled={enrolling}
-            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white disabled:bg-gray-100"
-          >
-            <option value="">Select a family member...</option>
-            {members.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name}
-              </option>
-            ))}
-          </select>
+        {selectedMember ? (
           <button
             onClick={handleEnroll}
-            disabled={!selectedMemberId || enrolling}
+            disabled={enrolling}
             className="px-6 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center"
           >
             {enrolling ? (
@@ -166,10 +157,40 @@ export default function CourseDetail() {
                 Enrolling...
               </>
             ) : (
-              'Enroll Now'
+              `Enroll ${selectedMember.name}`
             )}
           </button>
-        </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4">
+            <select
+              value={selectedMemberId}
+              onChange={(e) => setSelectedMemberId(e.target.value)}
+              disabled={enrolling}
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white disabled:bg-gray-100"
+            >
+              <option value="">Select a family member...</option>
+              {members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleEnroll}
+              disabled={!selectedMemberId || enrolling}
+              className="px-6 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center"
+            >
+              {enrolling ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enrolling...
+                </>
+              ) : (
+                'Enroll Now'
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Flashcards Section */}

@@ -77,3 +77,12 @@
 - **Pre-existing fix:** Removed unused `user` destructure in `StudySession.tsx` to unblock typecheck (TS6133, pre-existing from prior commit).
 - **Key files:** `pages/games/{GamesHub,GameLauncher,GamePlay}.tsx`, 9 new game components in `pages/games/`, `hooks/useGameRunner.ts`, `stores/gameStore.ts` (launcher state), `services/gameService.ts` (getEligibleCourses), `types/game.ts` (ActiveGameType + GAME_META), `utils/gameHelpers.ts` (mapToActiveType / slug maps / shuffle), `App.tsx` (routes).
 - **Build:** `npm run build` ✓ (1531 modules, 507kB main bundle).
+
+### 2026-05-18 — Games "No eligible courses" fix + Enrollment simplification
+- **Problem 1:** `gameService.getEligibleCourses` extracted `raw.courses` but backend returns `eligibleCourses`. Also mapped `c.courseName` but backend sends `courseTitle`.
+- **Fix 1:** Changed extraction to `raw?.eligibleCourses ?? raw?.courses ?? []` and field mapping to `c.courseName ?? c.courseTitle ?? c.course?.title ?? 'Untitled'`.
+- **Problem 2:** CourseDetail enrollment required picking a member from dropdown even though learner picker already selects an active member.
+- **Fix 2:** If `selectedMember` exists in familyStore, show a single "Enroll {name}" button. Dropdown only appears as fallback when no active member. Success message now includes member name.
+- **Pattern:** Use `selectedMember` from `useFamilyStore()` as primary; `selectedMemberId` state as fallback for no-active-member edge case.
+- **Key files:** `services/gameService.ts` (line 129), `pages/courses/CourseDetail.tsx` (enrollment section).
+- **Build:** `npx tsc --noEmit` ✓ clean.

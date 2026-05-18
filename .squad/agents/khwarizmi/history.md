@@ -221,3 +221,28 @@ Scribe merged all pending decisions from inbox into decisions.md, capturing 7 ne
 3. **Phase C (1–2 sprints):** Author FiqhScenario content trees (needs fiqh SME)
 4. **Parallel:** Implement "Who's Learning Today?" picker (Ibn Sina frontend + your backend middleware)
 
+---
+
+## 2026-05-18 — Eligible Courses Fix + Simple Enroll Endpoint
+
+**Status:** ✅ COMPLETE  
+
+### Work Completed
+
+1. **getEligibleCourses response shape fixed** — renamed `eligibleCourses` → `courses` in the return object to match frontend extraction (`raw.courses`). Added `courseName` (alias of `courseTitle`), `contentCount`, and `suggestedDifficulty` (≤8→EASY, ≤15→MEDIUM, else HARD).
+
+2. **New `countContentForGame()` helper** — counts questions/flashcards/arabicTerms for a game type on a given course (same content-type logic as `checkContentAvailability`).
+
+3. **POST /api/v1/courses/:courseId/enroll** — simplified enrollment endpoint that reads `x-active-member-id` header (same pattern as games). Idempotent: returns existing enrollment if already enrolled (200, not 409).
+
+4. **`CourseService.enrollMemberIdempotent()`** — new method paralleling `enrollMember` but without throwing on duplicate. Old endpoint preserved for backward compat.
+
+### Enrollment Edge Case (self-member)
+
+Verified: the `selfMemberId` from the learner picker IS a valid `FamilyMember.id` row. The enrollment query (`where: { memberId }`) works correctly because even parent-as-learner has a proper FamilyMember record. No code change needed.
+
+## Learnings
+
+**Frontend response extraction patterns (2026-05-18):** Frontend code `Array.isArray(raw) ? raw : raw?.courses ?? []` is the standard extraction. Backend must use `courses` as the key (not `eligibleCourses`). Always check the actual frontend extraction code before naming response fields.
+
+**Idempotent enrollment pattern (2026-05-18):** When adding a "quick enroll" that any role can use (not just parents), make it idempotent (200 + existing record) rather than throwing ConflictError. This lets the frontend fire-and-forget without error handling for the already-enrolled case.

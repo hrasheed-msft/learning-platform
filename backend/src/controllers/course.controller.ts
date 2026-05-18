@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { ActiveMemberRequest } from '../middleware/requireActiveMember.middleware';
 import { CourseService } from '../services/course.service';
 
 export class CourseController {
@@ -89,6 +90,27 @@ export class CourseController {
       res.json({
         success: true,
         data: enrollments,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Simple enrollment via x-active-member-id header.
+   * POST /api/v1/courses/:courseId/enroll
+   * Idempotent: returns 200 with existing enrollment if already enrolled.
+   */
+  static async enrollActiveMember(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const memberId = req.activeMemberId!;
+      const { courseId } = req.params;
+
+      const enrollment = await CourseService.enrollMemberIdempotent(req.user!.familyId, memberId, courseId);
+
+      res.status(200).json({
+        success: true,
+        data: enrollment,
       });
     } catch (error) {
       next(error);
