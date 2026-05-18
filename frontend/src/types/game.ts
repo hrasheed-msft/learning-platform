@@ -79,17 +79,49 @@ export interface GameRound {
 
 export interface GameContent {
   id: string;
+  // Common question fields
   arabicText?: string;
   transliteration?: string;
   translation?: string;
   questionText?: string;
   options?: string[];
   correctAnswer?: string;
+  // Flashcard fields
   front?: string;
   frontArabic?: string;
   back?: string;
   backArabic?: string;
   explanation?: string;
+  // TERM_MATCH / MEMORY_MATCH pairs
+  pairs?: Array<{ id: string; term: string; definition: string; transliteration?: string; [key: string]: unknown }>;
+  // Escape Room / Maze fields
+  clue?: string;
+  hint?: string;
+  stage?: number;
+  checkpoint?: number;
+  // SENTENCE_BUILD
+  words?: string[];
+  correctOrder?: string[];
+  // WORD_SEARCH / WORD_SCRAMBLE
+  grid?: string[][];
+  targetWords?: string[];
+  scrambledWord?: string;
+  // CALLIGRAPHY_TRACE
+  letter?: string;
+  strokeData?: unknown;
+  // HADITH_CHAIN
+  narrators?: Array<{ id: string; name: string; [key: string]: unknown }>;
+  // STORY_PUZZLE / SEERAH_TIMELINE
+  segments?: Array<{ id: string; text: string; [key: string]: unknown }>;
+  events?: Array<{ id: string; title: string; year?: string; [key: string]: unknown }>;
+  // MOSQUE_BUILDER / PATTERN_CREATOR
+  pattern?: unknown;
+  reward?: unknown;
+  // Speed quiz / game mode hints
+  gameMode?: string;
+  timeLimit?: number;
+  // Catch-all for any additional backend metadata fields
+  [key: string]: unknown;
 }
 
 export interface GameSession {

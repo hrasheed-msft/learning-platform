@@ -2,6 +2,7 @@ import api from './api';
 import type {
   Game,
   GameSession,
+  GameRound,
   GameDifficulty,
   RoundResult,
   GameCompletionResult,
@@ -23,6 +24,17 @@ import type {
 interface ApiResponse<T> {
   success: boolean;
   data: T;
+}
+
+/**
+ * Backend returns round data in `metadata`; frontend components expect `content`.
+ * This maps metadata → content so all 26 game components work without changes.
+ */
+function transformRounds(rounds: any[]): GameRound[] {
+  return rounds.map((r: any) => ({
+    ...r,
+    content: r.metadata ?? r.content ?? {},
+  }));
 }
 
 export const gameService = {
@@ -98,7 +110,11 @@ export const gameService = {
       memberId,
       difficulty,
     });
-    return response.data.data;
+    const data = response.data.data;
+    if (data.session?.rounds) {
+      data.session.rounds = transformRounds(data.session.rounds);
+    }
+    return data;
   },
 
   async submitRound(sessionId: string, roundIndex: number, answer: unknown, timeSpentMs: number): Promise<RoundResult> {
@@ -123,7 +139,11 @@ export const gameService = {
 
   async getSession(sessionId: string): Promise<GameSession> {
     const response = await api.get<ApiResponse<GameSession>>(`/games/sessions/${sessionId}`);
-    return response.data.data;
+    const session = response.data.data;
+    if (session?.rounds) {
+      session.rounds = transformRounds(session.rounds);
+    }
+    return session;
   },
 
   // --- Daily Challenge ---
