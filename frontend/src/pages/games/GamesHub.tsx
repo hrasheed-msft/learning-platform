@@ -247,7 +247,7 @@ export default function GamesHub() {
           {leaderboardEntries.length > 0 ? (
             <div className="space-y-3">
               {leaderboardEntries.slice(0, 5).map((entry) => (
-                <div key={entry.rank} className="flex items-center gap-3">
+                <div key={entry.member.id} className="flex items-center gap-3">
                   <span className={clsx(
                     'w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold',
                     entry.rank === 1 ? 'bg-yellow-100 text-yellow-700'

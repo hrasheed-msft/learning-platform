@@ -97,7 +97,6 @@ export const gameService = {
       gameId,
       memberId,
       difficulty,
-      gameType: gameId, // fallback if gameId is actually a type slug
     });
     return response.data.data;
   },
