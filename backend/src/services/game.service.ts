@@ -195,6 +195,13 @@ async function selectContent(
         take: roundCount * 2,
       });
     }
+    // Fallback: if course-scoped query returns insufficient results, query globally
+    if (questions.length < req.minQuestions && unitIds.length > 0) {
+      questions = await prisma.question.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: roundCount * 2,
+      });
+    }
     for (const q of questions) {
       items.push({
         contentType: 'QUESTION',
@@ -241,13 +248,20 @@ async function selectContent(
     // Fill remaining with unseen / random flashcards
     if (items.filter((i) => i.contentType === 'FLASHCARD').length < roundCount) {
       const existingIds = items.filter((i) => i.contentType === 'FLASHCARD').map((i) => i.contentId);
-      const extra = await prisma.flashCard.findMany({
+      let extra = await prisma.flashCard.findMany({
         where: {
           ...(unitIds.length > 0 ? { unitId: { in: unitIds } } : {}),
           id: { notIn: existingIds },
         },
         take: roundCount - existingIds.length,
       });
+      // Fallback: if course-scoped query returns insufficient flashcards, query globally
+      if (extra.length + existingIds.length < req.minFlashcards && unitIds.length > 0) {
+        extra = await prisma.flashCard.findMany({
+          where: { id: { notIn: existingIds } },
+          take: roundCount - existingIds.length,
+        });
+      }
       for (const fc of extra) {
         items.push({
           contentType: 'FLASHCARD',
@@ -265,10 +279,16 @@ async function selectContent(
 
   // ---------- Arabic Terms ----------
   if (req.minArabicTerms > 0) {
-    const terms = await prisma.arabicTerm.findMany({
+    let terms = await prisma.arabicTerm.findMany({
       where: unitFilter,
       take: roundCount * 2,
     });
+    // Fallback: if course-scoped query returns insufficient results, query globally
+    if (terms.length < req.minArabicTerms && unitIds.length > 0) {
+      terms = await prisma.arabicTerm.findMany({
+        take: roundCount * 2,
+      });
+    }
     for (const t of terms) {
       items.push({
         contentType: 'ARABIC_TERM',
@@ -975,23 +995,35 @@ async function checkContentAvailability(
   const unitFilter = unitIds.length > 0 ? { unitId: { in: unitIds } } : {};
 
   if (req.minArabicTerms > 0) {
-    const count = await prisma.arabicTerm.count({ where: unitFilter });
+    let count = await prisma.arabicTerm.count({ where: unitFilter });
+    // Fallback: if course-scoped content is insufficient, check global pool
+    if (count < req.minArabicTerms && unitIds.length > 0) {
+      count = await prisma.arabicTerm.count();
+    }
     if (count < req.minArabicTerms) {
       return { available: false, missing: `Need ${req.minArabicTerms} Arabic terms, found ${count}` };
     }
   }
 
   if (req.minFlashcards > 0) {
-    const count = await prisma.flashCard.count({
+    let count = await prisma.flashCard.count({
       where: unitIds.length > 0 ? { unitId: { in: unitIds } } : {},
     });
+    // Fallback: if course-scoped content is insufficient, check global pool
+    if (count < req.minFlashcards && unitIds.length > 0) {
+      count = await prisma.flashCard.count();
+    }
     if (count < req.minFlashcards) {
       return { available: false, missing: `Need ${req.minFlashcards} flashcards, found ${count}` };
     }
   }
 
   if (req.minQuestions > 0) {
-    const count = await prisma.question.count({ where: unitFilter });
+    let count = await prisma.question.count({ where: unitFilter });
+    // Fallback: if course-scoped content is insufficient, check global pool
+    if (count < req.minQuestions && unitIds.length > 0) {
+      count = await prisma.question.count();
+    }
     if (count < req.minQuestions) {
       return { available: false, missing: `Need ${req.minQuestions} questions, found ${count}` };
     }
