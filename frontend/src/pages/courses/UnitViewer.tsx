@@ -340,6 +340,25 @@ export default function UnitViewer() {
                 margin: 1rem 0;
                 font-style: italic;
               }
+              .unit-content .diagrams-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.25rem;
+                margin: 1rem 0 1.5rem;
+              }
+              .unit-content .diagram {
+                background-color: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                text-align: center;
+              }
+              .unit-content .diagram img {
+                width: 100%;
+                height: auto;
+                display: block;
+                object-fit: contain;
+              }
             `}</style>
             <div 
               className="unit-content prose-lg max-w-none text-gray-700 leading-relaxed"

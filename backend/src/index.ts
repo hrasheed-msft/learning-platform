@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 
 import config from './config';
 import prisma from './config/database';
@@ -79,6 +80,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 if (config.env !== 'test') {
   app.use(morgan(config.env === 'development' ? 'dev' : 'combined'));
 }
+
+// Static assets — coursebook diagram images
+app.use('/coursebook-images', express.static(path.join(__dirname, '../public/coursebook-images')));
 
 // API routes (v1)
 // Note: flashCardRoutes must be before courseRoutes because it has more specific
