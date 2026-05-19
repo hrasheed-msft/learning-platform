@@ -56,7 +56,9 @@ export default function FiqhScenarioGame() {
     const fakeNodes: Record<string, ScenarioNode> = {
       start: {
         id: 'start',
-        prompt: (c?.questionText as string) || 'What is the correct ruling?',
+        // c.questionText is the canonical field (backend fix); c.prompt is the
+        // legacy field name from older session records — keep as fallback.
+        prompt: (c?.questionText as string) || (c?.prompt as string) || 'What is the correct ruling?',
         choices: options.map((label, i) => ({
           id: `c-${i}`,
           label,

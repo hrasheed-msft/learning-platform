@@ -677,7 +677,14 @@ function formatRounds(
           metadata: {
             gameMode: 'FIQH_SCENARIO',
             nodeId: nodeIds[i],
-            prompt: c.questionText || c.front || '',
+            // "questionText" matches what the frontend MCQ-fallback path reads
+            // via currentContent.content.questionText (transformRounds maps
+            // metadata → content in gameService.ts).
+            questionText: c.questionText || c.front || '',
+            // Plain string array consumed by getOptions(c.options) in the
+            // MCQ-fallback branch of FiqhScenarioGame.
+            options,
+            // Richer choice objects kept for future branching-tree support.
             choices,
             isTerminal,
             correctAnswer: correct,
