@@ -11,6 +11,7 @@ import { seedMaktabCoursebook7 } from './seed-maktab-coursebook7';
 import { seedMaktabCoursebook8 } from './seed-maktab-coursebook8';
 import { seedMaktabFurtherStudiesNW } from './seed-maktab-further-studies-nw';
 import { seedQuduriTaharah } from './seed-quduri-taharah';
+import { seedQuduriSalah } from './seed-quduri-salah';
 import { seedTazkiyahCourse } from './seed-tazkiyah-course';
 import { seedHabitsCourse } from './seed-habits-course';
 import { seedRawaiHadaratinaCourse } from './seed-rawai-hadaratina-course';
@@ -2744,6 +2745,7 @@ async function main() {
 
   // Advanced Fiqh Courses
   await seedQuduriTaharah();
+  await seedQuduriSalah();
 
   // Additional Courses
   await seedTazkiyahCourse();
