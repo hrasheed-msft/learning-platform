@@ -535,7 +535,7 @@ export async function seedQuduriSalah() {
         unitId: unit1.id,
         type: 'MULTIPLE_CHOICE',
         questionText: 'For which prayers is the Adhan a sunnah according to al-Quduri?',
-        options: JSON.stringify(['The five daily prayers only', 'The five daily prayers and Jumu\'ah', 'All obligatory prayers including 'Id', 'All congregational prayers']),
+        options: JSON.stringify(['The five daily prayers only', 'The five daily prayers and Jumu\'ah', 'All obligatory prayers including \'Id', 'All congregational prayers']),
         correctAnswer: 'The five daily prayers and Jumu\'ah',
         explanation: 'Al-Quduri states: "The Adhan is a sunnah for the five daily prayers and Jumu\'ah, and not for anything else."',
         difficulty: 'MEDIUM',
@@ -543,10 +543,10 @@ export async function seedQuduriSalah() {
       {
         unitId: unit1.id,
         type: 'TRUE_FALSE',
-        questionText: 'The Adhan contains tarji' (repetition of the shahada quietly before saying it aloud) in the Hanafi school.',
+        questionText: 'The Adhan contains tarji\' (repetition of the shahada quietly before saying it aloud) in the Hanafi school.',
         options: JSON.stringify(['True', 'False']),
         correctAnswer: 'False',
-        explanation: 'Al-Quduri explicitly states "la tarji' fihi" — there is no tarji' in the Hanafi adhan. Tarji' is a feature of the Maliki and Shafi\'i adhan forms.',
+        explanation: 'Al-Quduri explicitly states "la tarji\' fihi" — there is no tarji\' in the Hanafi adhan. Tarji\' is a feature of the Maliki and Shafi\'i adhan forms.',
         difficulty: 'HARD',
       },
       {
@@ -577,9 +577,9 @@ export async function seedQuduriSalah() {
         unitId: unit2.id,
         type: 'MULTIPLE_CHOICE',
         questionText: 'According to al-Quduri, what is the \'awrah of a free woman in prayer?',
-        options: JSON.stringify(['The entire body', 'The entire body except face and hands', 'The entire body except face, hands, and feet', 'Only what a man would consider 'awrah']),
+        options: JSON.stringify(['The entire body', 'The entire body except face and hands', 'The entire body except face, hands, and feet', 'Only what a man would consider \'awrah']),
         correctAnswer: 'The entire body except face, hands, and feet',
-        explanation: 'Al-Quduri states: "The entire body of a free woman is 'awrah except her face, her two hands, and her two feet." This is the Hanafi position on the 'awrah of a free woman specifically in prayer.',
+        explanation: 'Al-Quduri states: "The entire body of a free woman is \'awrah except her face, her two hands, and her two feet." This is the Hanafi position on the \'awrah of a free woman specifically in prayer.',
         difficulty: 'MEDIUM',
       },
       {
@@ -588,7 +588,7 @@ export async function seedQuduriSalah() {
         questionText: 'What is the \'awrah of a man in prayer according to al-Quduri?',
         options: JSON.stringify(['From the chest to the knee', 'From the navel to the knee (knee included)', 'From the navel to below the knee (knee excluded)', 'The chest and back only']),
         correctAnswer: 'From the navel to the knee (knee included)',
-        explanation: 'Al-Quduri states: "The 'awrah of a man is what is below the navel to the knee, and the knee is part of the 'awrah."',
+        explanation: 'Al-Quduri states: "The \'awrah of a man is what is below the navel to the knee, and the knee is part of the \'awrah."',
         difficulty: 'MEDIUM',
       },
       {
@@ -597,7 +597,7 @@ export async function seedQuduriSalah() {
         questionText: 'If a person cannot find the direction of the qiblah and prays by their own judgment (ijtihad), they must repeat the prayer if they later discover they were wrong.',
         options: JSON.stringify(['True', 'False']),
         correctAnswer: 'False',
-        explanation: 'Al-Quduri states that if someone prays by ijtihad and later discovers they were wrong (after finishing the prayer), there is no obligation to repeat it (la i\'adah 'alayh).',
+        explanation: 'Al-Quduri states that if someone prays by ijtihad and later discovers they were wrong (after finishing the prayer), there is no obligation to repeat it (la i\'adah \'alayh).',
         difficulty: 'HARD',
       },
       {
@@ -606,7 +606,7 @@ export async function seedQuduriSalah() {
         questionText: 'If a person discovers mid-prayer that they are facing the wrong direction after doing ijtihad, they should _____ to the qiblah and continue.',
         options: undefined,
         correctAnswer: 'turn',
-        explanation: 'Al-Quduri states: "If he learns [he was wrong] while in prayer, he turns (istadara) toward the qiblah and continues (bana 'alayha)." The prayer is not restarted.',
+        explanation: 'Al-Quduri states: "If he learns [he was wrong] while in prayer, he turns (istadara) toward the qiblah and continues (bana \'alayha)." The prayer is not restarted.',
         difficulty: 'MEDIUM',
       },
       {
@@ -636,7 +636,7 @@ export async function seedQuduriSalah() {
       {
         unitId: unit3.id,
         type: 'MULTIPLE_CHOICE',
-        questionText: 'According to Abu Hanifah, if someone opens the prayer saying "Allah is greater" (Allahu Akbar) or "Allah is most great" (Allahu A'zam) instead of the standard takbir, is it valid?',
+        questionText: 'According to Abu Hanifah, if someone opens the prayer saying "Allah is greater" (Allahu Akbar) or "Allah is most great" (Allahu A\'zam) instead of the standard takbir, is it valid?',
         options: JSON.stringify(['No — only "Allahu Akbar" is valid', 'Yes — any wording of glorification is valid', 'Yes — according to Abu Hanifah and Muhammad', 'No — according to all three imams']),
         correctAnswer: 'Yes — according to Abu Hanifah and Muhammad',
         explanation: 'Al-Quduri records: Abu Hanifah and Muhammad hold that using alternative wordings of glorification (e.g., "Allahu Ajall" or "Allahu A\'zam") is valid for the opening takbir. Abu Yusuf said only "Allahu Akbar" is valid.',
@@ -1270,7 +1270,7 @@ export async function seedQuduriSalah() {
       { unitId: unit7.id, arabicText: 'جُمُعَة', transliteration: 'Jumu\'ah', translation: 'Friday prayer — requires city, authority, khutbah, and congregation' },
       { unitId: unit7.id, arabicText: 'خُطْبَة', transliteration: 'Khuṭbah', translation: 'Sermon — before prayer in Jumu\'ah, after in Eid' },
       { unitId: unit7.id, arabicText: 'مِصْر', transliteration: 'Miṣr', translation: 'City — required location for valid Jumu\'ah prayer' },
-      { unitId: unit7.id, arabicText: 'عِيد', transliteration: '\'Īd', translation: 'Celebration — 'Id al-Fitr and 'Id al-Adha, 2 rak\'ahs with extra takbirs' },
+      { unitId: unit7.id, arabicText: 'عِيد', transliteration: '\'Īd', translation: 'Celebration — \'Id al-Fitr and \'Id al-Adha, 2 rak\'ahs with extra takbirs' },
       { unitId: unit7.id, arabicText: 'تَكْبِيرَات العِيد', transliteration: 'Takbīrāt al-\'Īd', translation: 'Extra takbirs in Eid prayer — 3 in first rak\'ah, 3 in second' },
     ],
   });
