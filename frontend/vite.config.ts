@@ -25,6 +25,11 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      // Proxy coursebook images to backend static file server
+      '/coursebook-images': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
     },
   },
 });

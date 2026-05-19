@@ -5,9 +5,9 @@ import * as path from 'path';
 const prisma = new PrismaClient();
 
 const COURSEBOOK_HTML_DIR = path.join(__dirname, '../../maktab-coursebook-html');
+// Images are served by the backend at /coursebook-images; Vite proxies this path to localhost:3000
 const IMAGES_BASE_URL = '/coursebook-images';
 
-// Map HTML filename (without .html) to the course title stored in the DB
 const COURSE_TITLE_MAP: Record<string, string> = {
   Coursebook1: 'Maktab Coursebook 1',
   Coursebook2: 'Maktab Coursebook 2',
@@ -20,7 +20,6 @@ const COURSE_TITLE_MAP: Record<string, string> = {
   Coursebook8: 'An Nasihah Coursebook 8',
 };
 
-// Map HTML <section> id to a keyword present in the corresponding DB unit title
 const SUBJECT_UNIT_MAP: Record<string, string> = {
   'fiqh': 'Fiqh',
   'a--d-th': 'Aḥādīth',
@@ -30,6 +29,82 @@ const SUBJECT_UNIT_MAP: Record<string, string> = {
   'akhl-q': 'Akhlāq',
   '-d-b': 'Ādāb',
 };
+
+const STOP_WORDS = new Set([
+  'the', 'and', 'for', 'with', 'from', 'this', 'that', 'are', 'was',
+  'has', 'have', 'its', 'into', 'here', 'about', 'before', 'after',
+  'how', 'why', 'what', 'when', 'who', 'not',
+]);
+
+/** Strip the old "Visual Diagrams" block appended by the previous patch run. */
+function stripOldDiagramsBlock(content: string): string {
+  return content.replace(/<h2>Visual Diagrams<\/h2>[\s\S]*$/, '').trimEnd();
+}
+
+/** Extract meaningful keywords from an HTML heading string. */
+function headingKeywords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[\s:,;()''""\-–—]+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+}
+
+/**
+ * Find the best-matching <h3> heading in dbContent for a given HTML article heading.
+ * Returns the raw heading text (as it appears between <h3>…</h3>) or null if no match.
+ * Already-used headings are skipped to prevent inserting multiple diagrams at the same spot.
+ */
+function findMatchingH3(
+  htmlH3Text: string,
+  dbContent: string,
+  usedHeadings: Set<string>,
+): string | null {
+  const h3Regex = /<h3>([^<]+)<\/h3>/g;
+  const candidates: string[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = h3Regex.exec(dbContent)) !== null) {
+    if (!usedHeadings.has(m[1])) candidates.push(m[1]);
+  }
+
+  const keywords = headingKeywords(htmlH3Text);
+  if (keywords.length === 0) return null;
+
+  let bestMatch: string | null = null;
+  let bestScore = 0;
+
+  for (const candidate of candidates) {
+    const lower = candidate.toLowerCase();
+    let score = 0;
+    for (const kw of keywords) {
+      if (lower.includes(kw)) score++;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = candidate;
+    }
+  }
+
+  return bestScore > 0 ? bestMatch : null;
+}
+
+/** Insert diagramHtml immediately after the first occurrence of <h3>{h3Text}</h3>. */
+function insertAfterH3(content: string, h3Text: string, diagramHtml: string): string {
+  const tag = `<h3>${h3Text}</h3>`;
+  const idx = content.indexOf(tag);
+  if (idx === -1) return content;
+  const insertAt = idx + tag.length;
+  return content.slice(0, insertAt) + '\n' + diagramHtml + content.slice(insertAt);
+}
+
+/**
+ * Insert diagramHtml at the top of the content body — right before the first <h3>,
+ * used as a fallback when no heading keyword match is found.
+ */
+function insertBeforeFirstH3(content: string, diagramHtml: string): string {
+  const idx = content.indexOf('<h3>');
+  if (idx === -1) return content + '\n' + diagramHtml;
+  return content.slice(0, idx) + diagramHtml + '\n' + content.slice(idx);
+}
 
 async function patchCourseBookImages() {
   let totalPatched = 0;
@@ -52,7 +127,7 @@ async function patchCourseBookImages() {
       continue;
     }
 
-    // Match each <section class="subject" id="..."> block
+    // Match each <section class="subject" id="…"> block
     const sectionRegex =
       /<section[^>]+class="subject"[^>]+id="([^"]+)"[^>]*>([\s\S]*?)(?=<section[^>]+class="subject"|$)/g;
     let sectionMatch: RegExpExecArray | null;
@@ -63,17 +138,35 @@ async function patchCourseBookImages() {
       const unitKeyword = SUBJECT_UNIT_MAP[subjectId];
       if (!unitKeyword) continue;
 
-      // Extract all diagram img tags in this section
-      const imgRegex =
-        /<div[^>]+class="diagram"[^>]*>\s*<img[^>]+src="images\/([^"]+)"[^>]*alt="([^"]*)"[^>]*>/g;
-      const images: Array<{ filename: string; alt: string }> = [];
-      let imgMatch: RegExpExecArray | null;
+      // Collect diagram articles: each <article> that contains a <div class="diagram">
+      const articleRegex =
+        /<article[^>]+id="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g;
+      type DiagramArticle = { articleId: string; h3Text: string; filename: string; alt: string };
+      const articles: DiagramArticle[] = [];
+      let artMatch: RegExpExecArray | null;
 
-      while ((imgMatch = imgRegex.exec(sectionHtml)) !== null) {
-        images.push({ filename: imgMatch[1], alt: imgMatch[2] });
+      while ((artMatch = articleRegex.exec(sectionHtml)) !== null) {
+        const articleId = artMatch[1];
+        const articleBody = artMatch[2];
+        if (!articleBody.includes('class="diagram"')) continue;
+
+        // An article can have multiple diagrams; collect each one
+        const imgRegex =
+          /<div[^>]+class="diagram"[^>]*>\s*<img[^>]+src="images\/([^"]+)"[^>]*alt="([^"]*)"[^>]*/g;
+        let imgMatch: RegExpExecArray | null;
+        while ((imgMatch = imgRegex.exec(articleBody)) !== null) {
+          const h3Match = articleBody.match(/<h3>([^<]+)<\/h3>/);
+          const h3Text = h3Match ? h3Match[1] : articleId;
+          articles.push({
+            articleId,
+            h3Text,
+            filename: imgMatch[1],
+            alt: imgMatch[2],
+          });
+        }
       }
 
-      if (images.length === 0) continue;
+      if (articles.length === 0) continue;
 
       const unit = await prisma.unit.findFirst({
         where: {
@@ -87,30 +180,32 @@ async function patchCourseBookImages() {
         continue;
       }
 
-      if (unit.content?.includes('coursebook-images')) {
-        console.log(`⏭️  Already patched: ${courseTitle} — ${unit.title}`);
-        totalSkipped++;
-        continue;
-      }
+      // Strip any previously appended "Visual Diagrams" block, then patch inline
+      let content = stripOldDiagramsBlock(unit.content ?? '');
+      const usedHeadings = new Set<string>();
+      let insertedCount = 0;
 
-      const diagramsHtml =
-        `\n\n<h2>Visual Diagrams</h2>\n<div class="diagrams-grid">\n` +
-        images
-          .map(
-            (img) =>
-              `  <div class="diagram">\n    <img src="${IMAGES_BASE_URL}/${img.filename}" alt="${img.alt}" loading="lazy">\n  </div>`,
-          )
-          .join('\n') +
-        `\n</div>`;
+      for (const article of articles) {
+        const diagramHtml = `<div class="diagram"><img src="${IMAGES_BASE_URL}/${article.filename}" alt="${article.alt}" loading="lazy"></div>`;
+
+        const matchedH3 = findMatchingH3(article.h3Text, content, usedHeadings);
+        if (matchedH3) {
+          content = insertAfterH3(content, matchedH3, diagramHtml);
+          usedHeadings.add(matchedH3);
+        } else {
+          // Fallback: place before the first <h3> (section intro area)
+          console.log(`  ℹ️  No heading match for "${article.h3Text}" — inserting at top`);
+          content = insertBeforeFirstH3(content, diagramHtml);
+        }
+        insertedCount++;
+      }
 
       await prisma.unit.update({
         where: { id: unit.id },
-        data: { content: (unit.content ?? '') + diagramsHtml },
+        data: { content },
       });
 
-      console.log(
-        `✅ Patched ${images.length} image(s): ${courseTitle} — ${unit.title}`,
-      );
+      console.log(`✅ Patched ${insertedCount} image(s) inline: ${courseTitle} — ${unit.title}`);
       totalPatched++;
     }
   }
