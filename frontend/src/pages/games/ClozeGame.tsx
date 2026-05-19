@@ -29,26 +29,29 @@ export default function ClozeGame() {
     setTyped(''); setFeedback(null); setShowHint(false); setAttempts(0);
   }, [currentRound]);
 
+  // Derive values needed by useMemo before any early returns (Rules of Hooks)
+  const c = currentContent?.content;
+  const correct: string = String(c?.correctAnswer ?? '');
+
+  // Word bank for EASY (use options or shuffle correct + distractors)
+  const bank = useMemo(() => {
+    const opts = getOptions(c?.options);
+    if (opts.length > 0) return shuffle(opts);
+    return [correct];
+  }, [c?.options, correct]);
+
+  // --- All hooks declared above — early returns are safe from here ---
   if (lastResult) return <GameOverScreen result={lastResult} onPlayAgain={playAgain} />;
-  if (!started || !activeSession || !currentContent) {
+  if (!started || !activeSession || !currentContent || !c) {
     return <div className="flex items-center justify-center min-h-[40vh]"><Spinner size="lg" /></div>;
   }
 
-  const c = currentContent.content;
   const sentence: string = (c.questionText || c.front || '') as string;
-  const correct: string = String(c.correctAnswer ?? '');
   const arabic = c.arabicText as string | undefined;
   const isArabicAnswer = /[\u0600-\u06FF]/.test(correct);
 
   // Replace blank marker for display
   const displayedSentence = sentence.replace(/_+|\{blank\}/gi, '_____');
-
-  // Word bank for EASY (use options or shuffle correct + distractors)
-  const bank = useMemo(() => {
-    const opts = getOptions(c.options);
-    if (opts.length > 0) return shuffle(opts);
-    return [correct];
-  }, [c.options, correct]);
 
   const normalize = (s: string) =>
     difficulty === 'HARD' ? s.trim() : s.trim().toLowerCase().replace(/[\u064B-\u0652]/g, ''); // strip diacritics
