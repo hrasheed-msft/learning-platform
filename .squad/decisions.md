@@ -35,6 +35,21 @@ Implemented seed file for Mukhtasar al-Quduri's Kitab al-Taharah targeting TEEN/
 
 ---
 
+### 8. Quduri Salah Seed — Bilingual Content Format (2026-07-14)
+**Author:** Khwarizmi
+
+Implemented seed file for Mukhtasar al-Quduri's Kitab al-Salah targeting TEEN/ADULT audiences, following the exact pattern of Decision #2 (Taharah seed).
+
+**Key Decisions:**
+- **Same Format as Taharah:** Reuses bilingual `<div class="bilingual-text">` layout, `[AI-Generated Translation]` disclaimers, per-unit orderIndex reset for flashcards
+- **8 Units:** Awqat al-Salah, Adhan, Shurut al-Salah, Fara'id al-Salah, Sifat al-Salah, Al-Jama'ah, Salat al-Musafir, Salat al-Jumu'ah wa al-'Idayn
+- **Hanafi-Distinctive Rulings:** Highlighted in questions — double shadow for Dhuhr end, white shafaq for Maghrib, qahqahah breaking wudu', min Jumu'ah 3 besides imam, qunut in Witr year-round, muhazat al-mar'ah invalidating man's prayer
+- **Totals:** 42 questions, 35 flashcards, 55 Arabic terms
+
+**Status:** Implemented in `backend/prisma/seed-quduri-salah.ts` (1318 lines); wired into `seed.ts`
+
+---
+
 ### 3. Rate Limiter & Error Handling Fix (2026-05-16)
 **Author:** Khwarizmi
 

@@ -17,6 +17,12 @@
 - 11 seed files wired (Maktab 1-8, Quduri, Further Studies)
 - Totals: 50+ courses, 62+ units, 450+ questions, 530+ flashcards, 318+ Arabic terms
 
+**Quduri Salah Seed (2026-07-14):** ✅ COMPLETE
+- `seed-quduri-salah.ts` — 8 units, 42 questions, 35 flashcards, 55 Arabic terms
+- Bilingual HTML format (same as Taharah); TEEN/ADULT target; Hanafi-distinctive rulings highlighted
+- Wired into `seed.ts` after `seedQuduriTaharah()`
+- Commit: `feat: add Mukhtasar al-Quduri Salah chapter course`
+
 ## Key Learnings
 
 **Backend-Frontend Contract (2026-05-17):**
