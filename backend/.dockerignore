@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+*.log
+.git
+.gitignore
+README.md
+test-api-endpoints.ts
+test-api.ps1
+vitest.config.ts
+.eslintrc.js
+coverage

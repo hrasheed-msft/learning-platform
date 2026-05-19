@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: islamic-learning-platform
+metadata:
+  template: islamic-learning-platform
+
+services:
+  api:
+    project: ./backend
+    language: ts
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+
+  web:
+    project: ./frontend
+    language: ts
+    host: staticwebapp
+    dist: dist
+    build:
+      steps:
+        - run: npm install
+          shell: sh
+        - run: npm run build
+          shell: sh
+
+infra:
+  provider: bicep
+  path: ./infra
+  module: main
