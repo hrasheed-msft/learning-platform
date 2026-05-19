@@ -27,7 +27,7 @@ import ParentDashboard from '@/pages/dashboard/ParentDashboard';
 import ChildDetailView from '@/pages/dashboard/ChildDetailView';
 
 // Course Pages
-import CourseCatalog from '@/pages/courses/CourseCatalog';
+import CoursesPage from '@/pages/courses/CoursesPage';
 import CourseDetail from '@/pages/courses/CourseDetail';
 import CourseLearner from '@/pages/courses/CourseLearner';
 import UnitViewer from '@/pages/courses/UnitViewer';
@@ -202,7 +202,7 @@ function App() {
         <Route path="dashboard/parent/child/:memberId" element={<ChildDetailView />} />
 
         {/* Courses */}
-        <Route path="courses" element={<CourseCatalog />} />
+        <Route path="courses" element={<CoursesPage />} />
         <Route path="courses/:courseId" element={<CourseDetail />} />
         <Route path="courses/:courseId/learn" element={<CourseLearner />} />
         <Route path="courses/:courseId/units/:unitId" element={<UnitViewer />} />
