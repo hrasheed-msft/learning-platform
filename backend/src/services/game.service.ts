@@ -493,47 +493,58 @@ function formatRounds(
     }
 
     // ── G4. CLOZE ───────────────────────────────────────────────────────
-    // Remove 1–3 words from the sentence based on difficulty; EASY shows
-    // a word bank, HARD requires exact match.
+    // Remove one word per round; produce multiple rounds per item on harder
+    // difficulties. Frontend expects: questionText (with blank marker),
+    // correctAnswer, options (word bank), arabicText.
     case 'CLOZE': {
-      const blanksCount = difficulty === 'EASY' ? 1 : difficulty === 'MEDIUM' ? 2 : 3;
+      const blanksPerItem = difficulty === 'EASY' ? 1 : difficulty === 'MEDIUM' ? 2 : 3;
       const showWordBank = difficulty === 'EASY';
-      return items.map((item) => {
+      const rounds: Array<{ contentType: string; contentId: string; metadata: any }> = [];
+
+      for (const item of items) {
         const c = item.content;
         const sentence: string =
           c.back || c.front || c.questionText || c.translation || '';
-        const words = sentence.split(/\s+/).filter(Boolean);
-        const candidateIdx = words
+        const wordList = sentence.split(/\s+/).filter(Boolean);
+        const candidateIdx = wordList
           .map((_, i) => i)
-          .filter((i) => words[i].length > 2);
-        const chosen = shuffle(candidateIdx).slice(0, Math.min(blanksCount, candidateIdx.length))
+          .filter((i) => wordList[i].length > 2);
+        const chosen = shuffle(candidateIdx).slice(0, Math.min(blanksPerItem, candidateIdx.length))
           .sort((a, b) => a - b);
-        const blanks = chosen.map((position) => ({ position, answer: words[position] }));
 
+        // Build distractors from sibling items
         const distractors = items
           .filter((i) => i.contentId !== item.contentId)
           .flatMap((i) => {
             const t = (i.content.back || i.content.front || '') as string;
             return t.split(/\s+/).filter((w) => w.length > 2);
           });
-        const wordBank = showWordBank
-          ? shuffle([...blanks.map((b) => b.answer), ...shuffle(distractors).slice(0, 3)])
-          : undefined;
 
-        return {
-          contentType: item.contentType,
-          contentId: item.contentId,
-          metadata: {
-            gameMode: 'CLOZE',
-            sentence,
-            blanks,
-            wordBank,
-            arabicText: c.frontArabic || c.backArabic || c.arabicText || '',
-            hint: c.front || '',
-            explanation: c.back || '',
-          },
-        };
-      });
+        // One round per blank (frontend handles single blank per round)
+        for (const position of chosen) {
+          const correctAnswer = wordList[position];
+          const withBlank = wordList.map((w, i) => (i === position ? '{blank}' : w)).join(' ');
+          const options = showWordBank
+            ? shuffle([correctAnswer, ...shuffle(distractors).slice(0, 3)])
+            : undefined;
+
+          rounds.push({
+            contentType: item.contentType,
+            contentId: item.contentId,
+            metadata: {
+              gameMode: 'CLOZE',
+              questionText: withBlank,
+              correctAnswer,
+              options,
+              arabicText: c.frontArabic || c.backArabic || c.arabicText || '',
+              front: c.front || '',
+              hint: c.front || '',
+              explanation: c.back || '',
+            },
+          });
+        }
+      }
+      return rounds;
     }
 
     // ── G5. WORD_SEARCH ─────────────────────────────────────────────────
@@ -548,13 +559,15 @@ function formatRounds(
 
       const { grid, placements } = buildWordSearchGrid(words, gridSize, allowReverseDiagonal);
       const ids = items.map((i) => i.contentId).join(',');
+      const targetWords = placements.map((p) => p.word);
       return [{
         contentType: 'ARABIC_TERM',
         contentId: ids,
         metadata: {
           gameMode: 'WORD_SEARCH',
           grid,
-          words: placements.map((p) => p.word),
+          targetWords,
+          words: targetWords, // backward compat
           placements,
           gridSize,
           hints: items.map((it) => ({
@@ -1667,29 +1680,31 @@ async function gradeAnswer(
     }
 
     case 'CLOZE': {
-      const blanks: Array<{ position: number; answer: string }> = meta.blanks || [];
-      const playerAnswers: string[] = Array.isArray(raw)
-        ? raw.map(String)
-        : Array.isArray((answer as any)?.answers)
-          ? ((answer as any).answers as unknown[]).map(String)
-          : [];
-      if (playerAnswers.length < blanks.length) return false;
-      return blanks.every((b, i) =>
-        (playerAnswers[i] || '').trim().toLowerCase() === b.answer.trim().toLowerCase(),
-      );
+      // New format: each round has a single `correctAnswer` string.
+      // Frontend submits { answer: string, correct?: boolean }.
+      const correctAnswer: string = meta.correctAnswer || '';
+      const playerAnswer: string = typeof raw === 'string'
+        ? raw
+        : typeof (answer as any)?.answer === 'string'
+          ? (answer as any).answer
+          : '';
+      if (!correctAnswer) return false;
+      return playerAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
     }
 
     case 'WORD_SEARCH': {
-      const expected: string[] = Array.isArray(meta.words) ? meta.words : [];
+      const expected: string[] = Array.isArray(meta.targetWords)
+        ? meta.targetWords
+        : Array.isArray(meta.words) ? meta.words : [];
       const found: string[] = Array.isArray(raw)
         ? raw.map((w) => String(w).toUpperCase())
         : Array.isArray((answer as any)?.found)
           ? ((answer as any).found as unknown[]).map((w) => String(w).toUpperCase())
-          : [];
+          : Array.isArray((answer as any)?.foundWords)
+            ? ((answer as any).foundWords as unknown[]).map((w) => String(w).toUpperCase())
+            : [];
       if (expected.length === 0) return false;
-      // Correct if at least 60% of placed words are found (EASY threshold);
-      // tighter thresholds would live in difficulty metadata if needed.
-      const hits = expected.filter((w) => found.includes(w)).length;
+      const hits = expected.filter((w) => found.includes(w.toUpperCase())).length;
       return hits / expected.length >= 0.6;
     }
 
