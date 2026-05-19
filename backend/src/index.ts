@@ -28,6 +28,9 @@ import { notFoundHandler } from './middleware/notFound.middleware';
 
 const app = express();
 
+// Trust proxy — required for correct client IP detection behind Azure Container Apps ingress
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
@@ -62,7 +65,13 @@ if (config.env === 'production') {
 
   const authLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 20,
+    max: 50,
+    keyGenerator: (req) => {
+      // Use X-Forwarded-For (set by Azure Container Apps ingress) for per-client limiting
+      const forwarded = req.headers['x-forwarded-for'];
+      const clientIp = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(',')[0]?.trim();
+      return clientIp || req.ip || 'unknown';
+    },
     message: { error: 'Too many authentication attempts, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
