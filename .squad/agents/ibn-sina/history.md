@@ -69,6 +69,10 @@
 - **Driver:** `khaldun-game-redesign.md` consolidated 26 redundant game components into 9 distinct mechanics. User directive merged True/False into Quick Recall — final = 9.
 - **9 games (slug → ActiveGameType):** quick-recall, pair-match, flashcard-sprint, cloze, word-search, sequence-it, word-scramble, calligraphy-trace, fiqh-scenario.
 - **New routing pattern:** `/games` (hub) → `/games/:gameSlug/launch` (course + difficulty picker) → `/games/:gameSlug/play?gameId=X&difficulty=Y`. Replaces old `/games/play/:gameType` direct-launch flow.
+
+## Learnings
+
+- **2026-05-18 – Game start 422 fix**: The `POST /games/start` endpoint requires either a valid `gameId` (UUID) or a `gameType` string. When a course has no pre-existing Game row, `gameId` is null and gets serialized as the string `"null"` in URL params. The fix: (1) omit `gameId` from URL when falsy, (2) change `gameService.startGame()` to accept an object with optional `gameId`, `gameType`, and `courseId`, (3) derive `gameType` from the game slug via `SLUG_TO_TYPE` in `useGameRunner` as a fallback identifier. This ensures the backend always receives at least one valid identifier.
 - **Launcher pattern:** Hub no longer launches games. New `GameLauncher.tsx` fetches eligible courses for the chosen mechanic, lets user pick course + difficulty, writes selection to `gameStore.setLauncherSelection`, then navigates to play route. GamePlay re-hydrates from URL params if direct-loaded.
 - **DRY lifecycle:** `frontend/src/hooks/useGameRunner.ts` centralizes auto-start / submit / playAgain / exit-to-hub for all 9 games. Uses `startAttempted` ref to prevent double-start in StrictMode.
 - **Legacy back-compat:** `mapToActiveType()` in `utils/gameHelpers.ts` collapses old GameTypes (MULTIPLE_CHOICE / SPEED_QUIZ / TRIVIA_BATTLE / ESCAPE_ROOM / MAZE_RUNNER / etc) into the 9 new ActiveGameType values, so backend records with legacy types still route correctly.

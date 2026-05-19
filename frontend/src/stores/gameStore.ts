@@ -74,7 +74,7 @@ interface GameState {
   fetchDailyChallenge: (memberId: string) => Promise<void>;
 
   // Actions — Session
-  startGame: (gameId: string, memberId: string, difficulty: GameDifficulty) => Promise<void>;
+  startGame: (params: { gameId?: string; gameType?: string; memberId: string; courseId?: string; difficulty: GameDifficulty }) => Promise<void>;
   submitAnswer: (roundIndex: number, answer: unknown, timeSpentMs: number) => Promise<RoundResult>;
   completeGame: (reason: 'FINISHED' | 'ABANDONED' | 'TIMED_OUT') => Promise<GameCompletionResult>;
   resetSession: () => void;
@@ -168,10 +168,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  startGame: async (gameId, memberId, difficulty) => {
+  startGame: async (params) => {
     set({ isLoading: true, error: null, lastResult: null });
     try {
-      const data = await gameService.startGame(gameId, memberId, difficulty);
+      const data = await gameService.startGame(params);
       const session = data.session;
       set({
         activeSession: session,

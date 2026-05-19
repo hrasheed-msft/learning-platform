@@ -81,11 +81,14 @@ export default function GameLauncher() {
     if (!selectedCourse || !gameSlug) return;
     setLauncherSelection({
       gameSlug,
-      gameId: selectedCourse.gameId,
+      gameId: selectedCourse.gameId || undefined,
       courseId: selectedCourse.courseId,
       difficulty,
     });
-    navigate(`/games/${gameSlug}/play?gameId=${selectedCourse.gameId}&difficulty=${difficulty}`);
+    const params = new URLSearchParams({ difficulty });
+    if (selectedCourse.gameId) params.set('gameId', selectedCourse.gameId);
+    if (selectedCourse.courseId) params.set('courseId', selectedCourse.courseId);
+    navigate(`/games/${gameSlug}/play?${params.toString()}`);
   };
 
   if (!meta) {

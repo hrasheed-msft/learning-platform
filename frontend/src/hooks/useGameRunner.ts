@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGameStore } from '@/stores/gameStore';
 import { useActiveMemberId } from '@/hooks/useActiveMemberId';
+import { SLUG_TO_TYPE } from '@/utils/gameHelpers';
 import type { GameDifficulty, GameRound, RoundResult } from '@/types/game';
 
 interface RunnerOptions {
@@ -20,16 +21,20 @@ interface RunnerOptions {
  */
 export function useGameRunner(opts: RunnerOptions = {}) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const activeMemberId = useActiveMemberId();
   const {
     activeSession, currentRound, lastResult, rounds: submittedRounds,
     score, streak, lives, timeRemainingMs,
-    selectedGameId, selectedDifficulty,
+    selectedGameId, selectedGameSlug, selectedCourseId, selectedDifficulty,
     startGame, submitAnswer, completeGame, resetSession, isLoading, error,
   } = useGameStore();
 
   const gameId = opts.gameId ?? selectedGameId;
   const difficulty = opts.difficulty ?? selectedDifficulty;
+  const courseId = searchParams.get('courseId') || selectedCourseId || undefined;
+  const gameSlug = selectedGameSlug || undefined;
+  const gameType = gameSlug ? SLUG_TO_TYPE[gameSlug] : undefined;
   const autoStart = opts.autoStart ?? true;
 
   const [started, setStarted] = useState(false);
@@ -40,18 +45,24 @@ export function useGameRunner(opts: RunnerOptions = {}) {
   useEffect(() => {
     if (!autoStart) return;
     if (started || startAttempted.current) return;
-    if (!gameId || !activeMemberId) return;
+    if ((!gameId && !gameType) || !activeMemberId) return;
     startAttempted.current = true;
     (async () => {
       try {
-        await startGame(gameId, activeMemberId, difficulty);
+        await startGame({
+          gameId: gameId || undefined,
+          gameType: gameType || undefined,
+          memberId: activeMemberId,
+          courseId,
+          difficulty,
+        });
         setStarted(true);
         setRoundStartTime(Date.now());
       } catch {
         startAttempted.current = false; // allow retry
       }
     })();
-  }, [autoStart, gameId, activeMemberId, difficulty, started, startGame]);
+  }, [autoStart, gameId, gameType, activeMemberId, courseId, difficulty, started, startGame]);
 
   const totalRounds = activeSession?.totalRounds || 0;
   const currentContent: GameRound | undefined = activeSession?.rounds?.[currentRound];

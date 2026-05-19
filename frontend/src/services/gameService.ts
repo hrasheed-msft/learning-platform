@@ -161,11 +161,19 @@ export const gameService = {
 
   // --- Session Lifecycle ---
 
-  async startGame(gameId: string, memberId: string, difficulty: GameDifficulty): Promise<{ session: GameSession }> {
+  async startGame(params: {
+    gameId?: string;
+    gameType?: string;
+    memberId: string;
+    courseId?: string;
+    difficulty: GameDifficulty;
+  }): Promise<{ session: GameSession }> {
     const response = await api.post<ApiResponse<any>>('/games/start', {
-      gameId,
-      memberId,
-      difficulty,
+      ...(params.gameId ? { gameId: params.gameId } : {}),
+      ...(params.gameType ? { gameType: params.gameType } : {}),
+      ...(params.courseId ? { courseId: params.courseId } : {}),
+      memberId: params.memberId,
+      difficulty: params.difficulty,
     });
     const data = response.data.data;
     const session: any = data.session ?? {};
