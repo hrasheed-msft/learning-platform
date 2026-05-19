@@ -129,21 +129,28 @@ resource postgresDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03
 }
 
 // ============================================================================
-// Azure Cache for Redis
+// Azure Managed Redis (replaces retired Azure Cache for Redis)
 // ============================================================================
 
-resource redis 'Microsoft.Cache/redis@2023-08-01' = {
+resource redis 'Microsoft.Cache/redisEnterprise@2024-09-01-preview' = {
   name: 'redis-${environmentName}-${resourceToken}'
   location: location
   tags: tags
+  sku: {
+    name: 'Balanced_B0'
+  }
   properties: {
-    sku: {
-      name: 'Basic'
-      family: 'C'
-      capacity: 0
-    }
-    enableNonSslPort: false
     minimumTlsVersion: '1.2'
+  }
+}
+
+resource redisDb 'Microsoft.Cache/redisEnterprise/databases@2024-09-01-preview' = {
+  parent: redis
+  name: 'default'
+  properties: {
+    clientProtocol: 'Encrypted'
+    port: 10000
+    evictionPolicy: 'VolatileLRU'
   }
 }
 
@@ -169,7 +176,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 
 // Store secrets
 var databaseUrl = 'postgresql://${postgresAdminUser}:${postgresAdminPassword}@${postgres.properties.fullyQualifiedDomainName}:5432/islamic_learning?sslmode=require'
-var redisUrl = 'rediss://:${redis.listKeys().primaryKey}@${redis.properties.hostName}:6380'
+var redisUrl = 'rediss://:${redisDb.listKeys().primaryKey}@${redis.properties.hostName}:10000'
 
 resource secretDbUrl 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
@@ -301,7 +308,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
 
 resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
   name: 'swa-${environmentName}-${resourceToken}'
-  location: location
+  location: 'centralus'
   tags: union(tags, { 'azd-service-name': 'web' })
   sku: {
     name: 'Free'

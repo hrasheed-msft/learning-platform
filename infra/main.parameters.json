@@ -9,7 +9,7 @@
       "value": "${AZURE_LOCATION}"
     },
     "postgresAdminPassword": {
-      "value": "$(secretOrGeneratePassword)"
+      "value": "${POSTGRES_ADMIN_PASSWORD}"
     }
   }
 }
