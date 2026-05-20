@@ -49,3 +49,4 @@
 - Phase 2 games planning and scope management
 - Integration testing: Full backend/frontend flow
 - Consider adding Dockerfile for future Container Apps migration path
+- Multimodal implementation: TTS Phase 1 (4–6 days), Video Phase 2 (1–2 weeks)
