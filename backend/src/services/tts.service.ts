@@ -22,6 +22,20 @@ const MAX_VOICE_ELEMENTS_PER_CHUNK = 25;
 const CHUNK_DELAY_MS = 200;
 const MAX_RETRIES_PER_CHUNK = 2;
 
+/** Word-level timestamp entry for karaoke-style highlighting */
+export interface WordTimestamp {
+  word: string;
+  offset: number;   // milliseconds from audio start
+  duration: number; // milliseconds
+}
+
+/** Result from synthesizing a single chunk (audio + word timestamps) */
+interface ChunkSynthesisResult {
+  audioBuffer: Buffer;
+  wordTimestamps: WordTimestamp[];
+  durationMs: number;
+}
+
 /**
  * Strip HTML tags and decode common entities for TTS input.
  */
@@ -97,9 +111,10 @@ function delay(ms: number): Promise<void> {
 
 /**
  * Synthesize a single SSML chunk to a buffer using Azure Speech SDK.
- * Returns raw audio bytes.
+ * Captures word boundary events for timestamp generation.
+ * Returns audio bytes + word-level timestamps (local to this chunk).
  */
-async function synthesizeChunkToBuffer(ssml: string): Promise<Buffer> {
+async function synthesizeChunkWithTimestamps(ssml: string): Promise<ChunkSynthesisResult> {
   const speechConfig = sdk.SpeechConfig.fromSubscription(
     config.azureSpeech.key,
     config.azureSpeech.region
@@ -107,8 +122,25 @@ async function synthesizeChunkToBuffer(ssml: string): Promise<Buffer> {
   speechConfig.speechSynthesisOutputFormat =
     sdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
 
-  // Use null audio config to get buffer output instead of file
   const synthesizer = new sdk.SpeechSynthesizer(speechConfig, undefined as any);
+
+  const wordTimestamps: WordTimestamp[] = [];
+
+  // Register word boundary event to capture per-word timing
+  synthesizer.wordBoundary = (_sender, event) => {
+    // audioOffset is in 100-nanosecond ticks; convert to milliseconds
+    const offsetMs = Number(event.audioOffset) / 10000;
+    const durationMs = event.duration / 10000;
+    const word = event.text;
+
+    if (word && word.trim()) {
+      wordTimestamps.push({
+        word: word.trim(),
+        offset: Math.round(offsetMs),
+        duration: Math.round(durationMs),
+      });
+    }
+  };
 
   return new Promise((resolve, reject) => {
     synthesizer.speakSsmlAsync(
@@ -116,7 +148,10 @@ async function synthesizeChunkToBuffer(ssml: string): Promise<Buffer> {
       (result) => {
         synthesizer.close();
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-          resolve(Buffer.from(result.audioData));
+          const audioBuffer = Buffer.from(result.audioData);
+          // Estimate chunk duration from buffer size (128kbps = 16KB/s)
+          const durationMs = (audioBuffer.length / 16000) * 1000;
+          resolve({ audioBuffer, wordTimestamps, durationMs });
         } else {
           const errorDetail = result.errorDetails || 'Unknown TTS error';
           reject(new Error(`TTS synthesis failed: ${errorDetail}`));
@@ -131,18 +166,18 @@ async function synthesizeChunkToBuffer(ssml: string): Promise<Buffer> {
 }
 
 /**
- * Synthesize a single chunk with retry logic.
+ * Synthesize a single chunk with retry logic, capturing word timestamps.
  */
-async function synthesizeChunkWithRetry(ssml: string, chunkIndex: number): Promise<Buffer> {
+async function synthesizeChunkWithRetry(ssml: string, chunkIndex: number): Promise<ChunkSynthesisResult> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= MAX_RETRIES_PER_CHUNK; attempt++) {
     try {
       if (attempt > 0) {
         console.log(`TTS: retrying chunk ${chunkIndex + 1}, attempt ${attempt + 1}`);
-        await delay(CHUNK_DELAY_MS * 2); // Longer delay on retry
+        await delay(CHUNK_DELAY_MS * 2);
       }
-      return await synthesizeChunkToBuffer(ssml);
+      return await synthesizeChunkWithTimestamps(ssml);
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       console.warn(`TTS: chunk ${chunkIndex + 1} failed (attempt ${attempt + 1}): ${lastError.message}`);
@@ -152,17 +187,24 @@ async function synthesizeChunkWithRetry(ssml: string, chunkIndex: number): Promi
   throw lastError || new Error(`TTS: chunk ${chunkIndex + 1} failed after retries`);
 }
 
+/** Full synthesis result with timestamps */
+export interface SynthesisResult {
+  filePath: string;
+  durationSeconds: number;
+  timestamps: WordTimestamp[];
+}
+
 /**
  * Synthesize text to an MP3 file using Azure Speech SDK with chunked SSML.
  * Splits voice elements into groups of ≤25 to stay under Azure's 50-element limit.
- * Returns the file path and duration in seconds.
+ * Captures word-level timestamps with cumulative offsets across chunks.
  */
 export async function synthesizeToFile(
   text: string,
   language: 'ar' | 'en',
   outputPath: string,
   unitId?: string
-): Promise<{ filePath: string; durationSeconds: number }> {
+): Promise<SynthesisResult> {
   const voiceElements = buildVoiceElements(text, language);
   const ssmlChunks = chunkSsmlElements(voiceElements, language);
 
@@ -173,12 +215,27 @@ export async function synthesizeToFile(
 
   // Synthesize each chunk sequentially with delay between calls
   const audioBuffers: Buffer[] = [];
+  const allTimestamps: WordTimestamp[] = [];
+  let cumulativeOffsetMs = 0;
+
   for (let i = 0; i < ssmlChunks.length; i++) {
     if (i > 0) {
       await delay(CHUNK_DELAY_MS);
     }
-    const buffer = await synthesizeChunkWithRetry(ssmlChunks[i], i);
-    audioBuffers.push(buffer);
+    const chunkResult = await synthesizeChunkWithRetry(ssmlChunks[i], i);
+    audioBuffers.push(chunkResult.audioBuffer);
+
+    // Adjust timestamps with cumulative offset from previous chunks
+    for (const ts of chunkResult.wordTimestamps) {
+      allTimestamps.push({
+        word: ts.word,
+        offset: ts.offset + Math.round(cumulativeOffsetMs),
+        duration: ts.duration,
+      });
+    }
+
+    // Accumulate this chunk's duration for next chunk's offset base
+    cumulativeOffsetMs += chunkResult.durationMs;
   }
 
   // Concatenate all audio buffers (MP3 frames are self-contained, so concat works)
@@ -187,22 +244,23 @@ export async function synthesizeToFile(
   // Write to output file
   fs.writeFileSync(outputPath, finalAudio);
 
-  // Estimate duration from MP3 data size:
-  // 128kbps = 16KB/s, so duration ≈ fileSize / 16000
+  // Estimate duration from MP3 data size: 128kbps = 16KB/s
   const durationSeconds = finalAudio.length / 16000;
 
-  return { filePath: outputPath, durationSeconds };
+  return { filePath: outputPath, durationSeconds, timestamps: allTimestamps };
 }
 
 export interface AudioResult {
   url: string;
   duration: number | null;
+  timestamps: WordTimestamp[] | null;
   cached: boolean;
 }
 
 /**
  * Get or generate audio for a unit.
  * Checks AudioCache first; if miss, synthesizes via Azure Speech and stores.
+ * Returns audio URL + word-level timestamps for karaoke highlighting.
  */
 export async function getOrGenerateAudio(
   unitId: string,
@@ -222,7 +280,12 @@ export async function getOrGenerateAudio(
   });
 
   if (cached) {
-    return { url: cached.url, duration: cached.duration, cached: true };
+    return {
+      url: cached.url,
+      duration: cached.duration,
+      timestamps: (cached.timestamps as WordTimestamp[] | null) ?? null,
+      cached: true,
+    };
   }
 
   // Fetch unit content
@@ -257,12 +320,12 @@ export async function getOrGenerateAudio(
   const filename = `${unitId}-${language}${blockSuffix}.mp3`;
   const outputPath = path.join(AUDIO_DIR, filename);
 
-  const { durationSeconds } = await synthesizeToFile(textToSynthesize, language, outputPath, unitId);
+  const { durationSeconds, timestamps } = await synthesizeToFile(textToSynthesize, language, outputPath, unitId);
 
   // Build the public URL
   const audioUrl = `${baseUrl}/audio/${filename}`;
 
-  // Cache in database
+  // Cache in database (including timestamps)
   await prisma.audioCache.create({
     data: {
       unitId,
@@ -270,8 +333,100 @@ export async function getOrGenerateAudio(
       blockIndex: blockIndex ?? -1,
       url: audioUrl,
       duration: durationSeconds,
+      timestamps: timestamps as any,
     },
   });
 
-  return { url: audioUrl, duration: durationSeconds, cached: false };
+  return { url: audioUrl, duration: durationSeconds, timestamps, cached: false };
+}
+
+/**
+ * Get cached timestamps for a unit's audio (without generating).
+ * Returns null if no cache entry exists.
+ */
+export async function getAudioTimestamps(
+  unitId: string,
+  language: 'ar' | 'en',
+  blockIndex: number | null
+): Promise<WordTimestamp[] | null> {
+  const cached = await prisma.audioCache.findUnique({
+    where: {
+      unitId_language_blockIndex: {
+        unitId,
+        language,
+        blockIndex: blockIndex ?? -1,
+      },
+    },
+    select: { timestamps: true },
+  });
+
+  if (!cached || !cached.timestamps) return null;
+  return cached.timestamps as unknown as WordTimestamp[];
+}
+
+/**
+ * Pre-generate audio + timestamps for all units in the database.
+ * Processes sequentially to avoid overwhelming Azure Speech Service.
+ * Returns a summary of processed/failed units.
+ */
+export async function preGenerateAllAudio(
+  baseUrl: string,
+  language: 'ar' | 'en' = 'ar',
+  forceRegenerate: boolean = false
+): Promise<{ processed: number; skipped: number; failed: string[] }> {
+  const units = await prisma.unit.findMany({
+    where: { content: { not: null } },
+    select: { id: true, title: true },
+    orderBy: { orderIndex: 'asc' },
+  });
+
+  let processed = 0;
+  let skipped = 0;
+  const failed: string[] = [];
+
+  for (const unit of units) {
+    try {
+      // Check if already cached (skip unless forceRegenerate)
+      if (!forceRegenerate) {
+        const existing = await prisma.audioCache.findUnique({
+          where: {
+            unitId_language_blockIndex: {
+              unitId: unit.id,
+              language,
+              blockIndex: -1,
+            },
+          },
+          select: { id: true, timestamps: true },
+        });
+
+        if (existing && existing.timestamps) {
+          skipped++;
+          continue;
+        }
+
+        // Delete existing cache without timestamps so we regenerate with them
+        if (existing) {
+          await prisma.audioCache.delete({ where: { id: existing.id } });
+        }
+      } else {
+        // Force: delete existing cache entry
+        await prisma.audioCache.deleteMany({
+          where: { unitId: unit.id, language, blockIndex: -1 },
+        });
+      }
+
+      await getOrGenerateAudio(unit.id, language, null, baseUrl);
+      processed++;
+      console.log(`TTS pre-gen: ✓ ${unit.title || unit.id}`);
+
+      // Throttle to avoid rate limiting
+      await delay(500);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`TTS pre-gen: ✗ ${unit.title || unit.id} — ${msg}`);
+      failed.push(`${unit.title || unit.id}: ${msg}`);
+    }
+  }
+
+  return { processed, skipped, failed };
 }

@@ -43,10 +43,30 @@
 - **Redesign proposal:** 26 → 10 game types (QUICK_RECALL, PAIR_MATCH, FLASHCARD_SPRINT, CLOZE, WORD_SEARCH, SEQUENCE_IT, WORD_SCRAMBLE, VERIFY, CALLIGRAPHY_TRACE, FIQH_SCENARIO-rewritten). Document at `.squad/decisions/inbox/khaldun-game-redesign.md`.
 - **Key file paths for games work:** `backend/src/services/game.service.ts` (engine, 1095 LOC, switch at line ~398), `backend/prisma/schema.prisma` (GameType enum), `frontend/src/pages/games/*.tsx` (30 files — most candidates for deletion), `frontend/src/pages/games/GamesHub.tsx` (hub), `frontend/src/types/game.ts` (GAME_META).
 
+## Latest Session (2026-05-20)
+
+**Lead Architect Session:** Audio Synchronization Architecture  
+**Work:** Khaldun-6 — Designed pre-generated audio with real-time text highlighting  
+
+**Output:**
+- Complete architecture decision: `.squad/decisions/inbox/khaldun-audio-sync-architecture.md`
+- Covers: data model (AudioCache extension + TextSyncData), pre-gen pipeline (Bull/Redis background jobs), word boundary alignment, API contracts, Arabic RTL/diacritics handling, chunking integration (cumulative offsets)
+- Ready for implementation: Backend (Khwarizmi) + Frontend (Ibn Sina)
+
+**Key Decisions:**
+1. **Data Model:** Extend `AudioCache` with `textSync` JSON column (word boundaries + cumulative offsets)
+2. **Pipeline:** Background job queue (admin-triggered, manual first; auto-trigger Phase 2)
+3. **Word Boundaries:** JSON schema with millisecond precision, diacritics preserved, cumulative chunking
+4. **API:** Two endpoints (pre-gen audio + fallback TTS), signed Blob URLs for security
+5. **Arabic:** Strip diacritics for matching, preserve in display, RTL CSS rendering
+6. **Chunking:** Cumulative offset strategy decouples internal chunking from word sync (robust re-generation)
+
+---
+
 ## Next Steps
 
 - Parent Dashboard + Child Auth implementation
 - Phase 2 games planning and scope management
 - Integration testing: Full backend/frontend flow
-- Consider adding Dockerfile for future Container Apps migration path
-- Multimodal implementation: TTS Phase 1 (4–6 days), Video Phase 2 (1–2 weeks)
+- **Multimodal Phase 1:** Pre-gen audio with text sync (4–6 days, now architectured)
+- Video Phase 2 (1–2 weeks)

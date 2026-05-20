@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { getOrGenerateAudio } from '../services/tts.service';
+import { getOrGenerateAudio, getAudioTimestamps, preGenerateAllAudio } from '../services/tts.service';
 
 export class AudioController {
   /**
    * POST /api/v1/units/:unitId/audio
    * Body: { language: "ar" | "en", contentBlockId?: string }
    *
-   * Returns cached or freshly-generated audio URL for the unit.
+   * Returns cached or freshly-generated audio URL + word timestamps for the unit.
    */
   static async generateAudio(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -33,6 +33,7 @@ export class AudioController {
         data: {
           url: result.url,
           duration: result.duration,
+          timestamps: result.timestamps,
           cached: result.cached,
         },
       });
@@ -41,6 +42,85 @@ export class AudioController {
         res.status(404).json({ message: error.message });
         return;
       }
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/units/:unitId/audio/timestamps
+   * Query: ?language=ar|en&blockIndex=N
+   *
+   * Returns just the word-level timestamps for pre-generated audio.
+   */
+  static async getTimestamps(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { unitId } = req.params;
+      const language = (req.query.language as string) || 'ar';
+      const blockIndexParam = req.query.blockIndex as string | undefined;
+
+      if (!['ar', 'en'].includes(language)) {
+        res.status(400).json({ message: 'language must be "ar" or "en"' });
+        return;
+      }
+
+      const blockIndex = blockIndexParam !== undefined ? parseInt(blockIndexParam, 10) : null;
+      if (blockIndex !== null && isNaN(blockIndex)) {
+        res.status(400).json({ message: 'blockIndex must be a number' });
+        return;
+      }
+
+      const timestamps = await getAudioTimestamps(unitId, language as 'ar' | 'en', blockIndex);
+
+      if (!timestamps) {
+        res.status(404).json({ message: 'No pre-generated audio timestamps found for this unit' });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: { timestamps },
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/admin/pre-generate-audio
+   * Body: { language?: "ar" | "en", forceRegenerate?: boolean }
+   *
+   * Admin endpoint to batch pre-generate audio + timestamps for all units.
+   */
+  static async preGenerateAudio(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { language = 'ar', forceRegenerate = false } = req.body;
+
+      if (!['ar', 'en'].includes(language)) {
+        res.status(400).json({ message: 'language must be "ar" or "en"' });
+        return;
+      }
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+      // Run async — respond immediately with acknowledgement, process in background
+      res.json({
+        success: true,
+        message: `Audio pre-generation started for language="${language}", forceRegenerate=${forceRegenerate}. Check server logs for progress.`,
+      });
+
+      // Execute in background (after response is sent)
+      setImmediate(async () => {
+        try {
+          const result = await preGenerateAllAudio(baseUrl, language, forceRegenerate);
+          console.log(`TTS pre-gen complete: ${result.processed} processed, ${result.skipped} skipped, ${result.failed.length} failed`);
+          if (result.failed.length > 0) {
+            console.log(`TTS pre-gen failures:\n  ${result.failed.join('\n  ')}`);
+          }
+        } catch (err) {
+          console.error('TTS pre-gen fatal error:', err);
+        }
+      });
+    } catch (error: any) {
       next(error);
     }
   }
