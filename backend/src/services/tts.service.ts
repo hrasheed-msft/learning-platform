@@ -42,6 +42,10 @@ function containsArabic(text: string): boolean {
 /**
  * Build SSML for bilingual content — Arabic segments get ar-SA voice,
  * English segments get en-US voice.
+ *
+ * Azure Speech SSML rules:
+ * - <voice> must be a direct child of <speak> (never inside <lang>)
+ * - For bilingual content, use separate <voice> elements per language
  */
 function buildSsml(text: string, language: 'ar' | 'en'): string {
   if (language === 'ar') {
@@ -51,20 +55,29 @@ function buildSsml(text: string, language: 'ar' | 'en'): string {
 </speak>`;
   }
 
-  // English with possible inline Arabic — split on Arabic runs
+  // English with possible inline Arabic — split on Arabic character runs
   const parts = text.split(/([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\u064B-\u065F\u0670]+)/g);
-  const ssmlParts = parts
-    .filter((p) => p.trim())
+  const filteredParts = parts.filter((p) => p.trim());
+
+  // If no Arabic detected, simple single-voice output
+  if (!filteredParts.some(containsArabic)) {
+    return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="${VOICES.en}">${text}</voice>
+</speak>`;
+  }
+
+  // Bilingual: use separate <voice> elements for each language segment
+  const voiceElements = filteredParts
     .map((part) => {
       if (containsArabic(part)) {
-        return `<lang xml:lang="ar-SA"><voice name="${VOICES.ar}">${part.trim()}</voice></lang>`;
+        return `  <voice name="${VOICES.ar}">${part.trim()}</voice>`;
       }
-      return part.trim();
+      return `  <voice name="${VOICES.en}">${part.trim()}</voice>`;
     })
-    .join(' ');
+    .join('\n');
 
   return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-  <voice name="${VOICES.en}">${ssmlParts}</voice>
+${voiceElements}
 </speak>`;
 }
 
