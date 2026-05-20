@@ -5,13 +5,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { StudySession } from '../StudySession';
-import { useFlashCardStore } from '@/stores';
+import { useFlashCardStore, useFamilyStore, useAuthStore } from '@/stores';
 import { FlashCardDifficulty, FlashCardStatus } from '@/types';
 import type { FlashCardWithProgress } from '@/types';
 
 // Mock the store
 vi.mock('@/stores', () => ({
   useFlashCardStore: vi.fn(),
+  useFamilyStore: vi.fn(),
+  useAuthStore: vi.fn(),
 }));
 
 const mockCards: FlashCardWithProgress[] = [
@@ -88,6 +90,16 @@ describe('StudySession', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
+    // Mock family and auth stores
+    (useFamilyStore as any).mockReturnValue({
+      selectedMember: { id: 'member-1', name: 'Test Student' },
+      members: [{ id: 'member-1', name: 'Test Student' }],
+      fetchMembers: vi.fn(),
+    });
+    (useAuthStore as any).mockReturnValue({
+      family: { id: 'family-1', name: 'Test Family' },
+    });
+
     // Default mock implementation
     (useFlashCardStore as any).mockReturnValue({
       currentSession: null,

@@ -102,10 +102,10 @@ describe('AudioPlayer', () => {
     it('should display error message when audio fails', () => {
       const { container } = render(<AudioPlayer {...defaultProps} />);
 
-      // Simulate error event on audio element
+      // Simulate error event on audio element using native Event dispatch
       const audio = container.querySelector('audio');
       if (audio) {
-        fireEvent.error(audio);
+        audio.dispatchEvent(new Event('error'));
       }
 
       expect(screen.getByText(/Failed to load audio/)).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('AudioPlayer', () => {
 
       const audio = container.querySelector('audio');
       if (audio) {
-        fireEvent.error(audio);
+        audio.dispatchEvent(new Event('error'));
       }
 
       expect(screen.getByText('Dismiss')).toBeInTheDocument();

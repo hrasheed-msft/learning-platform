@@ -81,7 +81,7 @@ describe('VideoPlayer', () => {
       const { container } = render(<VideoPlayer {...defaultProps} />);
       const video = container.querySelector('video');
       if (video) {
-        fireEvent.error(video);
+        video.dispatchEvent(new Event('error'));
       }
       expect(screen.getByText(/Failed to load video/)).toBeInTheDocument();
     });

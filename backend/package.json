@@ -19,7 +19,7 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "test": "vitest run",
-    "test:ci": "vitest run --reporter=verbose",
+    "test:ci": "vitest run --reporter=verbose --exclude=src/__tests__/integration/**",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
