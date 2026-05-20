@@ -150,6 +150,7 @@ model Unit {
   quizResults    QuizResult[]
   games          Game[]
   audioCache     AudioCache[]
+  videoCache     VideoCache[]
 
   @@unique([courseId, orderIndex])
   @@index([courseId])
@@ -921,4 +922,21 @@ model AudioCache {
   @@unique([unitId, language, blockIndex])
   @@index([unitId])
   @@map("audio_cache")
+}
+
+model VideoCache {
+  id        String   @id @default(uuid())
+  unitId    String
+  language  String   // "ar" | "en"
+  url       String
+  duration  Float?   // seconds
+  status    String   @default("generating") // generating, ready, failed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, language])
+  @@index([unitId])
+  @@map("video_cache")
 }

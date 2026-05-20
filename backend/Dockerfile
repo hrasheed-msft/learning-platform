@@ -23,9 +23,21 @@ COPY src ./src/
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
-RUN apk add --no-cache openssl
+# Install Puppeteer dependencies (Chromium), ffmpeg, and Arabic fonts
+RUN apt-get update && apt-get install -y \
+  chromium \
+  ffmpeg \
+  fonts-noto-cjk \
+  fonts-noto-color-emoji \
+  fonts-freefont-ttf \
+  fonts-hosny-amiri \
+  openssl \
+  --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 

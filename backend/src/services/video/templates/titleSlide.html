@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a3a4a 0%, #0d2137 50%, #1a3a4a 100%);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+/* Islamic geometric pattern overlay */
+.pattern-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z' fill='none' stroke='%23c9a84c' stroke-width='1'/%3E%3Cpath d='M40 10L70 40L40 70L10 40Z' fill='none' stroke='%23c9a84c' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+/* Decorative border */
+.border-frame {
+  position: absolute;
+  inset: 30px;
+  border: 2px solid rgba(201, 168, 76, 0.4);
+  border-radius: 12px;
+}
+.border-frame::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 8px;
+}
+.content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 1400px;
+  padding: 60px;
+}
+.course-name {
+  font-size: 28px;
+  color: #c9a84c;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 40px;
+}
+.unit-title {
+  font-size: 72px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 30px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+.arabic-title {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  font-size: 56px;
+  color: #e8d5a3;
+  direction: rtl;
+  margin-top: 20px;
+  line-height: 1.4;
+}
+.divider {
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  margin: 30px auto;
+}
+</style>
+</head>
+<body>
+  <div class="pattern-overlay"></div>
+  <div class="border-frame"></div>
+  <div class="content">
+    <div class="course-name">{{courseName}}</div>
+    <div class="divider"></div>
+    <h1 class="unit-title">{{unitTitle}}</h1>
+    {{#if arabicTitle}}<div class="arabic-title">{{arabicTitle}}</div>{{/if}}
+  </div>
+</body>
+</html>

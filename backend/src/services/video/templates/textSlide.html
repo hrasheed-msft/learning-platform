@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #f8f5ef 0%, #ede8df 100%);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+.pattern-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%231a3a4a' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+.border-frame {
+  position: absolute;
+  inset: 30px;
+  border: 2px solid rgba(26, 58, 74, 0.15);
+  border-radius: 12px;
+}
+/* Left accent bar */
+.accent-bar {
+  position: absolute;
+  left: 50px;
+  top: 120px;
+  bottom: 120px;
+  width: 4px;
+  background: linear-gradient(180deg, #c9a84c, #1a3a4a, #c9a84c);
+  border-radius: 2px;
+}
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 1500px;
+  padding: 80px 100px 80px 120px;
+}
+.slide-number {
+  font-size: 14px;
+  color: #c9a84c;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+}
+.text-content {
+  font-size: 36px;
+  line-height: 1.7;
+  color: #2c3e50;
+  font-weight: 400;
+}
+.text-content strong, .text-content b {
+  color: #1a3a4a;
+  font-weight: 600;
+}
+.text-content em, .text-content i {
+  color: #5a7a8a;
+  font-style: italic;
+}
+/* Inline Arabic within English text */
+.text-content .arabic-inline {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  font-size: 40px;
+  color: #1a3a4a;
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+.unit-header {
+  position: absolute;
+  top: 45px;
+  right: 60px;
+  font-size: 16px;
+  color: rgba(26, 58, 74, 0.5);
+  font-weight: 500;
+}
+</style>
+</head>
+<body>
+  <div class="pattern-overlay"></div>
+  <div class="border-frame"></div>
+  <div class="accent-bar"></div>
+  <div class="unit-header">{{unitTitle}}</div>
+  <div class="content">
+    <div class="slide-number">{{slideLabel}}</div>
+    <div class="text-content">{{content}}</div>
+  </div>
+</body>
+</html>

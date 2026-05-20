@@ -22,6 +22,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import notificationRoutes from './routes/notification.routes';
 import gameRoutes from './routes/game.routes';
 import audioRoutes from './routes/audio.routes';
+import videoRoutes from './routes/video.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -120,6 +121,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/games', gameRoutes);
 app.use('/api/v1/units', audioRoutes);
+app.use('/api/v1', videoRoutes);
 
 // Error handling
 app.use(notFoundHandler);
