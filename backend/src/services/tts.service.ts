@@ -38,9 +38,10 @@ interface ChunkSynthesisResult {
 
 /**
  * Strip HTML tags and decode common entities for TTS input.
+ * Final output is XML-safe (no unescaped < > & characters).
  */
 function stripHtml(html: string): string {
-  return html
+  const text = html
     .replace(/<[^>]+>/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
@@ -50,6 +51,13 @@ function stripHtml(html: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+  // Re-escape XML special chars so text is safe inside SSML voice elements
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /**
