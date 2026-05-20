@@ -60,6 +60,19 @@ vi.mock('@/stores', () => ({
   })),
 }));
 
+// Mock services to prevent network calls
+vi.mock('@/services', () => ({
+  flashcardService: {
+    getDueCards: vi.fn().mockResolvedValue({ total: 0, cards: [] }),
+  },
+}));
+
+vi.mock('@/services/flashcardService', () => ({
+  flashcardService: {
+    getDueCards: vi.fn().mockResolvedValue({ total: 0, cards: [] }),
+  },
+}));
+
 const renderWithRouter = (component: React.ReactNode) => {
   return render(
     <BrowserRouter>

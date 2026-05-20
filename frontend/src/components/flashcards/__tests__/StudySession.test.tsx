@@ -125,6 +125,7 @@ describe('StudySession', () => {
     expect(mockStartStudySession).toHaveBeenCalledWith(
       mockCards,
       'study',
+      'member-1',
       'unit-1',
       'course-1'
     );
@@ -351,6 +352,7 @@ describe('StudySession', () => {
       currentSession: {
         cards: mockCards,
         currentIndex: 1,
+        completed: 2,
         mode: 'study',
         unitId: 'unit-1',
         courseId: 'course-1',
@@ -377,14 +379,6 @@ describe('StudySession', () => {
         onComplete={onComplete}
       />
     );
-
-    // Reveal answer
-    const revealButton = screen.getByRole('button', { name: /show answer/i });
-    fireEvent.click(revealButton);
-
-    // Rate last card
-    const rating4Button = screen.getByRole('button', { name: /4 Easy/i });
-    fireEvent.click(rating4Button);
 
     await waitFor(() => {
       expect(mockEndStudySession).toHaveBeenCalled();

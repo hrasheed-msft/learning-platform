@@ -10,7 +10,8 @@ const mockFetchEnrollments = vi.fn();
 vi.mock('@/stores', () => ({
   useAuthStore: vi.fn(() => ({
     family: { id: 'family-1', name: 'Test Family' },
-    user: { id: 'user-1', email: 'test@example.com', name: 'Parent User' }
+    user: { id: 'user-1', email: 'test@example.com', name: 'Parent User' },
+    logout: vi.fn(),
   })),
   useFamilyStore: vi.fn(() => ({
     members: [
@@ -19,6 +20,7 @@ vi.mock('@/stores', () => ({
     ],
     fetchMembers: mockFetchMembers,
     isLoading: false,
+    error: null,
   })),
   useCourseStore: vi.fn(() => ({
     enrollments: [
@@ -27,6 +29,7 @@ vi.mock('@/stores', () => ({
       { id: 'e3', memberId: 'member-2', courseId: 'c1', status: 'ACTIVE' },
     ],
     fetchEnrollments: mockFetchEnrollments,
+    fetchAllFamilyEnrollments: vi.fn(),
     isLoading: false,
   })),
 }));

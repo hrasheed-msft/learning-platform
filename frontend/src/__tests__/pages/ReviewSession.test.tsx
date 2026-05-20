@@ -7,12 +7,75 @@ import ReviewSession from '@/pages/review/ReviewSession';
 vi.mock('@/stores', () => ({
   useAuthStore: vi.fn(() => ({
     family: { id: 'family-1' },
-    user: { id: 'user-1' }
+    user: { id: 'user-1', familyId: 'family-1' }
   })),
   useFamilyStore: vi.fn(() => ({
     members: [{ id: 'member-1', name: 'Ahmed' }],
     fetchMembers: vi.fn(),
   })),
+}));
+
+// Mock services to prevent network calls
+vi.mock('@/services/srsService', () => ({
+  srsService: {
+    getDueReviews: vi.fn().mockResolvedValue({
+      overdue: [
+        {
+          id: 'item-1',
+          studentId: 'member-1',
+          contentType: 'dua',
+          contentId: 'content-1',
+          title: 'Dua before eating',
+          arabicText: 'بسم الله',
+          translation: 'In the name of Allah',
+          currentInterval: 1,
+          easeFactor: 2.5,
+          repetitionCount: 0,
+          nextReviewAt: new Date().toISOString(),
+        },
+        {
+          id: 'item-2',
+          studentId: 'member-1',
+          contentType: 'term',
+          contentId: 'content-2',
+          title: 'Tawheed',
+          arabicText: 'التوحيد',
+          translation: 'The oneness of Allah',
+          currentInterval: 1,
+          easeFactor: 2.5,
+          repetitionCount: 0,
+          nextReviewAt: new Date().toISOString(),
+        },
+        {
+          id: 'item-3',
+          studentId: 'member-1',
+          contentType: 'hadith',
+          contentId: 'content-3',
+          title: 'Salat hadith',
+          arabicText: 'الصلاة',
+          translation: 'Prayer',
+          currentInterval: 1,
+          easeFactor: 2.5,
+          repetitionCount: 0,
+          nextReviewAt: new Date().toISOString(),
+        },
+      ],
+      dueToday: [],
+      totalDue: 3,
+    }),
+    submitReview: vi.fn().mockResolvedValue({ success: true }),
+    getReviewHistory: vi.fn().mockResolvedValue([]),
+    getMemorizationItems: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock('@/services/familyService', () => ({
+  familyService: {
+    getMembers: vi.fn().mockResolvedValue([
+      { id: 'member-1', name: 'Ahmed', role: 'CHILD' }
+    ]),
+    getFamily: vi.fn().mockResolvedValue({ id: 'family-1', name: 'Test Family' }),
+  },
 }));
 
 const renderWithRouter = (component: React.ReactNode) => {
@@ -33,7 +96,8 @@ describe('ReviewSession', () => {
     
     await waitFor(() => {
       // Check that a review question is displayed (from mock data in component)
-      expect(screen.getByText(/Tawheed|Salat|dua/i)).toBeInTheDocument();
+      const items = screen.getAllByText(/Tawheed|Salat|dua/i);
+      expect(items.length).toBeGreaterThan(0);
     });
   });
 

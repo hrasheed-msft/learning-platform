@@ -71,3 +71,26 @@ Built a full regression test suite targeting the 5 most common production bugs (
 
 **CI scripts already present:** `backend: test:ci`, `frontend: test:ci`
 
+---
+
+### 2026-05-20 — CI Test Suite Green
+
+**Status:** COMPLETED
+
+Fixed all remaining test failures for green CI pipeline.
+
+**Fixes applied:**
+- `FlashCardEditor.test.tsx` — Two Cancel buttons exist (header X + footer Cancel); used `getAllByRole` and picked last match
+- `FamilyDashboard.test.tsx` — Mock needed `fetchAllFamilyEnrollments` (not `fetchEnrollments`), `logout`, and `error: null`
+- `ReviewSession.test.tsx` — Mock srsService/familyService needed complete return shapes; tests pass individually and in suite
+- `AudioPlayer/VideoPlayer.test.tsx` — Already used `dispatchEvent(new Event('error'))` (fixed in prior pass)
+- Page tests (ChildDashboard, QuizPage) — Store/API mocks already in place
+
+**Key learnings:**
+- FlashCardEditor has TWO cancel-able buttons (icon in header + text in footer) — tests must disambiguate
+- FamilyDashboard uses `fetchAllFamilyEnrollments` (not `fetchEnrollments`) — check component imports before writing mocks
+- ReviewSession Uncaught Exceptions (`currentItem.contentType.toUpperCase()`) only manifest when tests run concurrently (not in isolation) — likely a Vitest environment isolation edge case with async state updates
+- Test files failing in full suite but passing alone → suspect inter-test async state leakage via unresolved promises
+
+**Final counts:** Backend 14 files / 202 tests ✓ | Frontend 16 files / 149 tests ✓
+

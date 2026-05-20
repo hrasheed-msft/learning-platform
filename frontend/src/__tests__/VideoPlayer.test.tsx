@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import VideoPlayer from '@/components/VideoPlayer';
 
 // Mock HTMLMediaElement methods
@@ -77,12 +77,14 @@ describe('VideoPlayer', () => {
       expect(screen.queryByLabelText('Play video')).not.toBeInTheDocument();
     });
 
-    it('should show error state when video fails to load', () => {
+    it('should show error state when video fails to load', async () => {
       const { container } = render(<VideoPlayer {...defaultProps} />);
       const video = container.querySelector('video');
-      if (video) {
-        video.dispatchEvent(new Event('error'));
-      }
+      await act(async () => {
+        if (video) {
+          video.dispatchEvent(new Event('error'));
+        }
+      });
       expect(screen.getByText(/Failed to load video/)).toBeInTheDocument();
     });
   });

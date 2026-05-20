@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import AudioPlayer from '@/components/AudioPlayer';
 
 // Mock HTMLMediaElement methods
@@ -99,26 +99,30 @@ describe('AudioPlayer', () => {
   });
 
   describe('Error State', () => {
-    it('should display error message when audio fails', () => {
+    it('should display error message when audio fails', async () => {
       const { container } = render(<AudioPlayer {...defaultProps} />);
 
       // Simulate error event on audio element using native Event dispatch
       const audio = container.querySelector('audio');
-      if (audio) {
-        audio.dispatchEvent(new Event('error'));
-      }
+      await act(async () => {
+        if (audio) {
+          audio.dispatchEvent(new Event('error'));
+        }
+      });
 
       expect(screen.getByText(/Failed to load audio/)).toBeInTheDocument();
     });
 
-    it('should show dismiss button when onClose is provided in error state', () => {
+    it('should show dismiss button when onClose is provided in error state', async () => {
       const onClose = vi.fn();
       const { container } = render(<AudioPlayer {...defaultProps} onClose={onClose} />);
 
       const audio = container.querySelector('audio');
-      if (audio) {
-        audio.dispatchEvent(new Event('error'));
-      }
+      await act(async () => {
+        if (audio) {
+          audio.dispatchEvent(new Event('error'));
+        }
+      });
 
       expect(screen.getByText('Dismiss')).toBeInTheDocument();
     });

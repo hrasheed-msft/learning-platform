@@ -21,6 +21,27 @@ vi.mock('@/stores', () => ({
   })),
 }));
 
+// Mock services to prevent network calls
+vi.mock('@/services/assessmentService', () => ({
+  assessmentService: {
+    getQuizQuestions: vi.fn().mockRejectedValue(new Error('mocked')),
+    submitQuiz: vi.fn().mockResolvedValue({}),
+    getMemberResults: vi.fn().mockResolvedValue([]),
+    getQuizResult: vi.fn().mockResolvedValue({}),
+    getMemberProgress: vi.fn().mockResolvedValue({}),
+  },
+}));
+
+vi.mock('@/services/courseService', () => ({
+  courseService: {
+    getCourses: vi.fn().mockResolvedValue([]),
+    getCourse: vi.fn().mockResolvedValue({}),
+    getUnits: vi.fn().mockResolvedValue([]),
+    getUnit: vi.fn().mockResolvedValue({}),
+    getNextUnit: vi.fn().mockResolvedValue(null),
+  },
+}));
+
 const renderWithRouter = (component: React.ReactNode) => {
   return render(
     <BrowserRouter>

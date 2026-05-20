@@ -9,8 +9,8 @@ import { FlashCardDifficulty } from '@/types';
 import type { FlashCard } from '@/types';
 
 describe('FlashCardEditor', () => {
-  const mockOnSave = vi.fn();
-  const mockOnUpdate = vi.fn();
+  const mockOnSave = vi.fn().mockResolvedValue(undefined);
+  const mockOnUpdate = vi.fn().mockResolvedValue(undefined);
   const mockOnCancel = vi.fn();
 
   const mockCard: FlashCard = {
@@ -82,8 +82,8 @@ describe('FlashCardEditor', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/front \(english\) is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/back \(english\) is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/front text is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/back text is required/i)).toBeInTheDocument();
       expect(screen.getByText(/category is required/i)).toBeInTheDocument();
     });
 
@@ -105,7 +105,7 @@ describe('FlashCardEditor', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/front \(english\) is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/front text is required/i)).toBeInTheDocument();
     });
 
     // Edit field
@@ -113,7 +113,7 @@ describe('FlashCardEditor', () => {
     fireEvent.change(frontInput, { target: { value: 'Test question' } });
 
     await waitFor(() => {
-      expect(screen.queryByText(/front \(english\) is required/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/front text is required/i)).not.toBeInTheDocument();
     });
   });
 
@@ -191,6 +191,7 @@ describe('FlashCardEditor', () => {
 
     await waitFor(() => {
       expect(mockOnUpdate).toHaveBeenCalledWith(
+        '1',
         expect.objectContaining({
           front: 'What is Salah (Prayer)?',
           back: 'Prayer - one of the five pillars of Islam',
@@ -267,8 +268,8 @@ describe('FlashCardEditor', () => {
       expect(mockOnSave).toHaveBeenCalledWith({
         front: 'Test Question',
         back: 'Test Answer',
-        frontArabic: null,
-        backArabic: null,
+        frontArabic: undefined,
+        backArabic: undefined,
         category: 'Test',
         difficulty: 'MEDIUM',
         tags: [],
@@ -286,8 +287,9 @@ describe('FlashCardEditor', () => {
       />
     );
 
-    const cancelButton = screen.getByRole('button', { name: /cancel/i });
-    fireEvent.click(cancelButton);
+    // There are two cancel buttons (header icon + footer); use the footer one
+    const cancelButtons = screen.getAllByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelButtons[cancelButtons.length - 1]);
 
     expect(mockOnCancel).toHaveBeenCalled();
   });
@@ -303,7 +305,7 @@ describe('FlashCardEditor', () => {
       />
     );
 
-    const submitButton = screen.getByRole('button', { name: /creating.../i });
+    const submitButton = screen.getByRole('button', { name: /create flashcard/i });
     expect(submitButton).toBeDisabled();
   });
 
@@ -341,7 +343,7 @@ describe('FlashCardEditor', () => {
     });
   });
 
-  it('sets Arabic fields to null when empty', async () => {
+  it('sets Arabic fields to undefined when empty', async () => {
     render(
       <FlashCardEditor
         courseId="course-1"
@@ -372,8 +374,8 @@ describe('FlashCardEditor', () => {
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
         expect.objectContaining({
-          frontArabic: null,
-          backArabic: null,
+          frontArabic: undefined,
+          backArabic: undefined,
         })
       );
     });
