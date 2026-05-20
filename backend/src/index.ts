@@ -21,6 +21,7 @@ import childAuthRoutes from './routes/child-auth.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import notificationRoutes from './routes/notification.routes';
 import gameRoutes from './routes/game.routes';
+import audioRoutes from './routes/audio.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -97,6 +98,12 @@ app.use('/coursebook-images', (_req, res, next) => {
   next();
 }, express.static(path.join(__dirname, '../public/coursebook-images')));
 
+// Static assets — TTS audio files
+app.use('/audio', (_req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, '../public/audio')));
+
 // API routes (v1)
 // Note: flashCardRoutes must be before courseRoutes because it has more specific
 // routes like /courses/:courseId/flashcards that would otherwise be caught by
@@ -112,6 +119,7 @@ app.use('/api/v1', childAuthRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/games', gameRoutes);
+app.use('/api/v1/units', audioRoutes);
 
 // Error handling
 app.use(notFoundHandler);

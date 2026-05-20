@@ -149,6 +149,7 @@ model Unit {
   unitProgress   UnitProgress[]
   quizResults    QuizResult[]
   games          Game[]
+  audioCache     AudioCache[]
 
   @@unique([courseId, orderIndex])
   @@index([courseId])
@@ -900,4 +901,24 @@ model GameTimeLog {
   @@index([familyMemberId, date])
   @@index([date])
   @@map("game_time_logs")
+}
+
+// ============================================
+// TTS / AUDIOBOOK
+// ============================================
+
+model AudioCache {
+  id         String   @id @default(uuid())
+  unitId     String
+  language   String   // "ar" | "en"
+  blockIndex Int?     // null = full unit audio
+  url        String
+  duration   Float?   // seconds
+  createdAt  DateTime @default(now())
+
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, language, blockIndex])
+  @@index([unitId])
+  @@map("audio_cache")
 }

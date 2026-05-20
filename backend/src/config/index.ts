@@ -38,6 +38,10 @@ interface Config {
   openai: {
     apiKey: string;
   };
+  azureSpeech: {
+    key: string;
+    region: string;
+  };
   rateLimit: {
     windowMs: number;
     maxRequests: number;
@@ -78,6 +82,10 @@ const config: Config = {
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',
+  },
+  azureSpeech: {
+    key: process.env.AZURE_SPEECH_KEY || '',
+    region: process.env.AZURE_SPEECH_REGION || 'centralus',
   },
   rateLimit: {
     // Used only in production (see src/index.ts). 1-minute window, generous global cap.
