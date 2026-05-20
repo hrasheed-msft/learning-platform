@@ -16,6 +16,12 @@ const VOICES = {
   en: 'en-US-JennyNeural',
 } as const;
 
+// Azure Speech Service hard limit is 50 <voice> elements per request.
+// We use 25 to leave headroom.
+const MAX_VOICE_ELEMENTS_PER_CHUNK = 25;
+const CHUNK_DELAY_MS = 200;
+const MAX_RETRIES_PER_CHUNK = 2;
+
 /**
  * Strip HTML tags and decode common entities for TTS input.
  */
@@ -40,56 +46,60 @@ function containsArabic(text: string): boolean {
 }
 
 /**
- * Build SSML for bilingual content — Arabic segments get ar-SA voice,
- * English segments get en-US voice.
- *
- * Azure Speech SSML rules:
- * - <voice> must be a direct child of <speak> (never inside <lang>)
- * - For bilingual content, use separate <voice> elements per language
+ * Build voice elements for bilingual content — Arabic segments get ar-SA voice,
+ * English segments get en-US voice. Returns raw voice element strings (without <speak> wrapper).
  */
-function buildSsml(text: string, language: 'ar' | 'en'): string {
+function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
   if (language === 'ar') {
-    // Pure Arabic narration
-    return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="ar-SA">
-  <voice name="${VOICES.ar}">${text}</voice>
-</speak>`;
+    return [`<voice name="${VOICES.ar}">${text}</voice>`];
   }
 
   // English with possible inline Arabic — split on Arabic character runs
   const parts = text.split(/([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\u064B-\u065F\u0670]+)/g);
   const filteredParts = parts.filter((p) => p.trim());
 
-  // If no Arabic detected, simple single-voice output
+  // If no Arabic detected, single voice element
   if (!filteredParts.some(containsArabic)) {
-    return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-  <voice name="${VOICES.en}">${text}</voice>
-</speak>`;
+    return [`<voice name="${VOICES.en}">${text}</voice>`];
   }
 
-  // Bilingual: use separate <voice> elements for each language segment
-  const voiceElements = filteredParts
-    .map((part) => {
-      if (containsArabic(part)) {
-        return `  <voice name="${VOICES.ar}">${part.trim()}</voice>`;
-      }
-      return `  <voice name="${VOICES.en}">${part.trim()}</voice>`;
-    })
-    .join('\n');
-
-  return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-${voiceElements}
-</speak>`;
+  // Bilingual: one voice element per language segment
+  return filteredParts.map((part) => {
+    if (containsArabic(part)) {
+      return `<voice name="${VOICES.ar}">${part.trim()}</voice>`;
+    }
+    return `<voice name="${VOICES.en}">${part.trim()}</voice>`;
+  });
 }
 
 /**
- * Synthesize text to an MP3 file using Azure Speech SDK.
- * Returns the file path and duration in seconds.
+ * Split voice elements into chunks of ≤MAX_VOICE_ELEMENTS_PER_CHUNK,
+ * wrapping each chunk in a valid <speak> document.
  */
-async function synthesizeToFile(
-  text: string,
-  language: 'ar' | 'en',
-  outputPath: string
-): Promise<{ filePath: string; durationSeconds: number }> {
+function chunkSsmlElements(voiceElements: string[], language: 'ar' | 'en'): string[] {
+  const xmlLang = language === 'ar' ? 'ar-SA' : 'en-US';
+  const chunks: string[] = [];
+
+  for (let i = 0; i < voiceElements.length; i += MAX_VOICE_ELEMENTS_PER_CHUNK) {
+    const slice = voiceElements.slice(i, i + MAX_VOICE_ELEMENTS_PER_CHUNK);
+    const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${xmlLang}">
+${slice.map((el) => `  ${el}`).join('\n')}
+</speak>`;
+    chunks.push(ssml);
+  }
+
+  return chunks;
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Synthesize a single SSML chunk to a buffer using Azure Speech SDK.
+ * Returns raw audio bytes.
+ */
+async function synthesizeChunkToBuffer(ssml: string): Promise<Buffer> {
   const speechConfig = sdk.SpeechConfig.fromSubscription(
     config.azureSpeech.key,
     config.azureSpeech.region
@@ -97,10 +107,8 @@ async function synthesizeToFile(
   speechConfig.speechSynthesisOutputFormat =
     sdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
 
-  const audioConfig = sdk.AudioConfig.fromAudioFileOutput(outputPath);
-  const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-
-  const ssml = buildSsml(text, language);
+  // Use null audio config to get buffer output instead of file
+  const synthesizer = new sdk.SpeechSynthesizer(speechConfig, undefined as any);
 
   return new Promise((resolve, reject) => {
     synthesizer.speakSsmlAsync(
@@ -108,8 +116,7 @@ async function synthesizeToFile(
       (result) => {
         synthesizer.close();
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-          const durationSeconds = result.audioDuration / 10_000_000; // 100-ns ticks → seconds
-          resolve({ filePath: outputPath, durationSeconds });
+          resolve(Buffer.from(result.audioData));
         } else {
           const errorDetail = result.errorDetails || 'Unknown TTS error';
           reject(new Error(`TTS synthesis failed: ${errorDetail}`));
@@ -121,6 +128,70 @@ async function synthesizeToFile(
       }
     );
   });
+}
+
+/**
+ * Synthesize a single chunk with retry logic.
+ */
+async function synthesizeChunkWithRetry(ssml: string, chunkIndex: number): Promise<Buffer> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES_PER_CHUNK; attempt++) {
+    try {
+      if (attempt > 0) {
+        console.log(`TTS: retrying chunk ${chunkIndex + 1}, attempt ${attempt + 1}`);
+        await delay(CHUNK_DELAY_MS * 2); // Longer delay on retry
+      }
+      return await synthesizeChunkToBuffer(ssml);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      console.warn(`TTS: chunk ${chunkIndex + 1} failed (attempt ${attempt + 1}): ${lastError.message}`);
+    }
+  }
+
+  throw lastError || new Error(`TTS: chunk ${chunkIndex + 1} failed after retries`);
+}
+
+/**
+ * Synthesize text to an MP3 file using Azure Speech SDK with chunked SSML.
+ * Splits voice elements into groups of ≤25 to stay under Azure's 50-element limit.
+ * Returns the file path and duration in seconds.
+ */
+export async function synthesizeToFile(
+  text: string,
+  language: 'ar' | 'en',
+  outputPath: string,
+  unitId?: string
+): Promise<{ filePath: string; durationSeconds: number }> {
+  const voiceElements = buildVoiceElements(text, language);
+  const ssmlChunks = chunkSsmlElements(voiceElements, language);
+
+  const logId = unitId || path.basename(outputPath);
+  if (ssmlChunks.length > 1) {
+    console.log(`TTS: synthesizing in ${ssmlChunks.length} chunks for unit ${logId} (${voiceElements.length} voice elements)`);
+  }
+
+  // Synthesize each chunk sequentially with delay between calls
+  const audioBuffers: Buffer[] = [];
+  for (let i = 0; i < ssmlChunks.length; i++) {
+    if (i > 0) {
+      await delay(CHUNK_DELAY_MS);
+    }
+    const buffer = await synthesizeChunkWithRetry(ssmlChunks[i], i);
+    audioBuffers.push(buffer);
+  }
+
+  // Concatenate all audio buffers (MP3 frames are self-contained, so concat works)
+  const finalAudio = Buffer.concat(audioBuffers);
+
+  // Write to output file
+  fs.writeFileSync(outputPath, finalAudio);
+
+  // Estimate duration from MP3 data size:
+  // 128kbps = 16KB/s, so duration ≈ fileSize / 16000
+  const durationSeconds = finalAudio.length / 16000;
+
+  return { filePath: outputPath, durationSeconds };
 }
 
 export interface AudioResult {
@@ -186,7 +257,7 @@ export async function getOrGenerateAudio(
   const filename = `${unitId}-${language}${blockSuffix}.mp3`;
   const outputPath = path.join(AUDIO_DIR, filename);
 
-  const { durationSeconds } = await synthesizeToFile(textToSynthesize, language, outputPath);
+  const { durationSeconds } = await synthesizeToFile(textToSynthesize, language, outputPath, unitId);
 
   // Build the public URL
   const audioUrl = `${baseUrl}/audio/${filename}`;

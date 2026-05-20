@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import prisma from '../config/database';
-import { getOrGenerateAudio } from './tts.service';
+import { getOrGenerateAudio, synthesizeToFile } from './tts.service';
 
 const VIDEO_DIR = path.join(__dirname, '../../public/videos');
 const TEMPLATES_DIR = path.join(__dirname, './video/templates');
@@ -303,52 +303,14 @@ export async function generateUnitVideo(
 
 /**
  * Generate TTS audio for a single slide's narration text.
- * Uses the Azure Speech SDK directly (similar to tts.service but writes to a specific path).
+ * Delegates to the shared chunked synthesizeToFile from tts.service.
  */
 async function generateSlideAudio(
   text: string,
   language: 'ar' | 'en',
   outputPath: string
 ): Promise<{ filePath: string; durationSeconds: number }> {
-  // Dynamic import to reuse the same SDK setup
-  const sdk = await import('microsoft-cognitiveservices-speech-sdk');
-  const config = (await import('../config')).default;
-
-  const speechConfig = sdk.SpeechConfig.fromSubscription(
-    config.azureSpeech.key,
-    config.azureSpeech.region
-  );
-  speechConfig.speechSynthesisOutputFormat =
-    sdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
-
-  const VOICES = { ar: 'ar-SA-HamedNeural', en: 'en-US-JennyNeural' };
-  const voice = VOICES[language];
-
-  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${language === 'ar' ? 'ar-SA' : 'en-US'}">
-  <voice name="${voice}">${text}</voice>
-</speak>`;
-
-  const audioConfig = sdk.AudioConfig.fromAudioFileOutput(outputPath);
-  const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-
-  return new Promise((resolve, reject) => {
-    synthesizer.speakSsmlAsync(
-      ssml,
-      (result) => {
-        synthesizer.close();
-        if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-          const durationSeconds = result.audioDuration / 10_000_000;
-          resolve({ filePath: outputPath, durationSeconds });
-        } else {
-          reject(new Error(`TTS failed: ${result.errorDetails || 'Unknown error'}`));
-        }
-      },
-      (error) => {
-        synthesizer.close();
-        reject(new Error(`TTS error: ${error}`));
-      }
-    );
-  });
+  return synthesizeToFile(text, language, outputPath);
 }
 
 /**
