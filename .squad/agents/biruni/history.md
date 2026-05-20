@@ -36,3 +36,38 @@ Quality & security audit wrapped. Findings merged into team decision archive:
   - **This Sprint:** 8 high-severity fixes (quiz answer leak, file cleanup, JWT defaults, PIN hashing, Error Boundary, pagination)
 - Production cannot go live until blocking 3 are addressed
 - Full quality report available at `.squad/agents/biruni/quality-report-2026-05-16.md`
+
+---
+
+### 2026-05-20 — Comprehensive Test Suite Build
+
+**Status:** COMPLETED
+
+Built a full regression test suite targeting the 5 most common production bugs (auth refresh loops, rate limiter blocking logins, missing DB migrations, broken image paths, SSML formatting errors).
+
+**Backend Tests (14 files, 202 tests passing):**
+- `auth.api.test.ts` — Login, logout, token refresh, expired tokens, rate limiting behavior (14 tests)
+- `auth-flow.test.ts` — Refresh loop prevention, logout bypasses interceptor, rate limiter exemptions, expired token handling (11 tests)
+- `courses.test.ts` — List courses, get course, enrollment, pagination, filtering (13 tests)
+- `units.test.ts` — Unit content blocks, image URL rewriting, CORS, absolute URL conversion (9 tests)
+- `audio.test.ts` — AudioCache lookup, URL format, language selection (7 tests)
+- `ssml.test.ts` — XML well-formedness, voice nesting rules, Arabic/English voice selection, bilingual structure, edge cases (16 tests)
+- `video.test.ts` — Video endpoint, queue behavior, status polling, estimated time (8 tests)
+- `health.test.ts` — Health check always returns 200 (3 tests)
+- `database.test.ts` — All Prisma model accessibility, connection, model relationships (16+ tests)
+
+**Frontend Tests (4 files, 42 tests passing):**
+- `AudioPlayer.test.tsx` — Render, play/pause, speed control, error state, RTL (13 tests)
+- `VideoPlayer.test.tsx` — Render, states (loading/ready/error), RTL, close button (10 tests)
+- `UnitAudioButton.test.tsx` — Language toggle, loading states, caching, error handling (11 tests)
+- `authService.test.ts` — Token storage, refresh logic, infinite loop prevention (8 tests)
+
+**Key design decisions:**
+- All backend tests mock Prisma/Redis/Azure Speech — runnable without live DB
+- Integration tests (pre-existing) excluded from default `vitest run` since they need a real DB
+- SSML tests re-implement buildSsml() to validate the contract independently
+- Auth flow tests validate the exact patterns from api.ts that prevent refresh loops
+- Frontend tests use mocked services and HTMLMediaElement methods
+
+**CI scripts already present:** `backend: test:ci`, `frontend: test:ci`
+
