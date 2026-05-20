@@ -22,6 +22,9 @@ COPY src ./src/
 # Build TypeScript
 RUN npm run build
 
+# Copy non-TS assets (HTML templates, etc.) that tsc doesn't emit
+RUN cp -r src/services/video/templates dist/services/video/templates 2>/dev/null || true
+
 # Stage 2: Production
 FROM node:20-slim AS production
 
