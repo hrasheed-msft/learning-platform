@@ -91,7 +91,11 @@ if (config.env !== 'test') {
 }
 
 // Static assets — coursebook diagram images
-app.use('/coursebook-images', express.static(path.join(__dirname, '../public/coursebook-images')));
+// Allow cross-origin loading since frontend may be on a different domain
+app.use('/coursebook-images', (_req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, '../public/coursebook-images')));
 
 // API routes (v1)
 // Note: flashCardRoutes must be before courseRoutes because it has more specific

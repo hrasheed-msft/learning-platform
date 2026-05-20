@@ -58,7 +58,17 @@ export class CourseController {
     try {
       const { courseId, unitId } = req.params;
       const unit = await CourseService.getUnit(courseId, unitId);
-      
+
+      // Rewrite relative /coursebook-images/ paths to absolute backend URLs
+      // so images resolve correctly when the frontend is on a different origin.
+      if (unit.content?.text) {
+        const backendOrigin = `${req.protocol}://${req.get('host')}`;
+        unit.content.text = unit.content.text.replace(
+          /src="\/coursebook-images\//g,
+          `src="${backendOrigin}/coursebook-images/`
+        );
+      }
+
       res.json({
         success: true,
         data: unit,
