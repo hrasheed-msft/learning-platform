@@ -38,10 +38,9 @@ interface ChunkSynthesisResult {
 
 /**
  * Strip HTML tags and decode common entities for TTS input.
- * Final output is XML-safe (no unescaped < > & characters).
  */
 function stripHtml(html: string): string {
-  const text = html
+  return html
     .replace(/<[^>]+>/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
@@ -51,13 +50,6 @@ function stripHtml(html: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-
-  // Re-escape XML special chars so text is safe inside SSML voice elements
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
 
 /**
@@ -68,12 +60,23 @@ function containsArabic(text: string): boolean {
 }
 
 /**
+ * Escape XML special characters for safe inclusion inside SSML elements.
+ */
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
  * Build voice elements for bilingual content — Arabic segments get ar-SA voice,
  * English segments get en-US voice. Returns raw voice element strings (without <speak> wrapper).
  */
 function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
   if (language === 'ar') {
-    return [`<voice name="${VOICES.ar}">${text}</voice>`];
+    return [`<voice name="${VOICES.ar}">${escapeXml(text)}</voice>`];
   }
 
   // English with possible inline Arabic — split on Arabic character runs
@@ -82,15 +85,15 @@ function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
 
   // If no Arabic detected, single voice element
   if (!filteredParts.some(containsArabic)) {
-    return [`<voice name="${VOICES.en}">${text}</voice>`];
+    return [`<voice name="${VOICES.en}">${escapeXml(text)}</voice>`];
   }
 
   // Bilingual: one voice element per language segment
   return filteredParts.map((part) => {
     if (containsArabic(part)) {
-      return `<voice name="${VOICES.ar}">${part.trim()}</voice>`;
+      return `<voice name="${VOICES.ar}">${escapeXml(part.trim())}</voice>`;
     }
-    return `<voice name="${VOICES.en}">${part.trim()}</voice>`;
+    return `<voice name="${VOICES.en}">${escapeXml(part.trim())}</voice>`;
   });
 }
 
