@@ -67,7 +67,7 @@ if (config.env === 'production') {
 
   const authLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 50,
+    max: 15,
     keyGenerator: (req) => {
       // Use X-Forwarded-For (set by Azure Container Apps ingress) for per-client limiting
       const forwarded = req.headers['x-forwarded-for'];
@@ -77,6 +77,10 @@ if (config.env === 'production') {
     message: { error: 'Too many authentication attempts, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
+    // Exempt logout and refresh endpoints from rate limiting — these are
+    // often triggered programmatically and blocking them causes cascading failures
+    skip: (req) =>
+      req.path === '/logout' || req.path === '/refresh',
   });
   app.use('/api/v1/auth', authLimiter);
 } else {

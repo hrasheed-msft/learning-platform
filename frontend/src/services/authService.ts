@@ -1,4 +1,4 @@
-import api from './api';
+import api, { authApi } from './api';
 import type {
   LoginRequest,
   RegisterRequest,
@@ -17,13 +17,10 @@ interface ApiResponse<T> {
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      console.log('Login attempt with email:', credentials.email);
-      console.log('API URL:', import.meta.env.VITE_API_URL || '/api/v1');
       const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', credentials);
-      console.log('Login response:', response.data);
       return response.data.data;
     } catch (error) {
-      console.error('Login error details:', error);
+      console.error('Login error:', error);
       throw error;
     }
   },
@@ -34,11 +31,15 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
+    // Use authApi (no interceptor) to prevent 401 on logout from triggering refresh loop
     try {
-      await api.post('/auth/logout');
-    } catch (error) {
-      // Ignore logout errors - user should still be logged out locally
-      console.error('Logout error:', error);
+      const { useAuthStore } = await import('@/stores/authStore');
+      const token = useAuthStore.getState().accessToken;
+      await authApi.post('/auth/logout', {}, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+    } catch {
+      // Ignore logout errors - user is logged out locally regardless
     }
   },
 
@@ -58,7 +59,8 @@ export const authService = {
   },
 
   async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const response = await api.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
+    // Use authApi (no interceptor) — a 401 here must NOT trigger another refresh attempt
+    const response = await authApi.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
       '/auth/refresh',
       { refreshToken }
     );

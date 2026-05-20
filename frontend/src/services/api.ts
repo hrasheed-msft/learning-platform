@@ -12,6 +12,31 @@ const api: AxiosInstance = axios.create({
   timeout: 30000,
 });
 
+// Separate axios instance for auth operations (refresh/logout) that bypasses
+// the response interceptor to prevent infinite retry loops.
+export const authApi: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 15000,
+});
+
+// Token refresh state — prevents concurrent refresh attempts
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string | null) => void> = [];
+
+function onRefreshComplete(token: string | null) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+function waitForRefresh(): Promise<string | null> {
+  return new Promise((resolve) => {
+    refreshSubscribers.push(resolve);
+  });
+}
+
 // Request interceptor - add auth token and active member header
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -47,19 +72,45 @@ api.interceptors.response.use(
       }
     }
 
-    // Handle 401 Unauthorized - try to refresh token
+    // Handle 401 Unauthorized - try to refresh token (once only)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      const { refreshToken, accessToken } = useAuthStore.getState();
+
+      // No tokens at all — go straight to login, don't attempt refresh
+      if (!refreshToken && !accessToken) {
+        useAuthStore.getState().logout();
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      // If a refresh is already in progress, wait for it instead of firing another
+      if (isRefreshing) {
+        const newToken = await waitForRefresh();
+        if (newToken) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+        return Promise.reject(error);
+      }
+
+      isRefreshing = true;
+
       try {
         await useAuthStore.getState().refreshAuth();
-        const { accessToken } = useAuthStore.getState();
-        
-        if (accessToken) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        const { accessToken: newToken } = useAuthStore.getState();
+
+        isRefreshing = false;
+        onRefreshComplete(newToken);
+
+        if (newToken) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
         }
       } catch (refreshError) {
+        isRefreshing = false;
+        onRefreshComplete(null);
         useAuthStore.getState().logout();
         window.location.href = '/login';
         return Promise.reject(refreshError);
