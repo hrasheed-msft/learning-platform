@@ -25,11 +25,11 @@ export const audioService = {
     unitId: string,
     language: 'ar' | 'en'
   ): Promise<AudioGenerationResponse> {
-    const response = await api.post<AudioGenerationResponse>(
+    const response = await api.post(
       `/units/${unitId}/audio`,
       { language }
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -41,13 +41,17 @@ export const audioService = {
     language: 'ar' | 'en'
   ): Promise<AudioWithTimestampsResponse | null> {
     try {
-      const response = await api.get<AudioWithTimestampsResponse>(
+      const response = await api.get(
         `/units/${unitId}/audio`,
         { params: { language } }
       );
+      const data = response.data.data;
       // Only return if timestamps exist
-      if (response.data?.timestamps?.length) {
-        return response.data;
+      if (data?.timestamps?.length) {
+        return {
+          audioUrl: data.audioUrl,
+          timestamps: data.timestamps,
+        };
       }
       return null;
     } catch {

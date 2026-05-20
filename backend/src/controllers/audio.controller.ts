@@ -1,7 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
 import { getOrGenerateAudio, getAudioTimestamps, preGenerateAllAudio } from '../services/tts.service';
+import prisma from '../config/database';
 
 export class AudioController {
+  /**
+   * GET /api/v1/units/:unitId/audio?language=ar|en
+   * Returns cached audio URL + timestamps if pre-generated. Does NOT trigger generation.
+   */
+  static async getCachedAudio(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { unitId } = req.params;
+      const language = (req.query.language as string) || 'en';
+
+      if (!['ar', 'en'].includes(language)) {
+        res.status(400).json({ success: false, message: 'language must be "ar" or "en"' });
+        return;
+      }
+
+      const cached = await prisma.audioCache.findUnique({
+        where: {
+          unitId_language_blockIndex: {
+            unitId,
+            language,
+            blockIndex: -1,
+          },
+        },
+        select: { url: true, duration: true, timestamps: true },
+      });
+
+      if (!cached || !cached.url) {
+        res.status(404).json({ success: false, message: 'No pre-generated audio found for this unit' });
+        return;
+      }
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const audioUrl = cached.url.startsWith('http') ? cached.url : `${baseUrl}${cached.url}`;
+
+      res.json({
+        success: true,
+        data: {
+          audioUrl,
+          duration: cached.duration || 0,
+          timestamps: (cached.timestamps as any) || [],
+        },
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  }
   /**
    * POST /api/v1/units/:unitId/audio
    * Body: { language: "ar" | "en", contentBlockId?: string }

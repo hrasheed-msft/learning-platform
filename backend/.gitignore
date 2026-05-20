@@ -50,3 +50,5 @@ prisma/migrations/.tmp/
 .cache/
 .temp/
 .tmp/
+
+public/videos/*.mp4

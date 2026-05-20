@@ -10,6 +10,14 @@ const unitIdValidation = [
   param('unitId').isUUID().withMessage('Valid unit ID is required'),
 ];
 
+// GET /api/v1/units/:unitId/audio — retrieve cached TTS audio + timestamps (read-only)
+router.get(
+  '/:unitId/audio',
+  authenticate,
+  validate(unitIdValidation),
+  AudioController.getCachedAudio
+);
+
 // POST /api/v1/units/:unitId/audio — generate or retrieve cached TTS audio + timestamps
 router.post(
   '/:unitId/audio',
