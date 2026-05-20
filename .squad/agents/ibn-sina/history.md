@@ -90,3 +90,14 @@
 - **Pattern:** Use `selectedMember` from `useFamilyStore()` as primary; `selectedMemberId` state as fallback for no-active-member edge case.
 - **Key files:** `services/gameService.ts` (line 129), `pages/courses/CourseDetail.tsx` (enrollment section).
 - **Build:** `npx tsc --noEmit` ✓ clean.
+
+### 2026-05-20 — TTS Audio Player UI (Frontend)
+- **Status:** COMPLETED | 3 new files, 1 modified page, 1 updated barrel
+- **Deliverables:**
+  - `components/AudioPlayer.tsx` — Reusable player with play/pause, seekable progress bar, speed control (0.75x–1.5x), RTL support, error state
+  - `components/UnitAudioButton.tsx` — "Listen" button with Arabic/English language toggle, loading/error states, client-side URL caching per language
+  - `services/audioService.ts` — API service calling `POST /api/v1/units/:unitId/audio`
+  - `pages/courses/UnitViewer.tsx` — Integrated UnitAudioButton in unit header section
+- **Architecture:** Component caches audio URL per language in local state so repeated clicks don't re-generate. AudioPlayer uses native `<audio>` element with custom Tailwind UI. RTL-aware for Arabic content. "AI-generated audio" disclosure tooltip.
+- **API contract:** `POST /api/v1/units/:unitId/audio` body `{ language: "ar" | "en" }` → `{ url: string, duration: number }`
+- **Build:** `npx tsc --noEmit` ✓ clean

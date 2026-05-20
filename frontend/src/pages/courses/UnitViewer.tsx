@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
 import { courseService } from '@/services/courseService';
 import { useAuthStore } from '@/stores';
+import UnitAudioButton from '@/components/UnitAudioButton';
 import type { Unit, VideoResource, AudioResource, ArabicTerm } from '@/types/course';
 
 interface UnitProgress {
@@ -160,6 +161,15 @@ export default function UnitViewer() {
           {unit.title}
         </h1>
         <p className="text-gray-600 mt-2">{unit.description}</p>
+
+        {/* TTS Audio Button */}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <UnitAudioButton
+            unitId={unitId!}
+            hasArabic={arabicTerms.length > 0 || textContent.includes('arabic') || textContent.includes('bilingual')}
+            hasEnglish={true}
+          />
+        </div>
       </div>
 
       {/* Content Sections */}

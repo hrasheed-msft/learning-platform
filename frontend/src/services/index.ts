@@ -8,3 +8,4 @@ export { srsService } from './srsService';
 export { flashcardService } from './flashcardService';
 export { dashboardService } from './dashboardService';
 export { gameService } from './gameService';
+export { audioService } from './audioService';
