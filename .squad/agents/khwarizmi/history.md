@@ -1,8 +1,16 @@
 # Khwarizmi — Backend Implementation Agent
 
-**Focus:** Games engine, child auth, dashboard API, seed data generation
+**Focus:** Games engine, child auth, dashboard API, seed data generation, TTS/audio services
 
 ## Quick Status
+
+**TTS Word Timestamps (2026-05-20):** ✅ COMPLETE
+- Word-level timestamps via Azure Speech SDK `wordBoundary` event
+- Cumulative offset calculation across SSML chunks
+- `timestamps Json?` field on AudioCache model
+- Admin batch endpoint: `POST /api/v1/units/admin/pre-generate-audio`
+- Timestamps-only endpoint: `GET /api/v1/units/:unitId/audio/timestamps`
+- Audio response now includes `{url, duration, timestamps, cached}`
 
 **Games Backend (2026-05-17):** ✅ COMPLETE
 - 8 enums, 14 models, 3 services (game, achievement, parental controls), 15 API endpoints
