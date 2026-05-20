@@ -23,6 +23,16 @@
 - Wired into `seed.ts` after `seedQuduriTaharah()`
 - Commit: `feat: add Mukhtasar al-Quduri Salah chapter course`
 
+## Learnings
+
+**CI/CD Pipeline (2026-05-20):**
+- Created `ci-cd.yml` (full deploy pipeline) and `test.yml` (PR-only fast feedback)
+- Added `test:ci` scripts to both packages — `vitest run --reporter=verbose` for non-interactive CI
+- Backend CI needs `npx prisma generate` before tests (Prisma client must be generated)
+- Deploy jobs use `needs: [test-backend, test-frontend]` + `if: github.ref == 'refs/heads/main'` to gate deployments
+- Branch protection with required status checks (`test-backend`, `test-frontend`) completes the automated gate
+- Secrets needed: `AZURE_CREDENTIALS` (service principal), `SWA_DEPLOYMENT_TOKEN` (static web app token)
+
 ## Key Learnings
 
 **Backend-Frontend Contract (2026-05-17):**
@@ -262,3 +272,13 @@ Verified: the `selfMemberId` from the learner picker IS a valid `FamilyMember.id
 **TTS/Audiobook implementation (2026-05-20):** Azure Speech SDK (`microsoft-cognitiveservices-speech-sdk`) returns audio duration in 100-nanosecond ticks (`result.audioDuration`). Divide by 10,000,000 for seconds. SSML `<lang>` tags switch voice mid-narration for bilingual content. AudioCache uses blockIndex=-1 sentinel for "full unit" audio (Prisma unique constraint needs a concrete value, not null).
 
 **Video generation pipeline (2026-05-20):** Narrated slide-deck approach works well: Puppeteer renders HTML slides to PNG (1920×1080), TTS generates per-slide audio, ffmpeg stitches each image+audio into segment then concatenates. Key: Dockerfile must switch from `node:20-alpine` to `node:20-slim` (Debian) because Chromium/Puppeteer needs glibc. Install `fonts-hosny-amiri` for proper Arabic rendering. Use `--no-sandbox` and `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` in Container Apps. Fire-and-forget async generation pattern with database status tracking (generating→ready→failed) avoids blocking the API request.
+
+**Production deployment checklist (2026-05-20):** After creating new Prisma migrations locally, they do NOT auto-apply to production. Must run `npx prisma migrate deploy` with the production DATABASE_URL. Similarly, one-time data scripts like `patch-coursebook-images.ts` must be explicitly run against production — they are not part of the seed pipeline and not triggered by deployments. Always verify after deploy: (1) `prisma migrate status` shows no pending migrations, (2) data patches that modify existing rows have been applied.
+
+**DATABASE_URL special characters (2026-05-20):** Azure-generated PostgreSQL passwords often contain `!@#` characters. These must be URL-encoded (`%21%40%23`) in the connection string when passed via environment variables, or Prisma's URL parser will reject them with "empty host" errors.
+
+**Auth infinite refresh loop (2026-05-20):** When `authService.refreshToken()` and `authService.logout()` use the same axios instance that has a 401 interceptor, any failure triggers another refresh attempt → infinite loop → rate limiter blocks all logins. Fix pattern: (1) Create a separate `authApi` axios instance with NO response interceptor for refresh/logout calls. (2) Add `isRefreshing` flag + subscriber queue so concurrent 401s wait for one refresh instead of each firing their own. (3) If no tokens exist at all, skip refresh and redirect to login immediately. (4) Backend should exempt `/logout` and `/refresh` from auth rate limiter — these endpoints are victims of loops, not attack vectors.
+
+**Azure SSML nesting rules (2026-05-20):** `<voice>` must be a direct child of `<speak>` — never inside `<lang>`. For bilingual content with inline Arabic in English text, use separate `<voice>` elements at the `<speak>` level (one per language segment), NOT `<lang>` wrapping `<voice>`. The `<lang>` tag is only valid inside `<voice>` to hint pronunciation, not to wrap other media nodes. Error code 1007 with "should not contain node [voice] with type [Media]" = this nesting violation.
+
+**Video pre-generation queue pattern (2026-05-20):** On-demand video generation is too slow (60s+ per unit). Pattern: in-memory singleton queue + DB status column (`queued`|`generating`|`ready`|`failed`). Process one at a time with 2s delay between jobs. API endpoint returns queue position instead of blocking. Admin batch endpoint enqueues all units for a course. VideoCache.status extended from 3 states to 4 (added `queued`).
