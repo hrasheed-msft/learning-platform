@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, C
 import { courseService } from '@/services/courseService';
 import { useAuthStore } from '@/stores';
 import UnitAudioButton from '@/components/UnitAudioButton';
+import UnitVideoButton from '@/components/UnitVideoButton';
 import type { Unit, VideoResource, AudioResource, ArabicTerm } from '@/types/course';
 
 interface UnitProgress {
@@ -162,13 +163,29 @@ export default function UnitViewer() {
         </h1>
         <p className="text-gray-600 mt-2">{unit.description}</p>
 
-        {/* TTS Audio Button */}
+        {/* Study Aids: Audio + Video */}
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <UnitAudioButton
-            unitId={unitId!}
-            hasArabic={arabicTerms.length > 0 || textContent.includes('arabic') || textContent.includes('bilingual')}
-            hasEnglish={true}
-          />
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            📚 Study Aids
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <span className="text-xs font-medium text-gray-500 mb-1 block">🔊 Listen</span>
+              <UnitAudioButton
+                unitId={unitId!}
+                hasArabic={arabicTerms.length > 0 || textContent.includes('arabic') || textContent.includes('bilingual')}
+                hasEnglish={true}
+              />
+            </div>
+            <div>
+              <span className="text-xs font-medium text-gray-500 mb-1 block">🎬 Watch</span>
+              <UnitVideoButton
+                unitId={unitId!}
+                hasArabic={arabicTerms.length > 0 || textContent.includes('arabic') || textContent.includes('bilingual')}
+                hasEnglish={true}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

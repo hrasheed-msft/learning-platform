@@ -101,3 +101,14 @@
 - **Architecture:** Component caches audio URL per language in local state so repeated clicks don't re-generate. AudioPlayer uses native `<audio>` element with custom Tailwind UI. RTL-aware for Arabic content. "AI-generated audio" disclosure tooltip.
 - **API contract:** `POST /api/v1/units/:unitId/audio` body `{ language: "ar" | "en" }` → `{ url: string, duration: number }`
 - **Build:** `npx tsc --noEmit` ✓ clean
+
+### 2026-05-20 — Video Player UI (Frontend)
+- **Status:** COMPLETED | 3 new files, 1 modified page
+- **Deliverables:**
+  - `components/VideoPlayer.tsx` — HTML5 video player with custom controls (play/pause, seekable progress, speed control 0.75x–2x, fullscreen), dark cinema-style UI, AI-Generated badge, RTL support, auto-hiding controls
+  - `components/UnitVideoButton.tsx` — "Watch" button with Arabic/English language toggle, 3 states (idle → generating → ready), 5-second polling while generating, estimated time display, per-language URL caching
+  - `services/videoService.ts` — API service calling `POST /api/v1/units/:unitId/video` for both generation and status polling
+  - `pages/courses/UnitViewer.tsx` — Integrated UnitVideoButton in new "📚 Study Aids" grouped section alongside audio (grid: side-by-side on desktop, stacked on mobile)
+- **Architecture:** Consistent with AudioPlayer patterns—same caching strategy, RTL handling, error states. Video-specific: polling with interval ref, generating state animation, fullscreen API. Buttons grouped under "Study Aids" heading with responsive 2-col grid. AI disclaimer on playback.
+- **API contract:** `POST /api/v1/units/:unitId/video` body `{ language: "ar" | "en" }` → `{ status: "generating" | "ready", url?: string, estimatedTime?: number }`
+- **Build:** `npx tsc --noEmit` ✓ clean
