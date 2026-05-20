@@ -33,13 +33,15 @@ class VideoQueue {
       return false;
     }
 
-    // Skip if already ready in database
+    // Skip if already ready in database (but not stale generating/failed)
     const existing = await prisma.videoCache.findUnique({
       where: { unitId_language: { unitId, language } },
     });
     if (existing?.status === 'ready') {
       return false;
     }
+    // Skip if already queued in DB and we just need to add to in-memory queue
+    // (don't skip generating/failed — those may be stale after restart)
 
     // Mark as queued in database
     await prisma.videoCache.upsert({

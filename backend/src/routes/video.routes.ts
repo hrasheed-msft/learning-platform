@@ -22,35 +22,54 @@ router.post('/units/:unitId/video', async (req: Request, res: Response) => {
       });
     }
 
+    const { force } = req.body;
+
     // Check current status in database
     const cached = await prisma.videoCache.findUnique({
       where: { unitId_language: { unitId, language } },
     });
 
-    if (cached?.status === 'ready' && cached.url) {
-      return res.json({
-        success: true,
-        data: { status: 'ready', url: cached.url, duration: cached.duration },
+    if (!force) {
+      if (cached?.status === 'ready' && cached.url) {
+        return res.json({
+          success: true,
+          data: { status: 'ready', url: cached.url, duration: cached.duration },
+        });
+      }
+
+      // If "generating" but not actually in-memory queue, it's stale — re-enqueue
+      if (cached?.status === 'generating') {
+        const position = videoQueue.getPosition(unitId, language);
+        if (position >= 0 || videoQueue.isProcessing) {
+          return res.json({
+            success: true,
+            data: { status: 'generating', position, estimatedTime: 60 },
+          });
+        }
+        // Stale — fall through to re-enqueue
+      }
+
+      if (cached?.status === 'queued') {
+        const position = videoQueue.getPosition(unitId, language);
+        if (position >= 0) {
+          return res.json({
+            success: true,
+            data: { status: 'queued', position, estimatedTime: position * 60 },
+          });
+        }
+        // Stale — fall through to re-enqueue
+      }
+    }
+
+    // Reset stale status before enqueue if needed
+    if (cached && (cached.status === 'generating' || cached.status === 'failed' || force)) {
+      await prisma.videoCache.update({
+        where: { unitId_language: { unitId, language } },
+        data: { status: 'queued', updatedAt: new Date() },
       });
     }
 
-    if (cached?.status === 'generating') {
-      const position = videoQueue.getPosition(unitId, language);
-      return res.json({
-        success: true,
-        data: { status: 'generating', position, estimatedTime: 60 },
-      });
-    }
-
-    if (cached?.status === 'queued') {
-      const position = videoQueue.getPosition(unitId, language);
-      return res.json({
-        success: true,
-        data: { status: 'queued', position, estimatedTime: position * 60 },
-      });
-    }
-
-    // Not in system — enqueue it (non-blocking)
+    // Enqueue (non-blocking)
     await videoQueue.enqueue(unitId, language);
     const position = videoQueue.getPosition(unitId, language);
 

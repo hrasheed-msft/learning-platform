@@ -112,3 +112,24 @@
 - **Architecture:** Consistent with AudioPlayer patterns—same caching strategy, RTL handling, error states. Video-specific: polling with interval ref, generating state animation, fullscreen API. Buttons grouped under "Study Aids" heading with responsive 2-col grid. AI disclaimer on playback.
 - **API contract:** `POST /api/v1/units/:unitId/video` body `{ language: "ar" | "en" }` → `{ status: "generating" | "ready", url?: string, estimatedTime?: number }`
 - **Build:** `npx tsc --noEmit` ✓ clean
+
+### 2026-05-20 — Audio Sync Frontend (SyncedTextPlayer)
+- **Status:** COMPLETED | 5 new components + 1 store
+- **Team:** Collaborated with Khwarizmi (backend TTS) and Khaldun (architecture); Commit 99cffa5
+- **Deliverables:**
+  - `components/AudioPlayer/SyncedTextPlayer.tsx` — Main player managing real-time text sync state; props: unitId, content, language, initialPlaybackRate
+  - `components/AudioPlayer/TextHighlight.tsx` — Renders text sections with word-level highlighting; auto-scrolls to current word; RTL/LTR per section
+  - `components/AudioPlayer/AudioControls.tsx` — Playback controls: play/pause/stop, time display, seek slider, speed selector (0.75×–2×), language toggle
+  - `components/AudioPlayer/AudioMetadata.tsx` — Resource info: duration, file size, generated date, voice, buffering status
+  - `hooks/useAudioSync.ts` — Core hook: currentTimeMs sync, textSync data fetch, play/pause/seek/speed state management, fallback to on-demand TTS if pre-gen unavailable
+  - `stores/audioStore.ts` — Zustand: currentUnitId, currentTimeMs, isPlaying, duration, textSync, audioUrl, playbackRate, + action creators
+- **API Integration:** Fetch from `/api/v1/units/:unitId/audio` (pre-gen) → fallback `/api/v1/units/:unitId/audio/fallback` (streaming TTS)
+- **Sync Algorithm:** 60 FPS via RAF timeupdate listener; word finder: `words.find(w => w.sectionId === section && w.startMs <= ms < w.endMs)`; auto-scroll with smooth behavior
+- **RTL Support:** Dynamic per-section: CSS `direction: rtl|ltr`, `unicode-bidi: bidi-override`, `text-align: right|left`; Arabic text rendered with diacritics (`textWithDiacritics`); font: Noto Naskh Arabic
+- **Speed Control:** 0.75×, 1×, 1.5×, 2× — maintains sync accuracy via `currentTime` recalculation
+- **Error Handling:** Fallback UX smooth; if pre-gen unavailable → streams on-demand TTS without sync data (generic progress bar)
+- **A11y:** ARIA labels on all buttons; keyboard nav: Space (play/pause), Arrow Keys (seek), Volume (speed); screen reader announcements
+- **Performance:** Lazy-load TextHighlight per section (virtualization for long content); memoized word arrays; RAF time updates avoid requestIdleCallback lag
+- **Testing:** Unit tests (useAudioSync hook), integration tests (SyncedTextPlayer with mock responses), E2E (sync precision, RTL rendering, seek updates, speed changes, language toggle)
+- **Build:** `npx tsc --noEmit` ✓ clean; ready for integration with Khwarizmi's backend
+- **Related:** Khaldun's architecture (word boundaries, cumulative offsets, TextSync schema); Khwarizmi's TTS service (SSML chunking, Azure Speech integration)

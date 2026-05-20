@@ -192,6 +192,307 @@ Comprehensive implementation blueprint for Games feature specifying all game typ
 
 ---
 
+### 9. Test Suite Architecture & CI Convention (2026-05-20)
+**Author:** Biruni (Tester)  
+**Status:** IMPLEMENTED
+
+Comprehensive automated regression testing targeting critical production failure modes (auth refresh loops, rate limiter blocking, SSML errors, broken image paths).
+
+**Key Decisions:**
+- **Backend unit tests mock all external services** (Prisma, Redis, Azure Speech) — runnable without infrastructure
+- **Integration tests excluded from default `vitest run`** via `--exclude="**/integration/**"`; only run in CI with test database
+- **SSML tests duplicate buildSsml() logic** — validates contract independently from implementation
+- **Frontend auth tests validate refresh-loop-prevention pattern** (isRefreshing, subscriber queue, _retry, authApi separation)
+- **CI scripts:** `test:ci` runs `vitest run --reporter=verbose`; backend adds `--forceExit` for safety
+
+**Impact:** 244 new tests (202 backend + 42 frontend); all passing; critical production bugs now covered.
+
+---
+
+### 10. Game Start API – Object Params with Fallback gameType (2026-05-18)
+**Author:** Ibn Sina (Frontend)  
+**Status:** IMPLEMENTED
+
+Refactored `gameService.startGame()` from positional args to single params object to handle missing `gameId` gracefully.
+
+**Key Decisions:**
+- **Params object:** `{ gameId?: string; gameType?: string; memberId: string; courseId?: string; difficulty: GameDifficulty }`
+- **gameType derivation:** `useGameRunner` derives `gameType` from URL slug via `SLUG_TO_TYPE`, ensuring backend always gets valid identifier
+- **Truthy-only inclusion:** Only non-null values included in request body
+- **No game row case:** New courses without pre-existing Game row can start via `gameType` + `courseId`
+
+**Impact:** All 9 game components work without changes; courses without Game rows now functional.
+
+---
+
+### 11. Auth Refresh Loop Prevention Pattern (2026-05-20)
+**Author:** Khwarizmi  
+**Status:** IMPLEMENTED
+
+All auth-critical API calls MUST use separate `authApi` axios instance without response interceptor.
+
+**Key Decisions:**
+- **Separate authApi instance** — bare axios (no interceptors) used exclusively by `refreshToken()` and `logout()`
+- **isRefreshing flag** — prevents concurrent refresh attempts; queues 401 responses during in-flight refresh
+- **No-token shortcut** — if both tokens null, redirect to login immediately
+- **Backend exemption** — `/auth/logout` and `/auth/refresh` excluded from auth rate limiter via `skip` function
+
+**Rationale:** Main instance's 401 interceptor calling `refreshToken()` on main instance → infinite loop → rate limiter blocks user.
+
+**Impact:** Frontend: `api.ts`, `authService.ts`; Backend: `index.ts` (rate limiter config).
+
+---
+
+### 12. CI/CD Pipeline with Test Gates (2026-05-20)
+**Author:** Khwarizmi  
+**Status:** IMPLEMENTED
+
+Two-workflow GitHub Actions setup with automated test gates preventing unvalidated deployments.
+
+**Key Decisions:**
+- **`ci-cd.yml`** — Full pipeline on push to `main` and PRs; tests must pass before deploy
+- **`test.yml`** — Lightweight PR-only workflow (tests + lint) for fast feedback
+- **Deploy gated:** `needs: [test-backend, test-frontend]` — if either fails, no deployment
+- **Vitest in CI mode** — `vitest run --reporter=verbose`, no watch mode
+- **Prisma generate in CI** — required before tests (generated client not committed)
+- **Parallel test jobs** — independent for speed
+- **Separate test-only workflow** — PRs get fast feedback without deploy noise
+
+**Action Required:** Add secrets (`AZURE_CREDENTIALS`, `SWA_DEPLOYMENT_TOKEN`); enable branch protection on `main`.
+
+**Impact:** No code reaches production without passing tests; PRs show pass/fail inline.
+
+---
+
+### 13. TTS SSML Chunking — Voice Element Limit Fix (2026-05-20)
+**Author:** Khwarizmi  
+**Status:** IMPLEMENTED
+
+Azure Speech Service rejects SSML with >50 `<voice>` elements. Chunked voices into groups of ≤25 per request.
+
+**Key Decisions:**
+- **Chunk size:** 25 voice elements per SSML request (50% headroom under 50-element limit)
+- **buildVoiceElements()** returns raw voice strings (decoupled from `<speak>` wrapper)
+- **chunkSsmlElements()** splits into groups of 25, wraps each in valid `<speak>` document
+- **Sequential synthesis** with 200ms inter-chunk delay (rate limit courtesy)
+- **Per-chunk retry:** Up to 2 retries with 400ms backoff on failure
+- **MP3 concatenation:** Frames self-contained, no re-encoding needed
+- **synthesizeToFile exported:** Shared by both audiobook endpoint and video narration
+
+**Files Changed:** `backend/src/services/tts.service.ts`, `backend/src/services/videoService.ts`
+
+**Commit:** `01c5163` — `fix: chunk TTS SSML to stay under 50 voice-element limit`
+
+---
+
+### 14. TTS/Audiobook Backend Implementation (2026-05-20)
+**Author:** Khwarizmi  
+**Status:** IMPLEMENTED
+
+Implemented TTS/Audiobook API following pre-generation model with SSML chunking and bilingual support.
+
+**Key Decisions:**
+- **Endpoint:** `POST /api/v1/units/:unitId/audio` with `{ language: "ar" | "en", contentBlockId?: string }`
+- **Behavior:** Returns cached URL if exists; synthesizes on-demand and caches otherwise
+- **Voice Selection:** Arabic: `ar-SA-HamedNeural` (MSA, educational); English: `en-US-JennyNeural` (natural, clear)
+- **Bilingual:** SSML `<lang>` tag switches voice mid-narration for inline Arabic
+- **Storage (Phase 1):** Local filesystem `public/audio/{unitId}-{language}-{blockIndex}.mp3`; served as static files
+- **Caching:** `AudioCache` Prisma model with `@@unique([unitId, language, blockIndex])`; `blockIndex=-1` for full-unit
+- **Azure Resource:** `speech-islamic-learning` (F0 free tier, 5 hours/month, centralus region)
+
+**Files Created/Modified:**
+- `backend/src/services/tts.service.ts` — synthesis engine
+- `backend/src/controllers/audio.controller.ts` — request validation
+- `backend/src/routes/audio.routes.ts` — route registration
+- `backend/src/config/index.ts` — Azure Speech config
+- `backend/prisma/schema.prisma` — AudioCache model
+- `.env.example` — documented env vars
+
+**Team Notes:** First call per unit/language takes 2–5s (synthesis); subsequent calls instant (cached). Phase 3 will integrate licensed Quran recitation.
+
+---
+
+### 15. Round Metadata Must Match Frontend Destructuring (2026-05-18)
+**Author:** Khwarizmi  
+**Status:** IMPLEMENTED  
+**Commit:** `60e7e41`
+
+Backend round metadata field names are dictated by frontend component destructuring.
+
+**Key Decisions:**
+- **WORD_SEARCH:** Added `targetWords` field (frontend reads `c.targetWords`); kept `words` for backward-compat. Grader accepts `{ foundWords }` submission shape.
+- **CLOZE:** Restructured from multi-blank-per-round (`sentence` + `blanks[]`) to one-blank-per-round (`questionText` with `{blank}` marker, `correctAnswer` string, `options` array). Matches frontend single-input-per-round UX.
+- **Contract:** Frontend component destructuring IS the contract; backend formatters must match exactly.
+
+**Impact:** Both games work with existing frontend components; no frontend changes needed. Future game types must read frontend destructuring before writing backend formatter.
+
+---
+
+### 16. Pre-Generated Audio with Synchronized Text Highlighting — Architecture Design (2026-05-20)
+**Author:** Khaldun (Lead Architect)  
+**Status:** PROPOSAL — Architecture Decision
+
+Comprehensive design for pre-generated audio files with real-time text highlighting (karaoke-style), addressing timeout errors, lack of text sync, and repetitive TTS calls.
+
+**Key Decisions:**
+
+#### Data Model — Word-Level Timestamps Storage
+- **Extend audioCache** with new `textSync` column containing word boundary metadata
+- **TextSync JSON Schema:** `{ version: "1.0", words: WordBoundary[], chunkOffsets?: ChunkOffset[] }`
+- **WordBoundary fields:** `wordIndex`, `text`, `textWithDiacritics`, `startMs`, `endMs`, `sectionId`, `language`
+- **Rationale:** Keeps audio + metadata atomic; word boundaries always generated alongside audio
+
+#### Pre-Generation Pipeline — Background Job
+- **Queue:** Bull/Redis with admin UI trigger (no automatic generation initially)
+- **Stages:** Trigger → Fetch → Split → Generate → Align → Store → Notify
+- **Per-chunk retry:** Up to 2 retries with exponential backoff
+- **Job Payload:** `{ unitId, language, voiceId, sections[], priority, triggeredBy }`
+
+#### Timestamp Format — Cumulative Offsets
+- **Word-level granularity** — enables individual word highlighting during playback
+- **Chunk offset tracking** — allows re-generation strategy changes without breaking alignment
+- **Diacritics preservation** — Arabic stored with diacritics for accurate display
+
+#### API Contract — Frontend-Facing Endpoints
+- **GET `/api/v1/content/units/:unitId/audio`** — returns pre-gen audio + sync data; 412 if not ready (can auto-trigger job)
+- **GET `/api/v1/content/units/:unitId/audio/fallback`** — streams on-demand TTS (no sync data)
+- **Signed URLs** — Azure Blob SAS tokens for security
+- **Cache Headers** — Long TTL (1 year) on static blob URLs
+
+#### Arabic Handling — RTL, Diacritics, Word Splitting
+- **Preserve diacritics in storage**, use unicode word segmentation, render with RTL CSS
+- **Strip diacritics for matching logic** — separates display text from match/search logic
+- **Frontend:** CSS `direction: rtl` for Arabic sections; `textWithDiacritics` for display
+
+#### When Pre-Generation Happens
+- **Primary:** Manual admin trigger via admin UI
+- **Phase 2:** Auto-trigger on unit publish
+- **Cost control:** Admin chooses which units to pre-generate
+
+#### Testing Strategy
+- **Unit tests:** Word boundary extraction, cumulative offset calculation, diacritics handling, TextSync schema validation
+- **Integration tests:** End-to-end pre-gen job, audio + sync stored correctly, fallback TTS works
+- **E2E (Frontend):** Real-time highlighting, Arabic RTL rendering, instant seek sync, speed changes
+
+#### Migration Path
+1. Deploy audioCache schema (no breaking change)
+2. Deploy background job service
+3. Deploy admin endpoints (auth-gated)
+4. Deploy frontend components (feature-flagged)
+5. Enable feature flag (gradual rollout)
+
+**Phase 1 Scope:** AudioCache extension, background job pipeline, word boundary extraction, API endpoints, frontend AudioPlayer/TextHighlight, Arabic handling, cumulative offset strategy
+
+**Deferred to Phase 2:** Auto-trigger on publish, batch pre-gen UI, cost analytics, Redis in-memory sync, CDN integration
+
+**Risks:** Word boundary extraction timing data accuracy, audio concatenation frame boundaries, re-generation strategy changes.
+
+---
+
+### 17. Multimodal Architecture — Video Generation & TTS/Audiobook (2026-05-20)
+**Author:** Khaldun (Lead Architect)  
+**Status:** PROPOSAL — Pending team review
+
+Comprehensive multimodal feature design addressing high-value requests for automatic video generation and TTS/audiobook with full Arabic support.
+
+**Feature 1: Automatic Video Generation**
+
+#### Options Considered
+- **Option A (Avatar APIs):** HeyGen, D-ID, Synthesia, Azure TTS Avatar — Rejected due to Islamic appropriateness concerns (realistic human representations) and content control limitations
+- **Option B (Text-to-Video AI):** Sora, Runway, Pika, Kling — Rejected (no Arabic rendering, poor educational content control, expensive)
+- **Option C (Narrated Slide-Deck):** RECOMMENDED — Programmatic construction from unit content
+
+#### Option C: Narrated Slide-Deck Video (Recommended)
+- **Components:** Azure AI Speech TTS → MP3 narration; Puppeteer (headless Chrome) → PNG slides; ffmpeg → MP4 video
+- **Video structure:** Title card + content slides (key paragraphs) + Arabic term slides + summary
+- **Advantages:** Full Arabic text fidelity, Islamically appropriate (no human images, geometric art), controllable, cheap (~TTS cost only), works offline
+- **Slide format:** 1280×720 HD, 25fps; Islamic geometric backgrounds (CC0); Noto Naskh Arabic + Inter fonts
+- **Timing:** Each slide duration = audio segment duration; SSML `<bookmark>` tags for word-level timing
+
+#### Generation Trigger & Frequency
+- **Trigger:** Content-admin action ("Generate Video" button), not automatic
+- **Frequency:** Once per unit, on content publish; re-generated if content changes (hash-based invalidation)
+- **Background processing:** PostgreSQL-backed job table; worker loop in Container App (MVP uses async worker thread)
+- **Storage:** `media/videos/{unitId}/{hash}.mp4` in Azure Blob Storage (Hot tier); publicly readable via CDN
+
+**Feature 2: TTS / Audiobook**
+
+#### Pre-generate vs. On-the-Fly Analysis
+- **Pre-generate:** Zero latency (CDN), no per-user API calls, predictable cost, works offline
+- **Decision: Pre-generate** — content stable; cost of Blob Storage ($0.018/GB/month) negligible at scale
+
+#### Arabic Language Strategy
+- **Arabic content:** `ar-SA-HamedNeural` (male, MSA, educational)
+- **Arabic terms in English:** SSML `<lang xml:lang="ar-SA">` tag switches voice mid-narration
+- **English:** `en-US-JennyNeural` or `en-US-GuyNeural`
+- **Quranic recitation note:** NOT suitable for TTS; either skip Arabic ayat in audio or use disclaimer. Phase 3 integrates licensed recitation (EveryAyah.com API or Quran.com)
+
+#### "Listen" Button UX Flow
+1. Click "Listen" button on Unit page (language toggle: EN/AR)
+2. Fetch pre-generated MP3 from `/api/v1/units/:unitId/audio`
+3. If READY: stream from CDN (immediate); if PENDING/GENERATING: show "being prepared" message; if FAILED: retry option
+4. Minimal floating player: play/pause, speed control (0.75×/1×/1.5×/2×), progress bar
+
+#### Data Model Changes
+- **Extend AudioResource:** Add `language`, `voiceId`, `status`, `textHash`, `sizeBytes`, `generatedAt`, `errorMessage`
+- **Extend VideoResource:** Add `generationType` (MANUAL|SLIDE_DECK|AVATAR), `status`, `textHash`, `sizeBytes`, `generatedAt`, `errorMessage`
+- **New MediaGenerationJob:** Track async generation jobs (QUEUED|PROCESSING|DONE|FAILED)
+- **Extend UnitProgress:** Add `audioListened` boolean
+
+#### New Azure Resources Required
+- **Azure AI Speech (S0 tier):** TTS for audio generation + batch avatar (Phase 3). F0 free tier: 0.5M neural chars/month (dev/low usage); S0 production: pay-as-you-go
+- **Azure Blob Storage `media` container:** Hot tier, LRS redundancy, public read for CDN; sub-paths: `media/audio/{unitId}/`, `media/video/{unitId}/`
+- **Azure CDN (Standard Microsoft):** Low-latency global MP3/MP4 delivery; far-future cache headers (1 year) for hash-addressed files
+- **No new compute Phase 1–2:** Backend Container App gains `MediaGenerationService` + `SlideRenderService`; Puppeteer/ffmpeg added to Dockerfile; may need resource increase (1→2 vCPU, 2→4 GB RAM) for video generation
+
+#### Cost Estimates
+- **TTS one-time:** 200 units × 10K chars = 2M chars ≈ $32 (free tier saves ~$8); **net ~$24**
+- **Blob storage:** 1 GB audio (200×5MB) ≈ $0.018/mo; 10 GB video Phase 2 ≈ $0.18/mo; **total ~$0.20/mo**
+- **CDN delivery:** 100 learners × 10 units/week × 5MB audio = 5GB/week ≈ 20GB/mo ≈ $1.74/mo
+- **Phase 2 (audio+video):** 100 learners + 50MB videos ≈ +200GB/mo ≈ $17.40/mo
+- **Phase 1 total:** ~$2–5/mo at 100 learners; **Phase 2 total:** ~$20–25/mo
+
+#### Implementation Phases
+
+**Phase 1: TTS Audiobook (4–6 days)**
+- Provision Azure AI Speech (S0); store key in Key Vault
+- `MediaGenerationService.generateAudio()`: strip HTML → plain text → SSML build → Azure TTS → MP3 → Blob Storage
+- Job queue: `POST /api/v1/admin/units/:unitId/generate-audio`; `GET /api/v1/units/:unitId/audio`
+- Schema extension (migration)
+- Frontend: AudioPlayer component, "Listen" button, language toggle, status polling
+- Admin trigger: Directus "Generate Audio" action; bulk action per course
+
+**Phase 2: Slide-Deck Video Generation (1–2 weeks)**
+- Add Puppeteer + Chrome Headless + ffmpeg to Dockerfile
+- `SlideGenerationService`: parse content HTML → slide scripts → Puppeteer render PNGs → per-slide TTS → ffmpeg assemble
+- Increase Container App resources (2 vCPU/4 GB RAM)
+- Schema extensions (migration)
+- Video template design (geometric art, Arabic fonts, 1280×720 HD, 25fps)
+- Progress tracking: `videoCompleted` in UnitProgress
+
+**Phase 3: Per-Term Audio + Quranic Integration (Future)**
+- Pre-generate TTS for each `ArabicTerm.audioUrl`
+- Licensed Quran recitation (EveryAyah.com or Quran.com APIs)
+- Optional: Azure TTS Avatar for admin-created premium content (opt-in disclosure)
+- Offline download: package audio/video for PWA
+
+#### Open Questions
+1. **Admin trigger vs. auto-trigger:** Explicit trigger (Phase 1) or auto-generate on publish (Phase 2)?
+2. **Arabic voice gender:** Preferences per member (male/female) or universal default?
+3. **Video backgrounds:** Curate ~20 CC0 Islamic geometric art images for Phase 2
+4. **Container App sizing:** Video generation worker isolation (dedicated Container App job, scale-to-zero) or main container?
+5. **Multilingual expansion:** Urdu (`ur-PK-AsadNeural`) for South Asian audience — Phase 3 roadmap
+
+**Key Principles:**
+- Full Arabic text fidelity (RTL, diacritics, Quranic fonts)
+- Islamically appropriate (no photorealistic avatars)
+- Cost-viable (TTS ~$24 one-time, ~$2–25/mo ongoing)
+- Works offline/PWA-friendly
+
+**Risks:** Arabic quality on classical text (test ar-SA-HamedNeural first), Puppeteer/ffmpeg image size + startup (mitigate with dedicated worker Phase 2), content changes invalidate cache (use textHash), viral traffic CDN costs (cheap + caching means minimal Blob egress), user expectations on Quran recitation (clear UI label "AI-generated").
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
