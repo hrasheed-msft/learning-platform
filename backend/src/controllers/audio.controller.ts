@@ -33,6 +33,12 @@ export class AudioController {
         return;
       }
 
+      // Detect stale cache entries pointing to ephemeral container storage
+      if (cached.url.includes('azurecontainerapps.io/audio/')) {
+        res.status(404).json({ success: false, message: 'Audio needs regeneration (stale cache)' });
+        return;
+      }
+
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       const audioUrl = cached.url.startsWith('http') ? cached.url : `${baseUrl}${cached.url}`;
 

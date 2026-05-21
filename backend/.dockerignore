@@ -12,3 +12,9 @@ test-api.ps1
 vitest.config.ts
 .eslintrc.js
 coverage
+public/coursebook-images
+public/videos
+public/audio
+scripts
+*.mp4
+*.tmp*

@@ -1,14 +1,66 @@
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 import fs from 'fs';
 import path from 'path';
+import { BlobServiceClient } from '@azure/storage-blob';
 import config from '../config';
 import prisma from '../config/database';
 
 const AUDIO_DIR = path.join(__dirname, '../../public/audio');
 
-// Ensure audio directory exists
+// Ensure audio directory exists (used as temp storage before uploading to blob)
 if (!fs.existsSync(AUDIO_DIR)) {
   fs.mkdirSync(AUDIO_DIR, { recursive: true });
+}
+
+// Azure Blob Storage client for persistent audio storage
+const BLOB_CONTAINER_NAME = process.env.AZURE_STORAGE_CONTAINER_NAME || 'audio';
+let blobContainerClient: ReturnType<BlobServiceClient['getContainerClient']> | null = null;
+
+function getBlobContainerClient() {
+  if (blobContainerClient) return blobContainerClient;
+  const connStr = process.env.AZURE_STORAGE_CONNECTION_STRING || config.azure.storageConnectionString;
+  if (!connStr) {
+    console.warn('TTS: No AZURE_STORAGE_CONNECTION_STRING configured, using local file serving');
+    return null;
+  }
+  try {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+    blobContainerClient = blobServiceClient.getContainerClient(BLOB_CONTAINER_NAME);
+    console.log(`TTS: Blob storage configured - container "${BLOB_CONTAINER_NAME}" at ${blobServiceClient.url}`);
+    return blobContainerClient;
+  } catch (err: any) {
+    console.error('TTS: Failed to initialize blob storage client:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Upload an audio file to Azure Blob Storage and return the public URL.
+ * Falls back to local serving if blob storage isn't configured.
+ */
+async function uploadToBlob(filePath: string, filename: string, baseUrl: string): Promise<string> {
+  const container = getBlobContainerClient();
+  if (!container) {
+    // Fallback to local serving
+    console.log(`TTS: Serving audio locally: ${baseUrl}/audio/${filename}`);
+    return `${baseUrl}/audio/${filename}`;
+  }
+
+  try {
+    const blockBlobClient = container.getBlockBlobClient(filename);
+    await blockBlobClient.uploadFile(filePath, {
+      blobHTTPHeaders: { blobContentType: 'audio/mpeg' },
+    });
+    console.log(`TTS: Uploaded to blob: ${blockBlobClient.url}`);
+
+    // Clean up local temp file
+    try { fs.unlinkSync(filePath); } catch { /* ignore */ }
+
+    return blockBlobClient.url;
+  } catch (err: any) {
+    console.error(`TTS: Blob upload failed, falling back to local: ${err.message}`);
+    return `${baseUrl}/audio/${filename}`;
+  }
 }
 
 const VOICES = {
@@ -291,12 +343,21 @@ export async function getOrGenerateAudio(
   });
 
   if (cached) {
-    return {
-      url: cached.url,
-      duration: cached.duration,
-      timestamps: (cached.timestamps as WordTimestamp[] | null) ?? null,
-      cached: true,
-    };
+    // Detect stale cache entries pointing to ephemeral container storage
+    if (cached.url && cached.url.includes('azurecontainerapps.io/audio/') && getBlobContainerClient()) {
+      // Delete stale entry — will regenerate with blob storage below
+      await prisma.audioCache.delete({
+        where: { unitId_language_blockIndex: { unitId, language, blockIndex: blockIndex ?? -1 } },
+      });
+      console.log(`TTS: Migrating stale cache for ${unitId} to blob storage`);
+    } else {
+      return {
+        url: cached.url,
+        duration: cached.duration,
+        timestamps: (cached.timestamps as WordTimestamp[] | null) ?? null,
+        cached: true,
+      };
+    }
   }
 
   // Fetch unit content
@@ -326,15 +387,15 @@ export async function getOrGenerateAudio(
     throw new Error('No synthesizable text found in unit content');
   }
 
-  // Generate filename and synthesize
+  // Generate filename and synthesize to temp file
   const blockSuffix = blockIndex !== null && blockIndex >= 0 ? `-${blockIndex}` : '';
   const filename = `${unitId}-${language}${blockSuffix}.mp3`;
   const outputPath = path.join(AUDIO_DIR, filename);
 
   const { durationSeconds, timestamps } = await synthesizeToFile(textToSynthesize, language, outputPath, unitId);
 
-  // Build the public URL
-  const audioUrl = `${baseUrl}/audio/${filename}`;
+  // Upload to blob storage (or serve locally as fallback)
+  const audioUrl = await uploadToBlob(outputPath, filename, baseUrl);
 
   // Cache in database (including timestamps)
   await prisma.audioCache.create({
