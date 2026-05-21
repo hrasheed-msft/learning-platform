@@ -125,27 +125,65 @@ function escapeXml(text: string): string {
 /**
  * Build voice elements for bilingual content — Arabic segments get ar-SA voice,
  * English segments get en-US voice. Returns raw voice element strings (without <speak> wrapper).
+ *
+ * For English content, short inline Arabic (≤4 words) stays in the English voice
+ * to avoid prosody fragmentation. Only substantial Arabic passages (>4 words)
+ * trigger a voice switch.
  */
 function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
   if (language === 'ar') {
     return [`<voice name="${VOICES.ar}">${escapeXml(text)}</voice>`];
   }
 
-  // English with possible inline Arabic — split on Arabic character runs
-  const parts = text.split(/([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\u064B-\u065F\u0670]+)/g);
-  const filteredParts = parts.filter((p) => p.trim());
+  // Split on Arabic character runs — whitespace is NOT included in the Arabic class
+  const ARABIC_SEGMENT_RE = /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u064B-\u065F\u0670]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u064B-\u065F\u0670]+)*)/g;
+  const parts = text.split(ARABIC_SEGMENT_RE);
 
-  // If no Arabic detected, single voice element
-  if (!filteredParts.some(containsArabic)) {
-    return [`<voice name="${VOICES.en}">${escapeXml(text)}</voice>`];
+  // If no Arabic detected, single voice element with prosody boost
+  if (!parts.some(containsArabic)) {
+    return [`<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(text)}</prosody></voice>`];
   }
 
-  // Bilingual: one voice element per language segment
-  return filteredParts.map((part) => {
+  // Threshold: Arabic segments with >4 words get their own voice element
+  const ARABIC_WORD_THRESHOLD = 4;
+
+  // Merge short Arabic inline with surrounding English text
+  const mergedSegments: { voice: 'ar' | 'en'; text: string }[] = [];
+  let englishBuffer = '';
+
+  for (const part of parts) {
+    if (!part) continue;
+
     if (containsArabic(part)) {
-      return `<voice name="${VOICES.ar}">${escapeXml(part.trim())}</voice>`;
+      const arabicWordCount = part.trim().split(/\s+/).length;
+
+      if (arabicWordCount <= ARABIC_WORD_THRESHOLD) {
+        // Short Arabic — keep inline with English
+        englishBuffer += part;
+      } else {
+        // Substantial Arabic — flush English buffer, then add Arabic segment
+        if (englishBuffer.trim()) {
+          mergedSegments.push({ voice: 'en', text: englishBuffer.trim() });
+        }
+        englishBuffer = '';
+        mergedSegments.push({ voice: 'ar', text: part.trim() });
+      }
+    } else {
+      englishBuffer += part;
     }
-    return `<voice name="${VOICES.en}">${escapeXml(part.trim())}</voice>`;
+  }
+
+  // Flush remaining English buffer
+  if (englishBuffer.trim()) {
+    mergedSegments.push({ voice: 'en', text: englishBuffer.trim() });
+  }
+
+  // Build voice elements
+  return mergedSegments.map((seg) => {
+    if (seg.voice === 'ar') {
+      return `<voice name="${VOICES.ar}">${escapeXml(seg.text)}</voice>`;
+    }
+    return `<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(seg.text)}</prosody></voice>`;
   });
 }
 
