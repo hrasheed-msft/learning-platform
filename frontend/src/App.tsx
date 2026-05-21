@@ -1,60 +1,72 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useChildAuthStore } from '@/stores/childAuthStore';
 
-// Layouts
+// Layouts (keep eager — needed immediately)
 import MainLayout from '@/components/layouts/MainLayout';
 import AuthLayout from '@/components/layouts/AuthLayout';
 import ChildLayout from '@/components/layouts/ChildLayout';
 
-// Auth Pages
+// Auth Pages (keep eager — first pages users see)
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
-import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
-import VerifyEmailPage from '@/pages/auth/VerifyEmailPage';
-import ChildLoginPage from '@/pages/auth/ChildLoginPage';
 
-// Learner Picker
+// Lazy-loaded auth pages
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('@/pages/auth/VerifyEmailPage'));
+const ChildLoginPage = lazy(() => import('@/pages/auth/ChildLoginPage'));
+
+// Learner Picker (keep eager — critical path after login)
 import SelectLearner from '@/pages/SelectLearner';
 
-// Dashboard Pages
-import FamilyDashboard from '@/pages/dashboard/FamilyDashboard';
-import ChildDashboard from '@/pages/dashboard/ChildDashboard';
-import MemberProgress from '@/pages/dashboard/MemberProgress';
-import ParentDashboard from '@/pages/dashboard/ParentDashboard';
-import ChildDetailView from '@/pages/dashboard/ChildDetailView';
+// Dashboard Pages (lazy)
+const FamilyDashboard = lazy(() => import('@/pages/dashboard/FamilyDashboard'));
+const ChildDashboard = lazy(() => import('@/pages/dashboard/ChildDashboard'));
+const MemberProgress = lazy(() => import('@/pages/dashboard/MemberProgress'));
+const ParentDashboard = lazy(() => import('@/pages/dashboard/ParentDashboard'));
+const ChildDetailView = lazy(() => import('@/pages/dashboard/ChildDetailView'));
 
-// Course Pages
-import CoursesPage from '@/pages/courses/CoursesPage';
-import CourseDetail from '@/pages/courses/CourseDetail';
-import CourseLearner from '@/pages/courses/CourseLearner';
-import UnitViewer from '@/pages/courses/UnitViewer';
-import QuizPage from '@/pages/courses/QuizPage';
+// Course Pages (lazy)
+const CoursesPage = lazy(() => import('@/pages/courses/CoursesPage'));
+const CourseDetail = lazy(() => import('@/pages/courses/CourseDetail'));
+const CourseLearner = lazy(() => import('@/pages/courses/CourseLearner'));
+const UnitViewer = lazy(() => import('@/pages/courses/UnitViewer'));
+const QuizPage = lazy(() => import('@/pages/courses/QuizPage'));
 
-// Flashcard Pages
-import StudySessionPage from '@/pages/flashcards/StudySessionPage';
-import ReviewSessionPage from '@/pages/flashcards/ReviewSessionPage';
-import UnitFlashCardsPage from '@/pages/flashcards/UnitFlashCardsPage';
-import CourseFlashCardsPage from '@/pages/flashcards/CourseFlashCardsPage';
+// Flashcard Pages (lazy)
+const StudySessionPage = lazy(() => import('@/pages/flashcards/StudySessionPage'));
+const ReviewSessionPage = lazy(() => import('@/pages/flashcards/ReviewSessionPage'));
+const UnitFlashCardsPage = lazy(() => import('@/pages/flashcards/UnitFlashCardsPage'));
+const CourseFlashCardsPage = lazy(() => import('@/pages/flashcards/CourseFlashCardsPage'));
 
-// Games Pages
-import GamesHub from '@/pages/games/GamesHub';
-import GameLauncher from '@/pages/games/GameLauncher';
-import GamePlay from '@/pages/games/GamePlay';
-import ScoreHistory from '@/pages/games/ScoreHistory';
-import AchievementGallery from '@/pages/games/AchievementGallery';
-import LeaderboardPage from '@/pages/games/LeaderboardPage';
+// Games Pages (lazy)
+const GamesHub = lazy(() => import('@/pages/games/GamesHub'));
+const GameLauncher = lazy(() => import('@/pages/games/GameLauncher'));
+const GamePlay = lazy(() => import('@/pages/games/GamePlay'));
+const ScoreHistory = lazy(() => import('@/pages/games/ScoreHistory'));
+const AchievementGallery = lazy(() => import('@/pages/games/AchievementGallery'));
+const LeaderboardPage = lazy(() => import('@/pages/games/LeaderboardPage'));
 
-// Settings Pages
-import FamilySettings from '@/pages/settings/FamilySettings';
+// Settings Pages (lazy)
+const FamilySettings = lazy(() => import('@/pages/settings/FamilySettings'));
 
-// Child Pages
-import ChildDashboardHome from '@/pages/child/ChildDashboardHome';
-import ChildCoursesPage from '@/pages/child/ChildCoursesPage';
-import ChildFlashcardsPage from '@/pages/child/ChildFlashcardsPage';
-import ChildAchievementsPage from '@/pages/child/ChildAchievementsPage';
+// Child Pages (lazy)
+const ChildDashboardHome = lazy(() => import('@/pages/child/ChildDashboardHome'));
+const ChildCoursesPage = lazy(() => import('@/pages/child/ChildCoursesPage'));
+const ChildFlashcardsPage = lazy(() => import('@/pages/child/ChildFlashcardsPage'));
+const ChildAchievementsPage = lazy(() => import('@/pages/child/ChildAchievementsPage'));
+
+// Loading fallback for lazy routes
+function PageLoader() {
+  return (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
+    </div>
+  );
+}
 
 // Protected Route Component (parent/admin users)
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -133,6 +145,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Child Login — standalone page, not inside AuthLayout */}
       <Route path="/child-login" element={<ChildLoginPage />} />
@@ -234,6 +247,7 @@ function App() {
       {/* Catch all - 404 */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </Suspense>
   );
 }
 

@@ -17,6 +17,19 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-state': ['zustand', 'axios'],
+          'vendor-ui': ['lucide-react', 'clsx'],
+          'vendor-content': ['react-markdown', 'react-player'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+  },
   server: {
     port: 5173,
     proxy: {

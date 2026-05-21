@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, User, Loader2 } from 'lucide-react';
+import { UserPlus, User, Loader2, X } from 'lucide-react';
 import clsx from 'clsx';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores/authStore';
+import { familyService } from '@/services/familyService';
+import type { CreateMemberRequest } from '@/types';
 
 const TILE_COLORS = [
   'border-emerald-400 bg-emerald-50',
@@ -43,6 +45,13 @@ export default function SelectLearner() {
     useFamilyStore();
   const [enrolling, setEnrolling] = useState(false);
 
+  // Add learner modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newAge, setNewAge] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
   useEffect(() => {
     fetchLearners();
   }, [fetchLearners]);
@@ -62,6 +71,27 @@ export default function SelectLearner() {
       // error is set in the store
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  const handleAddLearner = async () => {
+    if (!newName.trim() || !newAge) return;
+    setAddingMember(true);
+    setAddError(null);
+    try {
+      const memberData: CreateMemberRequest = {
+        name: newName.trim(),
+        age: parseInt(newAge, 10),
+      };
+      await familyService.addMember('current', memberData);
+      await fetchLearners();
+      setNewName('');
+      setNewAge('');
+      setShowAddModal(false);
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add learner');
+    } finally {
+      setAddingMember(false);
     }
   };
 
@@ -171,9 +201,9 @@ export default function SelectLearner() {
             </span>
           </button>
 
-          {/* Add a learner tile (links to settings) */}
+          {/* Add a learner tile (opens modal) */}
           <button
-            onClick={() => navigate('/settings')}
+            onClick={() => setShowAddModal(true)}
             className="flex flex-col items-center gap-3 p-6 rounded-2xl border-3 border-dashed border-gray-300 bg-white/60 transition-all hover:scale-105 hover:shadow-lg hover:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-400"
           >
             <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center">
@@ -184,6 +214,79 @@ export default function SelectLearner() {
             </span>
             <span className="text-xs text-gray-400">Child or student</span>
           </button>
+        </div>
+      )}
+
+      {/* Add Learner Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
+            <button
+              onClick={() => { setShowAddModal(false); setAddError(null); }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Add a learner</h2>
+            <p className="text-sm text-gray-500 mb-5">Create a new learner profile for your family.</p>
+
+            {addError && (
+              <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {addError}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="learner-name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  id="learner-name"
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="e.g. Ahmad"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label htmlFor="learner-age" className="block text-sm font-medium text-gray-700 mb-1">
+                  Age
+                </label>
+                <input
+                  id="learner-age"
+                  type="number"
+                  min="3"
+                  max="99"
+                  value={newAge}
+                  onChange={(e) => setNewAge(e.target.value)}
+                  placeholder="e.g. 8"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => { setShowAddModal(false); setAddError(null); }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddLearner}
+                disabled={addingMember || !newName.trim() || !newAge}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {addingMember && <Loader2 className="w-4 h-4 animate-spin" />}
+                Add learner
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
