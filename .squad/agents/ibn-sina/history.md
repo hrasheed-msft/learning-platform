@@ -133,3 +133,14 @@
 - **Testing:** Unit tests (useAudioSync hook), integration tests (SyncedTextPlayer with mock responses), E2E (sync precision, RTL rendering, seek updates, speed changes, language toggle)
 - **Build:** `npx tsc --noEmit` ✓ clean; ready for integration with Khwarizmi's backend
 - **Related:** Khaldun's architecture (word boundaries, cumulative offsets, TextSync schema); Khwarizmi's TTS service (SSML chunking, Azure Speech integration)
+
+### 2026-05-21 — "Add a Learner" Fix + Performance Optimization
+- **Status:** COMPLETED | 4 files modified
+- **Issue 1 (Add Learner button broken):** The button navigated to `/settings`, but `ProtectedRoute` requires `selectedMember` — which is null on the learner picker. Fix: replaced navigation with an inline modal (name + age form) that calls `familyService.addMember` directly, then refreshes the learner list.
+- **Issue 2 (Slow first load):** Initial bundle was ~507kB monolith. Fixes:
+  1. `React.lazy()` + `Suspense` for all route components except Login/Register/SelectLearner
+  2. Vite `manualChunks` — splits vendors into react, state, ui, content chunks
+  3. Google Fonts loaded non-render-blocking (preload + media=print swap pattern)
+- **Result:** Initial JS bundle → 45kB (gzipped 11kB). Pages load on demand. Build clean.
+- **Key files:** `App.tsx`, `pages/SelectLearner.tsx`, `vite.config.ts`, `index.html`
+- **Pattern:** Keep only critical-path components eager (layouts, login, learner picker). Everything else lazy.

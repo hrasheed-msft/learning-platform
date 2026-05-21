@@ -33,6 +33,15 @@
 
 ## Learnings
 
+**Coursebook Images → Blob Storage (2026-05-21):**
+- `public/coursebook-images/` is in `.dockerignore` (188MB) — images don't exist in production Docker image
+- Created `coursebook-images` container on `stislamiclearning` storage account with public blob access
+- Uploaded all images via `az storage blob upload-batch`
+- Backend route redirects to blob storage in production; falls back to local in dev
+- Course controller rewrites `src="/coursebook-images/..."` directly to blob URL (no redirect hop)
+- Pattern: large static assets → blob storage with public access; keep `.dockerignore` exclusion
+- Env var `COURSEBOOK_IMAGES_BLOB_URL` can override the default blob URL if needed
+
 **CI/CD Pipeline (2026-05-20):**
 - Created `ci-cd.yml` (full deploy pipeline) and `test.yml` (PR-only fast feedback)
 - Added `test:ci` scripts to both packages — `vitest run --reporter=verbose` for non-interactive CI
