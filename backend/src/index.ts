@@ -97,9 +97,17 @@ if (config.env !== 'test') {
 }
 
 // Static assets — coursebook diagram images
-// Allow cross-origin loading since frontend may be on a different domain
-app.use('/coursebook-images', (_req, res, next) => {
+// In production, images live in Azure Blob Storage (excluded from Docker via .dockerignore).
+// Locally, fall back to the static files in public/coursebook-images.
+const COURSEBOOK_IMAGES_BLOB_URL = process.env.COURSEBOOK_IMAGES_BLOB_URL
+  || 'https://stislamiclearning.blob.core.windows.net/coursebook-images';
+
+app.use('/coursebook-images', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  if (config.env === 'production' || !require('fs').existsSync(path.join(__dirname, '../public/coursebook-images', req.path))) {
+    // Redirect to blob storage
+    return res.redirect(301, `${COURSEBOOK_IMAGES_BLOB_URL}${req.path}`);
+  }
   next();
 }, express.static(path.join(__dirname, '../public/coursebook-images')));
 

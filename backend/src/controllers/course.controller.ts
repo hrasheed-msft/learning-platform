@@ -59,13 +59,14 @@ export class CourseController {
       const { courseId, unitId } = req.params;
       const unit = await CourseService.getUnit(courseId, unitId);
 
-      // Rewrite relative /coursebook-images/ paths to absolute backend URLs
-      // so images resolve correctly when the frontend is on a different origin.
+      // Rewrite relative /coursebook-images/ paths to blob storage URLs
+      // so images load directly from CDN without a redirect hop through the backend.
       if (unit.content?.text) {
-        const backendOrigin = `${req.protocol}://${req.get('host')}`;
+        const blobBase = process.env.COURSEBOOK_IMAGES_BLOB_URL
+          || 'https://stislamiclearning.blob.core.windows.net/coursebook-images';
         unit.content.text = unit.content.text.replace(
           /src="\/coursebook-images\//g,
-          `src="${backendOrigin}/coursebook-images/`
+          `src="${blobBase}/`
         );
       }
 
