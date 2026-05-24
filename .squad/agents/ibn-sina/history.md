@@ -62,6 +62,12 @@
 - Preserve explicit user choices when family list refreshes
 - Pattern: `selectedMember` as primary, `selectedMemberId` state as fallback
 
+### Child Enrollment Identity (2026-05-24T09:39:57.085-05:00)
+- Child course reads must use the logged-in `FamilyMember` identity, not the parent `User` identity
+- Frontend child sessions need their own bearer token wiring in `frontend/src/services/api.ts` plus member-aware fetching in `frontend/src/hooks/useChildEnrollments.ts`
+- Key student surfaces: `frontend/src/pages/child/ChildDashboardHome.tsx` and `frontend/src/pages/child/ChildCoursesPage.tsx`
+- Backend guardrail: `backend/src/controllers/course.controller.ts` must resolve `familyId` from `req.child` for child JWTs and block cross-member access
+
 ### Audio Player Patterns (2026-05-20)
 - Component-level URL caching per language (no re-fetch on repeated clicks)
 - Native `<audio>` element with custom Tailwind UI for cross-platform consistency
