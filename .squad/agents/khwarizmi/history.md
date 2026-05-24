@@ -129,6 +129,12 @@
 - **User preference:** When TTS formatting logic changes, invalidate old audio automatically and let users regenerate only the units they actually open instead of paying for a full backfill.
 - **Key file paths:** `backend/src/services/tts.service.ts`, `backend/src/controllers/audio.controller.ts`, `backend/src/routes/audio.routes.ts`, `backend/prisma/schema.prisma`, `backend/prisma/migrations/20260524160542_add_audio_cache_version/migration.sql`, `.squad/decisions/inbox/khwarizmi-audio-cache-versioning.md`.
 
+### 2026-05-24T16:09:47.032-05:00 — Course text Arabic-term normalization + targeted audio invalidation
+- **Content source pattern:** Learner-facing lesson bodies live in `units.content`; seed files populate the raw HTML, but a post-seed normalization pass is now needed because many lessons still store bare transliterations.
+- **Normalization pattern:** `syncCourseTextFormatting()` rewrites matching transliterated terms to `Translation Arabic/(Transliteration)` using unit-linked `arabicTerms`, a shared glossary for concise translations, and idempotent replacement logic that skips already formatted text.
+- **Cache regeneration pattern:** Seeding now runs the normalization pass and deletes `AudioCache` rows for only the units whose text changed; there is also a standalone `npm run db:normalize:arabic-terms` repair script plus parent/admin invalidation endpoints at both `/api/v1/admin/invalidate-audio-cache` and `/api/v1/units/admin/audio-cache/invalidate`.
+- **Key file paths:** `backend/src/utils/arabic-term-formatting.ts`, `backend/src/services/course-content-formatting.service.ts`, `backend/prisma/normalize-course-content.ts`, `backend/prisma/seed.ts`, `backend/src/routes/audio-admin.routes.ts`, `backend/src/routes/audio.routes.ts`, `backend/src/services/tts.service.ts`.
+
 ## Archived History
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`

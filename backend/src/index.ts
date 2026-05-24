@@ -22,6 +22,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import notificationRoutes from './routes/notification.routes';
 import gameRoutes from './routes/game.routes';
 import audioRoutes from './routes/audio.routes';
+import audioAdminRoutes from './routes/audio-admin.routes';
 import videoRoutes from './routes/video.routes';
 
 // Import middleware
@@ -133,6 +134,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/games', gameRoutes);
 app.use('/api/v1/units', audioRoutes);
+app.use('/api/v1', audioAdminRoutes);
 app.use('/api/v1', videoRoutes);
 
 // Error handling

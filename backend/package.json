@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:normalize:arabic-terms": "ts-node prisma/normalize-course-content.ts",
     "db:seed:sarf": "ts-node prisma/seed-sarf-simple.ts",
     "db:seed:sarf:quizzes": "ts-node prisma/seed-sarf-quizzes.ts",
     "db:seed:habits": "ts-node prisma/seed-habits-course.ts",

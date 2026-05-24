@@ -24,6 +24,7 @@ import { seedSarfCoursePart5 } from './seed-sarf-course-part5';
 import { seedSarfQuizzes } from './seed-sarf-quizzes';
 import { seedSarfFlashcards } from './seed-sarf-flashcards';
 import { seedGames } from './seed-games';
+import { syncCourseTextFormatting } from '../src/services/course-content-formatting.service';
 
 const prisma = new PrismaClient();
 
@@ -2761,6 +2762,12 @@ async function main() {
   await seedSarfCoursePart5();
   await seedSarfQuizzes();
   await seedSarfFlashcards();
+
+  const contentFormattingResult = await syncCourseTextFormatting(prisma);
+  console.log(`✅ Normalized Arabic term formatting in ${contentFormattingResult.updatedUnits} unit(s)`);
+  if (contentFormattingResult.invalidatedAudioEntries > 0) {
+    console.log(`   - Invalidated ${contentFormattingResult.invalidatedAudioEntries} audio cache entr${contentFormattingResult.invalidatedAudioEntries === 1 ? 'y' : 'ies'}`);
+  }
 
   // Games — must run after courses exist
   await seedGames();
