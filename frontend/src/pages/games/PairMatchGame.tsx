@@ -52,9 +52,13 @@ export default function PairMatchGame() {
   }, [currentRound, defaultMode]);
 
   // All matched? auto-submit
+  // Backend gradeAnswer(PAIR_MATCH) expects: { matches: [{ termId, definitionId }] }
+  // Both sides of a pair share the same pairId, so termId === definitionId signals a
+  // valid match (not a cross-pair mismatch).
   useEffect(() => {
     if (pairs.length > 0 && matched.size === pairs.length && started) {
-      const t = setTimeout(() => submit({ matched: Array.from(matched), mode }), 700);
+      const matchPayload = Array.from(matched).map((id) => ({ termId: id, definitionId: id }));
+      const t = setTimeout(() => submit({ matches: matchPayload, mode }), 700);
       return () => clearTimeout(t);
     }
   }, [matched, pairs.length, started, mode, submit]);

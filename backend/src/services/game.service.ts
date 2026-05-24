@@ -1670,14 +1670,27 @@ async function gradeAnswer(
     }
 
     case 'PAIR_MATCH': {
-      const matches = (answer as any)?.matches;
-      if (!Array.isArray(matches)) return false;
+      const a = answer as any;
       const pairs: Array<{ id: string }> = meta.pairs || [];
-      // Correct iff every submitted pair has termId === definitionId
-      // (the frontend uses the same id for both sides) and all pairs are covered.
       const ids = new Set(pairs.map((p) => p.id));
-      if (matches.length < pairs.length) return false;
-      return matches.every((m: any) => m && m.termId && m.termId === m.definitionId && ids.has(m.termId));
+
+      // Canonical format: { matches: [{ termId, definitionId }] }
+      // Both sides of a matched pair share the same pairId, so termId === definitionId
+      // signals a valid match (not a cross-pair mismatch).
+      if (Array.isArray(a?.matches)) {
+        const matches: any[] = a.matches;
+        if (matches.length < pairs.length) return false;
+        return matches.every((m: any) => m && m.termId && m.termId === m.definitionId && ids.has(m.termId));
+      }
+
+      // Legacy / fallback format: { matched: string[] } (plain array of pairIds)
+      if (Array.isArray(a?.matched)) {
+        const matched: string[] = a.matched.map(String);
+        if (matched.length < pairs.length) return false;
+        return matched.every((id) => ids.has(id));
+      }
+
+      return false;
     }
 
     case 'FLASHCARD_SPRINT':
