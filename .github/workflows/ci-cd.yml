@@ -44,7 +44,8 @@ jobs:
       - run: |
           az acr build --registry cr34odstpjgaabg \
             --image islamic-learning-api:${{ github.sha }} \
-            --file backend/Dockerfile .
+            --file backend/Dockerfile \
+            backend
       - run: |
           az containerapp update \
             --name ca-api-islamic-learning \
