@@ -1,4 +1,5 @@
 import api from './api';
+import type { ApiRequestConfig } from './api';
 
 export interface WordTimestamp {
   word: string;
@@ -16,6 +17,10 @@ export interface AudioWithTimestampsResponse {
   timestamps: WordTimestamp[];
 }
 
+// Audio requests should never trigger page-level navigation on auth errors.
+// They fail gracefully with inline error messages instead.
+const audioRequestConfig: ApiRequestConfig = { skipAuthRedirect: true };
+
 export const audioService = {
   /**
    * Generate TTS audio for a unit in the specified language.
@@ -27,7 +32,8 @@ export const audioService = {
   ): Promise<AudioGenerationResponse> {
     const response = await api.post(
       `/units/${unitId}/audio`,
-      { language }
+      { language },
+      audioRequestConfig
     );
     return response.data.data;
   },
@@ -43,7 +49,7 @@ export const audioService = {
     try {
       const response = await api.get(
         `/units/${unitId}/audio`,
-        { params: { language } }
+        { params: { language }, ...audioRequestConfig }
       );
       const data = response.data.data;
       // Only return if timestamps exist

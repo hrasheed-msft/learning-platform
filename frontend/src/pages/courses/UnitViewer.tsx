@@ -139,6 +139,7 @@ export default function UnitViewer() {
         </Link>
         <div className="flex items-center space-x-2">
           <button 
+            type="button"
             onClick={handlePrevious}
             disabled={!previousUnit}
             className="px-4 py-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition"
@@ -149,6 +150,7 @@ export default function UnitViewer() {
             {currentUnitIndex + 1} / {allUnits.length}
           </span>
           <button 
+            type="button"
             onClick={handleNext}
             disabled={!nextUnit}
             className="px-4 py-2 bg-primary-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg hover:bg-primary-600 transition flex items-center"
@@ -212,6 +214,7 @@ export default function UnitViewer() {
                 </div>
                 {!progress.videoCompleted && (
                   <button
+                    type="button"
                     onClick={() => handleMarkComplete('video')}
                     disabled={updatingProgress}
                     className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition"
@@ -232,6 +235,7 @@ export default function UnitViewer() {
               </h3>
               {!progress.readingCompleted && (
                 <button
+                  type="button"
                   onClick={() => handleMarkComplete('reading')}
                   disabled={updatingProgress}
                   className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition"
@@ -400,6 +404,7 @@ export default function UnitViewer() {
               
               {nextUnit ? (
                 <button
+                  type="button"
                   onClick={handleNext}
                   className="inline-flex items-center px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
                 >

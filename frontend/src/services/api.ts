@@ -1,7 +1,17 @@
-import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores/authStore';
 import { useChildAuthStore } from '@/stores/childAuthStore';
 import { useFamilyStore } from '@/stores/familyStore';
+
+/**
+ * Extended request config that allows callers to suppress the interceptor's
+ * hard-navigation behavior (window.location.href) on 401/403 errors.
+ * Audio and other background requests use this so failures show inline errors
+ * rather than navigating the user away from their current page.
+ */
+export interface ApiRequestConfig extends AxiosRequestConfig {
+  skipAuthRedirect?: boolean;
+}
 
 // Create axios instance
 // Note: Backend API is at /api/v1, Vite proxy forwards /api to localhost:3000
@@ -65,13 +75,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; skipAuthRedirect?: boolean };
+    const skipRedirect = originalRequest?.skipAuthRedirect === true;
 
     // Handle 403 with NO_ACTIVE_MEMBER — redirect to learner picker
     if (error.response?.status === 403) {
       const data = error.response.data as { error?: string } | undefined;
       if (data?.error === 'NO_ACTIVE_MEMBER') {
-        window.location.href = '/select-learner';
+        if (!skipRedirect) {
+          window.location.href = '/select-learner';
+        }
         return Promise.reject(new Error('No active learner selected'));
       }
     }
@@ -82,8 +95,10 @@ api.interceptors.response.use(
 
       const childAuth = useChildAuthStore.getState();
       if (childAuth.isChildSession) {
-        childAuth.logout();
-        window.location.href = '/child-login';
+        if (!skipRedirect) {
+          childAuth.logout();
+          window.location.href = '/child-login';
+        }
         return Promise.reject(error);
       }
 
@@ -91,8 +106,10 @@ api.interceptors.response.use(
 
       // No tokens at all — go straight to login, don't attempt refresh
       if (!refreshToken && !accessToken) {
-        useAuthStore.getState().logout();
-        window.location.href = '/login';
+        if (!skipRedirect) {
+          useAuthStore.getState().logout();
+          window.location.href = '/login';
+        }
         return Promise.reject(error);
       }
 
@@ -122,8 +139,10 @@ api.interceptors.response.use(
       } catch (refreshError) {
         isRefreshing = false;
         onRefreshComplete(null);
-        useAuthStore.getState().logout();
-        window.location.href = '/login';
+        if (!skipRedirect) {
+          useAuthStore.getState().logout();
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
