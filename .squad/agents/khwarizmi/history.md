@@ -123,6 +123,12 @@
 - **User preference:** When parent and child sessions both exist, preserve one backend path that resolves the active learner automatically instead of requiring the frontend to manually map identities for every progress call.
 - **Key file paths:** `backend/src/controllers/course.controller.ts`, `backend/src/controllers/assessment.controller.ts`, `backend/src/services/course.service.ts`, `backend/src/services/assessment.service.ts`, `backend/src/routes/course.routes.ts`, `backend/src/routes/assessment.routes.ts`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/pages/courses/QuizPage.tsx`, `frontend/src/services/courseService.ts`.
 
+### 2026-05-24T16:05:42.973-05:00 — Audio cache versioning for TTS regen
+- **Architecture decision:** `AudioCache` now carries a nullable `cacheVersion`; any row missing the current TTS version is treated as stale and deleted on lookup so regenerated audio always uses the latest Arabic-term narration format.
+- **Cache invalidation pattern:** Keep on-demand generation cheap by deleting cache rows instead of bulk-regenerating files; `POST /api/v1/units/admin/audio-cache/invalidate` clears matching rows, and `buildAudioFilename()` bakes the cache version into new asset URLs to avoid reusing old paths.
+- **User preference:** When TTS formatting logic changes, invalidate old audio automatically and let users regenerate only the units they actually open instead of paying for a full backfill.
+- **Key file paths:** `backend/src/services/tts.service.ts`, `backend/src/controllers/audio.controller.ts`, `backend/src/routes/audio.routes.ts`, `backend/prisma/schema.prisma`, `backend/prisma/migrations/20260524160542_add_audio_cache_version/migration.sql`, `.squad/decisions/inbox/khwarizmi-audio-cache-versioning.md`.
+
 ## Archived History
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`

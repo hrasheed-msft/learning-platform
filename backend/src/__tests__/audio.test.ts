@@ -10,6 +10,8 @@ vi.mock('../config/database', () => ({
     audioCache: {
       findUnique: vi.fn(),
       create: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
     },
     unit: {
       findUnique: vi.fn(),
@@ -62,7 +64,14 @@ vi.mock('fs', () => ({
 }));
 
 import prisma from '../config/database';
-import { buildVoiceElements, preprocessTtsHtml } from '../services/tts.service';
+import {
+  buildAudioFilename,
+  buildVoiceElements,
+  getCachedAudioEntry,
+  invalidateAudioCache,
+  preprocessTtsHtml,
+  TTS_AUDIO_CACHE_VERSION,
+} from '../services/tts.service';
 
 describe('Audio / TTS Service', () => {
   beforeEach(() => {
@@ -70,67 +79,60 @@ describe('Audio / TTS Service', () => {
   });
 
   describe('AudioCache lookup', () => {
-    it('should return cached audio if available', async () => {
+    it('should return cached audio if available for the current cache version', async () => {
       const cachedEntry = {
         id: 'cache-1',
-        unitId: 'unit-1',
-        language: 'en',
-        blockIndex: -1,
-        url: 'https://api.example.com/audio/unit-1-en.mp3',
+        url: `https://api.example.com/audio/unit-1-en-${TTS_AUDIO_CACHE_VERSION}.mp3`,
         duration: 45.5,
+        timestamps: [{ word: 'Prayer', offset: 0, duration: 500 }],
+        cacheVersion: TTS_AUDIO_CACHE_VERSION,
       };
       vi.mocked(prisma.audioCache.findUnique).mockResolvedValue(cachedEntry as any);
 
-      const result = await prisma.audioCache.findUnique({
-        where: {
-          unitId_language_blockIndex: {
-            unitId: 'unit-1',
-            language: 'en',
-            blockIndex: -1,
-          },
-        },
-      });
+      const result = await getCachedAudioEntry('unit-1', 'en', null);
 
       expect(result).toBeDefined();
-      expect(result!.url).toContain('unit-1-en.mp3');
+      expect(result!.url).toContain(TTS_AUDIO_CACHE_VERSION);
       expect(result!.duration).toBe(45.5);
+      expect(prisma.audioCache.delete).not.toHaveBeenCalled();
+    });
+
+    it('should invalidate stale cached audio when cache version is missing', async () => {
+      vi.mocked(prisma.audioCache.findUnique).mockResolvedValue({
+        id: 'cache-old',
+        url: 'https://api.example.com/audio/unit-1-en.mp3',
+        duration: 30,
+        timestamps: null,
+        cacheVersion: null,
+      } as any);
+      vi.mocked(prisma.audioCache.delete).mockResolvedValue({} as any);
+
+      const result = await getCachedAudioEntry('unit-1', 'en', null);
+
+      expect(result).toBeNull();
+      expect(prisma.audioCache.delete).toHaveBeenCalledWith({ where: { id: 'cache-old' } });
     });
 
     it('should return null for uncached audio', async () => {
       vi.mocked(prisma.audioCache.findUnique).mockResolvedValue(null);
 
-      const result = await prisma.audioCache.findUnique({
-        where: {
-          unitId_language_blockIndex: {
-            unitId: 'unit-new',
-            language: 'ar',
-            blockIndex: -1,
-          },
-        },
-      });
+      const result = await getCachedAudioEntry('unit-new', 'ar', null);
 
       expect(result).toBeNull();
     });
   });
 
   describe('Audio URL format', () => {
-    it('should generate correct audio URL pattern', () => {
-      const unitId = 'unit-123';
-      const language = 'ar';
-      const baseUrl = 'https://api.example.com';
-      const filename = `${unitId}-${language}.mp3`;
-      const audioUrl = `${baseUrl}/audio/${filename}`;
+    it('should generate versioned filenames for full-unit audio', () => {
+      const filename = buildAudioFilename('unit-123', 'ar', null);
 
-      expect(audioUrl).toBe('https://api.example.com/audio/unit-123-ar.mp3');
+      expect(filename).toBe(`unit-123-ar-${TTS_AUDIO_CACHE_VERSION}.mp3`);
     });
 
-    it('should include block index in filename for block-specific audio', () => {
-      const unitId = 'unit-123';
-      const language = 'en';
-      const blockIndex = 2;
-      const filename = `${unitId}-${language}-${blockIndex}.mp3`;
+    it('should include block index in versioned filenames for block-specific audio', () => {
+      const filename = buildAudioFilename('unit-123', 'en', 2);
 
-      expect(filename).toBe('unit-123-en-2.mp3');
+      expect(filename).toBe(`unit-123-en-2-${TTS_AUDIO_CACHE_VERSION}.mp3`);
     });
   });
 
@@ -149,6 +151,19 @@ describe('Audio / TTS Service', () => {
       const validLanguages = ['ar', 'en'];
       expect(validLanguages.includes('fr')).toBe(false);
       expect(validLanguages.includes('ar')).toBe(true);
+    });
+  });
+
+  describe('Audio cache invalidation', () => {
+    it('should delete cached audio rows in bulk', async () => {
+      vi.mocked(prisma.audioCache.deleteMany).mockResolvedValue({ count: 7 } as any);
+
+      const deletedCount = await invalidateAudioCache({ language: 'en' });
+
+      expect(deletedCount).toBe(7);
+      expect(prisma.audioCache.deleteMany).toHaveBeenCalledWith({
+        where: { language: 'en' },
+      });
     });
   });
 

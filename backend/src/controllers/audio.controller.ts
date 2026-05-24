@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { getOrGenerateAudio, getAudioTimestamps, preGenerateAllAudio } from '../services/tts.service';
-import prisma from '../config/database';
+import {
+  getOrGenerateAudio,
+  getAudioTimestamps,
+  preGenerateAllAudio,
+  getCachedAudioEntry,
+  invalidateAudioCache,
+  TTS_AUDIO_CACHE_VERSION,
+} from '../services/tts.service';
 
 export class AudioController {
   /**
@@ -17,25 +23,10 @@ export class AudioController {
         return;
       }
 
-      const cached = await prisma.audioCache.findUnique({
-        where: {
-          unitId_language_blockIndex: {
-            unitId,
-            language,
-            blockIndex: -1,
-          },
-        },
-        select: { url: true, duration: true, timestamps: true },
-      });
+      const cached = await getCachedAudioEntry(unitId, language as 'ar' | 'en', null);
 
       if (!cached || !cached.url) {
         res.status(404).json({ success: false, message: 'No pre-generated audio found for this unit' });
-        return;
-      }
-
-      // Detect stale cache entries pointing to ephemeral container storage
-      if (cached.url.includes('azurecontainerapps.io/audio/')) {
-        res.status(404).json({ success: false, message: 'Audio needs regeneration (stale cache)' });
         return;
       }
 
@@ -131,6 +122,46 @@ export class AudioController {
       res.json({
         success: true,
         data: { timestamps },
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/admin/audio-cache/invalidate
+   * Body: { language?: "ar" | "en" }
+   *
+   * Deletes cached audio rows so units regenerate on-demand with the current TTS format.
+   */
+  static async invalidateCachedAudio(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const requestedLanguage = req.body?.language as string | undefined;
+      const requestedUnitIds = Array.isArray(req.body?.unitIds)
+        ? req.body.unitIds.filter((unitId: unknown): unitId is string => typeof unitId === 'string')
+        : undefined;
+
+      if (requestedLanguage !== undefined && !['ar', 'en'].includes(requestedLanguage)) {
+        res.status(400).json({ message: 'language must be "ar" or "en"' });
+        return;
+      }
+
+      const deletedCount = await invalidateAudioCache({
+        language: requestedLanguage as 'ar' | 'en' | undefined,
+        unitIds: requestedUnitIds,
+      });
+
+      res.json({
+        success: true,
+        message: deletedCount > 0
+          ? `Invalidated ${deletedCount} cached audio entr${deletedCount === 1 ? 'y' : 'ies'}. Audio will regenerate on next request.`
+          : 'No cached audio entries matched the invalidation filter.',
+        data: {
+          deletedCount,
+          language: requestedLanguage || 'all',
+          unitIds: requestedUnitIds || 'all',
+          cacheVersion: TTS_AUDIO_CACHE_VERSION,
+        },
       });
     } catch (error: any) {
       next(error);

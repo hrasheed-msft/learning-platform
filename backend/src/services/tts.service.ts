@@ -4,6 +4,13 @@ import path from 'path';
 import { BlobServiceClient } from '@azure/storage-blob';
 import config from '../config';
 import prisma from '../config/database';
+import {
+  decodeHtmlEntities,
+  normalizeWhitespace,
+  replaceTransliteratedTerms,
+  resolveArabicTermTranslation,
+  toDisplayTransliteration,
+} from '../utils/arabic-term-formatting';
 
 const AUDIO_DIR = path.join(__dirname, '../../public/audio');
 
@@ -15,6 +22,9 @@ if (!fs.existsSync(AUDIO_DIR)) {
 // Azure Blob Storage client for persistent audio storage
 const BLOB_CONTAINER_NAME = process.env.AZURE_STORAGE_CONTAINER_NAME || 'audio';
 let blobContainerClient: ReturnType<BlobServiceClient['getContainerClient']> | null = null;
+
+export const TTS_AUDIO_CACHE_VERSION = 'tts-arabic-term-format-v3';
+const AUDIO_CACHE_FILE_VERSION = TTS_AUDIO_CACHE_VERSION.replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
 
 function getBlobContainerClient() {
   if (blobContainerClient) return blobContainerClient;
@@ -97,49 +107,6 @@ interface TtsArabicTerm {
 const SSML_BREAK_PREFIX = '[[break:';
 const FORCE_ARABIC_OPEN = '[[ar]]';
 const FORCE_ARABIC_CLOSE = '[[/ar]]';
-const TRANSLITERATION_SEPARATOR_RE = /[\s\-–—_]+/;
-const TRANSLITERATION_CHAR_VARIANTS: Record<string, string> = {
-  a: 'aāáàâäãăą',
-  b: 'b',
-  c: 'cçč',
-  d: 'dḍďđḏ',
-  e: 'eēéèêë',
-  f: 'f',
-  g: 'gġğ',
-  h: 'hḥḩẖ',
-  i: 'iīíìîï',
-  j: 'jǧ',
-  k: 'kḳķ',
-  l: 'lḷļ',
-  m: 'm',
-  n: 'nñṇ',
-  o: 'oōóòôö',
-  p: 'p',
-  q: 'q',
-  r: 'rṛŕ',
-  s: 'sṣśš',
-  t: 'tṭţťṯ',
-  u: 'uūúùûü',
-  v: 'v',
-  w: 'wẇ',
-  x: 'x',
-  y: 'yýȳ',
-  z: 'zẓžźż',
-};
-
-function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ');
-}
-
-function normalizeWhitespace(text: string): string {
-  return text.replace(/\s+/g, ' ').trim();
-}
 
 /**
  * Strip HTML tags and decode common entities for TTS input.
@@ -153,62 +120,12 @@ function capitalizePhrase(text: string): string {
   return trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : '';
 }
 
-function simplifyTransliteration(text: string): string {
-  return normalizeWhitespace(
-    decodeHtmlEntities(text)
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[ʿʾʻʼ']/g, '')
-      .replace(/[^\p{L}\p{N}]+/gu, ' ')
-      .toLowerCase()
-  );
-}
-
-function toDisplayTransliteration(text: string): string {
-  return simplifyTransliteration(text)
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function buildTransliterationRegex(transliteration: string): RegExp | null {
-  const simplified = simplifyTransliteration(transliteration);
-  if (!simplified) return null;
-
-  const pattern = simplified
-    .split(TRANSLITERATION_SEPARATOR_RE)
-    .filter(Boolean)
-    .map((segment) => Array.from(segment).map((char) => {
-      const variants = TRANSLITERATION_CHAR_VARIANTS[char] || char;
-      return `[${escapeRegExp(variants)}]`;
-    }).join(''))
-    .join(String.raw`(?:[\s\-–—_'’ʿʾʻʼ]+)`);
-
-  if (!pattern) return null;
-  return new RegExp(`(^|[^\\p{L}])(${pattern}(?:['’ʿʾʻʼ])?)(?=$|[^\\p{L}])`, 'giu');
-}
-
 function formatArabicTermForTts(term: TtsArabicTerm): string {
-  return `${capitalizePhrase(term.translation)} ${FORCE_ARABIC_OPEN}${term.arabicText}${FORCE_ARABIC_CLOSE} ${toDisplayTransliteration(term.transliteration)}`;
+  return `${capitalizePhrase(resolveArabicTermTranslation(term))} ${FORCE_ARABIC_OPEN}${term.arabicText}${FORCE_ARABIC_CLOSE} ${toDisplayTransliteration(term.transliteration)}`;
 }
 
-function replaceTransliteratedTerms(text: string, arabicTerms: TtsArabicTerm[]): string {
-  return arabicTerms
-    .filter((term) => term.arabicText && term.transliteration && term.translation)
-    .sort((a, b) => simplifyTransliteration(b.transliteration).length - simplifyTransliteration(a.transliteration).length)
-    .reduce((currentText, term) => {
-      const transliterationRe = buildTransliterationRegex(term.transliteration);
-      if (!transliterationRe) return currentText;
-
-      return currentText.replace(transliterationRe, (_match, prefix: string) => {
-        return `${prefix}${formatArabicTermForTts(term)}`;
-      });
-    }, text);
+function replaceTermsForTts(text: string, arabicTerms: TtsArabicTerm[]): string {
+  return replaceTransliteratedTerms(text, arabicTerms, formatArabicTermForTts);
 }
 
 function extractSynthesisBlocks(html: string): string[] {
@@ -243,7 +160,7 @@ export function preprocessTtsHtml(html: string, arabicTerms: TtsArabicTerm[] = [
   });
 
   const plainText = stripHtml(htmlWithHeadingPauses);
-  return normalizeWhitespace(replaceTransliteratedTerms(plainText, arabicTerms));
+  return normalizeWhitespace(replaceTermsForTts(plainText, arabicTerms));
 }
 
 type PreprocessedToken =
@@ -534,6 +451,100 @@ export interface AudioResult {
   cached: boolean;
 }
 
+interface CachedAudioEntry {
+  id: string;
+  url: string;
+  duration: number | null;
+  timestamps: WordTimestamp[] | null;
+  cacheVersion: string | null;
+}
+
+function getNormalizedBlockIndex(blockIndex: number | null): number {
+  return blockIndex ?? -1;
+}
+
+function isLegacyAudioUrl(url: string): boolean {
+  return url.includes('azurecontainerapps.io/audio/');
+}
+
+function isCurrentAudioCacheVersion(cacheVersion: string | null | undefined): boolean {
+  return cacheVersion === TTS_AUDIO_CACHE_VERSION;
+}
+
+function shouldInvalidateCachedAudio(cached: CachedAudioEntry): boolean {
+  if (!isCurrentAudioCacheVersion(cached.cacheVersion)) {
+    return true;
+  }
+
+  return !!cached.url && isLegacyAudioUrl(cached.url) && getBlobContainerClient() !== null;
+}
+
+export function buildAudioFilename(
+  unitId: string,
+  language: 'ar' | 'en',
+  blockIndex: number | null
+): string {
+  const blockSuffix = blockIndex !== null && blockIndex >= 0 ? `-${blockIndex}` : '';
+  return `${unitId}-${language}${blockSuffix}-${AUDIO_CACHE_FILE_VERSION}.mp3`;
+}
+
+export async function getCachedAudioEntry(
+  unitId: string,
+  language: 'ar' | 'en',
+  blockIndex: number | null
+): Promise<CachedAudioEntry | null> {
+  const cached = await prisma.audioCache.findUnique({
+    where: {
+      unitId_language_blockIndex: {
+        unitId,
+        language,
+        blockIndex: getNormalizedBlockIndex(blockIndex),
+      },
+    },
+    select: {
+      id: true,
+      url: true,
+      duration: true,
+      timestamps: true,
+      cacheVersion: true,
+    },
+  });
+
+  if (!cached) {
+    return null;
+  }
+
+  const normalizedCache: CachedAudioEntry = {
+    id: cached.id,
+    url: cached.url,
+    duration: cached.duration,
+    timestamps: (cached.timestamps as unknown as WordTimestamp[] | null) ?? null,
+    cacheVersion: cached.cacheVersion,
+  };
+
+  if (!shouldInvalidateCachedAudio(normalizedCache)) {
+    return normalizedCache;
+  }
+
+  await prisma.audioCache.delete({ where: { id: cached.id } });
+  console.log(`TTS: Invalidated stale audio cache for ${unitId} (${language}, block ${getNormalizedBlockIndex(blockIndex)})`);
+  return null;
+}
+
+export async function invalidateAudioCache(filters: {
+  language?: 'ar' | 'en';
+  unitIds?: string[];
+} = {}): Promise<number> {
+  const result = await prisma.audioCache.deleteMany({
+    where: {
+      ...(filters.language ? { language: filters.language } : {}),
+      ...(filters.unitIds && filters.unitIds.length > 0 ? { unitId: { in: filters.unitIds } } : {}),
+    },
+  });
+
+  return result.count;
+}
+
 /**
  * Get or generate audio for a unit.
  * Checks AudioCache first; if miss, synthesizes via Azure Speech and stores.
@@ -545,33 +556,15 @@ export async function getOrGenerateAudio(
   blockIndex: number | null,
   baseUrl: string
 ): Promise<AudioResult> {
-  // Check cache
-  const cached = await prisma.audioCache.findUnique({
-    where: {
-      unitId_language_blockIndex: {
-        unitId,
-        language,
-        blockIndex: blockIndex ?? -1, // -1 signals "full unit"
-      },
-    },
-  });
+  const cached = await getCachedAudioEntry(unitId, language, blockIndex);
 
   if (cached) {
-    // Detect stale cache entries pointing to ephemeral container storage
-    if (cached.url && cached.url.includes('azurecontainerapps.io/audio/') && getBlobContainerClient()) {
-      // Delete stale entry — will regenerate with blob storage below
-      await prisma.audioCache.delete({
-        where: { unitId_language_blockIndex: { unitId, language, blockIndex: blockIndex ?? -1 } },
-      });
-      console.log(`TTS: Migrating stale cache for ${unitId} to blob storage`);
-    } else {
-      return {
-        url: cached.url,
-        duration: cached.duration,
-        timestamps: (cached.timestamps as WordTimestamp[] | null) ?? null,
-        cached: true,
-      };
-    }
+    return {
+      url: cached.url,
+      duration: cached.duration,
+      timestamps: cached.timestamps,
+      cached: true,
+    };
   }
 
   // Fetch unit content
@@ -611,8 +604,7 @@ export async function getOrGenerateAudio(
   }
 
   // Generate filename and synthesize to temp file
-  const blockSuffix = blockIndex !== null && blockIndex >= 0 ? `-${blockIndex}` : '';
-  const filename = `${unitId}-${language}${blockSuffix}.mp3`;
+  const filename = buildAudioFilename(unitId, language, blockIndex);
   const outputPath = path.join(AUDIO_DIR, filename);
 
   const { durationSeconds, timestamps } = await synthesizeToFile(textToSynthesize, language, outputPath, unitId);
@@ -625,10 +617,11 @@ export async function getOrGenerateAudio(
     data: {
       unitId,
       language,
-      blockIndex: blockIndex ?? -1,
+      blockIndex: getNormalizedBlockIndex(blockIndex),
       url: audioUrl,
       duration: durationSeconds,
       timestamps: timestamps as any,
+      cacheVersion: TTS_AUDIO_CACHE_VERSION,
     },
   });
 
@@ -644,19 +637,10 @@ export async function getAudioTimestamps(
   language: 'ar' | 'en',
   blockIndex: number | null
 ): Promise<WordTimestamp[] | null> {
-  const cached = await prisma.audioCache.findUnique({
-    where: {
-      unitId_language_blockIndex: {
-        unitId,
-        language,
-        blockIndex: blockIndex ?? -1,
-      },
-    },
-    select: { timestamps: true },
-  });
+  const cached = await getCachedAudioEntry(unitId, language, blockIndex);
 
   if (!cached || !cached.timestamps) return null;
-  return cached.timestamps as unknown as WordTimestamp[];
+  return cached.timestamps;
 }
 
 /**
@@ -683,25 +667,11 @@ export async function preGenerateAllAudio(
     try {
       // Check if already cached (skip unless forceRegenerate)
       if (!forceRegenerate) {
-        const existing = await prisma.audioCache.findUnique({
-          where: {
-            unitId_language_blockIndex: {
-              unitId: unit.id,
-              language,
-              blockIndex: -1,
-            },
-          },
-          select: { id: true, timestamps: true },
-        });
+        const existing = await getCachedAudioEntry(unit.id, language, null);
 
         if (existing && existing.timestamps) {
           skipped++;
           continue;
-        }
-
-        // Delete existing cache without timestamps so we regenerate with them
-        if (existing) {
-          await prisma.audioCache.delete({ where: { id: existing.id } });
         }
       } else {
         // Force: delete existing cache entry
