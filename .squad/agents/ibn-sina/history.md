@@ -84,6 +84,13 @@
 - User preference: audio generation should stay inline on the current unit page, preserving the Study Aids loading/progress state instead of navigating away.
 - Key files: `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/UnitAudioButton.test.tsx`, `frontend/src/services/audioService.ts`.
 
+### Audio Nav Bug TRUE Root Cause (2026-05-24T15:05:32.888-05:00)
+- The `type="button"` fix was a red herring. The REAL cause was the axios response interceptor in `api.ts` doing `window.location.href = '/login'` or `'/select-learner'` when audio API calls failed with 401/403.
+- When user reads content for a while (token expires), then clicks "Listen", the audio POST/GET fails → interceptor hard-navigates BEFORE the audioService catch block runs.
+- Fix: `skipAuthRedirect: true` config flag on audio requests. Interceptor checks this flag and skips navigation, letting errors propagate to inline UI error handling.
+- Anti-pattern discovered: `onClickCapture` + `stopPropagation()` on a wrapper div PREVENTS child button onClick handlers from firing. Never use this pattern. It was reverted.
+- Pattern: Background/non-critical API calls (audio, prefetch, sync) should ALWAYS use `skipAuthRedirect` to avoid hijacking the user's page context.
+
 ---
 
 ## Session History (Recent)
