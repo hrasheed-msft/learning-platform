@@ -55,6 +55,12 @@ function SyncedAudioControls({
 }: SyncedAudioControlsProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const isRtl = language === 'ar';
+
+  const stopAudioClick = (event: MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
   const {
     currentWordIndex,
     isPlaying,
@@ -80,7 +86,18 @@ function SyncedAudioControls({
   }, [onSyncStateChange]);
 
   const handleSeek = (event: ChangeEvent<HTMLInputElement>) => {
+    event.stopPropagation();
     seek(parseFloat(event.target.value) * 1000);
+  };
+
+  const handleTogglePlay = (event: MouseEvent<HTMLButtonElement>) => {
+    stopAudioClick(event);
+    togglePlayPause();
+  };
+
+  const handleRestart = (event: MouseEvent<HTMLButtonElement>) => {
+    stopAudioClick(event);
+    seek(0);
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -95,7 +112,7 @@ function SyncedAudioControls({
 
       <button
         type="button"
-        onClick={togglePlayPause}
+        onClick={handleTogglePlay}
         className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-primary-700 transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
@@ -104,7 +121,7 @@ function SyncedAudioControls({
 
       <button
         type="button"
-        onClick={() => seek(0)}
+        onClick={handleRestart}
         className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition"
         aria-label="Restart"
       >
@@ -218,8 +235,10 @@ export default function UnitAudioButton({
       setCache(prev => ({ ...prev, [lang]: cached }));
       setAudioData(cached);
       setSyncedData(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to generate audio';
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        (err instanceof Error ? err.message : 'Failed to generate audio');
       setError(message);
     } finally {
       setLoading(false);
@@ -228,11 +247,13 @@ export default function UnitAudioButton({
 
   const handleListenClick = (lang: Language) => (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+    event.stopPropagation();
     void handleListen(lang);
   };
 
   const handleClose = (event?: MouseEvent<HTMLButtonElement>) => {
     event?.preventDefault();
+    event?.stopPropagation();
     setShowPlayer(false);
     setAudioData(null);
     setSyncedData(null);

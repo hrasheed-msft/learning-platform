@@ -21,6 +21,12 @@ const HIGHLIGHT_CLASSES: Record<SyncLanguage, string> = {
   ar: 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-300 font-semibold',
 };
 
+// Void elements cannot have children in React (error #137)
+const VOID_ELEMENTS = new Set([
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+  'link', 'meta', 'param', 'source', 'track', 'wbr',
+]);
+
 export default function SyncedTextContent({
   html,
   currentWordIndex,
@@ -40,6 +46,7 @@ export default function SyncedTextContent({
       return null;
     }
 
+    try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const tokenMatcher = LANGUAGE_TOKEN_MATCHERS[language];
@@ -108,11 +115,21 @@ export default function SyncedTextContent({
         props[attribute.name] = attribute.value;
       });
 
+      const tagName = element.tagName.toLowerCase();
+
+      if (VOID_ELEMENTS.has(tagName)) {
+        return React.createElement(tagName, props);
+      }
+
       const children = Array.from(element.childNodes).map((child, index) => renderNode(child, `${key}-${index}`));
-      return React.createElement(element.tagName.toLowerCase(), props, children);
+      return React.createElement(tagName, props, children);
     };
 
     return Array.from(doc.body.childNodes).map((node, index) => renderNode(node, `node-${index}`));
+    } catch {
+      // Fall back to raw HTML if parsing/rendering fails
+      return null;
+    }
   }, [currentWordIndex, html, language, setActiveWordRef, shouldHighlight]);
 
   useEffect(() => {
@@ -123,7 +140,7 @@ export default function SyncedTextContent({
     activeWordRef.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
   }, [currentWordIndex, shouldHighlight]);
 
-  if (!shouldHighlight) {
+  if (!shouldHighlight || !renderedContent) {
     return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
