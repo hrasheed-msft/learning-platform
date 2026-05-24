@@ -9,6 +9,7 @@ export interface WordTimestamp {
 interface UseAudioSyncOptions {
   timestamps: WordTimestamp[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
+  highlightOffsetMs?: number;
 }
 
 interface UseAudioSyncReturn {
@@ -62,12 +63,31 @@ function findWordIndex(timestamps: WordTimestamp[], currentTimeMs: number): numb
   return result;
 }
 
-export function useAudioSync({ timestamps, audioRef }: UseAudioSyncOptions): UseAudioSyncReturn {
+const DEFAULT_HIGHLIGHT_OFFSET_MS = 400;
+
+export function useAudioSync({
+  timestamps,
+  audioRef,
+  highlightOffsetMs = DEFAULT_HIGHLIGHT_OFFSET_MS,
+}: UseAudioSyncOptions): UseAudioSyncReturn {
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const rafRef = useRef<number | null>(null);
+
+  const syncFromAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const timeMs = audio.currentTime * 1000;
+    const adjustedTimeMs = Math.max(0, timeMs - highlightOffsetMs);
+
+    setCurrentTime(audio.currentTime);
+    setCurrentWordIndex(findWordIndex(timestamps, adjustedTimeMs));
+  }, [audioRef, highlightOffsetMs, timestamps]);
 
   const tick = useCallback(() => {
     const audio = audioRef.current;
@@ -76,14 +96,9 @@ export function useAudioSync({ timestamps, audioRef }: UseAudioSyncOptions): Use
       return;
     }
 
-    const timeMs = audio.currentTime * 1000;
-    setCurrentTime(audio.currentTime);
-
-    const idx = findWordIndex(timestamps, timeMs);
-    setCurrentWordIndex(idx);
-
+    syncFromAudio();
     rafRef.current = requestAnimationFrame(tick);
-  }, [timestamps, audioRef]);
+  }, [audioRef, syncFromAudio]);
 
   const startLoop = useCallback(() => {
     if (rafRef.current === null) {
@@ -104,22 +119,29 @@ export function useAudioSync({ timestamps, audioRef }: UseAudioSyncOptions): Use
     if (!audio) return;
 
     const onPlay = () => {
+      syncFromAudio();
+    };
+    const onPlaying = () => {
       setIsPlaying(true);
+      syncFromAudio();
       startLoop();
     };
     const onPause = () => {
+      syncFromAudio();
       setIsPlaying(false);
       stopLoop();
     };
     const onEnded = () => {
       setIsPlaying(false);
       stopLoop();
+      setCurrentTime(audio.duration && isFinite(audio.duration) ? audio.duration : audio.currentTime);
       setCurrentWordIndex(-1);
     };
     const onSeeked = () => {
-      const timeMs = audio.currentTime * 1000;
-      setCurrentTime(audio.currentTime);
-      setCurrentWordIndex(findWordIndex(timestamps, timeMs));
+      syncFromAudio();
+    };
+    const onTimeUpdate = () => {
+      syncFromAudio();
     };
     const onLoadedMetadata = () => {
       if (audio.duration && isFinite(audio.duration)) {
@@ -128,20 +150,24 @@ export function useAudioSync({ timestamps, audioRef }: UseAudioSyncOptions): Use
     };
 
     audio.addEventListener('play', onPlay);
+    audio.addEventListener('playing', onPlaying);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('seeked', onSeeked);
+    audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
 
     return () => {
       audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('seeked', onSeeked);
+      audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       stopLoop();
     };
-  }, [audioRef, timestamps, startLoop, stopLoop]);
+  }, [audioRef, startLoop, stopLoop, syncFromAudio]);
 
   const play = useCallback(() => {
     audioRef.current?.play().catch(() => {});

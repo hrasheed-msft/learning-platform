@@ -22,6 +22,7 @@ export interface UnitAudioSyncState {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  togglePlayPause: () => void;
 }
 
 interface CachedAudio {
@@ -40,6 +41,8 @@ interface SyncedAudioControlsProps {
   language: Language;
   onSyncStateChange?: (state: UnitAudioSyncState | null) => void;
 }
+
+const HIGHLIGHT_DELAY_MS = 300;
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -68,7 +71,11 @@ function SyncedAudioControls({
     duration,
     togglePlayPause,
     seek,
-  } = useAudioSync({ timestamps, audioRef });
+  } = useAudioSync({
+    timestamps,
+    audioRef,
+    highlightOffsetMs: HIGHLIGHT_DELAY_MS,
+  });
 
   useEffect(() => {
     onSyncStateChange?.({
@@ -78,8 +85,9 @@ function SyncedAudioControls({
       isPlaying,
       currentTime,
       duration,
+      togglePlayPause,
     });
-  }, [currentTime, currentWordIndex, duration, isPlaying, language, onSyncStateChange, timestamps]);
+  }, [currentTime, currentWordIndex, duration, isPlaying, language, onSyncStateChange, timestamps, togglePlayPause]);
 
   useEffect(() => () => {
     onSyncStateChange?.(null);

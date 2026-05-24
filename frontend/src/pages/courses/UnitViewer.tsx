@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
+import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause } from 'lucide-react';
 import { courseService } from '@/services/courseService';
 import UnitAudioButton, { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
@@ -125,6 +125,8 @@ export default function UnitViewer() {
   const audioResources: AudioResource[] = unit.content?.audio || [];
   const arabicTerms: ArabicTerm[] = unit.content?.arabicTerms || [];
   const textContent = unit.content?.text || '<p>No content available for this unit yet.</p>';
+  const shouldShowFloatingAudioControl = Boolean(audioSyncState?.togglePlayPause)
+    && (audioSyncState?.isPlaying || ((audioSyncState?.currentTime ?? 0) > 0 && (audioSyncState?.currentTime ?? 0) < (audioSyncState?.duration ?? 0)));
 
   return (
     <div className="space-y-6 animate-in">
@@ -518,6 +520,18 @@ export default function UnitViewer() {
           </div>
         </div>
       </div>
+
+      {shouldShowFloatingAudioControl && audioSyncState && (
+        <button
+          type="button"
+          onClick={audioSyncState.togglePlayPause}
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-primary-600 shadow-lg ring-1 ring-gray-200 backdrop-blur transition hover:bg-white hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          aria-label={audioSyncState.isPlaying ? 'Pause audio' : 'Play audio'}
+          title={audioSyncState.isPlaying ? 'Pause audio' : 'Resume audio'}
+        >
+          {audioSyncState.isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        </button>
+      )}
     </div>
   );
 }

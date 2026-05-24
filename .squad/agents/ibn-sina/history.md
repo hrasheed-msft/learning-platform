@@ -84,12 +84,25 @@
 - User preference: audio generation should stay inline on the current unit page, preserving the Study Aids loading/progress state instead of navigating away.
 - Key files: `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/UnitAudioButton.test.tsx`, `frontend/src/services/audioService.ts`.
 
-### Audio Nav Bug TRUE Root Cause (2026-05-24T15:05:32.888-05:00)
-- The `type="button"` fix was a red herring. The REAL cause was the axios response interceptor in `api.ts` doing `window.location.href = '/login'` or `'/select-learner'` when audio API calls failed with 401/403.
-- When user reads content for a while (token expires), then clicks "Listen", the audio POST/GET fails → interceptor hard-navigates BEFORE the audioService catch block runs.
-- Fix: `skipAuthRedirect: true` config flag on audio requests. Interceptor checks this flag and skips navigation, letting errors propagate to inline UI error handling.
-- Anti-pattern discovered: `onClickCapture` + `stopPropagation()` on a wrapper div PREVENTS child button onClick handlers from firing. Never use this pattern. It was reverted.
-- Pattern: Background/non-critical API calls (audio, prefetch, sync) should ALWAYS use `skipAuthRedirect` to avoid hijacking the user's page context.
+### Audio Nav Hardening (2026-05-24T15:05:32.888-05:00)
+- Investigation found NO audio-specific `window.location`, `window.open`, React Router `navigate()`, `<a href>`, or backend `res.redirect()` in the unit audio generate flow.
+- Root cause pattern: the original fix only covered the listen buttons. Inline audio controls still needed full button hardening plus `stopPropagation()` so clicks stay inside the Study Aids UI instead of bubbling into parent page handlers.
+- Pattern: for inline study-aid/media controls, every non-submit action must be explicit `type="button"`, and audio control handlers should call both `preventDefault()` and `stopPropagation()`.
+- User preference: audio generation/playback must remain inline on the current lesson route, preserving loading/progress state rather than navigating away.
+- Key files: `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/components/AudioPlayer.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/UnitAudioButton.test.tsx`, `frontend/src/__tests__/AudioPlayer.test.tsx`.
+
+### Void Elements in React.createElement (2026-05-24T15:31:46.348-05:00)
+- When programmatically creating React elements from parsed HTML (DOMParser), void elements (`img`, `br`, `hr`, `input`, etc.) MUST NOT receive a `children` argument — React throws error #137 and crashes the entire component tree.
+- Pattern: maintain a `VOID_ELEMENTS` set and conditionally pass children only for non-void tags.
+- Always wrap useMemo-based HTML→ReactNode parsing in try-catch with a fallback to `dangerouslySetInnerHTML` to prevent blank pages.
+- The GET `/api/v1/units/:unitId/audio?language=X` endpoint returns 404 when no pre-generated audio exists — this is expected behavior, not a route mismatch. Frontend `getAudioWithTimestamps` already catches this gracefully.
+- Key file: `frontend/src/components/SyncedTextContent.tsx`.
+
+### Audio Sync UX Calibration (2026-05-24T16:05:42.973-05:00)
+- Azure word-boundary timestamps can lead the audible voice slightly, so synced readers should support a configurable highlight lag; current frontend default is `300ms` in `frontend/src/hooks/useAudioSync.ts`.
+- Pattern: wait for the audio element's `playing` event before starting the high-frequency sync loop, and still mirror `timeupdate`/`seeked` so progress and highlighting stay aligned after seeks.
+- User preference: playback controls should remain reachable while learners read, so UnitViewer now renders a floating fixed play/pause button for active synced audio sessions.
+- Key files: `frontend/src/hooks/useAudioSync.ts`, `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/useAudioSync.test.tsx`, `frontend/src/__tests__/UnitViewer.audio-floating-control.test.tsx`.
 
 ---
 
