@@ -71,13 +71,12 @@ export const courseService = {
     await api.delete(`/courses/enrollments/${enrollmentId}`);
   },
 
-  async updateProgress(memberId: string, unitId: string, progress: {
+  async updateProgress(unitId: string, progress: {
     videoCompleted?: boolean;
     readingCompleted?: boolean;
     quizCompleted?: boolean;
   }): Promise<void> {
     await api.post('/courses/progress', {
-      memberId,
       unitId,
       ...progress,
     });

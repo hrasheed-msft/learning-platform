@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { NotFoundError, ForbiddenError } from '../middleware/error.middleware';
 import { recordActivity } from './activity.service';
+import { CourseService } from './course.service';
 
 interface QuizAnswer {
   questionId: string;
@@ -99,28 +100,60 @@ export class AssessmentService {
       },
     });
 
+    const unit = await prisma.unit.findUnique({
+      where: { id: unitId },
+      select: {
+        id: true,
+        title: true,
+        courseId: true,
+        course: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    });
+
     // Update unit progress if passed
-    if (passed) {
-      const unit = await prisma.unit.findUnique({ where: { id: unitId } });
-      if (unit) {
-        const enrollment = await prisma.courseEnrollment.findUnique({
-          where: { memberId_courseId: { memberId, courseId: unit.courseId } },
+    if (passed && unit) {
+      const enrollment = await prisma.courseEnrollment.findUnique({
+        where: { memberId_courseId: { memberId, courseId: unit.courseId } },
+      });
+
+      if (enrollment) {
+        const existingProgress = await prisma.unitProgress.findUnique({
+          where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
+        });
+        const nowCompleted = Boolean(existingProgress?.videoCompleted && existingProgress?.readingCompleted);
+
+        await prisma.unitProgress.upsert({
+          where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
+          create: {
+            enrollmentId: enrollment.id,
+            unitId,
+            quizCompleted: true,
+            quizScore: score,
+            completedAt: nowCompleted ? new Date() : null,
+          },
+          update: {
+            quizCompleted: true,
+            quizScore: score,
+            completedAt: nowCompleted ? existingProgress?.completedAt ?? new Date() : null,
+          },
         });
 
-        if (enrollment) {
-          await prisma.unitProgress.upsert({
-            where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
-            create: {
-              enrollmentId: enrollment.id,
-              unitId,
-              quizCompleted: true,
-              quizScore: score,
-            },
-            update: {
-              quizCompleted: true,
-              quizScore: score,
-            },
-          });
+        const enrollmentProgress = await CourseService.updateCourseProgress(enrollment.id);
+        if (enrollmentProgress?.previousStatus !== 'COMPLETED' && enrollmentProgress?.status === 'COMPLETED') {
+          try {
+            await recordActivity(memberId, member.familyId, 'COURSE_COMPLETED', {
+              courseId: unit.courseId,
+              courseTitle: unit.course.title,
+              unitId: unit.id,
+              unitTitle: unit.title,
+            });
+          } catch (err) {
+            console.error('Failed to record course completion activity:', err);
+          }
         }
       }
     }
@@ -129,7 +162,10 @@ export class AssessmentService {
     try {
       if (member) {
         await recordActivity(memberId, member.familyId, 'QUIZ_COMPLETED', {
+          courseId: unit?.courseId,
+          courseTitle: unit?.course.title,
           unitId,
+          unitTitle: unit?.title,
           score,
           passed,
         });
@@ -138,11 +174,14 @@ export class AssessmentService {
       console.error('Failed to record quiz activity:', err);
     }
 
-    // Award points
+    // Award points and mark activity
     const points = passed ? (score === 100 ? 100 : 50) : 10;
     await prisma.familyMember.update({
       where: { id: memberId },
-      data: { totalPoints: { increment: points } },
+      data: {
+        totalPoints: { increment: points },
+        lastActiveAt: new Date(),
+      },
     });
 
     return {

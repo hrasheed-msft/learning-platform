@@ -1,5 +1,6 @@
 import prisma from '../config/database';
 import { NotFoundError, BadRequestError, ConflictError, ForbiddenError } from '../middleware/error.middleware';
+import { recordActivity } from './activity.service';
 
 interface GetCoursesInput {
   category?: string;
@@ -281,6 +282,16 @@ export class CourseService {
     // Get unit and verify enrollment
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
+      select: {
+        id: true,
+        title: true,
+        courseId: true,
+        course: {
+          select: {
+            title: true,
+          },
+        },
+      },
     });
 
     if (!unit) {
@@ -297,7 +308,19 @@ export class CourseService {
       throw new BadRequestError('Not enrolled in this course');
     }
 
-    // Upsert unit progress
+    const existingProgress = await prisma.unitProgress.findUnique({
+      where: {
+        enrollmentId_unitId: { enrollmentId: enrollment.id, unitId },
+      },
+    });
+
+    const nextProgressState = {
+      videoCompleted: data.videoCompleted ?? existingProgress?.videoCompleted ?? false,
+      readingCompleted: data.readingCompleted ?? existingProgress?.readingCompleted ?? false,
+      quizCompleted: data.quizCompleted ?? existingProgress?.quizCompleted ?? false,
+    };
+    const nowCompleted = isUnitComplete(nextProgressState);
+
     const progress = await prisma.unitProgress.upsert({
       where: {
         enrollmentId_unitId: { enrollmentId: enrollment.id, unitId },
@@ -305,21 +328,40 @@ export class CourseService {
       create: {
         enrollmentId: enrollment.id,
         unitId,
-        videoCompleted: data.videoCompleted || false,
-        readingCompleted: data.readingCompleted || false,
-        quizCompleted: data.quizCompleted || false,
+        videoCompleted: nextProgressState.videoCompleted,
+        readingCompleted: nextProgressState.readingCompleted,
+        quizCompleted: nextProgressState.quizCompleted,
         quizScore: data.quizScore,
+        completedAt: nowCompleted ? new Date() : null,
       },
       update: {
         ...(data.videoCompleted !== undefined && { videoCompleted: data.videoCompleted }),
         ...(data.readingCompleted !== undefined && { readingCompleted: data.readingCompleted }),
         ...(data.quizCompleted !== undefined && { quizCompleted: data.quizCompleted }),
         ...(data.quizScore !== undefined && { quizScore: data.quizScore }),
+        completedAt: nowCompleted ? existingProgress?.completedAt ?? new Date() : null,
       },
     });
 
-    // Update overall course progress
-    await this.updateCourseProgress(enrollment.id);
+    const enrollmentProgress = await this.updateCourseProgress(enrollment.id);
+
+    await prisma.familyMember.update({
+      where: { id: memberId },
+      data: { lastActiveAt: new Date() },
+    });
+
+    if (enrollmentProgress?.previousStatus !== 'COMPLETED' && enrollmentProgress?.status === 'COMPLETED') {
+      try {
+        await recordActivity(memberId, familyId, 'COURSE_COMPLETED', {
+          courseId: unit.courseId,
+          courseTitle: unit.course.title,
+          unitId: unit.id,
+          unitTitle: unit.title,
+        });
+      } catch (err) {
+        console.error('Failed to record course completion activity:', err);
+      }
+    }
 
     return progress;
   }
@@ -355,24 +397,41 @@ export class CourseService {
     }));
   }
 
-  private static async updateCourseProgress(enrollmentId: string): Promise<void> {
+  static async updateCourseProgress(enrollmentId: string) {
     const enrollment = await prisma.courseEnrollment.findUnique({
       where: { id: enrollmentId },
       include: {
-        course: { include: { units: true } },
+        course: {
+          select: {
+            id: true,
+            title: true,
+            units: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
         unitProgress: true,
       },
     });
 
-    if (!enrollment) return;
+    if (!enrollment) {
+      return null;
+    }
 
     const totalUnits = enrollment.course.units.length;
-    if (totalUnits === 0) return;
+    if (totalUnits === 0) {
+      return {
+        previousStatus: enrollment.status,
+        status: enrollment.status,
+        progress: enrollment.progress,
+        courseId: enrollment.course.id,
+        courseTitle: enrollment.course.title,
+      };
+    }
 
-    const completedUnits = enrollment.unitProgress.filter(
-      up => up.videoCompleted && up.readingCompleted && up.quizCompleted
-    ).length;
-
+    const completedUnits = enrollment.unitProgress.filter(isUnitComplete).length;
     const progress = Math.round((completedUnits / totalUnits) * 100);
     const status = progress === 100 ? 'COMPLETED' : 'ACTIVE';
 
@@ -381,8 +440,24 @@ export class CourseService {
       data: {
         progress,
         status,
-        ...(status === 'COMPLETED' && { completedAt: new Date() }),
+        completedAt: status === 'COMPLETED' ? enrollment.completedAt ?? new Date() : null,
       },
     });
+
+    return {
+      previousStatus: enrollment.status,
+      status,
+      progress,
+      courseId: enrollment.course.id,
+      courseTitle: enrollment.course.title,
+    };
   }
+}
+
+function isUnitComplete(progress?: {
+  videoCompleted?: boolean;
+  readingCompleted?: boolean;
+  quizCompleted?: boolean;
+} | null): boolean {
+  return Boolean(progress?.videoCompleted && progress?.readingCompleted && progress?.quizCompleted);
 }

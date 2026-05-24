@@ -20,7 +20,7 @@ const unitIdValidation = [
 
 const submitQuizValidation = [
   body('unitId').isUUID().withMessage('Valid unit ID is required'),
-  body('memberId').isUUID().withMessage('Valid member ID is required'),
+  body('memberId').optional().isUUID().withMessage('Valid member ID is required'),
   body('answers').isArray({ min: 1 }).withMessage('Answers array is required'),
   body('answers.*.questionId').isUUID().withMessage('Valid question ID is required'),
   body('answers.*.answer').notEmpty().withMessage('Answer is required'),

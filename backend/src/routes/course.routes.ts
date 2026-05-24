@@ -23,7 +23,7 @@ const enrollmentValidation = [
 ];
 
 const progressUpdateValidation = [
-  body('memberId').isUUID().withMessage('Valid member ID is required'),
+  body('memberId').optional().isUUID().withMessage('Valid member ID is required'),
   body('unitId').isUUID().withMessage('Valid unit ID is required'),
   body('videoCompleted').optional().isBoolean(),
   body('readingCompleted').optional().isBoolean(),

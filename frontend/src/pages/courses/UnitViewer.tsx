@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
 import { courseService } from '@/services/courseService';
-import { useAuthStore } from '@/stores';
 import UnitAudioButton, { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
 import type { Unit, VideoResource, AudioResource, ArabicTerm } from '@/types/course';
@@ -16,7 +15,6 @@ interface UnitProgress {
 export default function UnitViewer() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   
   const [unit, setUnit] = useState<Unit | null>(null);
   const [allUnits, setAllUnits] = useState<Unit[]>([]);
@@ -56,7 +54,7 @@ export default function UnitViewer() {
   }, [courseId, unitId]);
 
   const handleMarkComplete = async (type: 'video' | 'reading') => {
-    if (!user?.id || !unitId) return;
+    if (!unitId) return;
     
     try {
       setUpdatingProgress(true);
@@ -64,7 +62,7 @@ export default function UnitViewer() {
         ? { videoCompleted: true }
         : { readingCompleted: true };
       
-      await courseService.updateProgress(user.id, unitId, updateData);
+      await courseService.updateProgress(unitId, updateData);
       
       setProgress(prev => ({
         ...prev,

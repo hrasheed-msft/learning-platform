@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle, XCircle, HelpCircle, ChevronRight, Loader2, SkipForward } from 'lucide-react';
 import { assessmentService } from '@/services/assessmentService';
 import { courseService } from '@/services/courseService';
-import { useAuthStore } from '@/stores';
 
 type QuestionType = 'multiple-choice' | 'true-false' | 'fill-blank' | 'ordering' | 'matching';
 
@@ -22,7 +21,6 @@ interface Question {
 
 export default function QuizPage() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
-  const { user } = useAuthStore();
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,10 +173,9 @@ export default function QuizPage() {
         isCorrect: answers[q.id] === q.correctAnswer,
       }));
       
-      // Try to submit to API
-      if (unitId && user?.id) {
+      // Try to submit to API for the active learner profile
+      if (unitId) {
         await assessmentService.submitQuiz({
-          memberId: user.id,
           unitId,
           answers: answersArray,
           timeSpent: timeElapsed,

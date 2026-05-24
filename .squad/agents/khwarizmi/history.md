@@ -109,6 +109,12 @@
 - **User preference:** In outage mode, favor fast rollback and safe disablement over keeping non-essential AI/media features alive; audio/TTS must remain available.
 - **Key file paths:** `backend/src/routes/video.routes.ts`, `backend/src/services/videoQueue.service.ts`, `backend/src/services/videoService.ts`, `.github/workflows/ci-cd.yml`, `azure.yaml`.
 
+### 2026-05-24T10:13:27.614-05:00 — Child progress identity fix
+- **Architecture decision:** Any learner-scoped progress or quiz endpoint that already requires an active learner must trust the authenticated child token or `x-active-member-id` over a submitted `memberId`; request bodies can be stale or contain the parent `userId`.
+- **Progress pattern:** Quiz passes must update `unit_progress.completedAt`, recompute `course_enrollments.progress/status`, and refresh `family_members.lastActiveAt` so parent dashboards stay aligned with stored quiz results and completed lessons.
+- **User preference:** When parent and child sessions both exist, preserve one backend path that resolves the active learner automatically instead of requiring the frontend to manually map identities for every progress call.
+- **Key file paths:** `backend/src/controllers/course.controller.ts`, `backend/src/controllers/assessment.controller.ts`, `backend/src/services/course.service.ts`, `backend/src/services/assessment.service.ts`, `backend/src/routes/course.routes.ts`, `backend/src/routes/assessment.routes.ts`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/pages/courses/QuizPage.tsx`, `frontend/src/services/courseService.ts`.
+
 ## Archived History
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`

@@ -20,14 +20,14 @@ function resolveAccessibleMemberId(
   req: ActiveMemberRequest,
   requestedMemberId?: string,
 ): string {
-  const memberId = requestedMemberId ?? req.activeMemberId ?? req.child?.memberId;
+  if (req.child && requestedMemberId && requestedMemberId !== req.child.memberId) {
+    throw new ForbiddenError('Students can only access their own enrollments');
+  }
+
+  const memberId = req.child?.memberId ?? req.activeMemberId ?? requestedMemberId;
 
   if (!memberId) {
     throw new BadRequestError('Member ID is required');
-  }
-
-  if (req.child && memberId !== req.child.memberId) {
-    throw new ForbiddenError('Students can only access their own enrollments');
   }
 
   return memberId;

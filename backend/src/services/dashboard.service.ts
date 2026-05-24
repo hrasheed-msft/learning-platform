@@ -249,11 +249,10 @@ function formatEventTitle(eventType: string): string {
     QUIZ_COMPLETED: 'Completed a quiz',
     COURSE_STARTED: 'Started a course',
     COURSE_COMPLETED: 'Completed a course',
-    UNIT_COMPLETED: 'Completed a unit',
     FLASHCARD_REVIEWED: 'Reviewed flashcards',
-    GAME_COMPLETED: 'Played a game',
-    ACHIEVEMENT_EARNED: 'Earned an achievement',
-    STREAK_MILESTONE: 'Reached a streak milestone',
+    GAME_PLAYED: 'Played a game',
+    BADGE_EARNED: 'Earned a badge',
+    STREAK_REACHED: 'Reached a streak milestone',
   };
   return titles[eventType] || eventType.replace(/_/g, ' ').toLowerCase();
 }
