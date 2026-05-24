@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, type ChangeEvent } from 'react';
+import { useState, useCallback, useEffect, useRef, type ChangeEvent, type MouseEvent } from 'react';
 import { Volume2, Loader2, X, Play, Pause, RotateCcw } from 'lucide-react';
 import AudioPlayer from './AudioPlayer';
 import { useAudioSync } from '@/hooks/useAudioSync';
@@ -94,6 +94,7 @@ function SyncedAudioControls({
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
       <button
+        type="button"
         onClick={togglePlayPause}
         className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-primary-700 transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -102,6 +103,7 @@ function SyncedAudioControls({
       </button>
 
       <button
+        type="button"
         onClick={() => seek(0)}
         className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition"
         aria-label="Restart"
@@ -224,7 +226,13 @@ export default function UnitAudioButton({
     }
   }, [unitId, cache, syncedCache]);
 
-  const handleClose = () => {
+  const handleListenClick = (lang: Language) => (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    void handleListen(lang);
+  };
+
+  const handleClose = (event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
     setShowPlayer(false);
     setAudioData(null);
     setSyncedData(null);
@@ -241,7 +249,8 @@ export default function UnitAudioButton({
       <div className="flex items-center gap-2 flex-wrap">
         {hasEnglish && (
           <button
-            onClick={() => handleListen('en')}
+            type="button"
+            onClick={handleListenClick('en')}
             disabled={loading && selectedLang === 'en'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition
               ${selectedLang === 'en' && showPlayer
@@ -261,7 +270,8 @@ export default function UnitAudioButton({
 
         {hasArabic && (
           <button
-            onClick={() => handleListen('ar')}
+            type="button"
+            onClick={handleListenClick('ar')}
             disabled={loading && selectedLang === 'ar'}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition
               ${selectedLang === 'ar' && showPlayer
@@ -294,6 +304,7 @@ export default function UnitAudioButton({
         <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
           <span className="text-sm text-red-700">{error}</span>
           <button
+            type="button"
             onClick={handleClose}
             className="ml-auto text-red-600 hover:text-red-800"
             aria-label="Dismiss error"
@@ -313,6 +324,7 @@ export default function UnitAudioButton({
             onSyncStateChange={onSyncStateChange}
           />
           <button
+            type="button"
             onClick={handleClose}
             className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 transition"
             aria-label="Close player"
@@ -332,6 +344,7 @@ export default function UnitAudioButton({
             onClose={handleClose}
           />
           <button
+            type="button"
             onClick={handleClose}
             className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 transition"
             aria-label="Close player"

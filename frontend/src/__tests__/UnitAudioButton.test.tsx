@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { FormEvent } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import UnitAudioButton from '@/components/UnitAudioButton';
 
@@ -55,6 +56,25 @@ describe('UnitAudioButton', () => {
   });
 
   describe('Loading States', () => {
+    it('should not submit a wrapping form when generating audio', async () => {
+      const handleSubmit = vi.fn((event: FormEvent<HTMLFormElement>) => event.preventDefault());
+      vi.mocked(audioService.generateUnitAudio).mockImplementation(
+        () => new Promise(() => {})
+      );
+
+      render(
+        <form onSubmit={handleSubmit}>
+          <UnitAudioButton unitId="unit-1" hasEnglish={true} hasArabic={true} />
+        </form>
+      );
+      fireEvent.click(screen.getByText(/Listen \(English\)/));
+
+      await waitFor(() => {
+        expect(screen.getByText('Generating audio...')).toBeInTheDocument();
+      });
+      expect(handleSubmit).not.toHaveBeenCalled();
+    });
+
     it('should show loading state when generating audio', async () => {
       vi.mocked(audioService.generateUnitAudio).mockImplementation(
         () => new Promise(() => {}) // Never resolves

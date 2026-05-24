@@ -79,6 +79,11 @@
 - Arabic text rendered with diacritics (Noto Naskh Arabic font)
 - Auto-scroll to current word with `scrollIntoView({ behavior: 'smooth', block: 'center' })`
 
+### Audio Generation Navigation Guard (2026-05-24T14:36:21.808-05:00)
+- Async study-aid controls must render as explicit `type="button"` actions and call `preventDefault()` when they can be embedded in broader page containers.
+- User preference: audio generation should stay inline on the current unit page, preserving the Study Aids loading/progress state instead of navigating away.
+- Key files: `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/UnitAudioButton.test.tsx`, `frontend/src/services/audioService.ts`.
+
 ---
 
 ## Session History (Recent)
