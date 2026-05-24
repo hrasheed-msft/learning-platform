@@ -1,10 +1,28 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import UnitViewer from '@/pages/courses/UnitViewer';
 import { courseService } from '@/services/courseService';
 
 const navigateMock = vi.fn();
 const togglePlayPauseMock = vi.fn();
+const stopPlaybackMock = vi.fn();
+let intersectionCallback: ((entries: Array<Pick<IntersectionObserverEntry, 'isIntersecting'>>) => void) | null = null;
+
+class MockIntersectionObserver {
+  constructor(callback: (entries: Array<Pick<IntersectionObserverEntry, 'isIntersecting'>>) => void) {
+    intersectionCallback = callback;
+  }
+
+  observe() {}
+
+  disconnect() {}
+
+  unobserve() {}
+
+  takeRecords() {
+    return [];
+  }
+}
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -30,6 +48,7 @@ vi.mock('@/components/UnitAudioButton', () => ({
           currentTime: 1,
           duration: 12,
           togglePlayPause: togglePlayPauseMock,
+          stopPlayback: stopPlaybackMock,
         })}
       >
         Start floating audio
@@ -57,6 +76,9 @@ vi.mock('@/services/courseService', () => ({
 describe('UnitViewer floating audio control', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    intersectionCallback = null;
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+
     vi.mocked(courseService.getUnit).mockResolvedValue({
       id: 'unit-1',
       title: 'Unit title',
@@ -74,7 +96,7 @@ describe('UnitViewer floating audio control', () => {
     vi.mocked(courseService.updateProgress).mockResolvedValue({} as any);
   });
 
-  it('shows a fixed pause/play button while synced audio is active', async () => {
+  it('shows the floating controls only when synced audio is active and the main controls are out of view', async () => {
     render(<UnitViewer />);
 
     await waitFor(() => {
@@ -83,13 +105,35 @@ describe('UnitViewer floating audio control', () => {
 
     fireEvent.click(screen.getByText('Start floating audio'));
 
-    const floatingControl = screen.getByLabelText('Pause audio');
-    expect(floatingControl).toBeInTheDocument();
+    act(() => {
+      intersectionCallback?.([{ isIntersecting: false }]);
+    });
 
-    fireEvent.click(floatingControl);
+    const pauseButton = await screen.findByLabelText('Pause audio');
+    const stopButton = await screen.findByLabelText('Stop audio');
+
+    fireEvent.click(pauseButton);
+    fireEvent.click(stopButton);
+
     expect(togglePlayPauseMock).toHaveBeenCalledTimes(1);
+    expect(stopPlaybackMock).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      intersectionCallback?.([{ isIntersecting: true }]);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Pause audio')).not.toBeInTheDocument();
+    });
+
+    act(() => {
+      intersectionCallback?.([{ isIntersecting: false }]);
+    });
 
     fireEvent.click(screen.getByText('Stop floating audio'));
-    expect(screen.queryByLabelText('Pause audio')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Pause audio')).not.toBeInTheDocument();
+    });
   });
 });

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause } from 'lucide-react';
+import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause, Square } from 'lucide-react';
 import { courseService } from '@/services/courseService';
 import UnitAudioButton, { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
@@ -27,10 +27,36 @@ export default function UnitViewer() {
   });
   const [updatingProgress, setUpdatingProgress] = useState(false);
   const [audioSyncState, setAudioSyncState] = useState<UnitAudioSyncState | null>(null);
+  const [isMainAudioControlVisible, setIsMainAudioControlVisible] = useState(true);
+  const mainAudioControlRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setAudioSyncState(null);
+    setIsMainAudioControlVisible(true);
   }, [unitId]);
+
+  useEffect(() => {
+    const target = mainAudioControlRef.current;
+    if (!target || typeof IntersectionObserver === 'undefined') {
+      setIsMainAudioControlVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsMainAudioControlVisible(entry?.isIntersecting ?? true);
+      },
+      {
+        threshold: 0.2,
+      }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loading, unitId]);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -125,8 +151,9 @@ export default function UnitViewer() {
   const audioResources: AudioResource[] = unit.content?.audio || [];
   const arabicTerms: ArabicTerm[] = unit.content?.arabicTerms || [];
   const textContent = unit.content?.text || '<p>No content available for this unit yet.</p>';
-  const shouldShowFloatingAudioControl = Boolean(audioSyncState?.togglePlayPause)
+  const hasActiveAudioSession = Boolean(audioSyncState?.togglePlayPause)
     && (audioSyncState?.isPlaying || ((audioSyncState?.currentTime ?? 0) > 0 && (audioSyncState?.currentTime ?? 0) < (audioSyncState?.duration ?? 0)));
+  const shouldShowFloatingAudioControl = hasActiveAudioSession && !isMainAudioControlVisible;
 
   return (
     <div className="space-y-6 animate-in">
@@ -174,7 +201,7 @@ export default function UnitViewer() {
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
             📚 Study Aids
           </h3>
-          <div>
+          <div ref={mainAudioControlRef}>
             <span className="text-xs font-medium text-gray-500 mb-1 block">🔊 Listen</span>
             <UnitAudioButton
               unitId={unitId!}
@@ -522,15 +549,28 @@ export default function UnitViewer() {
       </div>
 
       {shouldShowFloatingAudioControl && audioSyncState && (
-        <button
-          type="button"
-          onClick={audioSyncState.togglePlayPause}
-          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-primary-600 shadow-lg ring-1 ring-gray-200 backdrop-blur transition hover:bg-white hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-          aria-label={audioSyncState.isPlaying ? 'Pause audio' : 'Play audio'}
-          title={audioSyncState.isPlaying ? 'Pause audio' : 'Resume audio'}
-        >
-          {audioSyncState.isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-        </button>
+        <div className="fixed bottom-6 right-4 z-40 sm:right-6">
+          <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white/95 px-2 py-2 shadow-lg backdrop-blur">
+            <button
+              type="button"
+              onClick={audioSyncState.togglePlayPause}
+              className="flex h-10 min-w-10 items-center justify-center rounded-full bg-primary-600 px-3 text-white transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              aria-label={audioSyncState.isPlaying ? 'Pause audio' : 'Play audio'}
+              title={audioSyncState.isPlaying ? 'Pause audio' : 'Resume audio'}
+            >
+              {audioSyncState.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={audioSyncState.stopPlayback}
+              className="flex h-10 min-w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              aria-label="Stop audio"
+              title="Stop audio"
+            >
+              <Square className="h-4 w-4 fill-current" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -104,6 +104,12 @@
 - User preference: playback controls should remain reachable while learners read, so UnitViewer now renders a floating fixed play/pause button for active synced audio sessions.
 - Key files: `frontend/src/hooks/useAudioSync.ts`, `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/useAudioSync.test.tsx`, `frontend/src/__tests__/UnitViewer.audio-floating-control.test.tsx`.
 
+### Floating Audio Affordance (2026-05-24T16:09:47.032-05:00)
+- Word-boundary timestamps still felt slightly ahead of the spoken audio, so the synced reader now uses a `400ms` lag by subtracting the offset before comparing `currentTime` against word timestamps.
+- For long lesson pages, keep a compact viewport-fixed transport available only when the primary Study Aids audio controls scroll out of view; `IntersectionObserver` is the clean trigger for that handoff.
+- Give floating media controls a real stop action, not just pause, so the overlay can dismiss itself by resetting playback to time `0`.
+- Key files: `frontend/src/hooks/useAudioSync.ts`, `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/UnitViewer.audio-floating-control.test.tsx`.
+
 ---
 
 ## Session History (Recent)
