@@ -135,6 +135,12 @@
 - **Cache regeneration pattern:** Seeding now runs the normalization pass and deletes `AudioCache` rows for only the units whose text changed; there is also a standalone `npm run db:normalize:arabic-terms` repair script plus parent/admin invalidation endpoints at both `/api/v1/admin/invalidate-audio-cache` and `/api/v1/units/admin/audio-cache/invalidate`.
 - **Key file paths:** `backend/src/utils/arabic-term-formatting.ts`, `backend/src/services/course-content-formatting.service.ts`, `backend/prisma/normalize-course-content.ts`, `backend/prisma/seed.ts`, `backend/src/routes/audio-admin.routes.ts`, `backend/src/routes/audio.routes.ts`, `backend/src/services/tts.service.ts`.
 
+### 2026-05-24T17:15:40.834-05:00 — Remote Arabic-term normalization endpoint
+- **Ops pattern:** Parent-authenticated admins can now trigger the same `syncCourseTextFormatting()` repair logic over HTTP at `POST /api/v1/admin/normalize-arabic-terms`, so production fixes no longer require SSH access or ad-hoc npm scripts.
+- **Idempotency detail:** The normalization helper now reports replacement counts while still skipping already formatted `Translation Arabic/(Transliteration)` content, so reruns return zero updated units/terms and leave audio cache untouched.
+- **Response contract:** The admin endpoint returns `updatedUnits`, `normalizedTerms`, and `clearedAudioCacheEntries` after clearing only the affected units’ `AudioCache` rows.
+- **Key file paths:** `backend/src/controllers/audio.controller.ts`, `backend/src/routes/audio-admin.routes.ts`, `backend/src/services/course-content-formatting.service.ts`, `backend/src/utils/arabic-term-formatting.ts`, `backend/prisma/normalize-course-content.ts`.
+
 ## Archived History
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`

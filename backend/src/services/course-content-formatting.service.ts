@@ -3,6 +3,7 @@ import {
   ArabicTermFormatInput,
   formatArabicTermForCourseText,
   replaceTransliteratedTerms,
+  replaceTransliteratedTermsWithCount,
 } from '../utils/arabic-term-formatting';
 
 export interface SyncCourseTextFormattingOptions {
@@ -13,6 +14,7 @@ export interface SyncCourseTextFormattingOptions {
 export interface SyncCourseTextFormattingResult {
   scannedUnits: number;
   updatedUnits: number;
+  normalizedTerms: number;
   invalidatedAudioEntries: number;
   updatedUnitIds: string[];
 }
@@ -66,13 +68,19 @@ export async function syncCourseTextFormatting(
   }) as UnitWithArabicTerms[];
 
   const updatedUnitIds: string[] = [];
+  let normalizedTerms = 0;
 
   for (const unit of units) {
     if (!unit.content || unit.arabicTerms.length === 0) {
       continue;
     }
 
-    const normalizedContent = normalizeCourseContentHtml(unit.content, unit.arabicTerms);
+    const { text: normalizedContent, replacements } = replaceTransliteratedTermsWithCount(
+      unit.content,
+      unit.arabicTerms,
+      formatArabicTermForCourseText
+    );
+
     if (normalizedContent === unit.content) {
       continue;
     }
@@ -82,6 +90,7 @@ export async function syncCourseTextFormatting(
       data: { content: normalizedContent },
     });
 
+    normalizedTerms += replacements;
     updatedUnitIds.push(unit.id);
   }
 
@@ -92,6 +101,7 @@ export async function syncCourseTextFormatting(
   return {
     scannedUnits: units.length,
     updatedUnits: updatedUnitIds.length,
+    normalizedTerms,
     invalidatedAudioEntries,
     updatedUnitIds,
   };

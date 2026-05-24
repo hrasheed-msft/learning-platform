@@ -9,6 +9,7 @@ async function main() {
   console.log('✅ Arabic term formatting sync complete');
   console.log(`   - Scanned units: ${result.scannedUnits}`);
   console.log(`   - Updated units: ${result.updatedUnits}`);
+  console.log(`   - Terms normalized: ${result.normalizedTerms}`);
   console.log(`   - Invalidated audio cache entries: ${result.invalidatedAudioEntries}`);
 }
 

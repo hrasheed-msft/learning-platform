@@ -1,9 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   formatArabicTermForCourseText,
   resolveArabicTermTranslation,
 } from '../utils/arabic-term-formatting';
-import { normalizeCourseContentHtml } from '../services/course-content-formatting.service';
+import {
+  normalizeCourseContentHtml,
+  syncCourseTextFormatting,
+} from '../services/course-content-formatting.service';
 
 describe('Course content Arabic term formatting', () => {
   it('formats common prayer vocabulary with concise translation, Arabic, and transliteration', () => {
@@ -38,14 +41,88 @@ describe('Course content Arabic term formatting', () => {
     const translation = resolveArabicTermTranslation({
       arabicText: 'طواف',
       transliteration: 'Tawaf',
-      translation: 'Circling the Ka\'bah seven times - a rite of pilgrimage',
+      translation: "Circling the Ka'bah seven times - a rite of pilgrimage",
     });
 
-    expect(translation).toBe('Circling the Ka\'bah seven times');
+    expect(translation).toBe("Circling the Ka'bah seven times");
     expect(formatArabicTermForCourseText({
       arabicText: 'طواف',
       transliteration: 'Tawaf',
-      translation: 'Circling the Ka\'bah seven times - a rite of pilgrimage',
-    })).toBe('Circling the Ka\'bah seven times طواف/(Tawaf)');
+      translation: "Circling the Ka'bah seven times - a rite of pilgrimage",
+    })).toBe("Circling the Ka'bah seven times طواف/(Tawaf)");
+  });
+});
+
+describe('syncCourseTextFormatting', () => {
+  it('returns updated unit, normalized term, and cleared cache counts', async () => {
+    const unitUpdate = vi.fn().mockResolvedValue(undefined);
+    const deleteMany = vi.fn().mockResolvedValue({ count: 3 });
+    const prisma = {
+      unit: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: 'unit-1',
+            content: '<p>Salah and Wudu.</p>',
+            arabicTerms: [
+              { arabicText: 'صلاة', transliteration: 'Salah', translation: 'Prayer - the formal Islamic worship performed five times daily' },
+              { arabicText: 'وضوء', transliteration: 'Wudu', translation: 'Ritual ablution - washing specific body parts before prayer' },
+            ],
+          },
+          {
+            id: 'unit-2',
+            content: '<p>Already normalized Prayer صلاة/(Salah).</p>',
+            arabicTerms: [
+              { arabicText: 'صلاة', transliteration: 'Salah', translation: 'Prayer - the formal Islamic worship performed five times daily' },
+            ],
+          },
+        ]),
+        update: unitUpdate,
+      },
+      audioCache: {
+        deleteMany,
+      },
+    };
+
+    const result = await syncCourseTextFormatting(prisma as never);
+
+    expect(result.scannedUnits).toBe(2);
+    expect(result.updatedUnits).toBe(1);
+    expect(result.normalizedTerms).toBe(2);
+    expect(result.invalidatedAudioEntries).toBe(3);
+    expect(result.updatedUnitIds).toEqual(['unit-1']);
+    expect(unitUpdate).toHaveBeenCalledTimes(1);
+    expect(deleteMany).toHaveBeenCalledWith({ where: { unitId: { in: ['unit-1'] } } });
+  });
+
+  it('is idempotent when units are already normalized', async () => {
+    const unitUpdate = vi.fn().mockResolvedValue(undefined);
+    const deleteMany = vi.fn().mockResolvedValue({ count: 0 });
+    const prisma = {
+      unit: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: 'unit-1',
+            content: '<p>Prayer صلاة/(Salah) starts after Ablution وضوء/(Wudu).</p>',
+            arabicTerms: [
+              { arabicText: 'صلاة', transliteration: 'Salah', translation: 'Prayer - the formal Islamic worship performed five times daily' },
+              { arabicText: 'وضوء', transliteration: 'Wudu', translation: 'Ritual ablution - washing specific body parts before prayer' },
+            ],
+          },
+        ]),
+        update: unitUpdate,
+      },
+      audioCache: {
+        deleteMany,
+      },
+    };
+
+    const result = await syncCourseTextFormatting(prisma as never);
+
+    expect(result.updatedUnits).toBe(0);
+    expect(result.normalizedTerms).toBe(0);
+    expect(result.invalidatedAudioEntries).toBe(0);
+    expect(result.updatedUnitIds).toEqual([]);
+    expect(unitUpdate).not.toHaveBeenCalled();
+    expect(deleteMany).not.toHaveBeenCalled();
   });
 });

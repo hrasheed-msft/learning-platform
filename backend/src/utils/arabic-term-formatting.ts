@@ -4,6 +4,11 @@ export interface ArabicTermFormatInput {
   translation: string;
 }
 
+export interface ReplaceTransliteratedTermsResult {
+  text: string;
+  replacements: number;
+}
+
 const TRANSLITERATION_SEPARATOR_RE = /[\s\-–—_]+/;
 const TRANSLITERATION_CHAR_VARIANTS: Record<string, string> = {
   a: 'aāáàâäãăą',
@@ -186,12 +191,14 @@ export function buildTransliterationRegex(transliteration: string): RegExp | nul
   return new RegExp(`(^|[^\\p{L}])(${pattern}(?:['’ʿʾʻʼ])?)(?=$|[^\\p{L}])`, 'giu');
 }
 
-export function replaceTransliteratedTerms(
+export function replaceTransliteratedTermsWithCount(
   text: string,
   arabicTerms: ArabicTermFormatInput[],
   formatter: (term: ArabicTermFormatInput) => string
-): string {
-  return arabicTerms
+): ReplaceTransliteratedTermsResult {
+  let replacements = 0;
+
+  const normalizedText = arabicTerms
     .filter((term) => term.arabicText && term.transliteration && term.translation)
     .sort((a, b) => simplifyTransliteration(b.transliteration).length - simplifyTransliteration(a.transliteration).length)
     .reduce((currentText, term) => {
@@ -206,10 +213,24 @@ export function replaceTransliteratedTerms(
             return match;
           }
 
+          replacements += 1;
           return `${prefix}${formatter(term)}`;
         }
       );
     }, text);
+
+  return {
+    text: normalizedText,
+    replacements,
+  };
+}
+
+export function replaceTransliteratedTerms(
+  text: string,
+  arabicTerms: ArabicTermFormatInput[],
+  formatter: (term: ArabicTermFormatInput) => string
+): string {
+  return replaceTransliteratedTermsWithCount(text, arabicTerms, formatter).text;
 }
 
 export function formatArabicTermForCourseText(term: ArabicTermFormatInput): string {

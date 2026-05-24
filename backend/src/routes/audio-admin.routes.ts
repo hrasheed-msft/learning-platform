@@ -14,6 +14,10 @@ const preGenerateAudio = (req: Request, res: Response, next: NextFunction): void
   void AudioController.preGenerateAudio(req, res, next);
 };
 
+const normalizeArabicTerms = (req: Request, res: Response, next: NextFunction): void => {
+  void AudioController.normalizeArabicTerms(req, res, next);
+};
+
 const audioAdminValidation = [
   body('language').optional().isIn(['ar', 'en']).withMessage('language must be "ar" or "en"'),
   body('unitIds').optional().isArray().withMessage('unitIds must be an array of unit IDs'),
@@ -34,6 +38,14 @@ router.post(
   requireParent,
   validate(audioAdminValidation),
   preGenerateAudio
+);
+
+router.post(
+  '/admin/normalize-arabic-terms',
+  authenticate,
+  requireParent,
+  validate(audioAdminValidation),
+  normalizeArabicTerms
 );
 
 export default router;

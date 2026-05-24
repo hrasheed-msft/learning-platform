@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import prisma from '../config/database';
+import { syncCourseTextFormatting } from '../services/course-content-formatting.service';
 import {
   getOrGenerateAudio,
   getAudioTimestamps,
@@ -161,6 +163,37 @@ export class AudioController {
           language: requestedLanguage || 'all',
           unitIds: requestedUnitIds || 'all',
           cacheVersion: TTS_AUDIO_CACHE_VERSION,
+        },
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/admin/normalize-arabic-terms
+   * Body: { unitIds?: string[] }
+   *
+   * Normalizes stored lesson content using the same logic as db:normalize:arabic-terms
+   * and clears stale audio cache rows for any affected units.
+   */
+  static async normalizeArabicTerms(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const requestedUnitIds = Array.isArray(req.body?.unitIds)
+        ? req.body.unitIds.filter((unitId: unknown): unitId is string => typeof unitId === 'string')
+        : undefined;
+
+      const result = await syncCourseTextFormatting(prisma, { unitIds: requestedUnitIds });
+
+      res.json({
+        success: true,
+        message: result.updatedUnits > 0
+          ? `Normalized ${result.normalizedTerms} Arabic term occurrence${result.normalizedTerms === 1 ? '' : 's'} across ${result.updatedUnits} unit${result.updatedUnits === 1 ? '' : 's'}.`
+          : 'All matching units were already normalized.',
+        data: {
+          updatedUnits: result.updatedUnits,
+          normalizedTerms: result.normalizedTerms,
+          clearedAudioCacheEntries: result.invalidatedAudioEntries,
         },
       });
     } catch (error: any) {
