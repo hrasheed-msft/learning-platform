@@ -109,6 +109,14 @@
 - **User preference:** In outage mode, favor fast rollback and safe disablement over keeping non-essential AI/media features alive; audio/TTS must remain available.
 - **Key file paths:** `backend/src/routes/video.routes.ts`, `backend/src/services/videoQueue.service.ts`, `backend/src/services/videoService.ts`, `.github/workflows/ci-cd.yml`, `azure.yaml`.
 
+### 2026-05-24T15:25:56.506-05:00 — PAIR_MATCH game stats accuracy bug fix
+- **Root cause:** `PairMatchGame.tsx` submitted `{ matched: string[] }` but `gradeAnswer()` in `game.service.ts` read `answer.matches` — always `undefined` → `isCorrect=false` every round → `accuracy=0%` stored in `GameScore`.
+- **Fix pattern:** Frontend now sends canonical format `{ matches: [{ termId, definitionId }] }`. Both sides of a matched pair share the same `pairId`, so `termId === definitionId` correctly signals a valid match (not a cross-pair mismatch). Backend also accepts legacy `{ matched: string[] }` as a fallback for backward compatibility.
+- **Identity was already correct:** `requireActiveMember` middleware resolves `child.memberId` (familyMemberId) as `req.activeMemberId` for all game endpoints; the identity bug from commit 297c7aa (course/quiz path) did NOT affect game stats.
+- **Key file paths:** `frontend/src/pages/games/PairMatchGame.tsx`, `backend/src/services/game.service.ts` (`gradeAnswer` PAIR_MATCH branch, line ~1672).
+- **Accuracy formula is correct:** `(roundsCorrect / answeredCount) * 100` in `submitRound`; the grading failure was the only cause of 0%.
+- **Commit:** `e4e369e`
+
 ### 2026-05-24T10:13:27.614-05:00 — Child progress identity fix
 - **Architecture decision:** Any learner-scoped progress or quiz endpoint that already requires an active learner must trust the authenticated child token or `x-active-member-id` over a submitted `memberId`; request bodies can be stale or contain the parent `userId`.
 - **Progress pattern:** Quiz passes must update `unit_progress.completedAt`, recompute `course_enrollments.progress/status`, and refresh `family_members.lastActiveAt` so parent dashboards stay aligned with stored quiz results and completed lessons.
