@@ -1,7 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { ActiveMemberRequest } from '../middleware/requireActiveMember.middleware';
+import { BadRequestError, ForbiddenError } from '../middleware/error.middleware';
 import { CourseService } from '../services/course.service';
+
+function resolveFamilyId(req: AuthenticatedRequest): string {
+  if (req.child) {
+    return req.child.familyId;
+  }
+
+  if (req.user) {
+    return req.user.familyId;
+  }
+
+  throw new BadRequestError('Unable to determine family for this request');
+}
+
+function resolveAccessibleMemberId(
+  req: ActiveMemberRequest,
+  requestedMemberId?: string,
+): string {
+  const memberId = requestedMemberId ?? req.activeMemberId ?? req.child?.memberId;
+
+  if (!memberId) {
+    throw new BadRequestError('Member ID is required');
+  }
+
+  if (req.child && memberId !== req.child.memberId) {
+    throw new ForbiddenError('Students can only access their own enrollments');
+  }
+
+  return memberId;
+}
 
 export class CourseController {
   static async getCourses(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -93,10 +123,11 @@ export class CourseController {
     }
   }
 
-  static async getMemberEnrollments(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getMemberEnrollments(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { memberId } = req.params;
-      const enrollments = await CourseService.getMemberEnrollments(req.user!.familyId, memberId);
+      const memberId = resolveAccessibleMemberId(req, req.params.memberId);
+      const familyId = resolveFamilyId(req);
+      const enrollments = await CourseService.getMemberEnrollments(familyId, memberId);
       
       res.json({
         success: true,
@@ -114,10 +145,11 @@ export class CourseController {
    */
   static async enrollActiveMember(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const memberId = req.activeMemberId!;
+      const memberId = resolveAccessibleMemberId(req);
+      const familyId = resolveFamilyId(req);
       const { courseId } = req.params;
 
-      const enrollment = await CourseService.enrollMemberIdempotent(req.user!.familyId, memberId, courseId);
+      const enrollment = await CourseService.enrollMemberIdempotent(familyId, memberId, courseId);
 
       res.status(200).json({
         success: true,
@@ -142,10 +174,12 @@ export class CourseController {
     }
   }
 
-  static async updateProgress(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async updateProgress(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { memberId, unitId, ...progressData } = req.body;
-      const progress = await CourseService.updateProgress(req.user!.familyId, memberId, unitId, progressData);
+      const { unitId, ...progressData } = req.body;
+      const memberId = resolveAccessibleMemberId(req, req.body.memberId);
+      const familyId = resolveFamilyId(req);
+      const progress = await CourseService.updateProgress(familyId, memberId, unitId, progressData);
       
       res.json({
         success: true,
@@ -156,10 +190,11 @@ export class CourseController {
     }
   }
 
-  static async getMemberProgress(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  static async getMemberProgress(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { memberId } = req.params;
-      const progress = await CourseService.getMemberProgress(req.user!.familyId, memberId);
+      const memberId = resolveAccessibleMemberId(req, req.params.memberId);
+      const familyId = resolveFamilyId(req);
+      const progress = await CourseService.getMemberProgress(familyId, memberId);
       
       res.json({
         success: true,

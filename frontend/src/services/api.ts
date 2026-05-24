@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores/authStore';
+import { useChildAuthStore } from '@/stores/childAuthStore';
 import { useFamilyStore } from '@/stores/familyStore';
 
 // Create axios instance
@@ -40,7 +41,10 @@ function waitForRefresh(): Promise<string | null> {
 // Request interceptor - add auth token and active member header
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const { accessToken } = useAuthStore.getState();
+    const { accessToken: parentAccessToken } = useAuthStore.getState();
+    const { accessToken: childAccessToken } = useChildAuthStore.getState();
+    const accessToken = parentAccessToken || childAccessToken;
+
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -75,6 +79,13 @@ api.interceptors.response.use(
     // Handle 401 Unauthorized - try to refresh token (once only)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
+      const childAuth = useChildAuthStore.getState();
+      if (childAuth.isChildSession) {
+        childAuth.logout();
+        window.location.href = '/child-login';
+        return Promise.reject(error);
+      }
 
       const { refreshToken, accessToken } = useAuthStore.getState();
 

@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Volume2, Loader2, X } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef, type ChangeEvent } from 'react';
+import { Volume2, Loader2, X, Play, Pause, RotateCcw } from 'lucide-react';
 import AudioPlayer from './AudioPlayer';
-import SyncedTextPlayer from './SyncedTextPlayer';
+import { useAudioSync } from '@/hooks/useAudioSync';
 import { audioService, type AudioGenerationResponse, type WordTimestamp } from '@/services/audioService';
 
 interface UnitAudioButtonProps {
@@ -10,11 +10,19 @@ interface UnitAudioButtonProps {
   hasArabic?: boolean;
   /** Whether unit has English content */
   hasEnglish?: boolean;
-  /** Optional text content to display with synced highlighting */
-  unitText?: string;
+  onSyncStateChange?: (state: UnitAudioSyncState | null) => void;
 }
 
-type Language = 'ar' | 'en';
+export type Language = 'ar' | 'en';
+
+export interface UnitAudioSyncState {
+  language: Language;
+  timestamps: WordTimestamp[];
+  currentWordIndex: number;
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+}
 
 interface CachedAudio {
   url: string;
@@ -24,14 +32,117 @@ interface CachedAudio {
 interface CachedSyncedAudio {
   audioUrl: string;
   timestamps: WordTimestamp[];
-  text: string;
+}
+
+interface SyncedAudioControlsProps {
+  audioUrl: string;
+  timestamps: WordTimestamp[];
+  language: Language;
+  onSyncStateChange?: (state: UnitAudioSyncState | null) => void;
+}
+
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function SyncedAudioControls({
+  audioUrl,
+  timestamps,
+  language,
+  onSyncStateChange,
+}: SyncedAudioControlsProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const isRtl = language === 'ar';
+  const {
+    currentWordIndex,
+    isPlaying,
+    currentTime,
+    duration,
+    togglePlayPause,
+    seek,
+  } = useAudioSync({ timestamps, audioRef });
+
+  useEffect(() => {
+    onSyncStateChange?.({
+      language,
+      timestamps,
+      currentWordIndex,
+      isPlaying,
+      currentTime,
+      duration,
+    });
+  }, [currentTime, currentWordIndex, duration, isPlaying, language, onSyncStateChange, timestamps]);
+
+  useEffect(() => () => {
+    onSyncStateChange?.(null);
+  }, [onSyncStateChange]);
+
+  const handleSeek = (event: ChangeEvent<HTMLInputElement>) => {
+    seek(parseFloat(event.target.value) * 1000);
+  };
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  return (
+    <div
+      className={`flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-xl shadow-sm ${isRtl ? 'flex-row-reverse' : ''}`}
+      dir={isRtl ? 'rtl' : 'ltr'}
+      title="AI-generated audio"
+    >
+      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+
+      <button
+        onClick={togglePlayPause}
+        className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-primary-700 transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        aria-label={isPlaying ? 'Pause' : 'Play'}
+      >
+        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+      </button>
+
+      <button
+        onClick={() => seek(0)}
+        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition"
+        aria-label="Restart"
+      >
+        <RotateCcw className="w-3.5 h-3.5" />
+      </button>
+
+      <div className="flex-1 min-w-0">
+        <input
+          type="range"
+          min={0}
+          max={duration || 1}
+          step={0.1}
+          value={currentTime}
+          onChange={handleSeek}
+          className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-primary-600
+            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
+            [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-600"
+          style={{
+            background: `linear-gradient(to ${isRtl ? 'left' : 'right'}, rgb(var(--color-primary-600, 79 70 229)) ${progress}%, #e5e7eb ${progress}%)`,
+          }}
+          aria-label="Audio progress"
+        />
+        <div className={`flex justify-between mt-1 text-xs text-gray-500 ${isRtl ? 'flex-row-reverse' : ''}`}>
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      <span className="shrink-0 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+        AI Audio
+      </span>
+    </div>
+  );
 }
 
 export default function UnitAudioButton({
   unitId,
   hasArabic = true,
   hasEnglish = true,
-  unitText,
+  onSyncStateChange,
 }: UnitAudioButtonProps) {
   const [selectedLang, setSelectedLang] = useState<Language | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,10 +166,9 @@ export default function UnitAudioButton({
         try {
           const result = await audioService.getAudioWithTimestamps(unitId, lang);
           if (result) {
-            const text = unitText || result.timestamps.map(t => t.word).join(' ');
             setSyncedCache(prev => ({
               ...prev,
-              [lang]: { audioUrl: result.audioUrl, timestamps: result.timestamps, text },
+              [lang]: { audioUrl: result.audioUrl, timestamps: result.timestamps },
             }));
           }
         } catch {
@@ -67,7 +177,13 @@ export default function UnitAudioButton({
       }
     };
     prefetch();
-  }, [unitId, hasEnglish, hasArabic, unitText]);
+  }, [unitId, hasEnglish, hasArabic]);
+
+  useEffect(() => {
+    if (!showPlayer || !syncedData || loading || error || !selectedLang) {
+      onSyncStateChange?.(null);
+    }
+  }, [error, loading, onSyncStateChange, selectedLang, showPlayer, syncedData]);
 
   const handleListen = useCallback(async (lang: Language) => {
     setError(null);
@@ -114,6 +230,7 @@ export default function UnitAudioButton({
     setSyncedData(null);
     setError(null);
     setSelectedLang(null);
+    onSyncStateChange?.(null);
   };
 
   const isBilingual = hasArabic && hasEnglish;
@@ -186,18 +303,18 @@ export default function UnitAudioButton({
         </div>
       )}
 
-      {/* Synced Text Player — shown when timestamps are available */}
-      {showPlayer && syncedData && !loading && !error && (
+      {/* Synced audio controls — highlighting now happens in the main lesson content */}
+      {showPlayer && syncedData && !loading && !error && selectedLang && (
         <div className="relative">
-          <SyncedTextPlayer
+          <SyncedAudioControls
             audioUrl={syncedData.audioUrl}
             timestamps={syncedData.timestamps}
-            text={syncedData.text}
-            direction={selectedLang === 'ar' ? 'rtl' : 'ltr'}
+            language={selectedLang}
+            onSyncStateChange={onSyncStateChange}
           />
           <button
             onClick={handleClose}
-            className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 transition z-10"
+            className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 transition"
             aria-label="Close player"
           >
             <X className="w-3 h-3" />

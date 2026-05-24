@@ -34,8 +34,8 @@ export const useChildAuthStore = create<ChildAuthState>()(
           const response: ChildAuthResponse = await childAuthService.childLogin(credentials);
           set({
             member: response.member,
-            accessToken: response.token,
-            refreshToken: response.refreshToken,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken ?? null,
             isAuthenticated: true,
             isChildSession: true,
             isLoading: false,

@@ -29,6 +29,25 @@ export default function CourseDetail() {
     }
   }, [family?.id, fetchMembers]);
 
+  useEffect(() => {
+    if (members.length === 0) {
+      setSelectedMemberId('');
+      return;
+    }
+
+    setSelectedMemberId((current) => {
+      if (current && members.some((member) => member.id === current)) {
+        return current;
+      }
+
+      if (selectedMember && members.some((member) => member.id === selectedMember.id)) {
+        return selectedMember.id;
+      }
+
+      return members[0].id;
+    });
+  }, [members, selectedMember]);
+
   if (isLoading || !selectedCourse) {
     return (
       <div className="animate-pulse space-y-6">
@@ -44,19 +63,17 @@ export default function CourseDetail() {
   }
 
   const handleEnroll = async () => {
-    const memberId = selectedMember?.id || selectedMemberId;
-    if (!memberId || !courseId) return;
-    
+    if (!selectedMemberId || !courseId) return;
+
     setEnrolling(true);
     setEnrollError(null);
     setEnrollSuccess(false);
-    
+
     try {
-      await enrollMember(memberId, courseId);
-      const memberName = selectedMember?.name || members.find(m => m.id === memberId)?.name || 'Member';
+      await enrollMember(selectedMemberId, courseId);
+      const memberName = members.find((member) => member.id === selectedMemberId)?.name || 'Member';
       setEnrollSuccess(true);
       setEnrollSuccessName(memberName);
-      setSelectedMemberId('');
       // Refresh course data to update enrollment count
       fetchCourse(courseId);
     } catch (err) {
@@ -145,10 +162,28 @@ export default function CourseDetail() {
           </div>
         )}
         
-        {selectedMember ? (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <select
+            value={selectedMemberId}
+            onChange={(e) => setSelectedMemberId(e.target.value)}
+            disabled={enrolling || members.length === 0}
+            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white disabled:bg-gray-100"
+            aria-label="Family member"
+          >
+            {members.length === 0 ? (
+              <option value="">No family members available</option>
+            ) : (
+              members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                  {selectedMember?.id === member.id ? ' (current learner)' : ''}
+                </option>
+              ))
+            )}
+          </select>
           <button
             onClick={handleEnroll}
-            disabled={enrolling}
+            disabled={!selectedMemberId || enrolling}
             className="px-6 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center"
           >
             {enrolling ? (
@@ -157,40 +192,10 @@ export default function CourseDetail() {
                 Enrolling...
               </>
             ) : (
-              `Enroll ${selectedMember.name}`
+              'Enroll Now'
             )}
           </button>
-        ) : (
-          <div className="flex flex-col sm:flex-row gap-4">
-            <select
-              value={selectedMemberId}
-              onChange={(e) => setSelectedMemberId(e.target.value)}
-              disabled={enrolling}
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white disabled:bg-gray-100"
-            >
-              <option value="">Select a family member...</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={handleEnroll}
-              disabled={!selectedMemberId || enrolling}
-              className="px-6 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center"
-            >
-              {enrolling ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Enrolling...
-                </>
-              ) : (
-                'Enroll Now'
-              )}
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Flashcards Section */}

@@ -1,7 +1,5 @@
 // Child Auth Types
 
-import type { AgeCategory } from './user';
-
 export interface ChildLoginRequest {
   username: string;
   password: string;
@@ -9,18 +7,22 @@ export interface ChildLoginRequest {
 
 export interface ChildMember {
   id: string;
-  familyId: string;
   name: string;
-  age: number;
-  ageCategory: AgeCategory;
-  avatarUrl?: string;
-  username: string;
+  ageCategory: string;
+  avatarUrl?: string | null;
+  familyId?: string;
+  age?: number;
+  username?: string;
 }
 
 export interface ChildAuthResponse {
-  token: string;
-  refreshToken: string;
+  accessToken: string;
+  refreshToken?: string | null;
   member: ChildMember;
+  family?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface SetCredentialsRequest {

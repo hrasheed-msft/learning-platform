@@ -62,6 +62,7 @@ vi.mock('fs', () => ({
 }));
 
 import prisma from '../config/database';
+import { buildVoiceElements, preprocessTtsHtml } from '../services/tts.service';
 
 describe('Audio / TTS Service', () => {
   beforeEach(() => {
@@ -148,6 +149,34 @@ describe('Audio / TTS Service', () => {
       const validLanguages = ['ar', 'en'];
       expect(validLanguages.includes('fr')).toBe(false);
       expect(validLanguages.includes('ar')).toBe(true);
+    });
+  });
+
+  describe('TTS preprocessing', () => {
+    const arabicTerms = [
+      { arabicText: 'صلاة', transliteration: 'salah', translation: 'prayer' },
+      { arabicText: 'وضوء', transliteration: 'wudu', translation: 'ablution' },
+    ];
+
+    it('should replace transliterated Arabic terms with translation, Arabic, and simple transliteration', () => {
+      const result = preprocessTtsHtml('<p>Ṣalāh requires Wuḍūʾ before class.</p>', arabicTerms);
+
+      expect(result).toContain('Prayer [[ar]]صلاة[[/ar]] Salah');
+      expect(result).toContain('Ablution [[ar]]وضوء[[/ar]] Wudu');
+      expect(result).not.toContain('Ṣalāh');
+      expect(result).not.toContain('Wuḍūʾ');
+    });
+
+    it('should add heading breaks and force Arabic voice for inserted Arabic terms', () => {
+      const preprocessed = preprocessTtsHtml('<h2>Ṣalāh</h2><p>Practice Ṣalāh daily.</p>', arabicTerms);
+      const voiceElements = buildVoiceElements(preprocessed, 'en');
+
+      expect(preprocessed).toContain('[[break:800ms]]');
+      expect(preprocessed).toContain('[[break:500ms]]');
+      expect(voiceElements.some((element) => element.includes('<break time="800ms"/>'))).toBe(true);
+      expect(voiceElements.some((element) => element.includes('<break time="500ms"/>'))).toBe(true);
+      expect(voiceElements.every((element) => element.startsWith('<voice '))).toBe(true);
+      expect(voiceElements.some((element) => element.includes('ar-SA-HamedNeural') && element.includes('صلاة'))).toBe(true);
     });
   });
 });

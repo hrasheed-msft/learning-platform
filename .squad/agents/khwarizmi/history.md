@@ -66,6 +66,12 @@
 - Returns 200 + existing record if already enrolled (not 409 ConflictError)
 - Lets frontend fire-and-forget without error handling
 
+### Azure SSML Break Placement + Targeted Regen (2026-05-24T09:31:36.752-05:00)
+- Azure Speech rejects root-level `<break>` nodes under `<speak>`; keep heading pauses wrapped inside `<voice>` elements in `backend/src/services/tts.service.ts`
+- Regression coverage for this lives in `backend/src/__tests__/audio.test.ts`
+- Reliable ops pattern for one-off reruns: find the unit via Prisma, clear the specific `AudioCache` row, then call `getOrGenerateAudio()` directly
+- Key path/data point for this request: `backend/prisma/seed-maktab-coursebook1.ts` defines Unit 1, and the live unit id is `988e4427-8d1c-447e-bc9d-17fa01c1118c`
+
 ---
 
 ## Session History (Recent)
@@ -94,6 +100,14 @@
 **Decision Created:** #23 — TTS Arabic Term Normalization + Heading Breaks (2026-05-24)
 
 ---
+
+## Learnings
+
+### 2026-05-24T09:58:03.672-05:00 — Emergency video generation rollback
+- **Architecture decision:** Temporarily disable backend video generation endpoints at `backend/src/routes/video.routes.ts` with fast 503 responses so lesson and audio traffic cannot trigger Puppeteer/ffmpeg work while the site is stabilized.
+- **Deployment pattern:** Production deploys from pushes to `main` via `.github/workflows/ci-cd.yml`; backend ships to Azure Container Apps (`ca-api-islamic-learning`) from `backend/Dockerfile`, frontend ships to Azure Static Web Apps.
+- **User preference:** In outage mode, favor fast rollback and safe disablement over keeping non-essential AI/media features alive; audio/TTS must remain available.
+- **Key file paths:** `backend/src/routes/video.routes.ts`, `backend/src/services/videoQueue.service.ts`, `backend/src/services/videoService.ts`, `.github/workflows/ci-cd.yml`, `azure.yaml`.
 
 ## Archived History
 

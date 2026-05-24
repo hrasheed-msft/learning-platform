@@ -88,20 +88,133 @@ interface ChunkSynthesisResult {
   durationMs: number;
 }
 
-/**
- * Strip HTML tags and decode common entities for TTS input.
- */
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]+>/g, ' ')
+interface TtsArabicTerm {
+  arabicText: string;
+  transliteration: string;
+  translation: string;
+}
+
+const SSML_BREAK_PREFIX = '[[break:';
+const FORCE_ARABIC_OPEN = '[[ar]]';
+const FORCE_ARABIC_CLOSE = '[[/ar]]';
+const TRANSLITERATION_SEPARATOR_RE = /[\s\-–—_]+/;
+const TRANSLITERATION_CHAR_VARIANTS: Record<string, string> = {
+  a: 'aāáàâäãăą',
+  b: 'b',
+  c: 'cçč',
+  d: 'dḍďđḏ',
+  e: 'eēéèêë',
+  f: 'f',
+  g: 'gġğ',
+  h: 'hḥḩẖ',
+  i: 'iīíìîï',
+  j: 'jǧ',
+  k: 'kḳķ',
+  l: 'lḷļ',
+  m: 'm',
+  n: 'nñṇ',
+  o: 'oōóòôö',
+  p: 'p',
+  q: 'q',
+  r: 'rṛŕ',
+  s: 'sṣśš',
+  t: 'tṭţťṯ',
+  u: 'uūúùûü',
+  v: 'v',
+  w: 'wẇ',
+  x: 'x',
+  y: 'yýȳ',
+  z: 'zẓžźż',
+};
+
+function decodeHtmlEntities(text: string): string {
+  return text
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/&nbsp;/g, ' ');
+}
+
+function normalizeWhitespace(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Strip HTML tags and decode common entities for TTS input.
+ */
+function stripHtml(html: string): string {
+  return normalizeWhitespace(decodeHtmlEntities(html.replace(/<[^>]+>/g, ' ')));
+}
+
+function capitalizePhrase(text: string): string {
+  const trimmed = normalizeWhitespace(text);
+  return trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : '';
+}
+
+function simplifyTransliteration(text: string): string {
+  return normalizeWhitespace(
+    decodeHtmlEntities(text)
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[ʿʾʻʼ']/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .toLowerCase()
+  );
+}
+
+function toDisplayTransliteration(text: string): string {
+  return simplifyTransliteration(text)
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildTransliterationRegex(transliteration: string): RegExp | null {
+  const simplified = simplifyTransliteration(transliteration);
+  if (!simplified) return null;
+
+  const pattern = simplified
+    .split(TRANSLITERATION_SEPARATOR_RE)
+    .filter(Boolean)
+    .map((segment) => Array.from(segment).map((char) => {
+      const variants = TRANSLITERATION_CHAR_VARIANTS[char] || char;
+      return `[${escapeRegExp(variants)}]`;
+    }).join(''))
+    .join(String.raw`(?:[\s\-–—_'’ʿʾʻʼ]+)`);
+
+  if (!pattern) return null;
+  return new RegExp(`(^|[^\\p{L}])(${pattern}(?:['’ʿʾʻʼ])?)(?=$|[^\\p{L}])`, 'giu');
+}
+
+function formatArabicTermForTts(term: TtsArabicTerm): string {
+  return `${capitalizePhrase(term.translation)} ${FORCE_ARABIC_OPEN}${term.arabicText}${FORCE_ARABIC_CLOSE} ${toDisplayTransliteration(term.transliteration)}`;
+}
+
+function replaceTransliteratedTerms(text: string, arabicTerms: TtsArabicTerm[]): string {
+  return arabicTerms
+    .filter((term) => term.arabicText && term.transliteration && term.translation)
+    .sort((a, b) => simplifyTransliteration(b.transliteration).length - simplifyTransliteration(a.transliteration).length)
+    .reduce((currentText, term) => {
+      const transliterationRe = buildTransliterationRegex(term.transliteration);
+      if (!transliterationRe) return currentText;
+
+      return currentText.replace(transliterationRe, (_match, prefix: string) => {
+        return `${prefix}${formatArabicTermForTts(term)}`;
+      });
+    }, text);
+}
+
+function extractSynthesisBlocks(html: string): string[] {
+  const blocks = html.match(/<(p|div|section|h[1-6])\b[^>]*>[\s\S]*?<\/\1>/gi) || [];
+  const meaningfulBlocks = blocks.filter((block) => stripHtml(block).length > 10);
+  return meaningfulBlocks.length > 0 ? meaningfulBlocks : [html];
 }
 
 /**
@@ -122,33 +235,64 @@ function escapeXml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/**
- * Build voice elements for bilingual content — Arabic segments get ar-SA voice,
- * English segments get en-US voice. Returns raw voice element strings (without <speak> wrapper).
- *
- * For English content, short inline Arabic (≤4 words) stays in the English voice
- * to avoid prosody fragmentation. Only substantial Arabic passages (>4 words)
- * trigger a voice switch.
- */
-function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
-  if (language === 'ar') {
-    return [`<voice name="${VOICES.ar}">${escapeXml(text)}</voice>`];
+export function preprocessTtsHtml(html: string, arabicTerms: TtsArabicTerm[] = []): string {
+  const htmlWithHeadingPauses = html.replace(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_match, headingContent: string) => {
+    const headingText = stripHtml(headingContent);
+    if (!headingText) return ' ';
+    return ` ${SSML_BREAK_PREFIX}800ms]] ${headingText} [[break:500ms]] `;
+  });
+
+  const plainText = stripHtml(htmlWithHeadingPauses);
+  return normalizeWhitespace(replaceTransliteratedTerms(plainText, arabicTerms));
+}
+
+type PreprocessedToken =
+  | { type: 'break'; timeMs: string }
+  | { type: 'text'; text: string; forceArabic: boolean };
+
+function tokenizePreprocessedText(text: string): PreprocessedToken[] {
+  const tokens: PreprocessedToken[] = [];
+  const markerRe = /\[\[break:(\d+)ms\]\]|\[\[ar\]\]([\s\S]*?)\[\[\/ar\]\]/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = markerRe.exec(text)) !== null) {
+    const plainText = normalizeWhitespace(text.slice(lastIndex, match.index));
+    if (plainText) {
+      tokens.push({ type: 'text', text: plainText, forceArabic: false });
+    }
+
+    if (match[1]) {
+      tokens.push({ type: 'break', timeMs: match[1] });
+    } else if (match[2]) {
+      const forcedArabicText = normalizeWhitespace(match[2]);
+      if (forcedArabicText) {
+        tokens.push({ type: 'text', text: forcedArabicText, forceArabic: true });
+      }
+    }
+
+    lastIndex = markerRe.lastIndex;
   }
 
+  const trailingText = normalizeWhitespace(text.slice(lastIndex));
+  if (trailingText) {
+    tokens.push({ type: 'text', text: trailingText, forceArabic: false });
+  }
+
+  return tokens;
+}
+
+function appendEnglishVoiceElements(voiceElements: string[], text: string): void {
   // Split on Arabic character runs — whitespace is NOT included in the Arabic class
   const ARABIC_SEGMENT_RE = /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u064B-\u065F\u0670]+(?:\s+[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u064B-\u065F\u0670]+)*)/g;
   const parts = text.split(ARABIC_SEGMENT_RE);
 
-  // If no Arabic detected, single voice element with prosody boost
   if (!parts.some(containsArabic)) {
-    return [`<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(text)}</prosody></voice>`];
+    voiceElements.push(`<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(text)}</prosody></voice>`);
+    return;
   }
 
-  // Threshold: Arabic segments with >4 words get their own voice element
   const ARABIC_WORD_THRESHOLD = 4;
-
-  // Merge short Arabic inline with surrounding English text
-  const mergedSegments: { voice: 'ar' | 'en'; text: string }[] = [];
   let englishBuffer = '';
 
   for (const part of parts) {
@@ -158,33 +302,65 @@ function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
       const arabicWordCount = part.trim().split(/\s+/).length;
 
       if (arabicWordCount <= ARABIC_WORD_THRESHOLD) {
-        // Short Arabic — keep inline with English
         englishBuffer += part;
       } else {
-        // Substantial Arabic — flush English buffer, then add Arabic segment
-        if (englishBuffer.trim()) {
-          mergedSegments.push({ voice: 'en', text: englishBuffer.trim() });
+        const bufferedText = normalizeWhitespace(englishBuffer);
+        if (bufferedText) {
+          voiceElements.push(`<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(bufferedText)}</prosody></voice>`);
         }
         englishBuffer = '';
-        mergedSegments.push({ voice: 'ar', text: part.trim() });
+        voiceElements.push(`<voice name="${VOICES.ar}">${escapeXml(normalizeWhitespace(part))}</voice>`);
       }
     } else {
       englishBuffer += part;
     }
   }
 
-  // Flush remaining English buffer
-  if (englishBuffer.trim()) {
-    mergedSegments.push({ voice: 'en', text: englishBuffer.trim() });
+  const bufferedText = normalizeWhitespace(englishBuffer);
+  if (bufferedText) {
+    voiceElements.push(`<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(bufferedText)}</prosody></voice>`);
+  }
+}
+
+/**
+ * Build voice elements for bilingual content — Arabic segments get ar-SA voice,
+ * English segments get en-US voice. Returns raw voice element strings (without <speak> wrapper).
+ */
+function buildBreakVoiceElement(language: 'ar' | 'en', timeMs: string): string {
+  const voiceName = language === 'ar' ? VOICES.ar : VOICES.en;
+  return `<voice name="${voiceName}"><break time="${timeMs}ms"/></voice>`;
+}
+
+export function buildVoiceElements(text: string, language: 'ar' | 'en'): string[] {
+  const tokens = tokenizePreprocessedText(text);
+  const voiceElements: string[] = [];
+
+  if (language === 'ar') {
+    for (const token of tokens) {
+      if (token.type === 'break') {
+        voiceElements.push(buildBreakVoiceElement('ar', token.timeMs));
+        continue;
+      }
+      voiceElements.push(`<voice name="${VOICES.ar}">${escapeXml(token.text)}</voice>`);
+    }
+    return voiceElements;
   }
 
-  // Build voice elements
-  return mergedSegments.map((seg) => {
-    if (seg.voice === 'ar') {
-      return `<voice name="${VOICES.ar}">${escapeXml(seg.text)}</voice>`;
+  for (const token of tokens) {
+    if (token.type === 'break') {
+      voiceElements.push(buildBreakVoiceElement('en', token.timeMs));
+      continue;
     }
-    return `<voice name="${VOICES.en}"><prosody rate="1.05">${escapeXml(seg.text)}</prosody></voice>`;
-  });
+
+    if (token.forceArabic) {
+      voiceElements.push(`<voice name="${VOICES.ar}">${escapeXml(token.text)}</voice>`);
+      continue;
+    }
+
+    appendEnglishVoiceElements(voiceElements, token.text);
+  }
+
+  return voiceElements;
 }
 
 /**
@@ -401,7 +577,17 @@ export async function getOrGenerateAudio(
   // Fetch unit content
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },
-    select: { content: true, title: true, arabicTerms: true },
+    select: {
+      content: true,
+      title: true,
+      arabicTerms: {
+        select: {
+          arabicText: true,
+          transliteration: true,
+          translation: true,
+        },
+      },
+    },
   });
 
   if (!unit || !unit.content) {
@@ -411,14 +597,13 @@ export async function getOrGenerateAudio(
   // Extract text for synthesis
   let textToSynthesize: string;
   if (blockIndex !== null && blockIndex >= 0) {
-    // Split content into blocks (paragraphs)
-    const blocks = unit.content.split(/<\/?(p|div|section|h[1-6])[^>]*>/gi).filter((b) => b.trim() && b.length > 10);
+    const blocks = extractSynthesisBlocks(unit.content);
     if (blockIndex >= blocks.length) {
       throw new Error(`Block index ${blockIndex} out of range (${blocks.length} blocks)`);
     }
-    textToSynthesize = stripHtml(blocks[blockIndex]);
+    textToSynthesize = preprocessTtsHtml(blocks[blockIndex], unit.arabicTerms);
   } else {
-    textToSynthesize = stripHtml(unit.content);
+    textToSynthesize = preprocessTtsHtml(unit.content, unit.arabicTerms);
   }
 
   if (!textToSynthesize.trim()) {

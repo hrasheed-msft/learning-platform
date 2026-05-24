@@ -6,6 +6,7 @@ import UnitAudioButton from '@/components/UnitAudioButton';
 vi.mock('@/services/audioService', () => ({
   audioService: {
     generateUnitAudio: vi.fn(),
+    getAudioWithTimestamps: vi.fn(),
   },
   default: undefined,
 }));
@@ -24,6 +25,7 @@ import { audioService } from '@/services/audioService';
 describe('UnitAudioButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(audioService.getAudioWithTimestamps).mockResolvedValue(null);
   });
 
   describe('Language Toggle', () => {
@@ -82,6 +84,30 @@ describe('UnitAudioButton', () => {
   });
 
   describe('Audio Playback', () => {
+    it('should show compact synced controls when timestamps are available', async () => {
+      vi.mocked(audioService.getAudioWithTimestamps).mockResolvedValue({
+        audioUrl: 'https://api.example.com/audio/unit-1-en.mp3',
+        timestamps: [
+          { word: 'Hello', offset: 0, duration: 500 },
+          { word: 'world', offset: 500, duration: 500 },
+        ],
+      });
+
+      render(<UnitAudioButton unitId="unit-1" hasEnglish={true} hasArabic={false} />);
+
+      await waitFor(() => {
+        expect(audioService.getAudioWithTimestamps).toHaveBeenCalledWith('unit-1', 'en');
+      });
+
+      fireEvent.click(screen.getByText('🔊 Listen'));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Play')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('audio-player')).not.toBeInTheDocument();
+    });
+
     it('should show AudioPlayer on successful generation', async () => {
       vi.mocked(audioService.generateUnitAudio).mockResolvedValue({
         url: 'https://api.example.com/audio/unit-1-en.mp3',
