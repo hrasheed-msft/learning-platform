@@ -493,6 +493,106 @@ Comprehensive multimodal feature design addressing high-value requests for autom
 
 ---
 
+### 18. User Directive — Arabic Term Formatting and Audio UX (2026-05-24)
+**Requested by:** hrasheed (via Copilot)
+
+User directive capturing three related feature requests for improving audio and text UX:
+
+**Key Decisions:**
+1. Arabic transliterated terms in audio/text should follow the pattern: "English Translation <Arabic Word>/(English transliteration)" — e.g., "Prayer صلاة/(Salah)" instead of bare transliterations with diacritics.
+2. Text highlighting during audio playback should occur in the existing content/text window, NOT in a separate small popup below the audio control.
+3. Add punctuation (pauses) around headings so the TTS audio pauses appropriately at section breaks.
+
+**Rationale:** Improves audio clarity and reading UX for Islamic education content. Directive captured from team feedback and implementation results.
+
+---
+
+### 19. Route-level Lazy Loading + Inline Modals for Pre-Auth Pages (2026-05-21)
+**Author:** Ibn Sina (Frontend Dev)
+**Status:** Implemented
+
+Two frontend issues required structural changes:
+
+1. The "Add a learner" button tried to navigate to `/settings` but got blocked by `ProtectedRoute` (requires `selectedMember`).
+2. Initial page load was ~507kB — all routes eagerly imported.
+
+**Key Decisions:**
+- **Inline modal pattern:** Pages rendered before a member is selected (like `/select-learner`) cannot navigate to protected routes. Actions like "Add a learner" use inline modals that call the API directly.
+- **Rule:** If a page exists outside the `ProtectedRoute` wrapper, it must be self-contained — no navigating to protected pages.
+- **Lazy loading convention:** Eager imports: Layouts, LoginPage, RegisterPage, SelectLearner (critical path). Lazy imports: Everything else via React.lazy().
+- **Vite code splitting:** Manual chunks: vendor-react, vendor-state, vendor-ui, vendor-content.
+
+**Impact:** Initial bundle: 507kB → 45kB (91% reduction). "Add a learner" now functional without navigating away.
+
+---
+
+### 20. Inline Audio Sync — Ownership and Page-Level Content Highlighting (2026-05-24)
+**Author:** Ibn Sina (Frontend Dev)
+**Status:** Implemented
+
+Synced audio highlighting was rendering in a separate popup below the audio controls, which duplicated the lesson text and split the reading flow.
+
+**Key Decisions:**
+- **Component ownership:** UnitAudioButton owns playback controls only and emits word-sync state via onSyncStateChange. UnitViewer owns inline highlighting of the existing lesson body via SyncedTextContent.
+- **Rationale:** Keeps Study Aids compact, removes duplicate text windows, lets learners follow the highlighted word inside the same content area they are already reading.
+- **Convention:** Future synced readers should prefer page-level content highlighting over embedding a second text surface inside the control component.
+
+**Impact:** Improves reading flow and removes UI duplication.
+
+---
+
+### 21. Coursebook Images — Served from Azure Blob Storage (2026-05-21)
+**Author:** Khwarizmi (Backend Dev)
+**Status:** Implemented
+
+Coursebook images (~188MB in `public/coursebook-images/`) were excluded from Docker builds via `.dockerignore` to keep image size manageable. This broke image display in production for all Maktab courses.
+
+**Key Decisions:**
+- Serve coursebook images from Azure Blob Storage instead of bundling them in Docker.
+- **Storage:** Account `stislamiclearning`, new container `coursebook-images`, public blob access.
+- **URL pattern:** https://stislamiclearning.blob.core.windows.net/coursebook-images/{filename}
+- **Backend:** `/coursebook-images/*` route redirects to blob storage in production, serves locally in dev. Course controller rewrites `src="/coursebook-images/..."` → direct blob URL.
+
+**Impact:** No database migration or frontend changes required. Image paths in DB content remain relative; URLs rewritten server-side.
+
+---
+
+### 22. TTS Prosody Fragmentation Fix (2026-05-20)
+**Author:** Khwarizmi (Backend Dev)
+**Component:** `backend/src/services/tts.service.ts` — `buildVoiceElements()`
+**Status:** Implemented
+
+English audio narration was reading "one word at a time with pauses" because `buildVoiceElements()` created a separate `<voice>` element for every Arabic fragment, no matter how small. Azure Speech resets prosody at each voice boundary, causing audible gaps.
+
+**Key Decisions:**
+- **Removed `\s` from Arabic regex** — whitespace no longer gets captured as Arabic, preventing spurious fragmentation.
+- **4-word threshold** — Arabic segments with ≤4 words stay inline within the English voice element. Only substantial passages (>4 words) trigger a voice switch to `ar-SA-HamedNeural`. Covers 99% of cases (inline terms like "wudu", "الوضوء", "salah").
+- **Prosody boost:** English voice elements get 5% speed boost (`<prosody rate="1.05">`) to address "too slow" feedback.
+
+**Trade-off:** Short Arabic terms rendered by English voice won't have perfect Arabic pronunciation. Accepted because fluency >> isolated accuracy for learning content.
+
+---
+
+### 23. TTS Arabic Term Normalization + Heading Breaks (2026-05-24)
+**Author:** Khwarizmi (Backend Dev)
+**Component:** `backend/src/services/tts.service.ts`
+**Status:** Implemented
+
+English narration was reading transliterated Arabic terms like `Ṣalāh` and `Wuḍūʾ` with English phonetics, and section headings flowed into body text without enough pause.
+
+**Key Decisions:**
+1. **Preprocess HTML** using `preprocessTtsHtml()` instead of plain `stripHtml()`.
+2. **Normalize transliterations** against `unit.arabicTerms` so transliterated terms become `Translation + Arabic script + simple transliteration` in spoken order.
+3. **Mark inserted Arabic text explicitly** with `[[ar]]...[[/ar]]` so `buildVoiceElements()` always emits an Arabic voice element for the term.
+4. **Convert headings into pause markers** (`[[break:800ms]]` before, `[[break:500ms]]` after) before voice-element construction.
+5. **Preserve headings for block audio** by replacing regex splitting with `extractSynthesisBlocks()` that keeps `<h1>`-`<h6>` blocks intact.
+
+**Trade-off:** Spoken pattern more verbose but pronunciation quality much better for educational vocabulary. Transliteration matching is heuristic-based targeting common Islamic-studies diacritic variants.
+
+**Validation:** `npx vitest run src/__tests__/audio.test.ts`, `npm run test:ci`, `npm run build`.
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus

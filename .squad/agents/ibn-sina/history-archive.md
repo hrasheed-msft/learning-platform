@@ -1,0 +1,95 @@
+# Ibn Sina — History Archive
+
+Archived entries from before 2026-05-20 for long-term reference.
+
+## Archived Sessions
+
+### 2026-05-16 — Full Frontend Inventory
+**Status:** 90-95% feature-complete; 10 gaps identified  
+**Architecture:** Auth via ProtectedRoute (19 core routes); 8 UI components; 4 stores; 6 services (~60 endpoints); Tailwind + Islamic palette + RTL support  
+**Outcome:** Inventory completed; gaps documented in decisions.md
+
+### 2026-05-17 — Child Login + Parent Dashboard Frontend
+**Status:** COMPLETED | 24 files created  
+**Deliverables:** ChildLoginPage, ChildLayout, ParentDashboard, childAuthStore, dashboardStore, notificationStore  
+**Architecture:** Separate child auth store; ChildProtectedRoute independent; SetCredentialsModal in FamilySettings  
+**Result:** All builds pass; no TypeScript errors
+
+### 2026-05-17 — Games Frontend Phase 1 (15 Game Types)
+**Status:** COMPLETED | 25 new files  
+**Deliverables:** 10 shared components, 6 playable games (TermMatch, SpeedQuiz, FlashcardFlip, DailyChallenge, EscapeRoom, MazeNavigator), GamePlay router  
+**Key Fixes:** 3 backend-frontend API contract mismatches resolved (achievements shape, leaderboard structure, streak fields)  
+**Architecture:** GameType enum established with GAME_META; all games follow 3-screen pattern
+
+### 2026-05-17 — Games Frontend Phase 2 (Expanded 15→26)
+**Status:** COMPLETED | 11 new components  
+**New Games:** WordScramble, FillInBlank, MemoryMatch, TrueFalse, MultipleChoice, SentenceBuild, ListeningQuiz, CalligraphyTrace, SpellingBee, StoryPuzzle, MazeRunner  
+**Result:** GamePlay router maps all 26 slugs; GAME_META updated; build clean
+
+### 2026-05-17 — Games Expansion (Additional 11 Components)
+**Status:** COMPLETED | 9 new components + MazeNavigator routed  
+**New Games:** AyahCompletion, FiqhScenario, HadithChain, WordSearch, KnowledgeExpedition, TriviaBattle, MosqueBuilder, PatternCreator, SeerahTimeline  
+**Result:** All 26 game types fully playable; GamePlay router complete; build clean
+
+### 2026-05-17 — Games Full Implementation (Phase 1 Complete)
+**Status:** COMPLETED | Full team integration  
+**Frontend Deliverables:** 26 game types, all components built, router complete, parental controls integrated  
+**Backend Parallel (Khwarizmi):** GameType enum 15→26, POST /games/start validation relaxed, content selection fallback, 26 templates + 69 seed games  
+**Team Coordination:** Parallel work completed without blockers; API contracts synchronized; both decisions merged into decisions.md  
+**Build Status:** ✅ Clean (frontend) + ✅ Clean (backend)  
+**Phase 1 Completion:** All 26 types playable end-to-end with parental controls integrated
+
+### 2026-05-18 — useActiveMemberId Pattern
+- **Problem:** All 26 game components used `selectedMember?.id` from `useFamilyStore()`, but `selectedMember` is only set via explicit `selectMember()` call — nobody does that. Result: "Start Game" silently fails for every game.
+- **Fix:** Created `frontend/src/hooks/useActiveMemberId.ts` — returns `selectedMember?.id || members[0]?.id` with auto-fetch of members. Updated all 26 game components to use this hook.
+- **Pattern:** GamesHub already had `activeMemberId = selectedMember?.id || members[0]?.id` inline. The hook centralizes this pattern.
+- **Key file:** `frontend/src/hooks/useActiveMemberId.ts`
+- **GamesHub key fix:** `filteredGames.map` used `key={game.id}` which can duplicate when same template creates multiple games. Changed to composite key `${game.id}-${game.template.type}-${index}`.
+
+### 2026-05-18 — Games frontend rebuilt: 26 → 9 mechanics
+- **Driver:** `khaldun-game-redesign.md` consolidated 26 redundant game components into 9 distinct mechanics. User directive merged True/False into Quick Recall — final = 9.
+- **9 games (slug → ActiveGameType):** quick-recall, pair-match, flashcard-sprint, cloze, word-search, sequence-it, word-scramble, calligraphy-trace, fiqh-scenario.
+- **New routing pattern:** `/games` (hub) → `/games/:gameSlug/launch` (course + difficulty picker) → `/games/:gameSlug/play?gameId=X&difficulty=Y`. Replaces old `/games/play/:gameType` direct-launch flow.
+
+### 2026-05-18 — Games "No eligible courses" fix + Enrollment simplification
+- **Problem 1:** `gameService.getEligibleCourses` extracted `raw.courses` but backend returns `eligibleCourses`. Also mapped `c.courseName` but backend sends `courseTitle`.
+- **Fix 1:** Changed extraction to `raw?.eligibleCourses ?? raw?.courses ?? []` and field mapping to `c.courseName ?? c.courseTitle ?? c.course?.title ?? 'Untitled'`.
+- **Problem 2:** CourseDetail enrollment required picking a member from dropdown even though learner picker already selects an active member.
+- **Fix 2:** If `selectedMember` exists in familyStore, show a single "Enroll {name}" button. Dropdown only appears as fallback when no active member. Success message now includes member name.
+- **Pattern:** Use `selectedMember` from `useFamilyStore()` as primary; `selectedMemberId` state as fallback for no-active-member edge case.
+- **Key files:** `services/gameService.ts` (line 129), `pages/courses/CourseDetail.tsx` (enrollment section).
+- **Build:** `npx tsc --noEmit` ✓ clean.
+
+---
+
+## Archived Learnings
+
+### 2026-05-20 — TTS Audio Player UI (Frontend)
+- **Status:** COMPLETED | 3 new files, 1 modified page, 1 updated barrel
+- **Components:** AudioPlayer.tsx, UnitAudioButton.tsx, audioService.ts; integrated into UnitViewer
+- **Architecture:** Reusable player with play/pause, seekable progress bar, speed control (0.75x–1.5x), RTL support, error state
+- **API contract:** `POST /api/v1/units/:unitId/audio` body `{ language: "ar" | "en" }` → `{ url: string, duration: number }`
+- **Build:** `npx tsc --noEmit` ✓ clean
+
+### 2026-05-20 — Video Player UI (Frontend)
+- **Status:** COMPLETED | 3 new files, 1 modified page
+- **Components:** VideoPlayer.tsx, UnitVideoButton.tsx, videoService.ts; integrated into UnitViewer
+- **Architecture:** HTML5 video player with custom controls (play/pause, seekable progress, speed control 0.75x–2x, fullscreen), dark cinema-style UI, AI-Generated badge, RTL support, auto-hiding controls
+- **API contract:** `POST /api/v1/units/:unitId/video` body `{ language: "ar" | "en" }` → `{ status: "generating" | "ready", url?: string, estimatedTime?: number }`
+- **Build:** `npx tsc --noEmit` ✓ clean
+
+### 2026-05-20 — Audio Sync Frontend (SyncedTextPlayer)
+- **Status:** COMPLETED | 5 new components + 1 store
+- **Components:** SyncedTextPlayer.tsx, TextHighlight.tsx, AudioControls.tsx, AudioMetadata.tsx, useAudioSync hook, audioStore
+- **Sync Algorithm:** 60 FPS via RAF timeupdate listener; word finder: `words.find(w => w.sectionId === section && w.startMs <= ms < w.endMs)`; auto-scroll with smooth behavior
+- **RTL Support:** Dynamic per-section; CSS `direction: rtl|ltr`, `unicode-bidi: bidi-override`, `text-align: right|left`; Arabic text with diacritics
+- **Error Handling:** Fallback to on-demand TTS without sync data (generic progress bar)
+- **Testing:** Unit tests (useAudioSync hook), integration tests (SyncedTextPlayer with mock responses), E2E (sync precision, RTL rendering, seek updates, speed changes, language toggle)
+- **Build:** `npx tsc --noEmit` ✓ clean
+
+### 2026-05-21 — "Add a Learner" Fix + Performance Optimization
+- **Status:** COMPLETED | 4 files modified
+- **Issue 1:** "Add Learner" button navigated to protected `/settings` with null `selectedMember`. Fix: inline modal calling `familyService.addMember` directly.
+- **Issue 2:** Initial bundle ~507kB. Fix: `React.lazy()` + Vite `manualChunks` + non-blocking Google Fonts.
+- **Result:** Initial JS bundle → 45kB (gzipped 11kB). Pages load on demand. Build clean.
+- **Pattern:** Keep only critical-path components eager (layouts, login, learner picker). Everything else lazy.
