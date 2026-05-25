@@ -43,7 +43,7 @@ interface SyncedAudioControlsProps {
   onSyncStateChange?: (state: UnitAudioSyncState | null) => void;
 }
 
-const HIGHLIGHT_DELAY_MS = 400;
+const HIGHLIGHT_DELAY_MS = 1200;
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);

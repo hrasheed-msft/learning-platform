@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause, Square } from 'lucide-react';
 import { courseService } from '@/services/courseService';
@@ -27,36 +27,10 @@ export default function UnitViewer() {
   });
   const [updatingProgress, setUpdatingProgress] = useState(false);
   const [audioSyncState, setAudioSyncState] = useState<UnitAudioSyncState | null>(null);
-  const [isMainAudioControlVisible, setIsMainAudioControlVisible] = useState(true);
-  const mainAudioControlRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setAudioSyncState(null);
-    setIsMainAudioControlVisible(true);
   }, [unitId]);
-
-  useEffect(() => {
-    const target = mainAudioControlRef.current;
-    if (!target || typeof IntersectionObserver === 'undefined') {
-      setIsMainAudioControlVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsMainAudioControlVisible(entry?.isIntersecting ?? true);
-      },
-      {
-        threshold: 0.2,
-      }
-    );
-
-    observer.observe(target);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [loading, unitId]);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -153,7 +127,7 @@ export default function UnitViewer() {
   const textContent = unit.content?.text || '<p>No content available for this unit yet.</p>';
   const hasActiveAudioSession = Boolean(audioSyncState?.togglePlayPause)
     && (audioSyncState?.isPlaying || ((audioSyncState?.currentTime ?? 0) > 0 && (audioSyncState?.currentTime ?? 0) < (audioSyncState?.duration ?? 0)));
-  const shouldShowFloatingAudioControl = hasActiveAudioSession && !isMainAudioControlVisible;
+  const shouldShowFloatingAudioControl = hasActiveAudioSession;
 
   return (
     <div className="space-y-6 animate-in">
@@ -201,7 +175,7 @@ export default function UnitViewer() {
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
             📚 Study Aids
           </h3>
-          <div ref={mainAudioControlRef}>
+          <div>
             <span className="text-xs font-medium text-gray-500 mb-1 block">🔊 Listen</span>
             <UnitAudioButton
               unitId={unitId!}
