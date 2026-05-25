@@ -53,6 +53,7 @@ describe('ChildCoursesPage', () => {
 
     expect(screen.getByText('Arabic Basics')).toBeInTheDocument();
     expect(screen.getByText(/40% complete/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /continue learning/i })).toHaveAttribute('href', '/child/courses/course-1/learn');
   });
 
   it('shows a helpful empty state when the student has no enrollments', () => {

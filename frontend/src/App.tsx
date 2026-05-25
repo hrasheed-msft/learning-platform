@@ -188,6 +188,9 @@ function App() {
       >
         <Route path="dashboard" element={<ChildDashboardHome />} />
         <Route path="courses" element={<ChildCoursesPage />} />
+        <Route path="courses/:courseId/learn" element={<CourseLearner />} />
+        <Route path="courses/:courseId/units/:unitId" element={<UnitViewer />} />
+        <Route path="courses/:courseId/units/:unitId/quiz" element={<QuizPage />} />
         <Route path="flashcards" element={<ChildFlashcardsPage />} />
         <Route path="achievements" element={<ChildAchievementsPage />} />
         <Route path="games" element={<GamesHub />} />

@@ -1,6 +1,15 @@
-import { BookOpen, CheckCircle2, Clock3, RefreshCw } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock3, PlayCircle, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useChildEnrollments } from '@/hooks/useChildEnrollments';
+import type { CourseEnrollment } from '@/types';
+
+function getLearnerState(memberId: string | undefined, enrollment: CourseEnrollment) {
+  return {
+    memberId,
+    enrollmentId: enrollment.id,
+    enrollment,
+  };
+}
 
 export default function ChildCoursesPage() {
   const { member, enrollments, isLoading, error, reload } = useChildEnrollments();
@@ -51,31 +60,46 @@ export default function ChildCoursesPage() {
               <span className="text-sm text-gray-500">{activeEnrollments.length} active</span>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {activeEnrollments.map((enrollment) => (
-                <div key={enrollment.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-primary-600">
-                        {enrollment.course?.category || 'Course'}
-                      </p>
-                      <h3 className="text-lg font-semibold text-gray-800 mt-1">{enrollment.course?.title}</h3>
+              {activeEnrollments.map((enrollment) => {
+                const progress = Math.max(0, Math.min(100, enrollment.progress ?? 0));
+                const buttonLabel = progress > 0 ? 'Continue Learning' : 'Start Learning';
+                const courseId = enrollment.course?.id ?? enrollment.courseId;
+
+                return (
+                  <div key={enrollment.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-primary-600">
+                          {enrollment.course?.category || 'Course'}
+                        </p>
+                        <h3 className="text-lg font-semibold text-gray-800 mt-1">{enrollment.course?.title}</h3>
+                      </div>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
+                        <Clock3 className="w-3 h-3" />
+                        {progress}% complete
+                      </span>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
-                      <Clock3 className="w-3 h-3" />
-                      {enrollment.progress ?? 0}% complete
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600">{enrollment.course?.description}</p>
-                  <div>
-                    <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary-500"
-                        style={{ width: `${Math.max(0, Math.min(100, enrollment.progress ?? 0))}%` }}
-                      />
+                    <p className="text-sm text-gray-600">{enrollment.course?.description}</p>
+                    <div className="space-y-4">
+                      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary-500"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+
+                      <Link
+                        to={`/child/courses/${courseId}/learn`}
+                        state={getLearnerState(member?.id, enrollment)}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-600"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        {buttonLabel}
+                      </Link>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -86,22 +110,35 @@ export default function ChildCoursesPage() {
                 <span className="text-sm text-gray-500">{completedEnrollments.length} finished</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {completedEnrollments.map((enrollment) => (
-                  <div key={enrollment.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-                          {enrollment.course?.category || 'Course'}
-                        </p>
-                        <h3 className="text-lg font-semibold text-gray-800 mt-1">{enrollment.course?.title}</h3>
+                {completedEnrollments.map((enrollment) => {
+                  const courseId = enrollment.course?.id ?? enrollment.courseId;
+
+                  return (
+                    <div key={enrollment.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
+                            {enrollment.course?.category || 'Course'}
+                          </p>
+                          <h3 className="text-lg font-semibold text-gray-800 mt-1">{enrollment.course?.title}</h3>
+                        </div>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Completed
+                        </span>
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Completed
-                      </span>
+
+                      <Link
+                        to={`/child/courses/${courseId}/learn`}
+                        state={getLearnerState(member?.id, enrollment)}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition hover:bg-green-100"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        Review Course
+                      </Link>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause, Square } from 'lucide-react';
 import { courseService } from '@/services/courseService';
 import UnitAudioButton, { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
 import type { Unit, VideoResource, AudioResource, ArabicTerm } from '@/types/course';
+import { getCourseLearnPath, getQuizPath, getUnitPath } from '@/utils/courseRoutePaths';
 
 interface UnitProgress {
   videoCompleted: boolean;
@@ -16,6 +17,10 @@ interface UnitProgress {
 export default function UnitViewer() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const courseLearnPath = courseId ? getCourseLearnPath(location.pathname, courseId) : '/courses';
+  const quizPath = courseId && unitId ? getQuizPath(location.pathname, courseId, unitId) : '/courses';
+  const currentUnitState = location.state as { memberId?: string; enrollmentId?: string } | null;
   
   const [unit, setUnit] = useState<Unit | null>(null);
   const [allUnits, setAllUnits] = useState<Unit[]>([]);
@@ -83,13 +88,13 @@ export default function UnitViewer() {
 
   const handlePrevious = () => {
     if (previousUnit && courseId) {
-      navigate(`/courses/${courseId}/units/${previousUnit.id}`);
+      navigate(getUnitPath(location.pathname, courseId, previousUnit.id), { state: currentUnitState ?? undefined });
     }
   };
 
   const handleNext = () => {
     if (nextUnit && courseId) {
-      navigate(`/courses/${courseId}/units/${nextUnit.id}`);
+      navigate(getUnitPath(location.pathname, courseId, nextUnit.id), { state: currentUnitState ?? undefined });
     }
   };
 
@@ -111,7 +116,7 @@ export default function UnitViewer() {
           <h2 className="text-xl font-semibold text-red-800 mb-2">Error Loading Unit</h2>
           <p className="text-red-600 mb-4">{error || 'Unit not found'}</p>
           <Link
-            to={`/courses/${courseId}`}
+            to={courseLearnPath}
             className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -135,7 +140,7 @@ export default function UnitViewer() {
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Link
-          to={`/courses/${courseId}`}
+          to={courseLearnPath}
           className="inline-flex items-center text-gray-600 hover:text-primary-600 transition"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -399,7 +404,7 @@ export default function UnitViewer() {
             {/* Bottom Navigation */}
             <div className="flex items-center justify-between pt-6 mt-6 border-t border-gray-200">
               <Link
-                to={`/courses/${courseId}/units/${unitId}/quiz`}
+                to={quizPath}
                 className="inline-flex items-center px-6 py-3 bg-secondary-500 text-white font-medium rounded-lg hover:bg-secondary-600 transition"
               >
                 Take Quiz
@@ -417,7 +422,7 @@ export default function UnitViewer() {
                 </button>
               ) : (
                 <Link
-                  to={`/courses/${courseId}`}
+                  to={courseLearnPath}
                   className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition"
                 >
                   Back to Course
@@ -492,7 +497,7 @@ export default function UnitViewer() {
 
           {/* Take Quiz Button */}
           <Link
-            to={`/courses/${courseId}/units/${unitId}/quiz`}
+            to={quizPath}
             className="block w-full px-6 py-3 bg-primary-500 text-white font-medium rounded-xl text-center hover:bg-primary-600 transition"
           >
             Take Quiz

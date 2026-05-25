@@ -1,13 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { useCourseStore } from '@/stores';
-import { courseService } from '@/services/courseService';
 import { ArrowLeft, Loader2, BookOpen, PlayCircle, CheckCircle, Lock } from 'lucide-react';
+import { useCourseStore } from '@/stores';
+import { useFamilyStore } from '@/stores/familyStore';
+import { useChildAuthStore } from '@/stores/childAuthStore';
+import { courseService } from '@/services/courseService';
+import { getUnitPath } from '@/utils/courseRoutePaths';
+import type { CourseEnrollment } from '@/types';
 import type { Unit } from '@/types/course';
 
 interface LocationState {
   memberId?: string;
   enrollmentId?: string;
+  enrollment?: CourseEnrollment;
+}
+
+type EnrollmentUnitProgress = NonNullable<CourseEnrollment['unitProgress']>[number];
+
+function isUnitCompleted(progress?: EnrollmentUnitProgress) {
+  if (!progress) {
+    return false;
+  }
+
+  if (progress.status) {
+    return progress.status === 'completed';
+  }
+
+  return Boolean(progress.videoCompleted && progress.readingCompleted && progress.quizCompleted);
+}
+
+function hasUnitStarted(progress?: EnrollmentUnitProgress) {
+  if (!progress) {
+    return false;
+  }
+
+  if (progress.status) {
+    return progress.status === 'in_progress' || progress.status === 'completed';
+  }
+
+  return Boolean(progress.videoCompleted || progress.readingCompleted || progress.quizCompleted);
 }
 
 export default function CourseLearner() {
@@ -15,28 +46,60 @@ export default function CourseLearner() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
-  
+  const { selectedMember } = useFamilyStore();
+  const { member: childMember } = useChildAuthStore();
   const { selectedCourse, fetchCourse, enrollments, isLoading: courseLoading } = useCourseStore();
+
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedEnrollment, setResolvedEnrollment] = useState<CourseEnrollment | null>(state?.enrollment ?? null);
 
-  // Find the enrollment for this course
-  const enrollment = enrollments.find(e => e.courseId === courseId);
+  const resumeUnitRef = useRef<HTMLDivElement | null>(null);
+  const isChildRoute = location.pathname.startsWith('/child/');
+  const backLinkPath = isChildRoute ? '/child/courses' : '/dashboard';
+  const browseCoursesPath = isChildRoute ? '/child/courses' : '/courses';
+  const storeEnrollment = enrollments.find((enrollment) => enrollment.courseId === courseId);
+  const activeMemberId = state?.memberId ?? (isChildRoute ? childMember?.id : selectedMember?.id);
+
+  useEffect(() => {
+    if (state?.enrollment) {
+      setResolvedEnrollment(state.enrollment);
+      return;
+    }
+
+    if (storeEnrollment) {
+      setResolvedEnrollment(storeEnrollment);
+    }
+  }, [state?.enrollment, storeEnrollment]);
 
   useEffect(() => {
     const loadCourseData = async () => {
-      if (!courseId) return;
-      
+      if (!courseId) {
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch course and units
-        await fetchCourse(courseId);
-        const unitsData = await courseService.getUnits(courseId);
+
+        const [_, unitsData] = await Promise.all([fetchCourse(courseId), courseService.getUnits(courseId)]);
         setUnits(unitsData);
-        
+
+        let nextEnrollment = state?.enrollment?.courseId === courseId ? state.enrollment : storeEnrollment ?? null;
+
+        if ((!nextEnrollment || nextEnrollment.unitProgress === undefined) && activeMemberId) {
+          const memberEnrollments = await courseService.getEnrollments(activeMemberId);
+          nextEnrollment = memberEnrollments.find((enrollment) => {
+            if (state?.enrollmentId) {
+              return enrollment.id === state.enrollmentId;
+            }
+
+            return enrollment.courseId === courseId;
+          }) ?? nextEnrollment;
+        }
+
+        setResolvedEnrollment(nextEnrollment ?? null);
       } catch (err) {
         console.error('Failed to load course:', err);
         setError('Failed to load course content');
@@ -45,41 +108,58 @@ export default function CourseLearner() {
       }
     };
 
-    loadCourseData();
-  }, [courseId, fetchCourse]);
+    void loadCourseData();
+  }, [activeMemberId, courseId, fetchCourse, state?.enrollment, state?.enrollmentId, storeEnrollment]);
 
-  // Determine which unit to show based on progress
-  const getFirstIncompleteUnit = (): Unit | null => {
-    if (units.length === 0) return null;
-    
-    // If we have unit progress from enrollment, find first incomplete
-    if (enrollment?.unitProgress && enrollment.unitProgress.length > 0) {
-      const completedUnitIds = new Set(
-        enrollment.unitProgress
-          .filter(up => up.status === 'completed')
-          .map(up => up.unitId)
-      );
-      
-      const incompleteUnit = units.find(unit => !completedUnitIds.has(unit.id));
-      return incompleteUnit || units[0];
+  const resumeUnit = (() => {
+    if (units.length === 0) {
+      return null;
     }
-    
-    // Default to first unit
-    return units[0];
-  };
+
+    const unitProgress = resolvedEnrollment?.unitProgress ?? [];
+    const partiallyStartedUnit = unitProgress.find((progress) => !isUnitCompleted(progress) && hasUnitStarted(progress));
+
+    if (partiallyStartedUnit) {
+      return units.find((unit) => unit.id === partiallyStartedUnit.unitId) ?? units[0];
+    }
+
+    const completedUnitIds = new Set(
+      unitProgress.filter((progress) => isUnitCompleted(progress)).map((progress) => progress.unitId),
+    );
+
+    return units.find((unit) => !completedUnitIds.has(unit.id)) ?? units[0];
+  })();
+
+  useEffect(() => {
+    if (!resumeUnitRef.current || !resumeUnit) {
+      return;
+    }
+
+    resumeUnitRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [resumeUnit]);
 
   const handleStartUnit = (unitId: string) => {
-    navigate(`/courses/${courseId}/units/${unitId}`, {
-      state: { memberId: state?.memberId, enrollmentId: state?.enrollmentId }
+    if (!courseId) {
+      return;
+    }
+
+    navigate(getUnitPath(location.pathname, courseId, unitId), {
+      state: {
+        memberId: activeMemberId,
+        enrollmentId: resolvedEnrollment?.id ?? state?.enrollmentId,
+        enrollment: resolvedEnrollment ?? undefined,
+      },
     });
   };
 
   const handleAutoStart = () => {
-    const targetUnit = getFirstIncompleteUnit();
-    if (targetUnit) {
-      handleStartUnit(targetUnit.id);
+    if (resumeUnit) {
+      handleStartUnit(resumeUnit.id);
     }
   };
+
+  const isContinuing = (resolvedEnrollment?.progress ?? 0) > 0
+    || Boolean(resolvedEnrollment?.unitProgress?.some((progress) => hasUnitStarted(progress)));
 
   if (loading || courseLoading) {
     return (
@@ -96,8 +176,8 @@ export default function CourseLearner() {
     return (
       <div className="text-center py-12">
         <p className="text-red-500 mb-4">{error}</p>
-        <Link to="/dashboard" className="text-primary-600 hover:text-primary-700">
-          Return to Dashboard
+        <Link to={backLinkPath} className="text-primary-600 hover:text-primary-700">
+          {isChildRoute ? 'Return to My Courses' : 'Return to Dashboard'}
         </Link>
       </div>
     );
@@ -107,26 +187,23 @@ export default function CourseLearner() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 mb-4">Course not found</p>
-        <Link to="/courses" className="text-primary-600 hover:text-primary-700">
+        <Link to={browseCoursesPath} className="text-primary-600 hover:text-primary-700">
           Browse Courses
         </Link>
       </div>
     );
   }
 
-  // If we have units, show the course overview with unit selection
   return (
     <div className="space-y-6 animate-in">
-      {/* Back Link */}
       <Link
-        to="/dashboard"
+        to={backLinkPath}
         className="inline-flex items-center text-gray-600 hover:text-primary-600 transition"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Dashboard
+        {isChildRoute ? 'Back to My Courses' : 'Back to Dashboard'}
       </Link>
 
-      {/* Course Header */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="h-32 bg-gradient-to-br from-primary-400 to-primary-600 relative">
           {selectedCourse.thumbnailUrl ? (
@@ -143,7 +220,7 @@ export default function CourseLearner() {
         </div>
 
         <div className="p-6">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
               <span className="px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
                 {selectedCourse.category}
@@ -154,26 +231,26 @@ export default function CourseLearner() {
               <p className="text-gray-600 mt-1">{selectedCourse.description}</p>
             </div>
             <button
+              type="button"
               onClick={handleAutoStart}
               disabled={units.length === 0}
-              className="px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center"
+              className="px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center"
             >
               <PlayCircle className="w-5 h-5 mr-2" />
-              {enrollment?.progress && enrollment.progress > 0 ? 'Continue Learning' : 'Start Learning'}
+              {isContinuing ? 'Continue Learning' : 'Start Learning'}
             </button>
           </div>
 
-          {/* Progress Bar */}
-          {enrollment && (
+          {resolvedEnrollment && (
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm mb-2">
                 <span className="text-gray-500">Course Progress</span>
-                <span className="font-medium text-primary-600">{enrollment.progress || 0}%</span>
+                <span className="font-medium text-primary-600">{resolvedEnrollment.progress || 0}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-primary-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${enrollment.progress || 0}%` }}
+                  style={{ width: `${resolvedEnrollment.progress || 0}%` }}
                 />
               </div>
             </div>
@@ -181,7 +258,6 @@ export default function CourseLearner() {
         </div>
       </div>
 
-      {/* Units List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6 border-b">
           <h2 className="text-xl font-heading font-semibold text-gray-800">
@@ -199,28 +275,30 @@ export default function CourseLearner() {
             </div>
           ) : (
             units.map((unit, index) => {
-              // Check if unit is completed based on enrollment progress
-              const unitProgress = enrollment?.unitProgress?.find(up => up.unitId === unit.id);
-              const isCompleted = unitProgress?.status === 'completed';
-              const isInProgress = unitProgress?.status === 'in_progress';
-              const isLocked = index > 0 && !enrollment?.unitProgress?.find(
-                up => up.unitId === units[index - 1].id && up.status === 'completed'
-              );
+              const unitProgress = resolvedEnrollment?.unitProgress?.find((progress) => progress.unitId === unit.id);
+              const previousProgress = index > 0
+                ? resolvedEnrollment?.unitProgress?.find((progress) => progress.unitId === units[index - 1].id)
+                : undefined;
+              const isCompleted = isUnitCompleted(unitProgress);
+              const isInProgress = !isCompleted && hasUnitStarted(unitProgress);
+              const isLocked = index > 0 && !isUnitCompleted(previousProgress);
+              const isResumeTarget = resumeUnit?.id === unit.id;
 
               return (
                 <div
                   key={unit.id}
+                  ref={isResumeTarget ? resumeUnitRef : null}
                   className={`flex items-center justify-between p-4 ${
                     isLocked ? 'opacity-50' : 'hover:bg-gray-50 cursor-pointer'
-                  } transition`}
+                  } ${isResumeTarget ? 'bg-primary-50/60 ring-1 ring-inset ring-primary-200' : ''} transition`}
                   onClick={() => !isLocked && handleStartUnit(unit.id)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      isCompleted 
-                        ? 'bg-green-100' 
-                        : isInProgress 
-                          ? 'bg-primary-100' 
+                      isCompleted
+                        ? 'bg-green-100'
+                        : isInProgress
+                          ? 'bg-primary-100'
                           : 'bg-gray-100'
                     }`}>
                       {isCompleted ? (
@@ -236,7 +314,14 @@ export default function CourseLearner() {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800">{unit.title}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-medium text-gray-800">{unit.title}</h3>
+                        {isResumeTarget && !isLocked && !isCompleted && (
+                          <span className="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-1 text-xs font-medium text-primary-700">
+                            Continue where you left off
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500 line-clamp-1">
                         {unit.description}
                       </p>

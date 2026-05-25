@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle, XCircle, HelpCircle, ChevronRight, Loader2, SkipForward } from 'lucide-react';
 import { assessmentService } from '@/services/assessmentService';
 import { courseService } from '@/services/courseService';
+import { getCourseLearnPath, getUnitPath } from '@/utils/courseRoutePaths';
 
 type QuestionType = 'multiple-choice' | 'true-false' | 'fill-blank' | 'ordering' | 'matching';
 
@@ -21,6 +22,9 @@ interface Question {
 
 export default function QuizPage() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
+  const location = useLocation();
+  const unitPath = courseId && unitId ? getUnitPath(location.pathname, courseId, unitId) : '/courses';
+  const courseLearnPath = courseId ? getCourseLearnPath(location.pathname, courseId) : '/courses';
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -234,7 +238,7 @@ export default function QuizPage() {
           <h2 className="text-xl font-semibold text-yellow-800 mb-2">No Questions Available</h2>
           <p className="text-yellow-600 mb-4">There are no quiz questions for this unit yet.</p>
           <Link
-            to={`/courses/${courseId}/units/${unitId}`}
+            to={unitPath}
             className="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -288,7 +292,7 @@ export default function QuizPage() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to={`/courses/${courseId}/units/${unitId}`}
+              to={unitPath}
               className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition flex items-center justify-center"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -310,7 +314,7 @@ export default function QuizPage() {
             )}
             {passed && (
               <Link
-                to={nextUnitId ? `/courses/${courseId}/units/${nextUnitId}` : `/courses/${courseId}`}
+                to={nextUnitId && courseId ? getUnitPath(location.pathname, courseId, nextUnitId) : courseLearnPath}
                 className="px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition flex items-center justify-center"
               >
                 {nextUnitId ? 'Next Unit' : 'Back to Course'}
@@ -364,7 +368,7 @@ export default function QuizPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <Link
-          to={`/courses/${courseId}/units/${unitId}`}
+          to={unitPath}
           className="inline-flex items-center text-gray-600 hover:text-primary-600 transition"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

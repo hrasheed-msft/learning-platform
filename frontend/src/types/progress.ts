@@ -30,13 +30,17 @@ export interface UnitProgress {
   id: string;
   enrollmentId: string;
   unitId: string;
-  status: UnitStatus;
-  attempts: number;
-  bestScore: number;
-  currentScore: number;
-  timeSpentMinutes: number;
+  status?: UnitStatus;
+  attempts?: number;
+  bestScore?: number;
+  currentScore?: number;
+  timeSpentMinutes?: number;
+  videoCompleted?: boolean;
+  readingCompleted?: boolean;
+  quizCompleted?: boolean;
+  quizScore?: number;
   startedAt?: string;
-  completedAt?: string;
+  completedAt?: string | null;
 }
 
 export interface MemberProgress {

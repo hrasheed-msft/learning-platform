@@ -13,6 +13,7 @@ vi.mock('react-router-dom', async () => {
     ...actual,
     Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
     useNavigate: () => navigateMock,
+    useLocation: () => ({ pathname: '/courses/course-1/units/unit-1', state: null }),
     useParams: () => ({ courseId: 'course-1', unitId: 'unit-1' }),
   };
 });
