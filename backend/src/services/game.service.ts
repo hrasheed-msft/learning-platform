@@ -598,15 +598,55 @@ function formatRounds(
         };
       });
       const ids = chosen.map((i) => i.contentId).join(',');
+      const correctOrder = chosen.map((i) => i.contentId);
+
+      const baseMeta: Record<string, unknown> = {
+        gameMode: 'SEQUENCE_IT',
+        mode,
+        items: shuffle(sequenceItems),
+        correctOrder,
+      };
+
+      // Emit a frontend-friendly array keyed to the selected mode so
+      // SequenceItGame.tsx can detect items via `narrators` / `events`
+      // / `segments`. IDs match `correctOrder` (contentIds) so the
+      // grader compares apples to apples.
+      if (mode === 'isnad') {
+        baseMeta.narrators = chosen.map((it) => {
+          const c = it.content;
+          return {
+            id: it.contentId,
+            name: c.front || c.translation || c.questionText || '',
+            role: c.back || c.transliteration || '',
+          };
+        });
+      } else if (mode === 'timeline') {
+        baseMeta.events = chosen.map((it) => {
+          const c = it.content;
+          return {
+            id: it.contentId,
+            title: c.front || c.questionText || c.translation || '',
+            year: c.back || c.transliteration || '',
+          };
+        });
+      } else {
+        // narrative + syntax both render fine as `segments`; using
+        // `segments` (not `words`) keeps IDs as contentIds so the
+        // backend grader can validate without an extra mapping.
+        baseMeta.segments = chosen.map((it) => {
+          const c = it.content;
+          return {
+            id: it.contentId,
+            text: c.front || c.questionText || c.arabicText || c.translation || '',
+            arabicText: c.frontArabic || c.arabicText || '',
+          };
+        });
+      }
+
       return [{
         contentType: chosen[0]?.contentType ?? 'FLASHCARD',
         contentId: ids,
-        metadata: {
-          gameMode: 'SEQUENCE_IT',
-          mode,
-          items: shuffle(sequenceItems),
-          correctOrder: chosen.map((i) => i.contentId),
-        },
+        metadata: baseMeta,
       }];
     }
 
@@ -616,13 +656,18 @@ function formatRounds(
       return items.map((item) => {
         const c = item.content;
         const word: string = (c.transliteration || c.front || c.translation || '').toString().trim();
+        const scrambled = shuffle(word.split('')).join('');
         return {
           contentType: item.contentType,
           contentId: item.contentId,
           metadata: {
             gameMode: 'WORD_SCRAMBLE',
             word,
-            scrambled: shuffle(word.split('')).join(''),
+            scrambled,
+            // Frontend-facing aliases (WordScrambleGame.tsx reads these).
+            correctAnswer: word,
+            scrambledWord: scrambled,
+            front: word,
             hint: c.translation || c.back || '',
             firstLetter: showFirstLetter ? word.charAt(0) : null,
             arabicText: c.arabicText || c.frontArabic || '',
