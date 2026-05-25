@@ -8,7 +8,7 @@ const timestamps: WordTimestamp[] = [
   { word: 'world', offset: 500, duration: 400 },
 ];
 
-function TestHarness({ highlightOffsetMs = 300 }: { highlightOffsetMs?: number }) {
+function TestHarness({ highlightOffsetMs = 1200 }: { highlightOffsetMs?: number }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { currentWordIndex } = useAudioSync({ timestamps, audioRef, highlightOffsetMs });
 

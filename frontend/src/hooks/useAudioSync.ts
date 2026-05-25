@@ -63,7 +63,7 @@ function findWordIndex(timestamps: WordTimestamp[], currentTimeMs: number): numb
   return result;
 }
 
-const DEFAULT_HIGHLIGHT_OFFSET_MS = 1200;
+const DEFAULT_HIGHLIGHT_OFFSET_MS = 220;
 
 export function useAudioSync({
   timestamps,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause, Square } from 'lucide-react';
 import { courseService } from '@/services/courseService';
@@ -522,8 +523,8 @@ export default function UnitViewer() {
         </div>
       </div>
 
-      {shouldShowFloatingAudioControl && audioSyncState && (
-        <div className="fixed bottom-6 right-4 z-40 sm:right-6">
+      {shouldShowFloatingAudioControl && audioSyncState && typeof document !== 'undefined' && createPortal(
+        <div className="fixed bottom-6 right-4 z-[60] sm:right-6">
           <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white/95 px-2 py-2 shadow-lg backdrop-blur">
             <button
               type="button"
@@ -544,7 +545,8 @@ export default function UnitViewer() {
               <Square className="h-4 w-4 fill-current" />
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -343,8 +343,16 @@ async function synthesizeChunkWithTimestamps(ssml: string): Promise<ChunkSynthes
         synthesizer.close();
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
           const audioBuffer = Buffer.from(result.audioData);
-          // Estimate chunk duration from buffer size (128kbps = 16KB/s)
-          const durationMs = (audioBuffer.length / 16000) * 1000;
+          // Prefer Azure's authoritative audio duration (100-ns ticks → ms).
+          // Falls back to a bitrate-based estimate only when the SDK doesn't
+          // report one. The bitrate estimate compounds drift across chunks
+          // because MP3 framing / metadata / VBR make raw bytes a poor proxy
+          // for true playback length — and that drift makes word highlights
+          // race ahead of (or lag behind) the actual spoken audio.
+          const reportedDurationTicks = (result as unknown as { audioDuration?: number | bigint }).audioDuration;
+          const durationMs = reportedDurationTicks
+            ? Number(reportedDurationTicks) / 10000
+            : (audioBuffer.length / 16000) * 1000;
           resolve({ audioBuffer, wordTimestamps, durationMs });
         } else {
           const errorDetail = result.errorDetails || 'Unknown TTS error';

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type MouseEvent } from 'react';
 import { Play, Pause, Volume2, AlertCircle } from 'lucide-react';
 
 interface AudioPlayerProps {
@@ -23,6 +23,11 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
   const [totalDuration, setTotalDuration] = useState(duration || 0);
   const [speed, setSpeed] = useState<number>(1);
   const [error, setError] = useState(false);
+
+  const stopAudioClick = (event: MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -50,7 +55,9 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
     };
   }, [src]);
 
-  const togglePlay = useCallback(() => {
+  const togglePlay = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    stopAudioClick(event);
+
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -63,6 +70,7 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
   }, [isPlaying]);
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const audio = audioRef.current;
     if (!audio) return;
     const time = parseFloat(e.target.value);
@@ -70,7 +78,9 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
     setCurrentTime(time);
   };
 
-  const cycleSpeed = () => {
+  const cycleSpeed = (event: MouseEvent<HTMLButtonElement>) => {
+    stopAudioClick(event);
+
     const audio = audioRef.current;
     if (!audio) return;
     const currentIndex = SPEED_OPTIONS.indexOf(speed as typeof SPEED_OPTIONS[number]);
@@ -86,7 +96,14 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
         <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
         <p className="text-sm text-red-700">Failed to load audio. Please try again.</p>
         {onClose && (
-          <button onClick={onClose} className="ml-auto text-sm text-red-600 hover:text-red-800 font-medium">
+          <button
+            type="button"
+            onClick={(event) => {
+              stopAudioClick(event);
+              onClose();
+            }}
+            className="ml-auto text-sm text-red-600 hover:text-red-800 font-medium"
+          >
             Dismiss
           </button>
         )}
@@ -106,6 +123,7 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
 
       {/* Play/Pause Button */}
       <button
+        type="button"
         onClick={togglePlay}
         className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-primary-700 transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -138,6 +156,7 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
 
       {/* Speed Control */}
       <button
+        type="button"
         onClick={cycleSpeed}
         className="shrink-0 px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition"
         aria-label={`Playback speed: ${speed}x`}
