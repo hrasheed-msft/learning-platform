@@ -103,6 +103,12 @@
 
 ## Learnings
 
+### 2026-05-24T21:00:31.834-05:00 — Prisma migrations must run before backend startup
+- **Root cause:** The backend image generated Prisma client code during build, but Azure Container Apps never ran `prisma migrate deploy`, so production schema lagged the checked-in migration history and `audio_cache.cacheVersion` was missing at runtime.
+- **Deployment fix:** `backend/Dockerfile` now installs the Prisma CLI in production dependencies and uses `backend/docker-entrypoint.sh` as the container entrypoint to run `npx --no-install prisma migrate deploy` before `node dist/index.js`.
+- **Ops behavior:** Startup now fails fast on migration errors instead of serving with a mismatched Prisma client/database schema.
+- **Key file paths:** `backend/Dockerfile`, `backend/docker-entrypoint.sh`, `backend/package.json`, `backend/package-lock.json`, `.github/workflows/ci-cd.yml`, `.squad/decisions/inbox/khwarizmi-prisma-migrate-on-startup.md`.
+
 ### 2026-05-24T09:58:03.672-05:00 — Emergency video generation rollback
 - **Architecture decision:** Temporarily disable backend video generation endpoints at `backend/src/routes/video.routes.ts` with fast 503 responses so lesson and audio traffic cannot trigger Puppeteer/ffmpeg work while the site is stabilized.
 - **Deployment pattern:** Production deploys from pushes to `main` via `.github/workflows/ci-cd.yml`; backend ships to Azure Container Apps (`ca-api-islamic-learning`) from `backend/Dockerfile`, frontend ships to Azure Static Web Apps.
