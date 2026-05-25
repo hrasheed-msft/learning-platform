@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef, type ChangeEvent, type MouseE
 import { Volume2, Loader2, X, Play, Pause, RotateCcw } from 'lucide-react';
 import AudioPlayer from './AudioPlayer';
 import { useAudioSync } from '@/hooks/useAudioSync';
+import { usePlaybackSpeed } from '@/hooks/usePlaybackSpeed';
 import { audioService, type AudioGenerationResponse, type WordTimestamp } from '@/services/audioService';
 
 interface UnitAudioButtonProps {
@@ -22,7 +23,9 @@ export interface UnitAudioSyncState {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  playbackRateLabel: string;
   togglePlayPause: () => void;
+  cyclePlaybackRate: () => void;
   stopPlayback: () => void;
 }
 
@@ -59,6 +62,10 @@ function SyncedAudioControls({
 }: SyncedAudioControlsProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const isRtl = language === 'ar';
+  const { playbackRateLabel, cyclePlaybackRate } = usePlaybackSpeed({
+    audioRef,
+    sourceKey: audioUrl,
+  });
 
   const stopAudioClick = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -96,10 +103,12 @@ function SyncedAudioControls({
       isPlaying,
       currentTime,
       duration,
+      playbackRateLabel,
       togglePlayPause,
+      cyclePlaybackRate,
       stopPlayback,
     });
-  }, [currentTime, currentWordIndex, duration, isPlaying, language, onSyncStateChange, stopPlayback, timestamps, togglePlayPause]);
+  }, [currentTime, currentWordIndex, cyclePlaybackRate, duration, isPlaying, language, onSyncStateChange, playbackRateLabel, stopPlayback, timestamps, togglePlayPause]);
 
   useEffect(() => () => {
     onSyncStateChange?.(null);
@@ -118,6 +127,11 @@ function SyncedAudioControls({
   const handleRestart = (event: MouseEvent<HTMLButtonElement>) => {
     stopAudioClick(event);
     seek(0);
+  };
+
+  const handleCycleSpeed = (event: MouseEvent<HTMLButtonElement>) => {
+    stopAudioClick(event);
+    cyclePlaybackRate();
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -146,6 +160,16 @@ function SyncedAudioControls({
         aria-label="Restart"
       >
         <RotateCcw className="w-3.5 h-3.5" />
+      </button>
+
+      <button
+        type="button"
+        onClick={handleCycleSpeed}
+        className="shrink-0 rounded-md bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600 transition hover:bg-gray-200"
+        aria-label={`Playback speed: ${playbackRateLabel}`}
+        title="Change playback speed"
+      >
+        {playbackRateLabel}
       </button>
 
       <div className="flex-1 min-w-0">

@@ -27,6 +27,10 @@ describe('AudioPlayer', () => {
     duration: 60,
   };
 
+  beforeEach(() => {
+    vi.mocked(window.localStorage.getItem).mockReturnValue(null);
+  });
+
   describe('Rendering', () => {
     it('should render the audio player', () => {
       render(<AudioPlayer {...defaultProps} />);
@@ -83,18 +87,36 @@ describe('AudioPlayer', () => {
       expect(screen.getByText('1.25x')).toBeInTheDocument();
     });
 
-    it('should cycle through all speeds: 0.75, 1, 1.25, 1.5', () => {
+    it('should cycle through the compact playback speeds', () => {
       render(<AudioPlayer {...defaultProps} />);
       const speedBtn = screen.getByTitle('Change playback speed');
 
-      // 1x → 1.25x → 1.5x → 0.75x → 1x
       fireEvent.click(speedBtn); // 1.25
       fireEvent.click(speedBtn); // 1.5
+      fireEvent.click(speedBtn); // 2
+      expect(screen.getByText('2x')).toBeInTheDocument();
+
       fireEvent.click(speedBtn); // 0.75
       expect(screen.getByText('0.75x')).toBeInTheDocument();
 
       fireEvent.click(speedBtn); // back to 1
       expect(screen.getByText('1x')).toBeInTheDocument();
+    });
+
+    it('restores the saved playback speed preference', () => {
+      vi.mocked(window.localStorage.getItem).mockReturnValue('1.5');
+
+      render(<AudioPlayer {...defaultProps} />);
+
+      expect(screen.getByText('1.5x')).toBeInTheDocument();
+    });
+
+    it('persists playback speed changes', () => {
+      render(<AudioPlayer {...defaultProps} />);
+
+      fireEvent.click(screen.getByTitle('Change playback speed'));
+
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('unit-audio-playback-rate', '1.25');
     });
   });
 

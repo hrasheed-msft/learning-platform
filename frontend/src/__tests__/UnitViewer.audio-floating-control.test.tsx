@@ -6,6 +6,7 @@ import { courseService } from '@/services/courseService';
 const navigateMock = vi.fn();
 const togglePlayPauseMock = vi.fn();
 const stopPlaybackMock = vi.fn();
+const cyclePlaybackRateMock = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -31,7 +32,9 @@ vi.mock('@/components/UnitAudioButton', () => ({
           isPlaying: true,
           currentTime: 1,
           duration: 12,
+          playbackRateLabel: '1.25x',
           togglePlayPause: togglePlayPauseMock,
+          cyclePlaybackRate: cyclePlaybackRateMock,
           stopPlayback: stopPlaybackMock,
         })}
       >
@@ -90,12 +93,15 @@ describe('UnitViewer floating audio control', () => {
     fireEvent.click(screen.getByText('Start floating audio'));
 
     const pauseButton = await screen.findByLabelText('Pause audio');
+    const speedButton = await screen.findByLabelText('Playback speed: 1.25x');
     const stopButton = await screen.findByLabelText('Stop audio');
 
     fireEvent.click(pauseButton);
+    fireEvent.click(speedButton);
     fireEvent.click(stopButton);
 
     expect(togglePlayPauseMock).toHaveBeenCalledTimes(1);
+    expect(cyclePlaybackRateMock).toHaveBeenCalledTimes(1);
     expect(stopPlaybackMock).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByText('Stop floating audio'));

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type MouseEvent } from 'react';
 import { Play, Pause, Volume2, AlertCircle } from 'lucide-react';
+import { usePlaybackSpeed } from '@/hooks/usePlaybackSpeed';
 
 interface AudioPlayerProps {
   src: string;
@@ -7,8 +8,6 @@ interface AudioPlayerProps {
   isRtl?: boolean;
   onClose?: () => void;
 }
-
-const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5] as const;
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -21,8 +20,11 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(duration || 0);
-  const [speed, setSpeed] = useState<number>(1);
   const [error, setError] = useState(false);
+  const { playbackRateLabel, cyclePlaybackRate } = usePlaybackSpeed({
+    audioRef,
+    sourceKey: src,
+  });
 
   const stopAudioClick = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -78,16 +80,9 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
     setCurrentTime(time);
   };
 
-  const cycleSpeed = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleCycleSpeed = (event: MouseEvent<HTMLButtonElement>) => {
     stopAudioClick(event);
-
-    const audio = audioRef.current;
-    if (!audio) return;
-    const currentIndex = SPEED_OPTIONS.indexOf(speed as typeof SPEED_OPTIONS[number]);
-    const nextIndex = (currentIndex + 1) % SPEED_OPTIONS.length;
-    const newSpeed = SPEED_OPTIONS[nextIndex];
-    audio.playbackRate = newSpeed;
-    setSpeed(newSpeed);
+    cyclePlaybackRate();
   };
 
   if (error) {
@@ -157,12 +152,12 @@ export default function AudioPlayer({ src, duration, isRtl = false, onClose }: A
       {/* Speed Control */}
       <button
         type="button"
-        onClick={cycleSpeed}
+        onClick={handleCycleSpeed}
         className="shrink-0 px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition"
-        aria-label={`Playback speed: ${speed}x`}
+        aria-label={`Playback speed: ${playbackRateLabel}`}
         title="Change playback speed"
       >
-        {speed}x
+        {playbackRateLabel}
       </button>
 
       {/* Volume indicator */}

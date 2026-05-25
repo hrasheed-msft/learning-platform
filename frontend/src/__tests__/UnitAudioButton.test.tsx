@@ -26,6 +26,7 @@ import { audioService } from '@/services/audioService';
 describe('UnitAudioButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(window.localStorage.getItem).mockReturnValue(null);
     vi.mocked(audioService.getAudioWithTimestamps).mockResolvedValue(null);
   });
 
@@ -146,6 +147,7 @@ describe('UnitAudioButton', () => {
       });
 
       expect(screen.queryByTestId('audio-player')).not.toBeInTheDocument();
+      expect(screen.getByText('1x')).toBeInTheDocument();
     });
 
     it('should show AudioPlayer on successful generation when timestamps are unavailable', async () => {
@@ -203,6 +205,33 @@ describe('UnitAudioButton', () => {
 
       // generateUnitAudio should only have been called ONCE
       expect(audioService.generateUnitAudio).toHaveBeenCalledTimes(1);
+    });
+
+    it('should restore and persist playback speed for synced audio', async () => {
+      vi.mocked(window.localStorage.getItem).mockReturnValue('1.5');
+      vi.mocked(audioService.getAudioWithTimestamps).mockResolvedValue({
+        audioUrl: 'https://api.example.com/audio/unit-1-en.mp3',
+        timestamps: [
+          { word: 'Hello', offset: 0, duration: 500 },
+          { word: 'world', offset: 500, duration: 500 },
+        ],
+      });
+
+      render(<UnitAudioButton unitId="unit-1" hasEnglish={true} hasArabic={false} />);
+
+      await waitFor(() => {
+        expect(audioService.getAudioWithTimestamps).toHaveBeenCalledWith('unit-1', 'en');
+      });
+
+      fireEvent.click(screen.getByText('🔊 Listen'));
+
+      const speedButton = await screen.findByTitle('Change playback speed');
+      expect(speedButton).toHaveTextContent('1.5x');
+
+      fireEvent.click(speedButton);
+
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('unit-audio-playback-rate', '2');
+      expect(screen.getByTitle('Change playback speed')).toHaveTextContent('2x');
     });
   });
 

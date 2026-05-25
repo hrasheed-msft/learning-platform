@@ -542,6 +542,15 @@ export default function UnitViewer() {
             </button>
             <button
               type="button"
+              onClick={audioSyncState.cyclePlaybackRate}
+              className="rounded-full bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              aria-label={`Playback speed: ${audioSyncState.playbackRateLabel}`}
+              title="Change playback speed"
+            >
+              {audioSyncState.playbackRateLabel}
+            </button>
+            <button
+              type="button"
               onClick={audioSyncState.stopPlayback}
               className="flex h-10 min-w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               aria-label="Stop audio"
