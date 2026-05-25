@@ -251,10 +251,18 @@ export default function UnitAudioButton({
 
     try {
       const result: AudioGenerationResponse = await audioService.generateUnitAudio(unitId, lang);
-      const cached = { url: result.url, duration: result.duration };
-      setCache(prev => ({ ...prev, [lang]: cached }));
-      setAudioData(cached);
-      setSyncedData(null);
+
+      if (result.timestamps?.length) {
+        const synced = { audioUrl: result.url, timestamps: result.timestamps };
+        setSyncedCache(prev => ({ ...prev, [lang]: synced }));
+        setSyncedData(synced);
+        setAudioData(null);
+      } else {
+        const cached = { url: result.url, duration: result.duration };
+        setCache(prev => ({ ...prev, [lang]: cached }));
+        setAudioData(cached);
+        setSyncedData(null);
+      }
     } catch (err: any) {
       const message =
         err?.response?.data?.message ||

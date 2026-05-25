@@ -128,7 +128,27 @@ describe('UnitAudioButton', () => {
       expect(screen.queryByTestId('audio-player')).not.toBeInTheDocument();
     });
 
-    it('should show AudioPlayer on successful generation', async () => {
+    it('should show compact synced controls when generated audio includes timestamps', async () => {
+      vi.mocked(audioService.generateUnitAudio).mockResolvedValue({
+        url: 'https://api.example.com/audio/unit-1-en.mp3',
+        duration: 30,
+        timestamps: [
+          { word: 'Hello', offset: 0, duration: 500 },
+          { word: 'world', offset: 500, duration: 500 },
+        ],
+      });
+
+      render(<UnitAudioButton unitId="unit-1" hasEnglish={true} hasArabic={true} />);
+      fireEvent.click(screen.getByText(/Listen \(English\)/));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Play')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('audio-player')).not.toBeInTheDocument();
+    });
+
+    it('should show AudioPlayer on successful generation when timestamps are unavailable', async () => {
       vi.mocked(audioService.generateUnitAudio).mockResolvedValue({
         url: 'https://api.example.com/audio/unit-1-en.mp3',
         duration: 30,

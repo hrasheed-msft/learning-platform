@@ -10,6 +10,8 @@ export interface WordTimestamp {
 export interface AudioGenerationResponse {
   url: string;
   duration: number;
+  timestamps?: WordTimestamp[];
+  cached?: boolean;
 }
 
 export interface AudioWithTimestampsResponse {
