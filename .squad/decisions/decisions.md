@@ -1,8 +1,8 @@
 # Decisions Archive
 
-**Last Updated:** 2026-05-18T15:52:28Z  
-**Total Decisions:** 25  
-**Source:** Merged from .squad/decisions/inbox/ on 2026-05-18
+**Last Updated:** 2026-06-05T23:37:00Z  
+**Total Decisions:** 28  
+**Source:** Merged from .squad/decisions/inbox/ on 2026-06-05
 
 ---
 
@@ -952,4 +952,169 @@ Returns courses authenticated member is enrolled in satisfying game's `courseCom
 - **Frontend (Ibn Sina):** Update launcher UI to call `/games/:slug/eligible-courses` after game selection
 - **Ops:** Plan for downtime during migration — enum swap is brief table rewrite on 3 columns
 - **QA:** Each 9 round formatters needs end-to-end test; old integration tests need slug+enum renames
+
+---
+
+## 2026-06-05T23:37:00: User directive
+
+**By:** hrasheed (via Copilot)  
+**What:** The al-Masar I'rab & Sarf course should be built as BOTH platform seed data (courses, units, questions, flashcards, Arabic terms following existing Prisma patterns) AND standalone interactive HTML lesson files as supplementary content. Not just HTML files alone.  
+**Why:** User request — course content should live in the platform's database alongside existing courses, with the HTML lessons as supplementary enrichment material.
+
+---
+
+## al-Masār I'rab & Sarf — Architecture Mapping
+
+**Author:** Khaldun (Lead Architect)  
+**Date:** 2026-06-05  
+**Status:** DECISION — Awaiting hrasheed approval before implementation begins
+
+### Executive Summary
+
+The al-Masār 8-week I'rab & Sarf course can be built almost entirely on existing Prisma models with **one targeted schema addition**. The standalone HTML files are the primary learning interface; the platform database is the secondary representation that powers SRS, games, and progress tracking. This distinction drives every decision below.
+
+### 1. Five-Part Circuit → Prisma Model Mapping
+
+#### Part 1 — Sarf Warm-up (Conjugation Drill)
+
+**Primary interface:** Standalone HTML file (input cells, check/reveal buttons, JavaScript normalization)  
+**Platform representation:** `Question` (type: `FILL_BLANK`) linked to the Week Unit
+
+The conjugation drill table has ~10–20 blank cells per week (2 verb paradigms × partial rows). Each blank is a `FILL_BLANK` question.
+
+**Decision:** Seed conjugation blanks as `FILL_BLANK` Questions. Accept that the drill table visual exists only in the HTML. No new model required.
+
+#### Part 2 — Passage Reading (Clickable Word Annotations)
+
+**Primary interface:** Standalone HTML file (`<span class="arabic-word">` with six `data-*` attributes)  
+**Platform representation:** `ArabicTerm` with a new `metadata: Json?` field
+
+The current `ArabicTerm` model has: `arabicText`, `transliteration`, `translation`, `audioUrl`. This covers exactly 2 of the 6 required data attributes.
+
+**REQUIRED SCHEMA CHANGE:** Add `metadata: Json?` to `ArabicTerm`.  
+Migration is a single `ALTER TABLE` — one nullable column, backwards compatible, no data loss.
+
+The `metadata` JSON shape:
+```json
+{
+  "vowelled": "عُلِمَ",
+  "root": "ع ل م",
+  "wordType": "verb",
+  "irab": "فعل ماضٍ مبني للمجهول...",
+  "sarf": "فَعِلَ — باب نصر — صحيح سالم",
+  "passageWeek": 2
+}
+```
+
+**Decision:** Extend `ArabicTerm` with `metadata: Json?`. One migration. No new model.
+
+#### Part 3 — I'rab & Sarf Quiz (8 MCQ)
+
+**Platform representation:** `Question` (type: `MULTIPLE_CHOICE`) + `QuizResult`
+
+The I'rab/Sarf subtotal split is tracked in `QuizResult.answers: Json`. Tag each Question with a custom difficulty prefix or add a tag to `questionText` as a prefix marker (e.g., `[IRAB]` / `[SARF]`).
+
+**Decision:** Use existing `Question` + `QuizResult`. Tag I'rab vs Sarf questions with `[IRAB]` / `[SARF]` prefix in `questionText` for sub-score calculation. No schema change.
+
+#### Part 4 — Grammar Connection from Qatr al-Nada
+
+**Platform representation:** Embedded in `Unit.content` (HTML rich text field, `@db.Text`)
+
+Seed each weekly Qatr al-Nada rule as 2–3 `FlashCard` records (front: grammar rule question, back: definition/example).
+
+**Decision:** Part 4 content lives in `Unit.content` HTML. Key rules additionally seeded as FlashCards for SRS. No new model.
+
+#### Part 5 — Reveal & Review (Full Analysis Table)
+
+**Platform representation:** Embedded in `Unit.content` (HTML) + `FlashCard`
+
+The "Key Takeaways" bullets (I'rab patterns and Sarf patterns to internalize) become `FlashCard` records with `category: 'rule'`.
+
+**Decision:** Part 5 lives in `Unit.content` HTML. Takeaway bullets seeded as `FlashCard` records. No new model.
+
+### 2. Course Structure
+
+**1 Course record** for the entire al-Masār program. **8 Units, one per week.** Each Unit contains ALL five parts of that week's circuit.
+
+`Unit.content` stores the full assembled HTML for that week's five-part circuit.
+
+### 3. Seed File Strategy
+
+Pattern: `seed-masaar-{concern}.ts`
+
+```
+backend/prisma/
+  seed-masaar-course.ts        ← Course record + 8 Week Units (with content HTML)
+  seed-masaar-quizzes.ts       ← All 64 MCQ Questions (8/week × 8 weeks)
+  seed-masaar-flashcards.ts    ← All FlashCards (~150 total: pattern + rule + vocabulary)
+  seed-masaar-terms.ts         ← ArabicTerm records for passage word annotations
+```
+
+### 4. HTML Lesson Placement
+
+The `maktab-coursebook-html/` precedent makes the repo-root location the established pattern:
+
+```
+/lesson-irab-sarf/
+  lesson-irab-sarf-week1.html   ← already exists (in personal-vscode workspace)
+  lesson-irab-sarf-week2.html
+  ...
+  lesson-irab-sarf-week8.html
+```
+
+This directory sits **at the repo root**, parallel to `maktab-coursebook-html/`.
+
+### 5. Implementation Order and Dependencies
+
+```
+[1] Schema Migration (ArabicTerm.metadata)
+       ↓
+[2] seed-masaar-course.ts  ← Establishes Course + Unit IDs that all other seeds reference
+       ↓
+[3] seed-masaar-quizzes.ts     ← Depends on Unit IDs from [2]
+    seed-masaar-flashcards.ts  ← Depends on Unit IDs from [2]  (parallel with [3])
+    seed-masaar-terms.ts       ← Depends on Unit IDs from [2] + schema change from [1]
+       ↓
+[4] HTML Weeks 2–8  ← Pure authoring, no database dependency
+```
+
+### 6. Open Decisions Requiring hrasheed Input
+
+1. **`ArabicTerm.metadata: Json?` migration** — approve before Khwarizmi starts `seed-masaar-terms.ts`.
+2. **Conjugation drill in platform (Phase 2)** — do we want to build a native CLOZE-based conjugation game?
+3. **HTML week 1 migration** — `lesson-irab-sarf-week1.html` currently lives in `personal-vscode` workspace. Move to `lesson-irab-sarf/`?
+4. **Course linkage in HTML** — hardcoded `courseId` back-link or title-slug URL?
+
+### Summary of Required Schema Change
+
+**One migration:**
+
+```prisma
+model ArabicTerm {
+  // existing fields...
+  metadata  Json?   // NEW: { vowelled, root, wordType, irab, sarf, passageWeek }
+}
+```
+
+All other parts of this course map to existing models without schema changes.
+
+---
+
+## Generated Audio Sync Contract
+
+**Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-05-24T23:11:45-05:00  
+**Status:** Proposed
+
+### Context
+
+The backend `POST /api/v1/units/:unitId/audio` endpoint already returns word timestamps alongside the generated audio URL and duration.
+
+### Decision
+
+Frontend audio orchestration should treat POST-generated audio with timestamps the same as pre-fetched synced audio, immediately routing it through the synced playback controls and page-level highlighting flow.
+
+### Impact
+
+First-run audio generation keeps word highlighting active in the main lesson body instead of silently falling back to unsynced playback.
 

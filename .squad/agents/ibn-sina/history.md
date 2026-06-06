@@ -110,6 +110,23 @@
 - Give floating media controls a real stop action, not just pause, so the overlay can dismiss itself by resetting playback to time `0`.
 - Key files: `frontend/src/hooks/useAudioSync.ts`, `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/pages/courses/UnitViewer.tsx`, `frontend/src/__tests__/UnitViewer.audio-floating-control.test.tsx`.
 
+### Generated Audio Sync Contract (2026-05-24T23:11:45-05:00)
+- The POST `/api/v1/units/:unitId/audio` response already includes `timestamps`; the frontend must consume them immediately instead of falling back to the plain `AudioPlayer` path.
+- Regression pattern: prefetch-only sync wiring breaks highlighting for first-run/generated audio even though playback still works.
+- Key files: `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/services/audioService.ts`, `frontend/src/__tests__/UnitAudioButton.test.tsx`.
+
+### 2026-06-05T23:37:00Z — al-Masār I'rab & Sarf Course Architecture + HTML Lesson Generation
+- **Decision:** Khaldun's architecture mapping approved; course will integrate platform seed data + standalone HTML
+- **Schema update:** `ArabicTerm.metadata: Json?` required for word annotations in clickable passage reading
+- **HTML workflow:** 8 lessons in `/lesson-irab-sarf/` (repo root), one per week
+- **Primary interface:** HTML files with interactive drills, clickable word annotations, games
+- **Secondary interface:** Platform database for SRS, quiz results, progress tracking, gamification
+- **Week 1 status:** Already exists in `personal-vscode` workspace; will be migrated to `lesson-irab-sarf/` repo folder
+- **Weeks 2–8 generation:** Pure frontend work; no database dependencies; can start immediately after Week 1 migration
+- **Content linkage:** Each HTML file includes platform return link; strategy (courseId vs slug) awaiting hrasheed decision
+- **Approved migration:** `ArabicTerm.metadata: Json?` — backend can begin seed file authoring immediately
+- **Key file:** `.squad/decisions/inbox/khaldun-irab-sarf-architecture.md` (merged to `.squad/decisions/decisions.md`)
+
 ---
 
 ## Session History (Recent)

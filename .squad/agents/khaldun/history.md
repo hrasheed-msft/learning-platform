@@ -109,6 +109,27 @@
 
 ---
 
+## Latest Session (2026-06-05)
+
+**Architecture Mapping: al-Masār I'rab & Sarf Course**
+**Work:** Khaldun-8 — Produced architecture decision for 8-week I'rab & Sarf course integration
+
+**Output:** `.squad/decisions/inbox/khaldun-irab-sarf-architecture.md`
+
+**Key Decisions:**
+1. **One Course, 8 Units** (one per week) — not 8 separate courses, not 5 units/week
+2. **One schema change required:** `ArabicTerm.metadata: Json?` — single nullable column for passage word annotations (vowelled form, root, word type, I'rab, Sarf notes)
+3. **Part → Model mapping:** Conjugation drill → `FILL_BLANK` Questions; Passage words → `ArabicTerm` + metadata; Quiz → `MULTIPLE_CHOICE` Questions; Qatr/Reveal content → `Unit.content` HTML; Flashcards → `FlashCard`
+4. **Seed split:** 4 files by concern — `seed-masaar-course.ts`, `seed-masaar-quizzes.ts`, `seed-masaar-flashcards.ts`, `seed-masaar-terms.ts`
+5. **HTML placement:** `lesson-irab-sarf/` at repo root (parallel to `maktab-coursebook-html/`)
+6. **Implementation order:** Migration → course seed → (quizzes + flashcards in parallel) → terms seed → HTML weeks 2–8
+
+**Learnings:**
+- **ArabicTerm is a vocabulary/SRS model, not a passage annotation model.** The gap between `ArabicTerm` (arabicText + transliteration + translation + audioUrl) and the 6-field clickable annotation spec reveals that `ArabicTerm` was designed for SRS term cards, not passage-level word decomposition. `metadata: Json?` bridges this without a structural new table.
+- **HTML-first, platform-secondary is the right frame for this course.** The 82KB self-contained HTML file is the primary study interface. The platform is progress tracking + SRS + games. Don't try to replicate the HTML's interactive affordances in the platform — represent the knowledge objects (questions, flashcards, terms) and let the HTML do the teaching.
+- **Concern-split seed files scale better than week-split.** The Sarf course precedent (seed-sarf-course.ts + part2-5 + quizzes + flashcards) proves this: each concern file is independently runnable, parallelizable, and debuggable. Week-split would require each file to locate the Course, creating coupling and order-sensitivity.
+- **`[IRAB]` / `[SARF]` question tagging in questionText** is a lightweight convention for sub-score filtering without adding a new column — the `QuizResult.answers` JSON already stores per-question results, so frontend filtering by prefix is sufficient.
+
 ## Next Steps
 
 - Parent Dashboard + Child Auth implementation
@@ -117,3 +138,4 @@
 - **Multimodal Phase 1:** Pre-gen audio with text sync (4–6 days, now architectured)
 - Video Phase 2 (1–2 weeks)
 - **Next coding task:** Integrate review gate into Squad spawning (include REVIEW_REQUEST directive)
+- **al-Masār:** hrasheed approval on 3 open decisions → Khwarizmi migration + seeds → Ibn Sina HTML weeks 2–8

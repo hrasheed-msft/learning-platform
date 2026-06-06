@@ -67,3 +67,38 @@ At round start, call Test-RetroOverdue (see skill retro-enforcement). If overdue
 
 **Why GitHub Issues, not markdown:**
 Production data: 0% completion across 6 retros using markdown checklists, 100% after switching to GitHub Issues.
+
+---
+
+## Code Review Gate
+
+| Field | Value |
+|-------|-------|
+| **Trigger** | auto |
+| **When** | before-commit |
+| **Condition** | Any agent produces code changes (backend, frontend, infra, migrations, Docker) |
+| **Facilitator** | lead |
+| **Participants** | biruni OR khaldun (never the author) |
+| **Time budget** | focused |
+| **Enabled** | ✅ yes |
+
+**Protocol:**
+1. Coding agent outputs `REVIEW_REQUEST` block (files changed, logic summary, migration/deploy impacts)
+2. Reviewer checks against the Review Checklist (see decision `khaldun-review-gate.md`)
+3. APPROVE → commit proceeds
+4. REJECT → author fixes, resubmits; after 2 rejections, Khaldun pairs to resolve
+
+**Review Checklist (minimum):**
+- Migrations present for schema changes and runnable
+- API field names match between frontend ↔ backend
+- No children in void JSX elements
+- Interceptors/middleware don't cause unrelated side effects
+- Docker COPY paths and env vars resolve correctly
+- TypeScript types align with Prisma schema
+
+**Spawning directive (include in all coding agent prompts):**
+```
+REVIEW GATE: Do NOT commit directly. After completing code changes, output a
+REVIEW_REQUEST block listing: (1) all files changed, (2) logic summary,
+(3) migration/deploy impacts. Await reviewer approval before committing.
+```

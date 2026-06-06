@@ -94,3 +94,35 @@ Fixed all remaining test failures for green CI pipeline.
 
 **Final counts:** Backend 14 files / 202 tests ✓ | Frontend 16 files / 149 tests ✓
 
+---
+
+### 2026-05-24 — Audio E2E Verification (Comprehensive)
+
+**Status:** COMPLETED — ALL PASS
+
+Full end-to-end code trace + test suite run for the audio generation flow after 4 prior failed fixes.
+
+**Test counts:** Frontend 19 files / 158 tests ✅ | Backend 16 files / 211 tests ✅ (1 integration skipped — no local DB)
+
+**Key findings — all 4 reported bugs confirmed FIXED:**
+1. No `window.location`/`navigate()` in UnitAudioButton.tsx or audioService.ts
+2. Routes aligned: frontend `POST /units/:unitId/audio` → backend mounted at `app.use('/api/v1/units', audioRoutes)` with `POST /:unitId/audio`
+3. SyncedTextContent.tsx handles void elements (img, br, hr) via `VOID_ELEMENTS` set + try/catch fallback to raw HTML
+4. `audioRequestConfig = { skipAuthRedirect: true }` passed on all audio API calls; interceptor checks it before every `window.location.href` assignment
+
+**Architecture patterns:**
+- Audio service uses `api.ts` shared axios instance with custom `ApiRequestConfig` interface extending `AxiosRequestConfig`
+- Backend audio controller never returns redirects (3xx) — only JSON with 200/400/404
+- TTS service falls back to local file serving when Azure Blob not configured
+- SyncedTextContent has double fallback: try/catch around parser → null renderedContent → dangerouslySetInnerHTML
+
+**Key file paths:**
+- `frontend/src/services/audioService.ts` — audio API calls with skipAuthRedirect
+- `frontend/src/services/api.ts` — interceptor with skipAuthRedirect guard
+- `frontend/src/components/SyncedTextContent.tsx` — void element handling
+- `backend/src/index.ts:135` — audio route mount point
+- `backend/src/routes/audio.routes.ts` — route definitions
+- `backend/src/controllers/audio.controller.ts` — request handlers
+
+**Recommendations filed:** Add void-element regression test, add E2E Playwright test for audio flow.
+

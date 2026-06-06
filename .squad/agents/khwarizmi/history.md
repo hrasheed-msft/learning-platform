@@ -147,6 +147,20 @@
 - **Response contract:** The admin endpoint returns `updatedUnits`, `normalizedTerms`, and `clearedAudioCacheEntries` after clearing only the affected units’ `AudioCache` rows.
 - **Key file paths:** `backend/src/controllers/audio.controller.ts`, `backend/src/routes/audio-admin.routes.ts`, `backend/src/services/course-content-formatting.service.ts`, `backend/src/utils/arabic-term-formatting.ts`, `backend/prisma/normalize-course-content.ts`.
 
+### 2026-06-05T23:37:00Z — al-Masār I'rab & Sarf Course Architecture Mapping
+- **Decision:** Khaldun produced comprehensive architecture doc for 8-week course build
+- **Schema change required:** `ArabicTerm.metadata: Json?` (one nullable column for word annotations)
+- **Seed file strategy:** 4 concern-based files (`seed-masaar-course.ts`, `seed-masaar-quizzes.ts`, `seed-masaar-flashcards.ts`, `seed-masaar-terms.ts`)
+- **Course structure:** 1 Course + 8 Units (one per week), each with HTML content
+- **HTML integration:** 8 standalone lessons in `/lesson-irab-sarf/` (repo root, parallel to `maktab-coursebook-html/`)
+- **Prisma mapping:** All 5 course parts fit existing models (Question, ArabicTerm, FlashCard, Unit) with no new models
+- **Implementation order:** 1) Migration, 2) seed-masaar-course.ts, 3) parallel seeds (quizzes/flashcards/terms), 4) HTML generation
+- **Status:** Awaiting hrasheed approval on metadata migration before implementation begins
+- **Estimated scope:** ~22–33h (Khwarizmi schema + seeds), ~7–14h (Ibn Sina HTML weeks 2–8)
+- **Key file:** `.squad/decisions/inbox/khaldun-irab-sarf-architecture.md` (merged to `.squad/decisions/decisions.md`)
+
+---
+
 ## Archived History
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`
