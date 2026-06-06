@@ -7,7 +7,7 @@ export async function seedMasaarQuizzes() {
   console.log('');
 
   const course = await prisma.course.findUnique({
-    where: { id: 'masaar-irab-sarf' },
+    where: { id: 'a1b2c3d4-e5f6-4890-abcd-ef1234567001' },
     include: { units: { orderBy: { orderIndex: 'asc' } } },
   });
 

@@ -10,7 +10,7 @@ type MasaarUnit = {
   passageTopicAr: string;
 };
 
-const MASAAR_COURSE_ID = 'masaar-irab-sarf';
+const MASAAR_COURSE_ID = 'a1b2c3d4-e5f6-4890-abcd-ef1234567001';
 
 const masaarUnits: MasaarUnit[] = [
   {
