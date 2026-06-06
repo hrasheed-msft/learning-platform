@@ -4,14 +4,16 @@ const prisma = new PrismaClient();
 
 const MASAAR_COURSE_ID = 'masaar-irab-sarf';
 
-type TermTuple = [term: string, vowelled: string, transliteration: string, translation: string, root: string, sarf: string];
+type TermTuple = [arabicText: string, vowelled: string, transliteration: string, translation: string, root: string, sarf: string];
+
+type MasaarTermCategory = 'NOUN' | 'VERB' | 'PARTICLE' | 'PHRASE' | 'ROOT';
 
 type MasaarTermInput = {
-  term: string;
+  arabicText: string;
   transliteration: string;
   translation: string;
-  category: 'NOUN' | 'VERB' | 'PARTICLE' | 'PHRASE' | 'ROOT';
   metadata: {
+    category: MasaarTermCategory;
     vowelled: string;
     root: string;
     wordType: string;
@@ -408,14 +410,14 @@ const WEEKLY_TUPLES: Record<number, { nouns: TermTuple[]; verbs: TermTuple[]; pa
   },
 };
 
-function mapTuple(week: number, tuple: TermTuple, category: MasaarTermInput['category'], wordType: string, irab: string): MasaarTermInput {
-  const [term, vowelled, transliteration, translation, root, sarf] = tuple;
+function mapTuple(week: number, tuple: TermTuple, category: MasaarTermCategory, wordType: string, irab: string): MasaarTermInput {
+  const [arabicText, vowelled, transliteration, translation, root, sarf] = tuple;
   return {
-    term,
+    arabicText,
     transliteration,
     translation,
-    category,
     metadata: {
+      category,
       vowelled,
       root,
       wordType,
@@ -456,7 +458,11 @@ export async function seedMasaarTerms() {
     throw new Error(`Expected 8 units for ${MASAAR_COURSE_ID}, found ${course.units.length}`);
   }
 
-  let totalUpserts = 0;
+  await prisma.arabicTerm.deleteMany({
+    where: { unitId: { in: course.units.map((u) => u.id) } },
+  });
+
+  let totalCreated = 0;
 
   for (const unit of course.units) {
     const week = unit.orderIndex + 1;
@@ -467,38 +473,21 @@ export async function seedMasaarTerms() {
       continue;
     }
 
-    for (const termData of terms) {
-      await prisma.arabicTerm.upsert({
-        where: {
-          term_unitId: {
-            term: termData.term,
-            unitId: unit.id,
-          },
-        },
-        update: {
-          term: termData.term,
-          transliteration: termData.transliteration,
-          translation: termData.translation,
-          category: termData.category,
-          metadata: termData.metadata,
-          unitId: unit.id,
-        },
-        create: {
-          term: termData.term,
-          transliteration: termData.transliteration,
-          translation: termData.translation,
-          category: termData.category,
-          metadata: termData.metadata,
-          unitId: unit.id,
-        },
-      });
-      totalUpserts += 1;
-    }
+    await prisma.arabicTerm.createMany({
+      data: terms.map((termData) => ({
+        arabicText: termData.arabicText,
+        transliteration: termData.transliteration,
+        translation: termData.translation,
+        metadata: termData.metadata,
+        unitId: unit.id,
+      })),
+    });
+    totalCreated += terms.length;
 
-    console.log(`   ✅ Week ${week}: upserted ${terms.length} Arabic terms`);
+    console.log(`   ✅ Week ${week}: created ${terms.length} Arabic terms`);
   }
 
-  console.log(`🎉 Completed al-Masār terms seed: ${totalUpserts} term upserts across 8 weeks.`);
+  console.log(`🎉 Completed al-Masār terms seed: ${totalCreated} Arabic terms across 8 weeks.`);
 }
 
 async function main() {
