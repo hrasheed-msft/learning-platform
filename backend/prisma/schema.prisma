@@ -194,6 +194,7 @@ model ArabicTerm {
   transliteration String
   translation     String
   audioUrl        String?
+  metadata        Json?
   createdAt       DateTime @default(now())
 
   unitId String

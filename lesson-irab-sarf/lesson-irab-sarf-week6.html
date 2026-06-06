@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المسار — Week 6: Unrestricted & Restricted</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #1a5e3a;
+            --primary-light: #2d8f5c;
+            --primary-dark: #0e3d25;
+            --accent: #c8a45e;
+            --accent-light: #e8d4a0;
+            --bg: #faf8f4;
+            --bg-card: #ffffff;
+            --bg-arabic: #fefcf7;
+            --text: #2c2c2c;
+            --text-light: #666666;
+            --text-muted: #999999;
+            --border: #e8e4dc;
+            --success: #27ae60;
+            --error: #c0392b;
+            --info: #2980b9;
+            --warning: #f39c12;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-brand { font-family: 'Amiri', serif; font-size: 2.4rem; font-weight: 700; margin-bottom: 4px; }
+        .header-brand span.arabic-brand { font-size: 2.8rem; margin-left: 12px; }
+        .header-subtitle { font-size: 1rem; opacity: 0.85; font-weight: 300; margin-bottom: 24px; }
+
+        .week-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 24px; padding: 8px 20px; font-size: 0.9rem; font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .week-title { font-size: 1.8rem; font-weight: 600; margin-top: 16px; line-height: 1.3; }
+        .week-title .arabic-title { font-family: 'Amiri', serif; font-size: 2rem; display: block; margin-top: 6px; font-weight: 700; }
+
+        .progress-bar-container { background: rgba(0,0,0,0.2); padding: 16px 24px; }
+        .progress-inner { max-width: 1100px; margin: 0 auto; }
+        .progress-steps { display: flex; gap: 4px; align-items: center; }
+
+        .progress-step {
+            flex: 1; height: 6px; background: rgba(255,255,255,0.2);
+            border-radius: 3px; transition: background 0.4s ease; cursor: pointer;
+        }
+
+        .progress-step.completed { background: var(--accent); }
+        .progress-step.active { background: var(--accent-light); animation: pulse-bar 2s infinite; }
+        @keyframes pulse-bar { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .progress-labels {
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 0.7rem; opacity: 0.7; color: white;
+        }
+
+        .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+        .section {
+            background: var(--bg-card); border-radius: var(--radius);
+            box-shadow: var(--shadow); margin-bottom: 28px;
+            overflow: hidden; border: 1px solid var(--border);
+        }
+
+        .section-header {
+            padding: 20px 28px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .section-header:hover { background: rgba(0,0,0,0.02); }
+
+        .section-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+        }
+        .section-icon.sarf { background: #e8f5e9; color: var(--primary); }
+        .section-icon.passage { background: #fff3e0; color: #e65100; }
+        .section-icon.quiz { background: #e3f2fd; color: #1565c0; }
+        .section-icon.grammar { background: #f3e5f5; color: #7b1fa2; }
+        .section-icon.reveal { background: #fce4ec; color: #c62828; }
+
+        .section-meta { flex: 1; }
+        .section-title { font-size: 1.15rem; font-weight: 600; color: var(--text); }
+        .section-duration { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .section-toggle { font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s; }
+        .section.open .section-toggle { transform: rotate(180deg); }
+        .section-body { padding: 0 28px 28px; display: none; }
+        .section.open .section-body { display: block; }
+
+        .arabic-text-block {
+            background: var(--bg-arabic); border: 2px solid var(--border);
+            border-radius: var(--radius-sm); padding: 32px;
+            direction: rtl; text-align: right;
+            font-family: 'Amiri', serif; font-size: 1.65rem; line-height: 2.4;
+            color: var(--text); margin: 16px 0; position: relative;
+        }
+        .arabic-text-block.vowelled { border-color: var(--success); background: #f0faf4; }
+
+        .arabic-text-block .label {
+            position: absolute; top: -12px; right: 16px;
+            background: var(--bg-card); padding: 2px 12px;
+            font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
+            color: var(--text-muted); direction: ltr;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .arabic-word {
+            cursor: pointer; padding: 2px 4px; border-radius: 4px;
+            transition: all 0.2s; display: inline; position: relative;
+        }
+        .arabic-word:hover { background: var(--accent-light); }
+        .arabic-word.highlighted { background: #fff3cd; border-bottom: 2px solid var(--accent); }
+
+        .word-tooltip {
+            display: none; position: fixed;
+            background: var(--primary-dark); color: white;
+            border-radius: var(--radius-sm); padding: 16px 20px;
+            font-family: 'Inter', sans-serif; font-size: 0.85rem;
+            direction: ltr; text-align: left; z-index: 1000;
+            min-width: 280px; max-width: 380px;
+            box-shadow: var(--shadow-lg); line-height: 1.6;
+        }
+        .word-tooltip.visible { display: block; }
+        .word-tooltip .tooltip-word {
+            font-family: 'Amiri', serif; font-size: 1.6rem; text-align: center;
+            padding-bottom: 10px; margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2); direction: rtl;
+        }
+        .word-tooltip .tooltip-row { display: flex; justify-content: space-between; padding: 3px 0; }
+        .word-tooltip .tooltip-label {
+            color: var(--accent-light); font-weight: 600; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .word-tooltip .tooltip-value { font-weight: 500; }
+
+        .quiz-container { margin: 20px 0; }
+
+        .quiz-question {
+            background: #f8f9fa; border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 24px; margin-bottom: 16px;
+            transition: border-color 0.3s;
+        }
+        .quiz-question.answered-correct { border-color: var(--success); background: #f0faf4; }
+        .quiz-question.answered-wrong { border-color: var(--error); background: #fef5f5; }
+
+        .quiz-number {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; background: var(--primary); color: white;
+            border-radius: 50%; font-size: 0.8rem; font-weight: 700; margin-bottom: 10px;
+        }
+
+        .quiz-prompt { font-size: 1rem; font-weight: 500; margin-bottom: 6px; }
+        .quiz-prompt .arabic-inline {
+            font-family: 'Amiri', serif; font-size: 1.5rem; color: var(--primary-dark);
+            direction: rtl; unicode-bidi: isolate;
+        }
+        .quiz-hint { font-size: 0.82rem; color: var(--text-light); margin-bottom: 14px; font-style: italic; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; background: white;
+            border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            cursor: pointer; transition: all 0.2s; font-size: 0.92rem;
+        }
+        .quiz-option:hover:not(.disabled) { border-color: var(--primary); background: #f0faf4; }
+
+        .quiz-option .option-marker {
+            width: 22px; height: 22px; border: 2px solid #ccc; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 0.7rem; font-weight: 700; transition: all 0.2s;
+        }
+        .quiz-option.correct-answer { border-color: var(--success); background: #d4edda; }
+        .quiz-option.correct-answer .option-marker { border-color: var(--success); background: var(--success); color: white; }
+        .quiz-option.wrong-answer { border-color: var(--error); background: #f8d7da; }
+        .quiz-option.wrong-answer .option-marker { border-color: var(--error); background: var(--error); color: white; }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.85; }
+        .quiz-option .option-text { flex: 1; }
+        .quiz-option .arabic-opt { font-family: 'Amiri', serif; font-size: 1.15rem; direction: rtl; unicode-bidi: isolate; }
+
+        .quiz-explanation {
+            display: none; margin-top: 12px; padding: 14px 18px;
+            background: #f8f9fa; border-left: 3px solid var(--primary);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.88rem; line-height: 1.7; color: var(--text);
+        }
+        .quiz-explanation.visible { display: block; }
+        .quiz-explanation strong { color: var(--primary-dark); }
+
+        .sarf-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            overflow: hidden; margin: 16px 0; direction: rtl;
+        }
+        .sarf-table th {
+            background: var(--primary); color: white; padding: 12px 16px;
+            font-weight: 600; text-align: center;
+            font-family: 'Amiri', serif; font-size: 1rem;
+        }
+        .sarf-table td {
+            padding: 10px 14px; text-align: center;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Amiri', serif; font-size: 1.2rem;
+        }
+        .sarf-table tr:nth-child(even) td { background: #fafaf8; }
+        .sarf-table tr:last-child td { border-bottom: none; }
+
+        .sarf-input {
+            font-family: 'Amiri', serif; font-size: 1.2rem; text-align: center;
+            direction: rtl; border: 1.5px solid var(--border); border-radius: 6px;
+            padding: 8px 12px; width: 120px; background: #fffef9; transition: border-color 0.3s;
+        }
+        .sarf-input:focus { outline: none; border-color: var(--primary); background: white; }
+        .sarf-input.correct { border-color: var(--success); background: #d4edda; }
+        .sarf-input.incorrect { border-color: var(--error); background: #f8d7da; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px; border: none; border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+        .btn-secondary:hover { background: #f0faf4; }
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
+        .score-card {
+            display: flex; gap: 24px; padding: 20px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            border-radius: var(--radius-sm); color: white; margin: 20px 0;
+        }
+        .score-item { text-align: center; flex: 1; }
+        .score-value { font-size: 2rem; font-weight: 700; }
+        .score-label { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+        .info-box { padding: 16px 20px; border-radius: var(--radius-sm); margin: 16px 0; font-size: 0.9rem; line-height: 1.7; }
+        .info-box.tip { background: #f0faf4; border-left: 3px solid var(--success); }
+        .info-box.note { background: #e8f4fd; border-left: 3px solid var(--info); }
+        .info-box.grammar { background: #f9f0fd; border-left: 3px solid #7b1fa2; }
+        .info-box strong { display: block; margin-bottom: 4px; }
+
+        .syllabus-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px; margin: 20px 0;
+        }
+        .syllabus-card {
+            padding: 18px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            transition: all 0.2s; position: relative;
+        }
+        .syllabus-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+        .syllabus-card.current { border-color: var(--primary); background: #f0faf4; }
+        .syllabus-card.current::after {
+            content: 'THIS WEEK'; position: absolute; top: -10px; right: 12px;
+            background: var(--primary); color: white; font-size: 0.6rem; font-weight: 700;
+            padding: 2px 10px; border-radius: 10px; letter-spacing: 0.5px;
+        }
+        .syllabus-card .week-num { font-size: 0.72rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .syllabus-card .week-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+        .syllabus-card .week-arabic { font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--text-light); direction: rtl; }
+        .syllabus-card .week-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+        .syllabus-card .tag { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .tag.sarf { background: #e8f5e9; color: #2e7d32; }
+        .tag.irab { background: #e3f2fd; color: #1565c0; }
+        .tag.usul { background: #fff3e0; color: #e65100; }
+        .tag.nahw { background: #f3e5f5; color: #7b1fa2; }
+
+        .intro-text { font-size: 0.95rem; color: var(--text-light); line-height: 1.8; margin-bottom: 20px; }
+        .section-intro { font-size: 0.92rem; color: var(--text-light); margin-bottom: 20px; line-height: 1.7; }
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        .analysis-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            overflow: hidden; margin: 16px 0; font-size: 0.88rem;
+        }
+        .analysis-table th {
+            background: #f8f9fa; padding: 10px 14px; font-weight: 600; text-align: left;
+            border-bottom: 2px solid var(--border); font-size: 0.78rem;
+            text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-light);
+        }
+        .analysis-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .analysis-table td.arabic-cell { font-family: 'Amiri', serif; font-size: 1.3rem; direction: rtl; text-align: center; }
+        .analysis-table tr:last-child td { border-bottom: none; }
+        .analysis-table tr:nth-child(even) td { background: #fdfcfa; }
+
+        .hidden { display: none; }
+
+        @media (max-width: 768px) {
+            .header-content { padding: 28px 16px; }
+            .header-brand { font-size: 1.8rem; }
+            .week-title { font-size: 1.4rem; }
+            .main { padding: 20px 16px 60px; }
+            .section-body { padding: 0 16px 20px; }
+            .arabic-text-block { font-size: 1.35rem; padding: 20px; }
+            .score-card { flex-direction: column; gap: 12px; }
+            .syllabus-grid { grid-template-columns: 1fr; }
+            .progress-labels { display: none; }
+        }
+    
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-content">
+        <div class="header-brand">al-Masār <span class="arabic-brand">المسار</span></div>
+        <div class="header-subtitle">Arabic &amp; Islamic Sciences — Post-Alimiyyah Development</div>
+        <div class="week-badge"><span>📖</span><span>WEEK 6 of 8 — Scaffolded Circuit Model</span></div>
+        <h1 class="week-title">Unrestricted &amp; Restricted<span class="arabic-title">المطلق والمقيد</span></h1>
+    </div>
+    <div class="progress-bar-container"><div class="progress-inner"><div class="progress-steps"><div class="progress-step active" data-step="1"></div><div class="progress-step" data-step="2"></div><div class="progress-step" data-step="3"></div><div class="progress-step" data-step="4"></div><div class="progress-step" data-step="5"></div></div><div class="progress-labels"><span>Sarf Warm-up</span><span>Passage Reading</span><span>I'rab &amp; Sarf Quiz</span><span>Grammar Connection</span><span>Reveal &amp; Review</span></div></div></div>
+</header>
+<main class="main">
+<div class="section open" id="overview-section"><div class="section-header" onclick="toggleSection('overview-section')"><div class="section-icon sarf">📋</div><div class="section-meta"><div class="section-title">8-Week Course Overview</div><div class="section-duration">~2 hours per week · Usul al-Shashi + Qatr al-Nada</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="intro-text">Each week follows the <strong>Scaffolded Circuit</strong>: a Sarf warm-up activates the morphological patterns you'll encounter, then you read and analyse an unvowelled passage from <em>Usul al-Shashi</em>, followed by an I'rab and Sarf quiz. A grammar connection from <em>Qatr al-Nada</em> grounds the rules you applied, and the session closes with the fully vowelled text and a review.</p><div class="syllabus-grid"><div class="syllabus-card"><div class="week-num">Week 1</div><div class="week-name">Definition of Fiqh &amp; Usul</div><div class="week-arabic">تعريف الفقه وأصوله</div><div class="week-tags"><span class="tag sarf">أجوف واوي</span><span class="tag sarf">اِسْتَفْعَلَ</span><span class="tag irab">اسم أنّ vs مبتدأ</span><span class="tag nahw">الإعراب وأقسامه</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 2</div><div class="week-name">The Quran as Evidence</div><div class="week-arabic">الكتاب كدليل شرعي</div><div class="week-tags"><span class="tag sarf">المبني للمجهول</span><span class="tag sarf">الفاعل والمفعول</span><span class="tag irab">الفاعل ونائبه</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 3</div><div class="week-name">The Prophetic Tradition</div><div class="week-arabic">السنة ومراتبها</div><div class="week-tags"><span class="tag sarf">أفعال المثال</span><span class="tag sarf">المبتدأ والخبر</span><span class="tag irab">المبتدأ والخبر</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 4</div><div class="week-name">Commands &amp; Prohibitions</div><div class="week-arabic">الأمر والنهي</div><div class="week-tags"><span class="tag sarf">الأمر والنهي</span><span class="tag sarf">كان وأخواتها</span><span class="tag irab">النواسخ</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 5</div><div class="week-name">General &amp; Specific</div><div class="week-arabic">العام والخاص</div><div class="week-tags"><span class="tag sarf">أفعال الأجوف</span><span class="tag sarf">إنّ وأخواتها</span><span class="tag irab">إنّ وأخواتها</span></div></div>
+            <div class="syllabus-card current"><div class="week-num">Week 6</div><div class="week-name">Unrestricted &amp; Restricted</div><div class="week-arabic">المطلق والمقيد</div><div class="week-tags"><span class="tag sarf">أفعال الناقص</span><span class="tag sarf">الحال والتمييز</span><span class="tag irab">المنصوبات</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 7</div><div class="week-name">Ambiguous &amp; Clarified</div><div class="week-arabic">المجمل والمبيّن</div><div class="week-tags"><span class="tag sarf">اللفيف والمضاعف</span><span class="tag sarf">الإضافة</span><span class="tag irab">المجرورات</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 8</div><div class="week-name">Analogy &amp; Independent Reasoning</div><div class="week-arabic">القياس والاجتهاد</div><div class="week-tags"><span class="tag sarf">مراجعة شاملة</span><span class="tag sarf">تحليل كامل</span><span class="tag irab">مراجعة عامة</span></div></div></div></div></div>
+
+<div class="section open" id="sarf-section"><div class="section-header" onclick="toggleSection('sarf-section')"><div class="section-icon sarf">🔤</div><div class="section-meta"><div class="section-title">Part 1: Sarf Warm-up</div><div class="section-duration">10 minutes · أفعال الناقص الواوي واليائي</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">This week trains <strong>naaqis verbs</strong> where the final radical is weak. You will drill <strong>دَعَا يَدْعُو</strong> and <strong>رَمَى يَرْمِي</strong>, then apply the rule of <strong>حذف حرف العلة في الجزم</strong> before reading the passage on المطلق والمقيد.</p><div class="info-box tip"><strong>💡 ناقص واوي — دَعَا يَدْعُو</strong> In jussive and imperative, the final weak letter drops: <span style="font-family:'Amiri',serif;">لَمْ يَدْعُ، اُدْعُ</span>.</div>
+<p style="font-weight:600; margin: 16px 0 8px;">Drill A — Conjugate <span style="font-family:'Amiri',serif; font-size:1.2rem;">دَعَا</span>:</p>
+<table class="sarf-table"><thead><tr><th>الضمير</th><th>الماضي</th><th>المضارع</th><th>المجزوم / الأمر</th></tr></thead><tbody>
+<tr><td>هُوَ</td><td>دَعَا</td><td><input type="text" class="sarf-input" data-answer="يَدْعُو" placeholder="..."></td><td><input type="text" class="sarf-input" data-answer="لَمْ يَدْعُ" placeholder="..."></td></tr>
+<tr><td>أَنْتَ</td><td>دَعَوْتَ</td><td>تَدْعُو</td><td><input type="text" class="sarf-input" data-answer="اُدْعُ" placeholder="..."></td></tr>
+<tr><td>هُمْ</td><td><input type="text" class="sarf-input" data-answer="دَعَوْا" placeholder="..."></td><td><input type="text" class="sarf-input" data-answer="يَدْعُونَ" placeholder="..."></td><td>لَمْ يَدْعُوا</td></tr>
+</tbody></table>
+<div class="info-box note" style="margin-top:24px;"><strong>💡 ناقص يائي — رَمَى يَرْمِي</strong> The yā’ becomes alif in perfect (<span style="font-family:'Amiri',serif;">رَمَى</span>), then drops in jussive/imperative: <span style="font-family:'Amiri',serif;">لَمْ يَرْمِ، اِرْمِ</span>.</div>
+<p style="font-weight:600; margin: 16px 0 8px;">Drill B — Conjugate <span style="font-family:'Amiri',serif; font-size:1.2rem;">رَمَى</span>:</p>
+<table class="sarf-table"><thead><tr><th>الضمير</th><th>الماضي</th><th>المضارع</th><th>المجزوم / الأمر</th></tr></thead><tbody>
+<tr><td>هُوَ</td><td>رَمَى</td><td><input type="text" class="sarf-input" data-answer="يَرْمِي" placeholder="..."></td><td><input type="text" class="sarf-input" data-answer="لَمْ يَرْمِ" placeholder="..."></td></tr>
+<tr><td>أَنْتَ</td><td><input type="text" class="sarf-input" data-answer="رَمَيْتَ" placeholder="..."></td><td>تَرْمِي</td><td><input type="text" class="sarf-input" data-answer="اِرْمِ" placeholder="..."></td></tr>
+<tr><td>هِيَ</td><td><input type="text" class="sarf-input" data-answer="رَمَتْ" placeholder="..."></td><td>تَرْمِي</td><td>لَمْ تَرْمِ</td></tr>
+</tbody></table><div class="btn-group"><button class="btn btn-primary" onclick="checkSarf()">Check Answers</button><button class="btn btn-secondary" onclick="revealSarf()">Reveal All</button></div><div id="sarf-score" class="hidden" style="margin-top:16px;"></div></div></div>
+
+<div class="section" id="passage-section"><div class="section-header" onclick="toggleSection('passage-section')"><div class="section-icon passage">📜</div><div class="section-meta"><div class="section-title">Part 2: Passage Reading — Usul al-Shashi</div><div class="section-duration">40 minutes · Unvowelled text analysis</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">This selection from the chapter of <strong>المطلق والمقيد</strong> outlines when an unrestricted wording is carried upon a restricted one. Track the conditions: unity of ruling and unity of cause.</p><div class="info-box note"><strong>📝 Reading strategy</strong>First read the legal logic: <em>مطلق</em>, <em>مقيد</em>, and the relation of cause and ruling. Then parse endings and verb forms.</div><div class="arabic-text-block" id="unvowelled-passage"><div class="label">Unvowelled — أصول الشاشي</div><span class="arabic-word" data-vowelled="الْمُطْلَقُ" data-root="ط ل ق" data-type="noun" data-irab="مبتدأ مرفوع" data-sarf="اسم مفعول من أَطْلَقَ على وزن مُفْعَل" data-meaning="the unrestricted">المطلق</span>
+            <span class="arabic-word" data-vowelled="مَا" data-root="—" data-type="relative" data-irab="اسم موصول في محل رفع خبر" data-sarf="—" data-meaning="that which">ما</span>
+            <span class="arabic-word" data-vowelled="تَنَاوَلَ" data-root="ن و ل" data-type="verb" data-irab="فعل ماضٍ" data-sarf="باب تَفَاعَلَ" data-meaning="covers">تناول</span>
+            <span class="arabic-word" data-vowelled="فَرْدًا" data-root="ف ر د" data-type="noun" data-irab="مفعول به منصوب" data-sarf="مصدر في معنى الواحد" data-meaning="an individual">فردا</span>
+            <span class="arabic-word" data-vowelled="شَائِعًا" data-root="ش ي ع" data-type="adj" data-irab="حال منصوب" data-sarf="اسم فاعل من شَاعَ" data-meaning="undesignated">شائعا</span>
+            <span class="arabic-word" data-vowelled="فِي" data-root="—" data-type="particle" data-irab="حرف جر" data-sarf="—" data-meaning="in">في</span>
+            <span class="arabic-word" data-vowelled="جِنْسِهِ" data-root="ج ن س" data-type="noun" data-irab="مجرور بفي وهو مضاف" data-sarf="اسم جنس" data-meaning="its class">جنسه</span>
+            <span class="arabic-word" data-vowelled="وَالْمُقَيَّدُ" data-root="ق ي د" data-type="noun" data-irab="معطوف مرفوع" data-sarf="اسم مفعول من قَيَّدَ" data-meaning="the restricted">والمقيد</span>
+            <span class="arabic-word" data-vowelled="مَا" data-root="—" data-type="relative" data-irab="اسم موصول خبر" data-sarf="—" data-meaning="that which">ما</span>
+            <span class="arabic-word" data-vowelled="دَلَّ" data-root="د ل ل" data-type="verb" data-irab="فعل ماضٍ" data-sarf="مضاعف" data-meaning="indicates">دل</span>
+            <span class="arabic-word" data-vowelled="عَلَى" data-root="—" data-type="particle" data-irab="حرف جر" data-sarf="—" data-meaning="upon">على</span>
+            <span class="arabic-word" data-vowelled="الْحَقِيقَةِ" data-root="ح ق ق" data-type="noun" data-irab="اسم مجرور" data-sarf="مصدر حَقَّ" data-meaning="the referent">الحقيقة</span>
+            <span class="arabic-word" data-vowelled="بِقَيْدٍ" data-root="ق ي د" data-type="noun" data-irab="مجرور بالباء" data-sarf="مصدر" data-meaning="with a restriction">بقيد</span>
+            <span class="arabic-word" data-vowelled="فَإِذَا" data-root="—" data-type="particle" data-irab="فاء استئنافية + إذا" data-sarf="—" data-meaning="then when">فاذا</span>
+            <span class="arabic-word" data-vowelled="اتَّحَدَ" data-root="و ح د" data-type="verb" data-irab="فعل ماضٍ" data-sarf="باب اِفْتَعَلَ مع إدغام" data-meaning="became one">اتحد</span>
+            <span class="arabic-word" data-vowelled="الْحُكْمُ" data-root="ح ك م" data-type="noun" data-irab="فاعل مرفوع" data-sarf="اسم" data-meaning="the ruling">الحكم</span>
+            <span class="arabic-word" data-vowelled="وَالسَّبَبُ" data-root="س ب ب" data-type="noun" data-irab="معطوف مرفوع" data-sarf="اسم" data-meaning="and cause">والسبب</span>
+            <span class="arabic-word" data-vowelled="حُمِلَ" data-root="ح م ل" data-type="verb" data-irab="ماضٍ مبني للمجهول" data-sarf="فعل ثلاثي مبني للمجهول" data-meaning="is carried">حمل</span>
+            <span class="arabic-word" data-vowelled="الْمُطْلَقُ" data-root="ط ل ق" data-type="noun" data-irab="نائب فاعل مرفوع" data-sarf="اسم مفعول" data-meaning="the unrestricted">المطلق</span>
+            <span class="arabic-word" data-vowelled="عَلَى" data-root="—" data-type="particle" data-irab="حرف جر" data-sarf="—" data-meaning="onto">على</span>
+            <span class="arabic-word" data-vowelled="الْمُقَيَّدِ" data-root="ق ي د" data-type="noun" data-irab="اسم مجرور بعلى" data-sarf="اسم مفعول" data-meaning="the restricted">المقيد</span>
+            <span class="arabic-word" data-vowelled="وَإِنْ" data-root="—" data-type="particle" data-irab="حرف شرط جازم" data-sarf="—" data-meaning="and if">وان</span>
+            <span class="arabic-word" data-vowelled="اخْتَلَفَ" data-root="خ ل ف" data-type="verb" data-irab="فعل ماضٍ" data-sarf="باب اِفْتَعَلَ" data-meaning="differs">اختلف</span>
+            <span class="arabic-word" data-vowelled="السَّبَبُ" data-root="س ب ب" data-type="noun" data-irab="فاعل مرفوع" data-sarf="اسم" data-meaning="the cause">السبب</span>
+            <span class="arabic-word" data-vowelled="أَوْ" data-root="—" data-type="particle" data-irab="حرف عطف" data-sarf="—" data-meaning="or">او</span>
+            <span class="arabic-word" data-vowelled="الْحُكْمُ" data-root="ح ك م" data-type="noun" data-irab="معطوف مرفوع" data-sarf="اسم" data-meaning="the ruling">الحكم</span>
+            <span class="arabic-word" data-vowelled="فَلَا" data-root="—" data-type="particle" data-irab="فاء + لا نافية" data-sarf="—" data-meaning="then not">فلا</span>
+            <span class="arabic-word" data-vowelled="يُحْمَلُ" data-root="ح م ل" data-type="verb" data-irab="مضارع مرفوع مبني للمجهول" data-sarf="passive imperfect" data-meaning="is carried">يحمل</span></div><div class="info-box tip"><strong>👆 Interactive</strong>Click any word to see full I'rab and Sarf details. Attempt first, then reveal.</div><div class="word-tooltip" id="word-tooltip"></div></div></div>
+
+<div class="section" id="quiz-section"><div class="section-header" onclick="toggleSection('quiz-section')"><div class="section-icon quiz">✍️</div><div class="section-meta"><div class="section-title">Part 3: I'rab &amp; Sarf Quiz</div><div class="section-duration">30 minutes · 8 questions</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">Test your analysis. 4 I'rab questions + 4 Sarf questions.</p><div class="quiz-container" id="main-quiz"><div class="quiz-question" id="q1">
+                <div class="quiz-number">1</div>
+                <div class="quiz-prompt">In <span class='arabic-inline'>فردا شائعا</span>, what is the I'rab of <span class='arabic-inline'>شائعا</span>?</div>
+                <div class="quiz-hint">Does it describe the state of فردا?</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q1',false)"><div class="option-marker">A</div><div class="option-text">تمييز منصوب</div></div><div class="quiz-option" onclick="selectOption(this,'q1',true)"><div class="option-marker">B</div><div class="option-text">حال منصوب</div></div><div class="quiz-option" onclick="selectOption(this,'q1',false)"><div class="option-marker">C</div><div class="option-text">مفعول مطلق</div></div><div class="quiz-option" onclick="selectOption(this,'q1',false)"><div class="option-marker">D</div><div class="option-text">خبر كان</div></div></div>
+                <div class="quiz-explanation" id="q1-explanation"><strong>شائعا</strong> is <strong>حال</strong> describing the state of فردًا: an individual in an unrestricted sense.</div>
+            </div>
+
+            <div class="quiz-question" id="q2">
+                <div class="quiz-number">2</div>
+                <div class="quiz-prompt">Which jussive form is correct for <span class='arabic-inline'>يَدْعُو</span>?</div>
+                <div class="quiz-hint">Naqis wāwī drops the final weak letter in jussive.</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q2',false)"><div class="option-marker">A</div><div class="option-text">لم يدعو</div></div><div class="quiz-option" onclick="selectOption(this,'q2',false)"><div class="option-marker">B</div><div class="option-text">لم يدعى</div></div><div class="quiz-option" onclick="selectOption(this,'q2',true)"><div class="option-marker">C</div><div class="option-text">لم يدعُ</div></div><div class="quiz-option" onclick="selectOption(this,'q2',false)"><div class="option-marker">D</div><div class="option-text">لم يدعِي</div></div></div>
+                <div class="quiz-explanation" id="q2-explanation">For ناقص واوي: <strong>يَدْعُو → لَمْ يَدْعُ</strong> by deleting the final wāw.</div>
+            </div>
+
+            <div class="quiz-question" id="q3">
+                <div class="quiz-number">3</div>
+                <div class="quiz-prompt">In <span class='arabic-inline'>ازداد الرجل علما</span>, <span class='arabic-inline'>علما</span> is best parsed as:</div>
+                <div class="quiz-hint">It clarifies the ambiguous increase.</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q3',false)"><div class="option-marker">A</div><div class="option-text">حال</div></div><div class="quiz-option" onclick="selectOption(this,'q3',true)"><div class="option-marker">B</div><div class="option-text">تمييز</div></div><div class="quiz-option" onclick="selectOption(this,'q3',false)"><div class="option-marker">C</div><div class="option-text">مفعول به</div></div><div class="quiz-option" onclick="selectOption(this,'q3',false)"><div class="option-marker">D</div><div class="option-text">مبتدأ</div></div></div>
+                <div class="quiz-explanation" id="q3-explanation"><strong>علما</strong> is <strong>تمييز</strong> because it removes ambiguity from ازداد.</div>
+            </div>
+
+            <div class="quiz-question" id="q4">
+                <div class="quiz-number">4</div>
+                <div class="quiz-prompt">The imperative of <span class='arabic-inline'>رَمَى</span> is:</div>
+                <div class="quiz-hint">Naqis yā’ī imperative drops final yā’.</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q4',false)"><div class="option-marker">A</div><div class="option-text">اِرْمِي</div></div><div class="quiz-option" onclick="selectOption(this,'q4',true)"><div class="option-marker">B</div><div class="option-text">اِرْمِ</div></div><div class="quiz-option" onclick="selectOption(this,'q4',false)"><div class="option-marker">C</div><div class="option-text">اُرْمُ</div></div><div class="quiz-option" onclick="selectOption(this,'q4',false)"><div class="option-marker">D</div><div class="option-text">رَمِ</div></div></div>
+                <div class="quiz-explanation" id="q4-explanation">Correct: <strong>اِرْمِ</strong>. The final weak letter is omitted.</div>
+            </div>
+
+            <div class="quiz-question" id="q5">
+                <div class="quiz-number">5</div>
+                <div class="quiz-prompt">In <span class='arabic-inline'>سرت ليلا</span>, <span class='arabic-inline'>ليلا</span> is:</div>
+                <div class="quiz-hint">Is it clarifying quantity/type or state/time?</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q5',false)"><div class="option-marker">A</div><div class="option-text">حال</div></div><div class="quiz-option" onclick="selectOption(this,'q5',false)"><div class="option-marker">B</div><div class="option-text">تمييز</div></div><div class="quiz-option" onclick="selectOption(this,'q5',true)"><div class="option-marker">C</div><div class="option-text">مفعول فيه (ظرف)</div></div><div class="quiz-option" onclick="selectOption(this,'q5',false)"><div class="option-marker">D</div><div class="option-text">مفعول مطلق</div></div></div>
+                <div class="quiz-explanation" id="q5-explanation"><strong>ليلا</strong> is a time adverb (ظرف زمان), not حال or تمييز.</div>
+            </div>
+
+            <div class="quiz-question" id="q6">
+                <div class="quiz-number">6</div>
+                <div class="quiz-prompt">In <span class='arabic-inline'>طاب زيد نفسا</span>, <span class='arabic-inline'>نفسا</span> is:</div>
+                <div class="quiz-hint">A famous tamiyiz example.</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q6',true)"><div class="option-marker">A</div><div class="option-text">تمييز</div></div><div class="quiz-option" onclick="selectOption(this,'q6',false)"><div class="option-marker">B</div><div class="option-text">حال</div></div><div class="quiz-option" onclick="selectOption(this,'q6',false)"><div class="option-marker">C</div><div class="option-text">مفعول به</div></div><div class="quiz-option" onclick="selectOption(this,'q6',false)"><div class="option-marker">D</div><div class="option-text">بدل</div></div></div>
+                <div class="quiz-explanation" id="q6-explanation"><strong>نفسًا</strong> is <strong>تمييز</strong> clarifying the sense of طاب.</div>
+            </div>
+
+            <div class="quiz-question" id="q7">
+                <div class="quiz-number">7</div>
+                <div class="quiz-prompt">How do you identify a ناقص verb in unvowelled text?</div>
+                <div class="quiz-hint">Look at final alif shapes.</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q7',false)"><div class="option-marker">A</div><div class="option-text">By doubled middle radical only</div></div><div class="quiz-option" onclick="selectOption(this,'q7',true)"><div class="option-marker">B</div><div class="option-text">By alif maqsurah/mamdudah clue at word-end</div></div><div class="quiz-option" onclick="selectOption(this,'q7',false)"><div class="option-marker">C</div><div class="option-text">By initial hamzah only</div></div><div class="quiz-option" onclick="selectOption(this,'q7',false)"><div class="option-marker">D</div><div class="option-text">It cannot be identified</div></div></div>
+                <div class="quiz-explanation" id="q7-explanation">A final <strong>ى / ا</strong> in many verb forms often signals a ناقص origin (final weak radical).</div>
+            </div>
+
+            <div class="quiz-question" id="q8">
+                <div class="quiz-number">8</div>
+                <div class="quiz-prompt">Choose the correct jussive pair:</div>
+                <div class="quiz-hint">Apply deletion in both verbs.</div>
+                <div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q8',false)"><div class="option-marker">A</div><div class="option-text">لم يدعو / لم يرمي</div></div><div class="quiz-option" onclick="selectOption(this,'q8',true)"><div class="option-marker">B</div><div class="option-text">لم يدعُ / لم يرمِ</div></div><div class="quiz-option" onclick="selectOption(this,'q8',false)"><div class="option-marker">C</div><div class="option-text">لم يدعى / لم يرما</div></div><div class="quiz-option" onclick="selectOption(this,'q8',false)"><div class="option-marker">D</div><div class="option-text">لم يدعِي / لم يرمُ</div></div></div>
+                <div class="quiz-explanation" id="q8-explanation">Correct pair is <strong>لم يدعُ</strong> and <strong>لم يرمِ</strong>.</div>
+            </div></div><div id="quiz-results" class="hidden"><div class="score-card"><div class="score-item"><div class="score-value" id="quiz-score-value">0/8</div><div class="score-label">Correct Answers</div></div><div class="score-item"><div class="score-value" id="quiz-irab-score">0/4</div><div class="score-label">I'rab Questions</div></div><div class="score-item"><div class="score-value" id="quiz-sarf-score">0/4</div><div class="score-label">Sarf Questions</div></div></div></div></div></div>
+
+<div class="section" id="grammar-section"><div class="section-header" onclick="toggleSection('grammar-section')"><div class="section-icon grammar">📐</div><div class="section-meta"><div class="section-title">Part 4: Grammar Connection — Qatr al-Nada</div><div class="section-duration">25 minutes · الحال والتمييز</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">Connect your reading to the formal nahw framework.</p><div class="arabic-text-block"><div class="label">قطر الندى — محور الأسبوع</div>الحال وصف نكرة منصوب يبين هيئة صاحبه والتمييز اسم نكرة منصوب يفسر مبهما من ذات أو نسبة</div><table class="analysis-table"><thead><tr><th>Concept</th><th style='text-align:center'>Arabic</th><th>How it works in this week</th></tr></thead><tbody><tr><td><strong>تمييز الحال</strong></td><td class='arabic-cell'>الْحَالُ</td><td>يبيّن هيئة صاحب الحال وقت وقوع الفعل، وغالبًا يمكن سؤاله بـ: كيف؟</td></tr>
+<tr><td><strong>تمييز التمييز</strong></td><td class='arabic-cell'>التَّمْيِيزُ</td><td>يفسر إبهامًا في مقدار أو نسبة، وغالبًا يجيب عن: ماذا؟ أو كم؟</td></tr>
+<tr><td><strong>موضع الالتباس</strong></td><td class='arabic-cell'>مُنْتَصَبَانِ</td><td>كلاهما منصوب نكرة؛ الفرق في الوظيفة الدلالية.</td></tr>
+<tr><td><strong>علامة عملية</strong></td><td class='arabic-cell'>هَيْئَة / إِبْهَام</td><td>إن كان بيان هيئة = حال، وإن كان رفع إبهام = تمييز.</td></tr></tbody></table><div class="info-box note"><strong>📌 Visual summary</strong>Revisit this table after the quiz and map each row to one line in the passage.</div></div></div>
+
+<div class="section" id="reveal-section"><div class="section-header" onclick="toggleSection('reveal-section')"><div class="section-icon reveal">✅</div><div class="section-meta"><div class="section-title">Part 5: Reveal &amp; Review</div><div class="section-duration">15 minutes · Fully vowelled text + complete analysis</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">Final check: compare your parsing to the guided model answer.</p><div class="arabic-text-block vowelled"><div class="label" style="color: var(--success);">✓ Fully Vowelled — أصول الشاشي</div>الْمُطْلَقُ مَا تَنَاوَلَ فَرْدًا شَائِعًا فِي جِنْسِهِ، وَالْمُقَيَّدُ مَا دَلَّ عَلَى الْحَقِيقَةِ بِقَيْدٍ، فَإِذَا اتَّحَدَ الْحُكْمُ وَالسَّبَبُ حُمِلَ الْمُطْلَقُ عَلَى الْمُقَيَّدِ، وَإِنِ اخْتَلَفَ السَّبَبُ أَوِ الْحُكْمُ فَلَا يُحْمَلُ.</div><h3 style="margin: 24px 0 12px; font-size: 1.05rem;">Complete Word-by-Word Analysis</h3><table class="analysis-table"><thead><tr><th style='text-align:center'>Word</th><th>Type</th><th>I'rab</th><th>Sarf Notes</th></tr></thead><tbody><tr><td class='arabic-cell'>الْمُطْلَقُ</td><td>Noun</td><td>مبتدأ مرفوع</td><td>اسم مفعول من أطلق</td></tr>
+<tr><td class='arabic-cell'>شَائِعًا</td><td>Adj</td><td>حال منصوب</td><td>اسم فاعل من شاع</td></tr>
+<tr><td class='arabic-cell'>الْمُقَيَّدُ</td><td>Noun</td><td>معطوف مرفوع</td><td>اسم مفعول من قيّد</td></tr>
+<tr><td class='arabic-cell'>بِقَيْدٍ</td><td>Prep phrase</td><td>مجرور بالباء</td><td>مصدر ق ي د</td></tr>
+<tr><td class='arabic-cell'>حُمِلَ</td><td>Verb</td><td>ماضٍ مبني للمجهول</td><td>passive form</td></tr>
+<tr><td class='arabic-cell'>الْمُطْلَقُ</td><td>Noun</td><td>نائب فاعل مرفوع</td><td>في جملة المبني للمجهول</td></tr>
+<tr><td class='arabic-cell'>يُحْمَلُ</td><td>Verb</td><td>مضارع مرفوع مبني للمجهول</td><td>استمرار الحكم</td></tr>
+<tr><td class='arabic-cell'>لَمْ يَدْعُ</td><td>Verb</td><td>مجزوم بحذف حرف العلة</td><td>ناقص واوي</td></tr>
+<tr><td class='arabic-cell'>لَمْ يَرْمِ</td><td>Verb</td><td>مجزوم بحذف حرف العلة</td><td>ناقص يائي</td></tr></tbody></table><div class="divider"></div><h3 style="margin: 20px 0 12px; font-size: 1.05rem;">Week 6 Key Takeaways</h3><div class="info-box tip"><strong>I'rab mastery targets</strong><ul style="margin: 8px 0 0 20px; list-style: disc;"><li>Differentiate <strong>حال</strong> (state) from <strong>تمييز</strong> (clarifier).</li>
+<li>Both are منصوب نكرة, but their semantic roles differ.</li>
+<li>In legal prose, short منصوب words often need contextual judgment.</li></ul></div><div class="info-box tip"><strong>Sarf mastery targets</strong><ul style="margin: 8px 0 0 20px; list-style: disc;"><li>Naqis verbs lose final weak letter in jussive and imperative.</li>
+<li>Watch for final <strong>ى / ا</strong> clues in unvowelled text.</li>
+<li>Pair morphology with syntax: form changes often affect I'rab visibility.</li></ul></div><div class="info-box note"><strong>📅 Next step</strong>Week 7: <strong>المجمل والمبيّن</strong> with <strong>اللفيف والمضاعف</strong> and iḍāfah chains.</div></div></div>
+</main>
+<script>
+    function toggleSection(id) { document.getElementById(id).classList.toggle('open'); updateProgress(); }
+
+    const sectionIds = ['sarf-section','passage-section','quiz-section','grammar-section','reveal-section'];
+    function updateProgress() {
+        const steps = document.querySelectorAll('.progress-step');
+        sectionIds.forEach((id, i) => {
+            if (document.getElementById(id).classList.contains('open')) {
+                steps[i].classList.add('completed');
+                if (i + 1 < steps.length) steps[i+1].classList.add('active');
+            }
+        });
+    }
+
+    function checkSarf() {
+        const inputs = document.querySelectorAll('.sarf-input');
+        let correct = 0, total = 0;
+        inputs.forEach(input => {
+            if (!input.value.trim()) return;
+            total++;
+            if (normalizeArabic(input.value.trim()) === normalizeArabic(input.dataset.answer)) {
+                input.classList.add('correct'); input.classList.remove('incorrect'); correct++;
+            } else { input.classList.add('incorrect'); input.classList.remove('correct'); }
+        });
+        const s = document.getElementById('sarf-score'); s.classList.remove('hidden');
+        s.innerHTML = `<div class="info-box ${correct===total&&total>0?'tip':'note'}"><strong>${correct===total&&total>0?'✅ Excellent!':'📝 Keep practising'}</strong> You got ${correct} out of ${inputs.length} correct.${correct<inputs.length?' Click "Reveal All" to see answers.':''}</div>`;
+    }
+
+    function revealSarf() {
+        document.querySelectorAll('.sarf-input').forEach(i => { i.value = i.dataset.answer; i.classList.add('correct'); i.classList.remove('incorrect'); });
+    }
+
+    function normalizeArabic(t) {
+        return t.replace(/[\u064B-\u065F\u0670]/g,'').replace(/[\u0622\u0623\u0625]/g,'\u0627').replace(/\s+/g,'');
+    }
+
+    const tooltip = document.getElementById('word-tooltip');
+    document.querySelectorAll('.arabic-word').forEach(word => {
+        word.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const d = this.dataset;
+            document.querySelectorAll('.arabic-word').forEach(w => w.classList.remove('highlighted'));
+            this.classList.add('highlighted');
+            tooltip.innerHTML = `
+                <div class="tooltip-word">${d.vowelled}</div>
+                <div class="tooltip-row"><span class="tooltip-label">Meaning</span><span class="tooltip-value">${d.meaning}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Type</span><span class="tooltip-value">${d.type}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Root</span><span class="tooltip-value">${d.root}</span></div>
+                <hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:8px 0;">
+                <div class="tooltip-row" style="flex-direction:column;gap:4px;"><span class="tooltip-label">I'rab</span><span class="tooltip-value" style="font-size:0.82rem;">${d.irab}</span></div>
+                <hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:8px 0;">
+                <div class="tooltip-row" style="flex-direction:column;gap:4px;"><span class="tooltip-label">Sarf</span><span class="tooltip-value" style="font-size:0.82rem;">${d.sarf}</span></div>`;
+            const r = this.getBoundingClientRect();
+            let top = r.bottom + 10, left = r.left + r.width/2 - 160;
+            if (left < 10) left = 10;
+            if (left + 340 > window.innerWidth) left = window.innerWidth - 350;
+            if (top + 320 > window.innerHeight) top = r.top - 330;
+            tooltip.style.top = top+'px'; tooltip.style.left = left+'px';
+            tooltip.classList.add('visible');
+        });
+    });
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.arabic-word') && !e.target.closest('.word-tooltip')) {
+            tooltip.classList.remove('visible');
+            document.querySelectorAll('.arabic-word').forEach(w => w.classList.remove('highlighted'));
+        }
+    });
+
+    let quizAnswered=0, quizCorrect=0, irabCorrect=0, sarfCorrect=0;
+    const irabQs=['q1','q3','q5','q6'], sarfQs=['q2','q4','q7','q8'];
+
+    function selectOption(el, qid, correct) {
+        const q = document.getElementById(qid);
+        if (q.classList.contains('answered-correct')||q.classList.contains('answered-wrong')) return;
+        q.querySelectorAll('.quiz-option').forEach(o => o.classList.add('disabled'));
+        if (correct) {
+            el.classList.add('correct-answer'); q.classList.add('answered-correct'); quizCorrect++;
+            if (irabQs.includes(qid)) irabCorrect++;
+            if (sarfQs.includes(qid)) sarfCorrect++;
+        } else {
+            el.classList.add('wrong-answer'); q.classList.add('answered-wrong');
+            q.querySelectorAll('.quiz-option').forEach(o => {
+                if (o.getAttribute('onclick')&&o.getAttribute('onclick').includes('true')) o.classList.add('correct-answer');
+            });
+        }
+        quizAnswered++;
+        document.getElementById(qid+'-explanation').classList.add('visible');
+        if (quizAnswered >= 8) {
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('quiz-score-value').textContent = quizCorrect+'/8';
+            document.getElementById('quiz-irab-score').textContent = irabCorrect+'/4';
+            document.getElementById('quiz-sarf-score').textContent = sarfCorrect+'/4';
+        }
+    }
+
+    updateProgress();
+
+</script>
+</body>
+</html>

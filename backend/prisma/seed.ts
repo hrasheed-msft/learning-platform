@@ -23,6 +23,10 @@ import { seedSarfCoursePart4 } from './seed-sarf-course-part4';
 import { seedSarfCoursePart5 } from './seed-sarf-course-part5';
 import { seedSarfQuizzes } from './seed-sarf-quizzes';
 import { seedSarfFlashcards } from './seed-sarf-flashcards';
+import { seedMasaarCourse } from './seed-masaar-course';
+import { seedMasaarQuizzes } from './seed-masaar-quizzes';
+import { seedMasaarFlashcards } from './seed-masaar-flashcards';
+import { seedMasaarTerms } from './seed-masaar-terms';
 import { seedGames } from './seed-games';
 import { syncCourseTextFormatting } from '../src/services/course-content-formatting.service';
 
@@ -2762,6 +2766,10 @@ async function main() {
   await seedSarfCoursePart5();
   await seedSarfQuizzes();
   await seedSarfFlashcards();
+  await seedMasaarCourse();
+  await seedMasaarQuizzes();
+  await seedMasaarFlashcards();
+  await seedMasaarTerms();
 
   const contentFormattingResult = await syncCourseTextFormatting(prisma);
   console.log(`✅ Normalized Arabic term formatting in ${contentFormattingResult.updatedUnits} unit(s)`);
@@ -2779,8 +2787,8 @@ async function main() {
   console.log('   - 1 Demo Family (The Ahmad Family)');
   console.log('   - 1 Parent User (demo@example.com)');
   console.log('   - 3 Family Members (Ahmed, Fatima, Yusuf)');
-  console.log('   - 23 Seed files loaded (Maktab CB1-8, CB6B/6G, Further Studies, Quduri,');
-  console.log('     Tazkiyah, Habits, Rawai Hadaratina, Hujjatullah, Sarf Parts 1-5 + Quizzes + Flashcards)');
+  console.log('   - 26 Seed files loaded (Maktab CB1-8, CB6B/6G, Further Studies, Quduri,');
+  console.log('     Tazkiyah, Habits, Rawai Hadaratina, Hujjatullah, Sarf Parts 1-5 + Quizzes + Flashcards, Masaar Course + Quizzes + Terms)');
   console.log('   - All courses with units, quizzes, flashcards, and Arabic terms');
   console.log('   - Multiple enrollments per member');
   console.log('   - Unit progress records');
