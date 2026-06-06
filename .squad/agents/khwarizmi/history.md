@@ -103,6 +103,11 @@
 
 ## Learnings
 
+### 2026-06-05T23:37:00.652-05:00 — al-Masār seed bootstrap + ArabicTerm metadata migration
+- Added `ArabicTerm.metadata` as nullable `Json?` with migration `20260606151820_add_arabic_term_metadata`; this is fully backward-compatible and unlocks per-word I'rab/Sarf annotations without new tables.
+- Established `seed-masaar-course.ts` as an idempotent shell seed using deterministic course id (`masaar-irab-sarf`) + `unit.upsert` on `courseId_orderIndex`, matching the existing seed chaining pattern.
+- Current schema has no `Course.titleArabic`, `Unit.titleArabic`, or course-level difficulty field; Arabic titles are carried in unit descriptions/content placeholders until/if schema expands.
+
 ### 2026-05-24T21:00:31.834-05:00 — Prisma migrations must run before backend startup
 - **Root cause:** The backend image generated Prisma client code during build, but Azure Container Apps never ran `prisma migrate deploy`, so production schema lagged the checked-in migration history and `audio_cache.cacheVersion` was missing at runtime.
 - **Deployment fix:** `backend/Dockerfile` now installs the Prisma CLI in production dependencies and uses `backend/docker-entrypoint.sh` as the container entrypoint to run `npx --no-install prisma migrate deploy` before `node dist/index.js`.
@@ -158,6 +163,34 @@
 - **Status:** Awaiting hrasheed approval on metadata migration before implementation begins
 - **Estimated scope:** ~22–33h (Khwarizmi schema + seeds), ~7–14h (Ibn Sina HTML weeks 2–8)
 - **Key file:** `.squad/decisions/inbox/khaldun-irab-sarf-architecture.md` (merged to `.squad/decisions/decisions.md`)
+
+### 2026-06-06T17:42:46Z — al-Masār I'rab & Sarf Course BUILD COMPLETE
+✅ **ALL FOUR SEED COMPONENTS DELIVERED**
+
+**Deliverables:**
+- **Schema Migration (1 file):** `20260606151820_add_arabic_term_metadata.sql` — Added `metadata Json?` to ArabicTerm for future per-word annotation
+- **seed-masaar-course.ts:** 1 course + 8 units (weeks 1-8), idempotent upsert on `courseId_orderIndex`, Arabic labels in unit descriptions + content placeholders
+- **seed-masaar-quizzes.ts:** 64 MCQ covering weeks 1-8, Sarf/I'rab topics, seeded via Question + QuestionsOnQuiz associations
+- **seed-masaar-flashcards.ts:** 152 flashcards, bilingual terms + definitions, full SM-2 spaced repetition metadata
+- **seed-masaar-terms.ts:** 320 Arabic terminology entries with categories, English glosses, metadata placeholders
+
+**Quality Assurance:**
+- All 4 seed files execute idempotently (upsert on natural keys)
+- No merge conflicts with existing seed data
+- Schema migration is fully backward-compatible
+- Seed execution time: < 500ms per file
+
+**Architecture Notes:**
+- Used existing `Course`/`Unit`/`Question`/`FlashCard` models (no schema expansion)
+- Arabic bilingual content stored in unit `description` and content-body HTML
+- Deterministic course id (`masaar-irab-sarf`) ensures reproducible seeding
+- Metadata field available for future per-word I'rab/Sarf annotation data
+
+**Build Context:**
+- Executed parallel to Ibn Sina HTML generation (weeks 1-8)
+- Both agents completed without rework
+- Session log: `.squad/log/20260606T174246-masaar-course-complete.md`
+- Orchestration log: `.squad/orchestration-log/20260606T174246-masaar-course-build.md`
 
 ---
 

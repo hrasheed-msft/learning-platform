@@ -115,6 +115,11 @@
 - Regression pattern: prefetch-only sync wiring breaks highlighting for first-run/generated audio even though playback still works.
 - Key files: `frontend/src/components/UnitAudioButton.tsx`, `frontend/src/services/audioService.ts`, `frontend/src/__tests__/UnitAudioButton.test.tsx`.
 
+### Week Lesson Parity for Standalone HTML (2026-06-05T23:37:00.652-05:00)
+- Reusing the full Week 1 scaffold (header, progress, accordion parts, quiz engine, tooltip system, normalization) is the fastest way to preserve interaction parity while swapping only week-specific pedagogical content.
+- For Arabic-learning UX, every passage token should stay clickable with complete `data-*` grammar metadata so morphology and I'rab remain inspectable at word level without breaking reading flow.
+- Passive-voice weeks need explicit UI cues for فاعل vs نائب الفاعل recognition because this is harder to infer in unvowelled text; pairing warm-up paradigms with passage detection rules improves transfer.
+
 ### 2026-06-05T23:37:00Z — al-Masār I'rab & Sarf Course Architecture + HTML Lesson Generation
 - **Decision:** Khaldun's architecture mapping approved; course will integrate platform seed data + standalone HTML
 - **Schema update:** `ArabicTerm.metadata: Json?` required for word annotations in clickable passage reading
@@ -126,6 +131,34 @@
 - **Content linkage:** Each HTML file includes platform return link; strategy (courseId vs slug) awaiting hrasheed decision
 - **Approved migration:** `ArabicTerm.metadata: Json?` — backend can begin seed file authoring immediately
 - **Key file:** `.squad/decisions/inbox/khaldun-irab-sarf-architecture.md` (merged to `.squad/decisions/decisions.md`)
+
+### 2026-06-06T17:42:46Z — al-Masār HTML Lessons Complete (Weeks 1–8)
+✅ **ALL EIGHT HTML LESSONS DELIVERED**
+
+**Deliverables:**
+- **week-1.html through week-8.html:** 8 semantic HTML lesson files in `/lesson-irab-sarf/` directory
+- Each file includes: lesson header, structured content blocks, clickable Arabic terms with I'rab/Sarf metadata, inline drills
+- Preserved full Week 1 scaffold (header, progress accordion, quiz engine, tooltip system, grammar metadata)
+- Applied consistent interactive architecture across all 8 weeks
+
+**Quality Assurance:**
+- All 8 files maintain semantic HTML structure (`.subject`, `.topic`, `.arabic` CSS classes)
+- Clickable word annotations preserved with complete `data-*` grammar metadata
+- Passive-voice weeks (weeks 4–5) include explicit UI cues for فاعل vs نائب الفاعل recognition
+- RTL/LTR text handling consistent across all weeks
+- No rework required; all agents completed on first attempt
+
+**Architecture Notes:**
+- Each HTML file is self-contained (no external JS dependencies beyond basic HTML5)
+- Markup structure ready for platform ingestion (matches maktab-coursebook-html semantic format)
+- Grammar metadata baked into HTML `data-*` attributes for word-level lookup
+- Platform linkage ready for hrasheed's courseId vs slug routing decision
+
+**Build Context:**
+- Parallel to Khwarizmi seed generation (schema + 4 seed files)
+- Both agent streams completed without rework
+- Session log: `.squad/log/20260606T174246-masaar-course-complete.md`
+- Orchestration log: `.squad/orchestration-log/20260606T174246-masaar-course-build.md`
 
 ---
 

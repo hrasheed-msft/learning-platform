@@ -1,8 +1,32 @@
 # Decisions Archive
 
-**Last Updated:** 2026-06-05T23:37:00Z  
-**Total Decisions:** 28  
-**Source:** Merged from .squad/decisions/inbox/ on 2026-06-05
+**Last Updated:** 2026-06-06T17:42:46Z  
+**Total Decisions:** 29  
+**Source:** Merged from .squad/decisions/inbox/ on 2026-06-06
+
+---
+
+## al-Masār Seed Schema Alignment
+
+**Author:** Khwarizmi  
+**Date:** 2026-06-05T23:37:00-05:00  
+**Status:** Implemented
+
+### Context
+Task required `seed-masaar-course.ts` with bilingual weekly units plus adding `ArabicTerm.metadata`.
+
+### Decision
+Use existing schema as-is for course/unit records:
+- `Course` has no `titleArabic` or course-level `difficulty` field.
+- `Unit` has no `titleArabic` field.
+
+Therefore:
+- Arabic course/week labels are represented in unit `description` + bilingual `content` placeholders.
+- Deterministic idempotency is enforced with `course.upsert(where: { id: 'masaar-irab-sarf' })` and `unit.upsert(where: { courseId_orderIndex })`.
+- Added `ArabicTerm.metadata Json?` via migration `20260606151820_add_arabic_term_metadata`.
+
+### Rationale
+This satisfies the architecture requirement for future per-word annotation data while avoiding unrelated schema expansion outside the approved migration scope.
 
 ---
 
