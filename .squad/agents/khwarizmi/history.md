@@ -103,6 +103,11 @@
 
 ## Learnings
 
+### 2026-06-06T17:09:20-05:00 — al-Masār lesson summaries + linked static HTML delivery
+- `seed-masaar-course.ts` now stores concise HTML summaries instead of placeholders, with Arabic passage focus, English translation, grammar bullets, and a canonical `/lessons/masaar-irab-sarf/week-N.html` CTA embedded directly in each unit `content`.
+- The eight standalone HTML lessons now live under `frontend/public/lessons/masaar-irab-sarf/` as `week-1.html` through `week-8.html`, matching the production route shape expected by the frontend lesson CTA work.
+- Production reseeding for course `a1b2c3d4-e5f6-4890-abcd-ef1234567001` completed successfully, and all 8 unit records now carry the expected lesson links.
+
 ### 2026-06-05T23:37:00.652-05:00 — al-Masār seed bootstrap + ArabicTerm metadata migration
 - Added `ArabicTerm.metadata` as nullable `Json?` with migration `20260606151820_add_arabic_term_metadata`; this is fully backward-compatible and unlocks per-word I'rab/Sarf annotations without new tables.
 - Established `seed-masaar-course.ts` as an idempotent shell seed using deterministic course id (`masaar-irab-sarf`) + `unit.upsert` on `courseId_orderIndex`, matching the existing seed chaining pattern.

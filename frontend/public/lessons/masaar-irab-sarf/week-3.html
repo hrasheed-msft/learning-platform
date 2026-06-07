@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المسار — Week 3: The Prophetic Tradition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #1a5e3a;
+            --primary-light: #2d8f5c;
+            --primary-dark: #0e3d25;
+            --accent: #c8a45e;
+            --accent-light: #e8d4a0;
+            --bg: #faf8f4;
+            --bg-card: #ffffff;
+            --bg-arabic: #fefcf7;
+            --text: #2c2c2c;
+            --text-light: #666666;
+            --text-muted: #999999;
+            --border: #e8e4dc;
+            --success: #27ae60;
+            --error: #c0392b;
+            --info: #2980b9;
+            --warning: #f39c12;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-brand { font-family: 'Amiri', serif; font-size: 2.4rem; font-weight: 700; margin-bottom: 4px; }
+        .header-brand span.arabic-brand { font-size: 2.8rem; margin-left: 12px; }
+        .header-subtitle { font-size: 1rem; opacity: 0.85; font-weight: 300; margin-bottom: 24px; }
+
+        .week-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 24px; padding: 8px 20px; font-size: 0.9rem; font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .week-title { font-size: 1.8rem; font-weight: 600; margin-top: 16px; line-height: 1.3; }
+        .week-title .arabic-title { font-family: 'Amiri', serif; font-size: 2rem; display: block; margin-top: 6px; font-weight: 700; }
+
+        .progress-bar-container { background: rgba(0,0,0,0.2); padding: 16px 24px; }
+        .progress-inner { max-width: 1100px; margin: 0 auto; }
+        .progress-steps { display: flex; gap: 4px; align-items: center; }
+
+        .progress-step {
+            flex: 1; height: 6px; background: rgba(255,255,255,0.2);
+            border-radius: 3px; transition: background 0.4s ease; cursor: pointer;
+        }
+
+        .progress-step.completed { background: var(--accent); }
+        .progress-step.active { background: var(--accent-light); animation: pulse-bar 2s infinite; }
+        @keyframes pulse-bar { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .progress-labels {
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 0.7rem; opacity: 0.7; color: white;
+        }
+
+        .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+        .section {
+            background: var(--bg-card); border-radius: var(--radius);
+            box-shadow: var(--shadow); margin-bottom: 28px;
+            overflow: hidden; border: 1px solid var(--border);
+        }
+
+        .section-header {
+            padding: 20px 28px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .section-header:hover { background: rgba(0,0,0,0.02); }
+
+        .section-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+        }
+        .section-icon.sarf { background: #e8f5e9; color: var(--primary); }
+        .section-icon.passage { background: #fff3e0; color: #e65100; }
+        .section-icon.quiz { background: #e3f2fd; color: #1565c0; }
+        .section-icon.grammar { background: #f3e5f5; color: #7b1fa2; }
+        .section-icon.reveal { background: #fce4ec; color: #c62828; }
+
+        .section-meta { flex: 1; }
+        .section-title { font-size: 1.15rem; font-weight: 600; color: var(--text); }
+        .section-duration { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .section-toggle { font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s; }
+        .section.open .section-toggle { transform: rotate(180deg); }
+        .section-body { padding: 0 28px 28px; display: none; }
+        .section.open .section-body { display: block; }
+
+        .arabic-text-block {
+            background: var(--bg-arabic); border: 2px solid var(--border);
+            border-radius: var(--radius-sm); padding: 32px;
+            direction: rtl; text-align: right;
+            font-family: 'Amiri', serif; font-size: 1.65rem; line-height: 2.4;
+            color: var(--text); margin: 16px 0; position: relative;
+        }
+        .arabic-text-block.vowelled { border-color: var(--success); background: #f0faf4; }
+
+        .arabic-text-block .label {
+            position: absolute; top: -12px; right: 16px;
+            background: var(--bg-card); padding: 2px 12px;
+            font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
+            color: var(--text-muted); direction: ltr;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .arabic-word {
+            cursor: pointer; padding: 2px 4px; border-radius: 4px;
+            transition: all 0.2s; display: inline; position: relative;
+        }
+        .arabic-word:hover { background: var(--accent-light); }
+        .arabic-word.highlighted { background: #fff3cd; border-bottom: 2px solid var(--accent); }
+
+        .word-tooltip {
+            display: none; position: fixed;
+            background: var(--primary-dark); color: white;
+            border-radius: var(--radius-sm); padding: 16px 20px;
+            font-family: 'Inter', sans-serif; font-size: 0.85rem;
+            direction: ltr; text-align: left; z-index: 1000;
+            min-width: 280px; max-width: 380px;
+            box-shadow: var(--shadow-lg); line-height: 1.6;
+        }
+        .word-tooltip.visible { display: block; }
+        .word-tooltip .tooltip-word {
+            font-family: 'Amiri', serif; font-size: 1.6rem; text-align: center;
+            padding-bottom: 10px; margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2); direction: rtl;
+        }
+        .word-tooltip .tooltip-row { display: flex; justify-content: space-between; padding: 3px 0; }
+        .word-tooltip .tooltip-label {
+            color: var(--accent-light); font-weight: 600; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .word-tooltip .tooltip-value { font-weight: 500; }
+
+        .quiz-container { margin: 20px 0; }
+
+        .quiz-question {
+            background: #f8f9fa; border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 24px; margin-bottom: 16px;
+            transition: border-color 0.3s;
+        }
+        .quiz-question.answered-correct { border-color: var(--success); background: #f0faf4; }
+        .quiz-question.answered-wrong { border-color: var(--error); background: #fef5f5; }
+
+        .quiz-number {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; background: var(--primary); color: white;
+            border-radius: 50%; font-size: 0.8rem; font-weight: 700; margin-bottom: 10px;
+        }
+
+        .quiz-prompt { font-size: 1rem; font-weight: 500; margin-bottom: 6px; }
+        .quiz-prompt .arabic-inline {
+            font-family: 'Amiri', serif; font-size: 1.5rem; color: var(--primary-dark);
+            direction: rtl; unicode-bidi: isolate;
+        }
+        .quiz-hint { font-size: 0.82rem; color: var(--text-light); margin-bottom: 14px; font-style: italic; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; background: white;
+            border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            cursor: pointer; transition: all 0.2s; font-size: 0.92rem;
+        }
+        .quiz-option:hover:not(.disabled) { border-color: var(--primary); background: #f0faf4; }
+
+        .quiz-option .option-marker {
+            width: 22px; height: 22px; border: 2px solid #ccc; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 0.7rem; font-weight: 700; transition: all 0.2s;
+        }
+        .quiz-option.correct-answer { border-color: var(--success); background: #d4edda; }
+        .quiz-option.correct-answer .option-marker { border-color: var(--success); background: var(--success); color: white; }
+        .quiz-option.wrong-answer { border-color: var(--error); background: #f8d7da; }
+        .quiz-option.wrong-answer .option-marker { border-color: var(--error); background: var(--error); color: white; }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.85; }
+        .quiz-option .option-text { flex: 1; }
+        .quiz-option .arabic-opt { font-family: 'Amiri', serif; font-size: 1.15rem; direction: rtl; unicode-bidi: isolate; }
+
+        .quiz-explanation {
+            display: none; margin-top: 12px; padding: 14px 18px;
+            background: #f8f9fa; border-left: 3px solid var(--primary);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.88rem; line-height: 1.7; color: var(--text);
+        }
+        .quiz-explanation.visible { display: block; }
+        .quiz-explanation strong { color: var(--primary-dark); }
+
+        .sarf-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            overflow: hidden; margin: 16px 0; direction: rtl;
+        }
+        .sarf-table th {
+            background: var(--primary); color: white; padding: 12px 16px;
+            font-weight: 600; text-align: center;
+            font-family: 'Amiri', serif; font-size: 1rem;
+        }
+        .sarf-table td {
+            padding: 10px 14px; text-align: center;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Amiri', serif; font-size: 1.2rem;
+        }
+        .sarf-table tr:nth-child(even) td { background: #fafaf8; }
+        .sarf-table tr:last-child td { border-bottom: none; }
+
+        .sarf-input {
+            font-family: 'Amiri', serif; font-size: 1.2rem; text-align: center;
+            direction: rtl; border: 1.5px solid var(--border); border-radius: 6px;
+            padding: 8px 12px; width: 120px; background: #fffef9; transition: border-color 0.3s;
+        }
+        .sarf-input:focus { outline: none; border-color: var(--primary); background: white; }
+        .sarf-input.correct { border-color: var(--success); background: #d4edda; }
+        .sarf-input.incorrect { border-color: var(--error); background: #f8d7da; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px; border: none; border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+        .btn-secondary:hover { background: #f0faf4; }
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
+        .score-card {
+            display: flex; gap: 24px; padding: 20px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            border-radius: var(--radius-sm); color: white; margin: 20px 0;
+        }
+        .score-item { text-align: center; flex: 1; }
+        .score-value { font-size: 2rem; font-weight: 700; }
+        .score-label { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+        .info-box { padding: 16px 20px; border-radius: var(--radius-sm); margin: 16px 0; font-size: 0.9rem; line-height: 1.7; }
+        .info-box.tip { background: #f0faf4; border-left: 3px solid var(--success); }
+        .info-box.note { background: #e8f4fd; border-left: 3px solid var(--info); }
+        .info-box.grammar { background: #f9f0fd; border-left: 3px solid #7b1fa2; }
+        .info-box strong { display: block; margin-bottom: 4px; }
+
+        .syllabus-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px; margin: 20px 0;
+        }
+        .syllabus-card {
+            padding: 18px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            transition: all 0.2s; position: relative;
+        }
+        .syllabus-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+        .syllabus-card.current { border-color: var(--primary); background: #f0faf4; }
+        .syllabus-card.current::after {
+            content: 'THIS WEEK'; position: absolute; top: -10px; right: 12px;
+            background: var(--primary); color: white; font-size: 0.6rem; font-weight: 700;
+            padding: 2px 10px; border-radius: 10px; letter-spacing: 0.5px;
+        }
+        .syllabus-card .week-num { font-size: 0.72rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .syllabus-card .week-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+        .syllabus-card .week-arabic { font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--text-light); direction: rtl; }
+        .syllabus-card .week-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+        .syllabus-card .tag { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .tag.sarf { background: #e8f5e9; color: #2e7d32; }
+        .tag.irab { background: #e3f2fd; color: #1565c0; }
+        .tag.usul { background: #fff3e0; color: #e65100; }
+        .tag.nahw { background: #f3e5f5; color: #7b1fa2; }
+
+        .intro-text { font-size: 0.95rem; color: var(--text-light); line-height: 1.8; margin-bottom: 20px; }
+        .section-intro { font-size: 0.92rem; color: var(--text-light); margin-bottom: 20px; line-height: 1.7; }
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        .analysis-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            overflow: hidden; margin: 16px 0; font-size: 0.88rem;
+        }
+        .analysis-table th {
+            background: #f8f9fa; padding: 10px 14px; font-weight: 600; text-align: left;
+            border-bottom: 2px solid var(--border); font-size: 0.78rem;
+            text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-light);
+        }
+        .analysis-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .analysis-table td.arabic-cell { font-family: 'Amiri', serif; font-size: 1.3rem; direction: rtl; text-align: center; }
+        .analysis-table tr:last-child td { border-bottom: none; }
+        .analysis-table tr:nth-child(even) td { background: #fdfcfa; }
+
+        .hidden { display: none; }
+
+        @media (max-width: 768px) {
+            .header-content { padding: 28px 16px; }
+            .header-brand { font-size: 1.8rem; }
+            .week-title { font-size: 1.4rem; }
+            .main { padding: 20px 16px 60px; }
+            .section-body { padding: 0 16px 20px; }
+            .arabic-text-block { font-size: 1.35rem; padding: 20px; }
+            .score-card { flex-direction: column; gap: 12px; }
+            .syllabus-grid { grid-template-columns: 1fr; }
+            .progress-labels { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header class="header">
+    <div class="header-content">
+        <div class="header-brand">al-Masār <span class="arabic-brand">المسار</span></div>
+        <div class="header-subtitle">Arabic &amp; Islamic Sciences — Post-Alimiyyah Development</div>
+        <div class="week-badge"><span>📖</span><span>WEEK 3 of 8 — Scaffolded Circuit Model</span></div>
+        <h1 class="week-title">The Prophetic Tradition<span class="arabic-title">السنة ومراتبها</span></h1>
+    </div>
+    <div class="progress-bar-container"><div class="progress-inner"><div class="progress-steps"><div class="progress-step active" data-step="1"></div><div class="progress-step" data-step="2"></div><div class="progress-step" data-step="3"></div><div class="progress-step" data-step="4"></div><div class="progress-step" data-step="5"></div></div><div class="progress-labels"><span>Sarf Warm-up</span><span>Passage Reading</span><span>I'rab &amp; Sarf Quiz</span><span>Grammar Connection</span><span>Reveal &amp; Review</span></div></div></div>
+</header>
+
+<main class="main">
+<div class="section open" id="overview-section"><div class="section-header" onclick="toggleSection('overview-section')"><div class="section-icon sarf">📋</div><div class="section-meta"><div class="section-title">8-Week Course Overview</div><div class="section-duration">~2 hours per week · Usul al-Shashi + Qatr al-Nada</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="intro-text">Each week follows the <strong>Scaffolded Circuit</strong>: a Sarf warm-up activates the morphological patterns you'll encounter, then you read and analyse an unvowelled passage from <em>Usul al-Shashi</em>, followed by an I'rab and Sarf quiz. A grammar connection from <em>Qatr al-Nada</em> grounds the rules you applied, and the session closes with the fully vowelled text and a review.</p><div class="syllabus-grid">
+            <div class="syllabus-card"><div class="week-num">Week 1</div><div class="week-name">Definition of Fiqh &amp; Usul</div><div class="week-arabic">تعريف الفقه وأصوله</div><div class="week-tags"><span class="tag sarf">أجوف واوي</span><span class="tag sarf">اِسْتَفْعَلَ</span><span class="tag irab">اسم أنّ vs مبتدأ</span><span class="tag nahw">الإعراب وأقسامه</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 2</div><div class="week-name">The Quran as Evidence</div><div class="week-arabic">الكتاب كدليل شرعي</div><div class="week-tags"><span class="tag sarf">المبني للمجهول</span><span class="tag irab">الفاعل والمفعول</span><span class="tag nahw">الفاعل ونائبه</span></div></div>
+            <div class="syllabus-card current"><div class="week-num">Week 3</div><div class="week-name">The Prophetic Tradition</div><div class="week-arabic">السنة ومراتبها</div><div class="week-tags"><span class="tag sarf">أفعال المثال</span><span class="tag irab">المبتدأ والخبر</span><span class="tag nahw">المبتدأ والخبر</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 4</div><div class="week-name">Commands &amp; Prohibitions</div><div class="week-arabic">الأمر والنهي</div><div class="week-tags"><span class="tag sarf">الأمر والنهي</span><span class="tag irab">كان وأخواتها</span><span class="tag nahw">النواسخ</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 5</div><div class="week-name">General &amp; Specific</div><div class="week-arabic">العام والخاص</div><div class="week-tags"><span class="tag sarf">أفعال الأجوف</span><span class="tag irab">إنّ وأخواتها</span><span class="tag nahw">إنّ وأخواتها</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 6</div><div class="week-name">Unrestricted &amp; Restricted</div><div class="week-arabic">المطلق والمقيد</div><div class="week-tags"><span class="tag sarf">أفعال الناقص</span><span class="tag irab">الحال والتمييز</span><span class="tag nahw">المنصوبات</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 7</div><div class="week-name">Ambiguous &amp; Clarified</div><div class="week-arabic">المجمل والمبيّن</div><div class="week-tags"><span class="tag sarf">اللفيف والمضاعف</span><span class="tag irab">الإضافة</span><span class="tag nahw">المجرورات</span></div></div>
+            <div class="syllabus-card"><div class="week-num">Week 8</div><div class="week-name">Analogy &amp; Independent Reasoning</div><div class="week-arabic">القياس والاجتهاد</div><div class="week-tags"><span class="tag sarf">مراجعة شاملة</span><span class="tag irab">تحليل كامل</span><span class="tag nahw">مراجعة عامة</span></div></div>
+</div></div></div>
+
+<div class="section open" id="sarf-section">
+    <div class="section-header" onclick="toggleSection('sarf-section')">
+        <div class="section-icon sarf">🔤</div>
+        <div class="section-meta"><div class="section-title">Part 1: Sarf Warm-up</div><div class="section-duration">10 minutes · أفعال المثال الواوي</div></div><div class="section-toggle">▼</div>
+    </div>
+    <div class="section-body">
+        <p class="section-intro">This week drills <strong>الفعل المثال الواوي</strong>. Notice how the initial <strong>واو</strong> stays in past tense (<span style="font-family:'Amiri',serif;">وَعَدَ</span>) but drops in imperfect and imperative (<span style="font-family:'Amiri',serif;">يَعِدُ · عِدْ</span>).</p>
+        <div class="info-box tip"><strong>💡 Core rule</strong> If the first radical is <strong>و</strong> and the imperfect has kasrah on the second radical, Arabic drops that initial waw for ease in <strong>المضارع</strong> and <strong>الأمر</strong>.</div>
+        <p style="font-weight:600; margin: 16px 0 8px;">Drill A — Conjugate <span style="font-family:'Amiri',serif; font-size:1.2rem;">وَعَدَ</span>:</p>
+        <table class="sarf-table"><thead><tr><th>الضمير</th><th>الماضي</th><th>المضارع</th><th>الأمر</th></tr></thead><tbody>
+            <tr><td>هُوَ</td><td style="font-family:'Amiri',serif;">وَعَدَ</td><td><input type="text" class="sarf-input" data-answer="يَعِدُ" placeholder="..."></td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td>هُمْ</td><td><input type="text" class="sarf-input" data-answer="وَعَدُوا" placeholder="..."></td><td style="font-family:'Amiri',serif;">يَعِدُونَ</td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td>أَنْتَ</td><td style="font-family:'Amiri',serif;">وَعَدْتَ</td><td><input type="text" class="sarf-input" data-answer="تَعِدُ" placeholder="..."></td><td><input type="text" class="sarf-input" data-answer="عِدْ" placeholder="..."></td></tr>
+        </tbody></table>
+        <div class="info-box note" style="margin-top:24px;"><strong>💡 Parallel pattern</strong> <span style="font-family:'Amiri',serif;">وَصَلَ</span> behaves the same: <span style="font-family:'Amiri',serif;">يَصِلُ · صِلْ</span>. Past keeps waw, imperfect/imperative drop it.</div>
+        <p style="font-weight:600; margin: 16px 0 8px;">Drill B — Conjugate <span style="font-family:'Amiri',serif; font-size:1.2rem;">وَصَلَ</span>:</p>
+        <table class="sarf-table"><thead><tr><th>الضمير</th><th>الماضي</th><th>المضارع</th><th>الأمر</th></tr></thead><tbody>
+            <tr><td>هُوَ</td><td style="font-family:'Amiri',serif;">وَصَلَ</td><td><input type="text" class="sarf-input" data-answer="يَصِلُ" placeholder="..."></td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td>هِيَ</td><td><input type="text" class="sarf-input" data-answer="وَصَلَتْ" placeholder="..."></td><td style="font-family:'Amiri',serif;">تَصِلُ</td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td>أَنْتَ</td><td style="font-family:'Amiri',serif;">وَصَلْتَ</td><td><input type="text" class="sarf-input" data-answer="تَصِلُ" placeholder="..."></td><td><input type="text" class="sarf-input" data-answer="صِلْ" placeholder="..."></td></tr>
+        </tbody></table>
+        <div class="btn-group"><button class="btn btn-primary" onclick="checkSarf()">Check Answers</button><button class="btn btn-secondary" onclick="revealSarf()">Reveal All</button></div><div id="sarf-score" class="hidden" style="margin-top:16px;"></div>
+    </div>
+</div>
+
+
+<div class="section" id="passage-section"><div class="section-header" onclick="toggleSection('passage-section')"><div class="section-icon passage">��</div><div class="section-meta"><div class="section-title">Part 2: Passage Reading — Usul al-Shashi</div><div class="section-duration">40 minutes · Unvowelled text analysis</div></div><div class="section-toggle">▼</div></div>
+<div class="section-body"><p class="section-intro">Read a core section on <strong>السنة</strong>: its definition and transmission ranks. Track مبتدأ/خبر structures and note where predicates are fronted.</p>
+<div class="info-box note"><strong>📝 Reading strategy</strong> Mark every nominal sentence first, then ask: where is the مبتدأ and where is the خبر? In this passage, ranking logic depends on clean nominal parsing.</div>
+<div class="arabic-text-block" id="unvowelled-passage"><div class="label">Unvowelled — أصول الشاشي</div>
+<span class="arabic-word" data-vowelled="وَأَمَّا" data-root="—" data-type="particle" data-irab="واو استئنافية، أما للتفصيل" data-sarf="أداة انتقال" data-meaning="As for">واما</span>
+<span class="arabic-word" data-vowelled="السُّنَّةُ" data-root="س ن ن" data-type="noun" data-irab="مبتدأ مرفوع" data-sarf="اسم على وزن فُعْلَة" data-meaning="the Sunnah">السنة</span>
+<span class="arabic-word" data-vowelled="فَهِيَ" data-root="—" data-type="pronoun" data-irab="الفاء رابطة، هي ضمير مبتدأ" data-sarf="ضمير منفصل" data-meaning="then it is">فهي</span>
+<span class="arabic-word" data-vowelled="مَا" data-root="—" data-type="relative" data-irab="اسم موصول في محل رفع خبر" data-sarf="اسم موصول" data-meaning="that which">ما</span>
+<span class="arabic-word" data-vowelled="صَدَرَ" data-root="ص د ر" data-type="verb" data-irab="فعل ماض" data-sarf="فعل صحيح" data-meaning="issued">صدر</span>
+<span class="arabic-word" data-vowelled="عَنِ" data-root="—" data-type="particle" data-irab="حرف جر" data-sarf="—" data-meaning="from">عن</span>
+<span class="arabic-word" data-vowelled="النَّبِيِّ" data-root="ن ب أ" data-type="noun" data-irab="اسم مجرور" data-sarf="فعيل" data-meaning="the Prophet">النبي</span>
+<span class="arabic-word" data-vowelled="مِنْ" data-root="—" data-type="particle" data-irab="حرف جر" data-sarf="—" data-meaning="from">من</span>
+<span class="arabic-word" data-vowelled="قَوْلٍ" data-root="ق و ل" data-type="noun" data-irab="اسم مجرور" data-sarf="مصدر أجوف واوي" data-meaning="speech">قول</span>
+<span class="arabic-word" data-vowelled="أَوْ" data-root="—" data-type="particle" data-irab="حرف عطف" data-sarf="—" data-meaning="or">او</span>
+<span class="arabic-word" data-vowelled="فِعْلٍ" data-root="ف ع ل" data-type="noun" data-irab="معطوف مجرور" data-sarf="مصدر" data-meaning="action">فعل</span>
+<span class="arabic-word" data-vowelled="أَوْ" data-root="—" data-type="particle" data-irab="حرف عطف" data-sarf="—" data-meaning="or">او</span>
+<span class="arabic-word" data-vowelled="تَقْرِيرٍ" data-root="ق ر ر" data-type="noun" data-irab="معطوف مجرور" data-sarf="تفعيل" data-meaning="approval">تقرير</span><br>
+<span class="arabic-word" data-vowelled="وَهِيَ" data-root="—" data-type="pronoun" data-irab="واو استئنافية، هي مبتدأ" data-sarf="ضمير" data-meaning="and it is">وهي</span>
+<span class="arabic-word" data-vowelled="حُجَّةٌ" data-root="ح ج ج" data-type="noun" data-irab="خبر مرفوع" data-sarf="اسم هيئة" data-meaning="proof">حجة</span>
+<span class="arabic-word" data-vowelled="بَعْدَ" data-root="ب ع د" data-type="noun" data-irab="ظرف منصوب" data-sarf="اسم زمان" data-meaning="after">بعد</span>
+<span class="arabic-word" data-vowelled="الْكِتَابِ" data-root="ك ت ب" data-type="noun" data-irab="مضاف إليه مجرور" data-sarf="مصدر" data-meaning="the Book">الكتاب</span>
+<span class="arabic-word" data-vowelled="وَفِي" data-root="—" data-type="particle" data-irab="واو استئنافية، في حرف جر" data-sarf="—" data-meaning="and in">وفي</span>
+<span class="arabic-word" data-vowelled="السُّنَّةِ" data-root="س ن ن" data-type="noun" data-irab="اسم مجرور" data-sarf="فُعْلَة" data-meaning="the Sunnah">السنة</span>
+<span class="arabic-word" data-vowelled="أَقْسَامٌ" data-root="ق س م" data-type="noun" data-irab="مبتدأ مؤخر مرفوع" data-sarf="جمع تكسير" data-meaning="categories">اقسام</span>
+<span class="arabic-word" data-vowelled="ثَلَاثَةٌ" data-root="ث ل ث" data-type="noun" data-irab="نعت مرفوع" data-sarf="عدد" data-meaning="three">ثلاثة</span><br>
+<span class="arabic-word" data-vowelled="الْمُتَوَاتِرُ" data-root="و ت ر" data-type="noun" data-irab="مبتدأ مرفوع" data-sarf="اسم فاعل" data-meaning="mutawatir">المتواتر</span>
+<span class="arabic-word" data-vowelled="مَا" data-root="—" data-type="relative" data-irab="خبر" data-sarf="اسم موصول" data-meaning="that which">ما</span>
+<span class="arabic-word" data-vowelled="يَرْوِيهِ" data-root="ر و ي" data-type="verb" data-irab="فعل مضارع مرفوع" data-sarf="ناقص يائي" data-meaning="is narrated">يرويه</span>
+<span class="arabic-word" data-vowelled="جَمْعٌ" data-root="ج م ع" data-type="noun" data-irab="فاعل مرفوع" data-sarf="مصدر" data-meaning="a group">جمع</span>
+<span class="arabic-word" data-vowelled="لَا" data-root="—" data-type="particle" data-irab="حرف نفي" data-sarf="—" data-meaning="not">لا</span>
+<span class="arabic-word" data-vowelled="يُتَصَوَّرُ" data-root="ص و ر" data-type="verb" data-irab="مضارع مبني للمجهول" data-sarf="تفعّل" data-meaning="is conceived">يتصور</span>
+<span class="arabic-word" data-vowelled="تَوَاطُؤُهُمْ" data-root="و ط أ" data-type="noun" data-irab="نائب فاعل مرفوع" data-sarf="تفاعل" data-meaning="their collusion">تواطؤهم</span>
+<span class="arabic-word" data-vowelled="عَلَى" data-root="—" data-type="particle" data-irab="حرف جر" data-sarf="—" data-meaning="upon">على</span>
+<span class="arabic-word" data-vowelled="الْكَذِبِ" data-root="ك ذ ب" data-type="noun" data-irab="مجرور" data-sarf="مصدر" data-meaning="lying">الكذب</span><br>
+<span class="arabic-word" data-vowelled="وَالْمَشْهُورُ" data-root="ش ه ر" data-type="noun" data-irab="مبتدأ مرفوع" data-sarf="اسم مفعول" data-meaning="mashhur">والمشهور</span>
+<span class="arabic-word" data-vowelled="مَا" data-root="—" data-type="relative" data-irab="خبر" data-sarf="اسم موصول" data-meaning="that which">ما</span>
+<span class="arabic-word" data-vowelled="كَانَ" data-root="ك و ن" data-type="verb" data-irab="فعل ماض ناقص" data-sarf="كان وأخواتها" data-meaning="was">كان</span>
+<span class="arabic-word" data-vowelled="فِي" data-root="—" data-type="particle" data-irab="جار" data-sarf="—" data-meaning="in">في</span>
+<span class="arabic-word" data-vowelled="الْأَصْلِ" data-root="أ ص ل" data-type="noun" data-irab="اسم مجرور" data-sarf="اسم" data-meaning="origin">الاصل</span>
+<span class="arabic-word" data-vowelled="آحَادًا" data-root="أ ح د" data-type="noun" data-irab="خبر كان منصوب" data-sarf="جمع" data-meaning="solitary">احادا</span>
+<span class="arabic-word" data-vowelled="ثُمَّ" data-root="—" data-type="particle" data-irab="حرف عطف" data-sarf="—" data-meaning="then">ثم</span>
+<span class="arabic-word" data-vowelled="اشْتَهَرَ" data-root="ش ه ر" data-type="verb" data-irab="فعل ماض" data-sarf="افتعل" data-meaning="became famous">اشتهر</span>
+<span class="arabic-word" data-vowelled="وَخَبَرُ" data-root="خ ب ر" data-type="noun" data-irab="مبتدأ" data-sarf="مصدر" data-meaning="report of">وخبر</span>
+<span class="arabic-word" data-vowelled="الْوَاحِدِ" data-root="و ح د" data-type="noun" data-irab="مضاف إليه" data-sarf="اسم فاعل" data-meaning="one narrator">الواحد</span>
+<span class="arabic-word" data-vowelled="مَا" data-root="—" data-type="relative" data-irab="خبر" data-sarf="اسم موصول" data-meaning="that which">ما</span>
+<span class="arabic-word" data-vowelled="لَمْ" data-root="—" data-type="particle" data-irab="حرف جزم" data-sarf="جازم" data-meaning="did not">لم</span>
+<span class="arabic-word" data-vowelled="يَبْلُغْ" data-root="ب ل غ" data-type="verb" data-irab="مضارع مجزوم" data-sarf="فعل صحيح" data-meaning="reach">يبلغ</span>
+<span class="arabic-word" data-vowelled="حَدَّ" data-root="ح د د" data-type="noun" data-irab="مفعول به" data-sarf="مصدر" data-meaning="limit">حد</span>
+<span class="arabic-word" data-vowelled="التَّوَاتُرِ" data-root="و ت ر" data-type="noun" data-irab="مضاف إليه" data-sarf="تفاعل" data-meaning="tawatur">التواتر</span>
+</div>
+<div class="info-box tip"><strong>👆 Interactive</strong> Click any word to inspect full I'rab + Sarf labels.</div><div class="word-tooltip" id="word-tooltip"></div></div></div>
+
+
+<div class="section" id="quiz-section"><div class="section-header" onclick="toggleSection('quiz-section')"><div class="section-icon quiz">✍️</div><div class="section-meta"><div class="section-title">Part 3: I'rab &amp; Sarf Quiz</div><div class="section-duration">30 minutes · 8 questions</div></div><div class="section-toggle">▼</div></div>
+<div class="section-body"><p class="section-intro">4 I'rab questions + 4 Sarf questions. Week 3 adds fronted predicates and weak-initial morphophonemics.</p><div class="quiz-container" id="main-quiz">
+<div class="quiz-question" id="q1"><div class="quiz-number">1</div><div class="quiz-prompt">In <span class="arabic-inline">وفي السنة أقسام ثلاثة</span>, what is the i'rab of <span class="arabic-inline">أقسام</span>?</div><div class="quiz-hint">The جار ومجرور is fronted.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q1',true)"><div class="option-marker">A</div><div class="option-text">مبتدأ مؤخر مرفوع</div></div><div class="quiz-option" onclick="selectOption(this,'q1',false)"><div class="option-marker">B</div><div class="option-text">خبر مقدم مجرور</div></div><div class="quiz-option" onclick="selectOption(this,'q1',false)"><div class="option-marker">C</div><div class="option-text">مفعول به منصوب</div></div><div class="quiz-option" onclick="selectOption(this,'q1',false)"><div class="option-marker">D</div><div class="option-text">اسم كان</div></div></div><div class="quiz-explanation" id="q1-explanation">In this structure the prepositional phrase <strong>في السنة</strong> is a fronted predicate; <strong>أقسامٌ</strong> is the delayed subject (مبتدأ مؤخر) and remains marfūʿ.</div></div>
+<div class="quiz-question" id="q2"><div class="quiz-number">2</div><div class="quiz-prompt">Why does <span class="arabic-inline">وَعَدَ</span> become <span class="arabic-inline">يَعِدُ</span> (not يوعد) in imperfect?</div><div class="quiz-hint">Think of weak-initial simplification.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q2',true)"><div class="option-marker">A</div><div class="option-text">The initial waw drops in المثال الواوي when the عين has kasrah</div></div><div class="quiz-option" onclick="selectOption(this,'q2',false)"><div class="option-marker">B</div><div class="option-text">Every imperfect must delete its first radical</div></div><div class="quiz-option" onclick="selectOption(this,'q2',false)"><div class="option-marker">C</div><div class="option-text">Because the root is ع د only</div></div><div class="quiz-option" onclick="selectOption(this,'q2',false)"><div class="option-marker">D</div><div class="option-text">Because يَعِدُ is passive</div></div></div><div class="quiz-explanation" id="q2-explanation">The root stays <strong>و ع د</strong>; only the pronounced surface drops the initial waw in this pattern for phonetic ease.</div></div>
+<div class="quiz-question" id="q3"><div class="quiz-number">3</div><div class="quiz-prompt">In <span class="arabic-inline">السنة حجة بعد الكتاب</span>, what is <span class="arabic-inline">حجة</span>?</div><div class="quiz-hint">Nominal sentence baseline.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q3',false)"><div class="option-marker">A</div><div class="option-text">مبتدأ</div></div><div class="quiz-option" onclick="selectOption(this,'q3',true)"><div class="option-marker">B</div><div class="option-text">خبر مرفوع</div></div><div class="quiz-option" onclick="selectOption(this,'q3',false)"><div class="option-marker">C</div><div class="option-text">حال</div></div><div class="quiz-option" onclick="selectOption(this,'q3',false)"><div class="option-marker">D</div><div class="option-text">مفعول مطلق</div></div></div><div class="quiz-explanation" id="q3-explanation"><strong>السنة</strong> is مبتدأ and <strong>حجة</strong> completes the predication as khabar.</div></div>
+<div class="quiz-question" id="q4"><div class="quiz-number">4</div><div class="quiz-prompt">Choose the correct three-form chain for the verb meaning “to promise”:</div><div class="quiz-hint">Past keeps waw, imperfect + imperative drop it.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q4',true)"><div class="option-marker">A</div><div class="option-text"><span class="arabic-opt">وَعَدَ / يَعِدُ / عِدْ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q4',false)"><div class="option-marker">B</div><div class="option-text"><span class="arabic-opt">وَعَدَ / يُوعِدُ / أَوْعِدْ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q4',false)"><div class="option-marker">C</div><div class="option-text"><span class="arabic-opt">عَدَ / يَعِدُ / عِدْ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q4',false)"><div class="option-marker">D</div><div class="option-text"><span class="arabic-opt">وَعَدَ / يَعُدُ / عُدْ</span></div></div></div><div class="quiz-explanation" id="q4-explanation">This is the core Week 3 pattern for <strong>المثال الواوي</strong>.</div></div>
+<div class="quiz-question" id="q5"><div class="quiz-number">5</div><div class="quiz-prompt">In <span class="arabic-inline">والمشهور ما كان في الأصل آحادا</span>, what is <span class="arabic-inline">آحادا</span>?</div><div class="quiz-hint">Track كان.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q5',false)"><div class="option-marker">A</div><div class="option-text">اسم كان</div></div><div class="quiz-option" onclick="selectOption(this,'q5',true)"><div class="option-marker">B</div><div class="option-text">خبر كان منصوب</div></div><div class="quiz-option" onclick="selectOption(this,'q5',false)"><div class="option-marker">C</div><div class="option-text">خبر مرفوع</div></div><div class="quiz-option" onclick="selectOption(this,'q5',false)"><div class="option-marker">D</div><div class="option-text">تمييز</div></div></div><div class="quiz-explanation" id="q5-explanation">After <strong>كان</strong>, the predicate is منصوب: <strong>آحادًا</strong>.</div></div>
+<div class="quiz-question" id="q6"><div class="quiz-number">6</div><div class="quiz-prompt">Which expression contains a fronted predicate (خبر مقدم)?</div><div class="quiz-hint">Look for a prepositional phrase first.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q6',true)"><div class="option-marker">A</div><div class="option-text"><span class="arabic-opt">فِي السُّنَّةِ أَقْسَامٌ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q6',false)"><div class="option-marker">B</div><div class="option-text"><span class="arabic-opt">السُّنَّةُ حُجَّةٌ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q6',false)"><div class="option-marker">C</div><div class="option-text"><span class="arabic-opt">المُتَوَاتِرُ مَقْبُولٌ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q6',false)"><div class="option-marker">D</div><div class="option-text"><span class="arabic-opt">خَبَرُ الوَاحِدِ مَقْبُولٌ</span></div></div></div><div class="quiz-explanation" id="q6-explanation">When a جار ومجرور precedes, it can serve as fronted khabar and delay the mubtada.</div></div>
+<div class="quiz-question" id="q7"><div class="quiz-number">7</div><div class="quiz-prompt">Which pair correctly parallels <span class="arabic-inline">وَعَدَ / يَعِدُ</span>?</div><div class="quiz-hint">Another المثال الواوي.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q7',true)"><div class="option-marker">A</div><div class="option-text"><span class="arabic-opt">وَصَلَ / يَصِلُ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q7',false)"><div class="option-marker">B</div><div class="option-text"><span class="arabic-opt">وَقَعَ / يُوقِعُ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q7',false)"><div class="option-marker">C</div><div class="option-text"><span class="arabic-opt">قَالَ / يَقُولُ</span></div></div><div class="quiz-option" onclick="selectOption(this,'q7',false)"><div class="option-marker">D</div><div class="option-text"><span class="arabic-opt">وَعَى / يَعِي</span></div></div></div><div class="quiz-explanation" id="q7-explanation">Both verbs are weak-initial and lose waw in imperfect with kasrah pattern.</div></div>
+<div class="quiz-question" id="q8"><div class="quiz-number">8</div><div class="quiz-prompt">What best explains why waw remains in <span class="arabic-inline">وَعَدَ</span> but drops in <span class="arabic-inline">عِدْ</span>?</div><div class="quiz-hint">Compare syllable pressure in each template.</div><div class="quiz-options"><div class="quiz-option" onclick="selectOption(this,'q8',true)"><div class="option-marker">A</div><div class="option-text">Past template tolerates initial waw; imperative seeks lighter onset and deletes it</div></div><div class="quiz-option" onclick="selectOption(this,'q8',false)"><div class="option-marker">B</div><div class="option-text">Imperative always uses all radicals fully</div></div><div class="quiz-option" onclick="selectOption(this,'q8',false)"><div class="option-marker">C</div><div class="option-text">Because عِدْ comes from a different root</div></div><div class="quiz-option" onclick="selectOption(this,'q8',false)"><div class="option-marker">D</div><div class="option-text">Because ماضي has no weak letters</div></div></div><div class="quiz-explanation" id="q8-explanation">This is the core teaching point: same root, different surface behaviour by pattern and phonology.</div></div>
+</div><div id="quiz-results" class="hidden"><div class="score-card"><div class="score-item"><div class="score-value" id="quiz-score-value">0/8</div><div class="score-label">Correct Answers</div></div><div class="score-item"><div class="score-value" id="quiz-irab-score">0/4</div><div class="score-label">I'rab Questions</div></div><div class="score-item"><div class="score-value" id="quiz-sarf-score">0/4</div><div class="score-label">Sarf Questions</div></div></div></div></div></div>
+
+
+<div class="section" id="grammar-section"><div class="section-header" onclick="toggleSection('grammar-section')"><div class="section-icon grammar">📐</div><div class="section-meta"><div class="section-title">Part 4: Grammar Connection — Qatr al-Nada</div><div class="section-duration">25 minutes · المبتدأ والخبر</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">Formalise this week's parsing with Ibn Hisham's discussion of subject-predicate sentences.</p>
+<div class="arabic-text-block"><div class="label">قطر الندى — المبتدأ والخبر</div>المبتدأ اسم مجرد عن العوامل اللفظية مسند إليه والخبر هو المسند الذي تتم به الفائدة وقد يتقدم الخبر إذا كان ظرفا أو جارا ومجرورا</div>
+<div class="info-box grammar"><strong>Translation</strong> “The مبتدأ is a noun free of verbal governors to which predication is attached; the خبر is the predicate that completes meaning. The predicate may be fronted when it is a ظرف or prepositional phrase.”</div>
+<h3 style="margin:24px 0 12px; font-size:1.05rem;">Where the rule appears in this week's passage:</h3>
+<table class="analysis-table"><thead><tr><th>Concept</th><th style="text-align:center">Arabic</th><th>Week 3 Example</th></tr></thead><tbody>
+<tr><td><strong>مبتدأ</strong></td><td class="arabic-cell">السُّنَّةُ</td><td>In <strong>السنة حجة</strong>, السنة is the subject carrying the claim.</td></tr>
+<tr><td><strong>خبر</strong></td><td class="arabic-cell">حُجَّةٌ</td><td>The predicate defines legal status.</td></tr>
+<tr><td><strong>خبر مقدم</strong></td><td class="arabic-cell">فِي السُّنَّةِ</td><td>In <strong>وفي السنة أقسام</strong>, the PP comes first as fronted predicate.</td></tr>
+<tr><td><strong>مبتدأ مؤخر</strong></td><td class="arabic-cell">أَقْسَامٌ</td><td>Delayed subject appears after the fronted خبر.</td></tr>
+</tbody></table>
+<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin:12px 0;">
+<div style="padding:16px; background:#e8f5e9; border-radius:8px; text-align:center;"><div style="font-family:'Amiri',serif; font-size:1.6rem;">مُبْتَدَأ</div><div style="font-size:0.82rem; color:#2e7d32;">Anchor noun</div><div style="font-size:0.78rem; color:#666;">السنة</div></div>
+<div style="padding:16px; background:#e3f2fd; border-radius:8px; text-align:center;"><div style="font-family:'Amiri',serif; font-size:1.6rem;">خَبَر</div><div style="font-size:0.82rem; color:#1565c0;">Completes predication</div><div style="font-size:0.78rem; color:#666;">حجة</div></div>
+<div style="padding:16px; background:#fff3e0; border-radius:8px; text-align:center;"><div style="font-family:'Amiri',serif; font-size:1.6rem;">خَبَرٌ مُقَدَّم</div><div style="font-size:0.82rem; color:#e65100;">Fronted PP/Adverb</div><div style="font-size:0.78rem; color:#666;">في السنة</div></div>
+<div style="padding:16px; background:#f3e5f5; border-radius:8px; text-align:center;"><div style="font-family:'Amiri',serif; font-size:1.6rem;">مُبْتَدَأٌ مُؤَخَّر</div><div style="font-size:0.82rem; color:#7b1fa2;">Delayed subject</div><div style="font-size:0.78rem; color:#666;">أقسام</div></div>
+</div>
+<div class="info-box note" style="margin-top:20px;"><strong>📌 The big insight</strong> Week 3 requires structural vision: not every marfūʿ noun after a phrase is immediate subject; word order can invert with خبر مقدم.</div></div></div>
+
+
+<div class="section" id="reveal-section"><div class="section-header" onclick="toggleSection('reveal-section')"><div class="section-icon reveal">✅</div><div class="section-meta"><div class="section-title">Part 5: Reveal &amp; Review</div><div class="section-duration">15 minutes · Fully vowelled text + complete analysis</div></div><div class="section-toggle">▼</div></div><div class="section-body"><p class="section-intro">The complete passage with full vowelling.</p>
+<div class="arabic-text-block vowelled"><div class="label" style="color:var(--success);">✓ Fully Vowelled — أصول الشاشي</div>وَأَمَّا السُّنَّةُ فَهِيَ مَا صَدَرَ عَنِ النَّبِيِّ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ مِنْ قَوْلٍ أَوْ فِعْلٍ أَوْ تَقْرِيرٍ ۝ وَهِيَ حُجَّةٌ بَعْدَ الْكِتَابِ وَفِي السُّنَّةِ أَقْسَامٌ ثَلَاثَةٌ ۝ الْمُتَوَاتِرُ مَا يَرْوِيهِ جَمْعٌ لَا يُتَصَوَّرُ تَوَاطُؤُهُمْ عَلَى الْكَذِبِ ۝ وَالْمَشْهُورُ مَا كَانَ فِي الْأَصْلِ آحَادًا ثُمَّ اشْتَهَرَ ۝ وَخَبَرُ الْوَاحِدِ مَا لَمْ يَبْلُغْ حَدَّ التَّوَاتُرِ</div>
+<h3 style="margin:24px 0 12px; font-size:1.05rem;">Complete Word-by-Word Analysis</h3>
+<table class="analysis-table"><thead><tr><th style="text-align:center">Word</th><th>Type</th><th>I'rab</th><th>Sarf Notes</th></tr></thead><tbody>
+<tr><td class="arabic-cell">السُّنَّةُ</td><td>Noun</td><td><strong>مرفوع</strong> — مبتدأ</td><td>Root س ن ن</td></tr>
+<tr><td class="arabic-cell">حُجَّةٌ</td><td>Noun</td><td><strong>مرفوع</strong> — خبر</td><td>اسم هيئة</td></tr>
+<tr><td class="arabic-cell">فِي السُّنَّةِ</td><td>Prep phrase</td><td>خبر مقدم</td><td>جار ومجرور</td></tr>
+<tr><td class="arabic-cell">أَقْسَامٌ</td><td>Noun</td><td><strong>مرفوع</strong> — مبتدأ مؤخر</td><td>جمع تكسير</td></tr>
+<tr><td class="arabic-cell">يُتَصَوَّرُ</td><td>Verb</td><td>مضارع مبني للمجهول</td><td>Form V passive</td></tr>
+<tr><td class="arabic-cell">تَوَاطُؤُهُمْ</td><td>Noun</td><td><strong>مرفوع</strong> — نائب فاعل</td><td>تفاعل</td></tr>
+<tr><td class="arabic-cell">كَانَ ... آحَادًا</td><td>Kana clause</td><td>خبر كان منصوب</td><td>تمهيد للأسبوع القادم</td></tr>
+<tr><td class="arabic-cell">وَعَدَ / يَعِدُ / عِدْ</td><td>Verb pattern</td><td>مثال واوي</td><td>حذف الواو في المضارع والأمر</td></tr>
+<tr><td class="arabic-cell">وَصَلَ / يَصِلُ / صِلْ</td><td>Verb pattern</td><td>مثال واوي</td><td>نفس القاعدة</td></tr>
+</tbody></table><div class="divider"></div>
+<h3 style="margin:20px 0 12px; font-size:1.05rem;">Week 3 Key Takeaways</h3>
+<div class="info-box tip"><strong>I'rab patterns to internalise</strong><ul style="margin:8px 0 0 20px; list-style:disc;"><li>Detect <strong>خبر مقدم</strong> when a PP opens the sentence.</li><li>Keep مبتدأ/خبر mapping explicit before interpreting legal hierarchy.</li><li>Nominal definitions in usul depend on clean predicate structure.</li></ul></div>
+<div class="info-box tip"><strong>Sarf patterns to internalise</strong><ul style="margin:8px 0 0 20px; list-style:disc;"><li>In <strong>المثال الواوي</strong>, past keeps waw: <span style="font-family:'Amiri',serif;">وَعَدَ</span>.</li><li>Imperfect + imperative often drop waw: <span style="font-family:'Amiri',serif;">يَعِدُ · عِدْ</span>.</li><li>The root is unchanged; only surface realization shifts.</li></ul></div>
+<div class="info-box note"><strong>📅 Next week preview</strong> Week 4: <strong>الأمر والنهي</strong> with <strong>كان وأخواتها</strong>. Sarf focus: imperative formation across sound, hollow, and defective verbs.</div></div></div>
+
+</main>
+<script>
+    function toggleSection(id) { document.getElementById(id).classList.toggle('open'); updateProgress(); }
+
+    const sectionIds = ['sarf-section','passage-section','quiz-section','grammar-section','reveal-section'];
+    function updateProgress() {
+        const steps = document.querySelectorAll('.progress-step');
+        sectionIds.forEach((id, i) => {
+            if (document.getElementById(id).classList.contains('open')) {
+                steps[i].classList.add('completed');
+                if (i + 1 < steps.length) steps[i+1].classList.add('active');
+            }
+        });
+    }
+
+    function checkSarf() {
+        const inputs = document.querySelectorAll('.sarf-input');
+        let correct = 0, total = 0;
+        inputs.forEach(input => {
+            if (!input.value.trim()) return;
+            total++;
+            if (normalizeArabic(input.value.trim()) === normalizeArabic(input.dataset.answer)) {
+                input.classList.add('correct'); input.classList.remove('incorrect'); correct++;
+            } else { input.classList.add('incorrect'); input.classList.remove('correct'); }
+        });
+        const s = document.getElementById('sarf-score'); s.classList.remove('hidden');
+        s.innerHTML = `<div class="info-box ${correct===total&&total>0?'tip':'note'}"><strong>${correct===total&&total>0?'✅ Excellent!':'📝 Keep practising'}</strong> You got ${correct} out of ${inputs.length} correct.${correct<inputs.length?' Click "Reveal All" to see answers.':''}</div>`;
+    }
+
+    function revealSarf() {
+        document.querySelectorAll('.sarf-input').forEach(i => { i.value = i.dataset.answer; i.classList.add('correct'); i.classList.remove('incorrect'); });
+    }
+
+    function normalizeArabic(t) {
+        return t.replace(/[\u064B-\u065F\u0670]/g,'').replace(/[\u0622\u0623\u0625]/g,'\u0627').replace(/\s+/g,'');
+    }
+
+    const tooltip = document.getElementById('word-tooltip');
+    document.querySelectorAll('.arabic-word').forEach(word => {
+        word.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const d = this.dataset;
+            document.querySelectorAll('.arabic-word').forEach(w => w.classList.remove('highlighted'));
+            this.classList.add('highlighted');
+            tooltip.innerHTML = `
+                <div class="tooltip-word">${d.vowelled}</div>
+                <div class="tooltip-row"><span class="tooltip-label">Meaning</span><span class="tooltip-value">${d.meaning}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Type</span><span class="tooltip-value">${d.type}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Root</span><span class="tooltip-value">${d.root}</span></div>
+                <hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:8px 0;">
+                <div class="tooltip-row" style="flex-direction:column;gap:4px;"><span class="tooltip-label">I'rab</span><span class="tooltip-value" style="font-size:0.82rem;">${d.irab}</span></div>
+                <hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:8px 0;">
+                <div class="tooltip-row" style="flex-direction:column;gap:4px;"><span class="tooltip-label">Sarf</span><span class="tooltip-value" style="font-size:0.82rem;">${d.sarf}</span></div>`;
+            const r = this.getBoundingClientRect();
+            let top = r.bottom + 10, left = r.left + r.width/2 - 160;
+            if (left < 10) left = 10;
+            if (left + 340 > window.innerWidth) left = window.innerWidth - 350;
+            if (top + 320 > window.innerHeight) top = r.top - 330;
+            tooltip.style.top = top+'px'; tooltip.style.left = left+'px';
+            tooltip.classList.add('visible');
+        });
+    });
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.arabic-word') && !e.target.closest('.word-tooltip')) {
+            tooltip.classList.remove('visible');
+            document.querySelectorAll('.arabic-word').forEach(w => w.classList.remove('highlighted'));
+        }
+    });
+
+    let quizAnswered=0, quizCorrect=0, irabCorrect=0, sarfCorrect=0;
+    const irabQs=['q1','q3','q5','q6'], sarfQs=['q2','q4','q7','q8'];
+
+    function selectOption(el, qid, correct) {
+        const q = document.getElementById(qid);
+        if (q.classList.contains('answered-correct')||q.classList.contains('answered-wrong')) return;
+        q.querySelectorAll('.quiz-option').forEach(o => o.classList.add('disabled'));
+        if (correct) {
+            el.classList.add('correct-answer'); q.classList.add('answered-correct'); quizCorrect++;
+            if (irabQs.includes(qid)) irabCorrect++;
+            if (sarfQs.includes(qid)) sarfCorrect++;
+        } else {
+            el.classList.add('wrong-answer'); q.classList.add('answered-wrong');
+            q.querySelectorAll('.quiz-option').forEach(o => {
+                if (o.getAttribute('onclick')&&o.getAttribute('onclick').includes('true')) o.classList.add('correct-answer');
+            });
+        }
+        quizAnswered++;
+        document.getElementById(qid+'-explanation').classList.add('visible');
+        if (quizAnswered >= 8) {
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('quiz-score-value').textContent = quizCorrect+'/8';
+            document.getElementById('quiz-irab-score').textContent = irabCorrect+'/4';
+            document.getElementById('quiz-sarf-score').textContent = sarfCorrect+'/4';
+        }
+    }
+
+    updateProgress();
+</script>
+</body>
+</html>

@@ -126,3 +126,11 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 
 **Recommendations filed:** Add void-element regression test, add E2E Playwright test for audio flow.
 
+---
+
+### 2026-06-06T17:05:11-05:00 — Enrollment QA template learnings
+
+- Route-level enrollment tests can validate `express-validator` UUID guards without touching Prisma or a live database by mounting `course.routes.ts` in an isolated Express app.
+- The new-course QA template should verify both enrollment entry points: `POST /api/v1/courses/enrollments` returns 201 for parent-managed enrollments, while `POST /api/v1/courses/:courseId/enroll` uses the active learner and stays idempotent-friendly.
+- For deployment safety, the highest-value regression checks are: slug-style course IDs must fail with 422 before service calls, valid-but-missing UUIDs should surface 404s from the service layer, and duplicate enrollments should preserve the conflict/idempotent behavior of each endpoint.
+

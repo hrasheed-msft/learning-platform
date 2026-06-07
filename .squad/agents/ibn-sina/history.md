@@ -160,6 +160,11 @@
 - Session log: `.squad/log/20260606T174246-masaar-course-complete.md`
 - Orchestration log: `.squad/orchestration-log/20260606T174246-masaar-course-build.md`
 
+### Interactive Lesson CTA Surfacing (2026-06-06T17:09:20-05:00)
+- `UnitViewer` already renders `unit.content.text` HTML directly (raw when idle, parsed/preserved through `SyncedTextContent` during audio sync), so backend-authored lesson `<a>` tags work without extra frontend parsing changes.
+- For al-Masār units, add a dedicated top-of-content CTA only when the HTML content already references `/lessons/masaar-irab-sarf/week-N.html`; derive the canonical button URL from `orderIndex + 1` so the button stays consistent even if inline copy changes.
+- Style inline lesson anchors explicitly inside `.unit-content` so backend-provided links remain obvious and tappable within long-form lesson text.
+
 ---
 
 ## Session History (Recent)

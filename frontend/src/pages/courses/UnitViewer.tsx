@@ -14,6 +14,8 @@ interface UnitProgress {
   quizCompleted: boolean;
 }
 
+const MASAAR_LESSON_PATH_PATTERN = /\/lessons\/masaar-irab-sarf\/week-\d+\.html/i;
+
 export default function UnitViewer() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
   const navigate = useNavigate();
@@ -131,6 +133,10 @@ export default function UnitViewer() {
   const audioResources: AudioResource[] = unit.content?.audio || [];
   const arabicTerms: ArabicTerm[] = unit.content?.arabicTerms || [];
   const textContent = unit.content?.text || '<p>No content available for this unit yet.</p>';
+  const hasInteractiveLessonLink = MASAAR_LESSON_PATH_PATTERN.test(textContent);
+  const interactiveLessonUrl = hasInteractiveLessonLink
+    ? `/lessons/masaar-irab-sarf/week-${unit.orderIndex + 1}.html`
+    : null;
   const hasActiveAudioSession = Boolean(audioSyncState?.togglePlayPause)
     && (audioSyncState?.isPlaying || ((audioSyncState?.currentTime ?? 0) > 0 && (audioSyncState?.currentTime ?? 0) < (audioSyncState?.duration ?? 0)));
   const shouldShowFloatingAudioControl = hasActiveAudioSession;
@@ -253,6 +259,18 @@ export default function UnitViewer() {
                 </button>
               )}
             </div>
+            {interactiveLessonUrl && (
+              <a
+                href={interactiveLessonUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mb-6 inline-flex w-full items-center justify-center gap-3 rounded-xl bg-primary-600 px-5 py-4 text-base font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <BookOpen className="h-5 w-5" />
+                <span>Open Full Interactive Lesson</span>
+                <span aria-hidden="true" className="text-lg leading-none">↗</span>
+              </a>
+            )}
             <style>{`
               .unit-content h2 {
                 font-size: 1.5rem;
@@ -279,6 +297,15 @@ export default function UnitViewer() {
                 color: #374151;
                 line-height: 1.75;
                 margin-bottom: 1rem;
+              }
+              .unit-content a {
+                color: #2563eb;
+                font-weight: 600;
+                text-decoration: underline;
+                text-underline-offset: 0.2em;
+              }
+              .unit-content a:hover {
+                color: #1d4ed8;
               }
               .unit-content ul, .unit-content ol {
                 margin-left: 1.5rem;
