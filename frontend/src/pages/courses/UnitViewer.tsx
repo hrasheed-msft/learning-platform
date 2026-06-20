@@ -45,10 +45,21 @@ export default function UnitViewer() {
       
       try {
         setLoading(true);
-        const data = await courseService.getUnit(courseId, unitId);
-        const unitsData = await courseService.getUnits(courseId);
+        const memberId = currentUnitState?.memberId;
+        const [data, unitsData, savedProgress] = await Promise.all([
+          courseService.getUnit(courseId, unitId),
+          courseService.getUnits(courseId),
+          memberId ? courseService.getUnitProgress(memberId, unitId).catch(() => null) : Promise.resolve(null),
+        ]);
         setUnit(data);
         setAllUnits(unitsData);
+        if (savedProgress) {
+          setProgress({
+            videoCompleted: savedProgress.videoCompleted,
+            readingCompleted: savedProgress.readingCompleted,
+            quizCompleted: savedProgress.quizCompleted,
+          });
+        }
       } catch (err) {
         console.error('Failed to fetch unit:', err);
         setError('Failed to load unit content');
@@ -231,7 +242,12 @@ export default function UnitViewer() {
                 <FileText className="w-5 h-5 mr-2 text-primary-500" />
                 Lesson Content
               </h3>
-              {!progress.readingCompleted && (
+              {progress.readingCompleted ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-sm bg-green-50 text-green-700 rounded-lg border border-green-200 font-medium">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  Read
+                </span>
+              ) : (
                 <button
                   type="button"
                   onClick={() => handleMarkComplete('reading')}
@@ -411,15 +427,53 @@ export default function UnitViewer() {
               className="unit-content prose-lg max-w-none text-gray-700 leading-relaxed"
             />
             
+            {/* Mark as Read — prominent bottom CTA */}
+            {progress.readingCompleted ? (
+              <div className="flex justify-center mt-6 mb-2">
+                <p className="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 font-medium rounded-xl border border-green-200">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  Lesson completed ✅
+                </p>
+              </div>
+            ) : (
+              <div className="flex justify-center mt-6 mb-2">
+                <button
+                  type="button"
+                  onClick={() => handleMarkComplete('reading')}
+                  disabled={updatingProgress}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-green-500 text-white font-semibold text-base rounded-xl hover:bg-green-600 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {updatingProgress ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-5 h-5" />
+                  )}
+                  {updatingProgress ? 'Saving…' : "✅ I've read this lesson"}
+                </button>
+              </div>
+            )}
+
             {/* Bottom Navigation */}
-            <div className="flex items-center justify-between pt-6 mt-6 border-t border-gray-200">
-              <Link
-                to={quizPath}
-                className="inline-flex items-center px-6 py-3 bg-secondary-500 text-white font-medium rounded-lg hover:bg-secondary-600 transition"
-              >
-                Take Quiz
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </Link>
+            <div className="flex items-center justify-between pt-6 mt-4 border-t border-gray-200">
+              {progress.readingCompleted ? (
+                <Link
+                  to={quizPath}
+                  className="inline-flex items-center px-6 py-3 bg-secondary-500 text-white font-medium rounded-lg hover:bg-secondary-600 transition"
+                >
+                  Take Quiz
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  title="Complete the lesson reading first"
+                  className="inline-flex items-center px-6 py-3 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed"
+                >
+                  Take Quiz
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </button>
+              )}
               
               {nextUnit ? (
                 <button
@@ -506,13 +560,25 @@ export default function UnitViewer() {
           </div>
 
           {/* Take Quiz Button */}
-          <Link
-            to={quizPath}
-            className="block w-full px-6 py-3 bg-primary-500 text-white font-medium rounded-xl text-center hover:bg-primary-600 transition"
-          >
-            Take Quiz
-            <ChevronRight className="w-5 h-5 inline ml-2" />
-          </Link>
+          {progress.readingCompleted ? (
+            <Link
+              to={quizPath}
+              className="block w-full px-6 py-3 bg-primary-500 text-white font-medium rounded-xl text-center hover:bg-primary-600 transition"
+            >
+              Take Quiz
+              <ChevronRight className="w-5 h-5 inline ml-2" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title="Complete the lesson reading first"
+              className="block w-full px-6 py-3 bg-gray-300 text-gray-500 font-medium rounded-xl text-center cursor-not-allowed"
+            >
+              Take Quiz
+              <ChevronRight className="w-5 h-5 inline ml-2" />
+            </button>
+          )}
 
           {/* Audio Resources */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">

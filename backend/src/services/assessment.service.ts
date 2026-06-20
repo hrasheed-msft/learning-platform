@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { NotFoundError, ForbiddenError, CooldownError } from '../middleware/error.middleware';
+import { NotFoundError, ForbiddenError, BadRequestError, CooldownError } from '../middleware/error.middleware';
 import { recordActivity } from './activity.service';
 import { CourseService } from './course.service';
 
@@ -100,6 +100,23 @@ export class AssessmentService {
 
     if (!member) {
       throw new ForbiddenError('Member not found or does not belong to your family');
+    }
+
+    // Reading gate: enrolled students must complete the lesson before quizzing.
+    // Unenrolled users (browsing without enrolling) are allowed through.
+    const gateUnit = await prisma.unit.findUnique({ where: { id: unitId }, select: { courseId: true } });
+    if (gateUnit) {
+      const enrollment = await prisma.courseEnrollment.findUnique({
+        where: { memberId_courseId: { memberId, courseId: gateUnit.courseId } },
+      });
+      if (enrollment) {
+        const unitProgress = await prisma.unitProgress.findUnique({
+          where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
+        });
+        if (!unitProgress?.readingCompleted) {
+          throw new BadRequestError('You must complete the lesson reading before taking the quiz.');
+        }
+      }
     }
 
     // Enforce cooldown: block rapid retries after a failed attempt

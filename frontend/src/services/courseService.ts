@@ -86,4 +86,24 @@ export const courseService = {
     const response = await api.get<ApiResponse<unknown>>(`/courses/progress/member/${memberId}`);
     return response.data.data;
   },
+
+  async getUnitProgress(memberId: string, unitId: string): Promise<{ videoCompleted: boolean; readingCompleted: boolean; quizCompleted: boolean } | null> {
+    interface UnitProgressRecord {
+      unitId: string;
+      videoCompleted: boolean;
+      readingCompleted: boolean;
+      quizCompleted: boolean;
+    }
+    interface CourseProgressRecord {
+      courseId: string;
+      unitProgress: UnitProgressRecord[];
+    }
+    const response = await api.get<ApiResponse<CourseProgressRecord[]>>(`/courses/progress/member/${memberId}`);
+    const courses = response.data.data;
+    for (const course of courses) {
+      const found = course.unitProgress.find(up => up.unitId === unitId);
+      if (found) return { videoCompleted: found.videoCompleted, readingCompleted: found.readingCompleted, quizCompleted: found.quizCompleted };
+    }
+    return null;
+  },
 };

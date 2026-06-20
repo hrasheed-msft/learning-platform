@@ -156,6 +156,29 @@
 
 
 
+### 2026-06-20T17:31:22-05:00 — Reading Completion Gate in submitQuiz()
+
+**Task:** Block quiz attempts for enrolled students who haven't marked reading as complete.
+
+**Changes — `backend/src/services/assessment.service.ts`:**
+- Added `BadRequestError` to the import from `error.middleware`.
+- Inserted a reading gate block in `submitQuiz()` **before** the cooldown check and before grading.
+- Gate logic:
+  - Looks up the unit's `courseId`.
+  - If no enrollment exists for this member+course → gate is skipped (unenrolled exploration allowed).
+  - If enrolled but no `UnitProgress` row → blocked (no row = not-read).
+  - If enrolled and `readingCompleted` is `false` → blocked with `BadRequestError 400`.
+  - If `readingCompleted` is `true` → allowed through.
+- Uses `findUnique` with the composite key `memberId_courseId` (consistent with the rest of the service).
+
+**Reading-complete endpoint (already exists — no new route needed):**
+- `POST /api/v1/courses/progress`
+- Body: `{ unitId: "<uuid>", readingCompleted: true }` (memberId resolved from auth context)
+- Handler: `CourseController.updateProgress` → `CourseService.updateProgress` (upserts `UnitProgress`)
+- Ibn Sina: call this endpoint when the student scrolls/clicks to mark reading done before showing the quiz button.
+
+**tsc --noEmit:** passes clean.
+
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`
 
 Key prior work:

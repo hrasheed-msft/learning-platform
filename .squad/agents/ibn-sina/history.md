@@ -102,6 +102,14 @@ Key prior work:
 
 ## Learnings
 
+### Mark-as-Read UX — Reading Gate for Quiz Access (2026-06-20T17:31:22-05:00)
+- `UnitViewer` already had `progress.readingCompleted` state and `handleMarkComplete('reading')` wired to `courseService.updateProgress` — but state was never loaded from the backend, so it reset to `false` on every page load. Fix: add `courseService.getUnitProgress(memberId, unitId)` to the `Promise.all` on mount.
+- `getMemberProgress` returns an array of `{ courseId, unitProgress: [{ unitId, videoCompleted, readingCompleted, quizCompleted }] }` — filter by `unitId` to find the current unit's saved progress.
+- For the quiz gate UX: replace `<Link>` with a disabled `<button>` (with `title` tooltip) when `readingCompleted` is false. Both occurrences — bottom-nav inside the content card and the sidebar — must be gated consistently.
+- Prominent bottom CTA: a full-width `bg-green-500` button "✅ I've read this lesson" below the lesson body is far more discoverable than the tiny `text-sm` header button. Both can coexist — header badge confirms state, bottom CTA is the primary action.
+- The `memberId` needed for progress fetching is available in `location.state` as `currentUnitState?.memberId`. Always guard with a `.catch(() => null)` so progress load failure doesn't block unit content display.
+- `npx tsc --noEmit` passes clean.
+
 ### Anti-Rush UX — Cooldown Countdown + Gated Answer Reveal (2026-06-20T17:18:56-05:00)
 - `Promise.all` in the questions-load `useEffect` lets cooldown check run concurrently with question fetch at zero latency cost. Both settle before `setLoading(false)`.
 - Cooldown state is `cooldownEndsAt: Date | null` — single source of truth. `cooldownSecondsLeft` is derived from it every second via a dedicated `useEffect` with `setInterval`. This keeps countdown logic isolated from everything else.
