@@ -100,6 +100,21 @@ export class AssessmentController {
     }
   }
 
+  static async getCooldownStatus(req: ActiveMemberRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { unitId } = req.params;
+      const memberId = resolveAccessibleMemberId(req);
+      const status = await AssessmentService.getCooldownStatus(memberId, unitId);
+
+      res.json({
+        success: true,
+        data: status,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async generateQuestions(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { unitId, count, types } = req.body;

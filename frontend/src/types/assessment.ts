@@ -50,6 +50,13 @@ export interface GradedAnswer {
   explanation?: string | null;
 }
 
+// Shape returned by GET /assessments/units/:unitId/cooldown-status
+export interface CooldownStatus {
+  onCooldown: boolean;
+  retryAfterMinutes: number;
+  retryAt: string | null;
+}
+
 // Shape returned by POST /assessments/submit
 export interface QuizSubmissionResponse {
   id: string;

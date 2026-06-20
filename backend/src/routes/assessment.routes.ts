@@ -38,6 +38,9 @@ const generateQuestionsValidation = [
 // Get questions for a unit
 router.get('/units/:unitId/questions', validate(unitIdValidation), AssessmentController.getQuestions);
 
+// Get cooldown status for a unit (tells frontend whether a retry delay is active)
+router.get('/units/:unitId/cooldown-status', validate(unitIdValidation), AssessmentController.getCooldownStatus);
+
 // Submit quiz answers
 router.post('/submit', validate(submitQuizValidation), AssessmentController.submitQuiz);
 

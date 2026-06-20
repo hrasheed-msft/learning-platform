@@ -12,6 +12,16 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
+  // CooldownError gets its own flat response shape for frontend countdown UI
+  if (err instanceof CooldownError) {
+    res.status(429).json({
+      error: err.message,
+      retryAfterMinutes: err.retryAfterMinutes,
+      retryAt: err.retryAt,
+    });
+    return;
+  }
+
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   const isOperational = err.isOperational || false;
@@ -89,5 +99,16 @@ export class ValidationError extends AppError {
 export class InternalServerError extends AppError {
   constructor(message = 'Internal Server Error') {
     super(message, 500);
+  }
+}
+
+export class CooldownError extends AppError {
+  retryAfterMinutes: number;
+  retryAt: string;
+
+  constructor(message: string, retryAfterMinutes: number, retryAt: string) {
+    super(message, 429);
+    this.retryAfterMinutes = retryAfterMinutes;
+    this.retryAt = retryAt;
   }
 }

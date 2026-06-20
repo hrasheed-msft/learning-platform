@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Clock, CheckCircle, XCircle, HelpCircle, ChevronRight, Loader2, SkipForward } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, XCircle, HelpCircle, ChevronRight, Loader2, SkipForward, Timer } from 'lucide-react';
 import { assessmentService } from '@/services/assessmentService';
 import { courseService } from '@/services/courseService';
 import { getCourseLearnPath, getUnitPath } from '@/utils/courseRoutePaths';
@@ -37,6 +37,8 @@ export default function QuizPage() {
   const [submitting, setSubmitting] = useState(false);
   const [nextUnitId, setNextUnitId] = useState<string | null>(null);
   const [submitResult, setSubmitResult] = useState<QuizSubmissionResponse | null>(null);
+  const [cooldownEndsAt, setCooldownEndsAt] = useState<Date | null>(null);
+  const [cooldownSecondsLeft, setCooldownSecondsLeft] = useState(0);
 
   // Fetch questions from API
   useEffect(() => {
@@ -45,7 +47,17 @@ export default function QuizPage() {
       
       try {
         setLoading(true);
-        const data = await assessmentService.getQuizQuestions(unitId);
+        const [data] = await Promise.all([
+          assessmentService.getQuizQuestions(unitId),
+          // Check cooldown status concurrently on page load
+          assessmentService.getCooldownStatus(unitId).then((status) => {
+            if (status.onCooldown && status.retryAt) {
+              setCooldownEndsAt(new Date(status.retryAt));
+            }
+          }).catch(() => {
+            // Cooldown check failure is non-blocking
+          }),
+        ]);
         
         // Transform API response to Question format (no correctAnswer/explanation from GET)
         const transformedQuestions: Question[] = data.map((q: any) => ({
@@ -130,6 +142,18 @@ export default function QuizPage() {
     }
   }, [showResults, loading]);
 
+  // Cooldown countdown — ticks every second until retryAt is reached
+  useEffect(() => {
+    if (!cooldownEndsAt) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.floor((cooldownEndsAt.getTime() - Date.now()) / 1000));
+      setCooldownSecondsLeft(remaining);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [cooldownEndsAt]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -179,8 +203,33 @@ export default function QuizPage() {
           timeSpent: timeElapsed,
         });
         setSubmitResult(result);
+
+        // After a failed attempt, fetch the authoritative cooldown window from the backend
+        if (!result.passed) {
+          try {
+            const cooldownStatus = await assessmentService.getCooldownStatus(unitId);
+            if (cooldownStatus.onCooldown && cooldownStatus.retryAt) {
+              setCooldownEndsAt(new Date(cooldownStatus.retryAt));
+            } else {
+              // Fallback: 15-minute cooldown from now
+              setCooldownEndsAt(new Date(Date.now() + 15 * 60 * 1000));
+            }
+          } catch {
+            // Fallback: 15-minute cooldown from now
+            setCooldownEndsAt(new Date(Date.now() + 15 * 60 * 1000));
+          }
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
+      // Handle 429 — backend rejected because cooldown is still active
+      if (err.response?.status === 429) {
+        const { retryAfterMinutes, retryAt } = err.response.data ?? {};
+        if (retryAt) {
+          setCooldownEndsAt(new Date(retryAt));
+        } else if (retryAfterMinutes) {
+          setCooldownEndsAt(new Date(Date.now() + retryAfterMinutes * 60 * 1000));
+        }
+      }
       console.error('Failed to submit quiz:', err);
       // Continue showing results even if submission fails; score will be unavailable
     } finally {
@@ -246,6 +295,43 @@ export default function QuizPage() {
     );
   }
 
+  // Pre-quiz cooldown screen — student must wait before retrying
+  if (!showResults && cooldownSecondsLeft > 0) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6 animate-in">
+        <div className="flex items-center justify-between">
+          <Link
+            to={unitPath}
+            className="inline-flex items-center text-gray-600 hover:text-primary-600 transition"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Unit
+          </Link>
+        </div>
+        <div className="bg-white rounded-xl p-8 shadow-sm border border-amber-200 text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 flex items-center justify-center">
+            <Timer className="w-10 h-10 text-amber-600" />
+          </div>
+          <h1 className="text-2xl font-heading font-bold text-gray-800 mb-2">Quiz Locked</h1>
+          <p className="text-gray-600 mb-6">
+            Take some time to review the lesson before retrying.
+          </p>
+          <div className="bg-amber-50 rounded-lg p-6 mb-6">
+            <p className="text-sm text-amber-700 font-medium mb-2">Retry available in</p>
+            <p className="text-4xl font-mono font-bold text-amber-600">{formatTime(cooldownSecondsLeft)}</p>
+          </div>
+          <Link
+            to={unitPath}
+            className="inline-flex items-center px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Review the Lesson
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (showResults) {
     const score = calculateScore();
     const passed = submitResult?.passed ?? score.percentage >= 70;
@@ -295,9 +381,10 @@ export default function QuizPage() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Unit
             </Link>
-            {!passed && (
+            {!passed && cooldownSecondsLeft === 0 && (
               <button
                 onClick={() => {
+                  setCooldownEndsAt(null);
                   setShowResults(false);
                   setCurrentIndex(0);
                   setAnswers({});
@@ -322,47 +409,99 @@ export default function QuizPage() {
           </div>
         </div>
 
-        {/* Review Answers */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Review Your Answers</h2>
-          <div className="space-y-4">
-            {questions.map((q, idx) => {
-              const graded = submitResult?.answers.find(a => a.questionId === q.id);
-              const userAnswer = graded?.answer ?? answers[q.id];
-              const isCorrect = graded?.isCorrect ?? false;
-              return (
-                <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <div className="flex items-start space-x-3">
-                    {isCorrect ? (
-                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                    )}
-                    <div>
-                      <p className="font-medium text-gray-800">{idx + 1}. {q.question || q.questionText}</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Your answer: <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>{userAnswer || 'Not answered'}</span>
-                      </p>
-                      {!isCorrect && graded?.correctAnswer && (
-                        <p className="text-sm text-green-600 mt-1">
-                          Correct answer: {graded.correctAnswer}
+        {/* Cooldown countdown — shown after a failed attempt while the window is active */}
+        {!passed && cooldownSecondsLeft > 0 && (
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-amber-200 text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <Timer className="w-5 h-5 text-amber-600" />
+              <h2 className="text-base font-semibold text-gray-800">Take some time to review the lesson before retrying</h2>
+            </div>
+            <p className="text-sm text-amber-700 font-medium mb-1">Retry available in</p>
+            <p className="text-3xl font-mono font-bold text-amber-600">{formatTime(cooldownSecondsLeft)}</p>
+          </div>
+        )}
+
+        {/* Review Answers — full details only for passed attempts */}
+        {passed ? (
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Review Your Answers</h2>
+            <div className="space-y-4">
+              {questions.map((q, idx) => {
+                const graded = submitResult?.answers.find(a => a.questionId === q.id);
+                const userAnswer = graded?.answer ?? answers[q.id];
+                const isCorrect = graded?.isCorrect ?? false;
+                return (
+                  <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div className="flex items-start space-x-3">
+                      {isCorrect ? (
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <p className="font-medium text-gray-800">{idx + 1}. {q.question || q.questionText}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Your answer: <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>{userAnswer || 'Not answered'}</span>
                         </p>
-                      )}
-                      {graded?.explanation && (
-                        <p className="text-sm text-gray-500 mt-2 italic">{graded.explanation}</p>
-                      )}
+                        {!isCorrect && graded?.correctAnswer && (
+                          <p className="text-sm text-green-600 mt-1">
+                            Correct answer: {graded.correctAnswer}
+                          </p>
+                        )}
+                        {graded?.explanation && (
+                          <p className="text-sm text-gray-500 mt-2 italic">{graded.explanation}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-            {!submitResult && (
-              <p className="text-sm text-gray-500 italic text-center py-2">
-                Results could not be retrieved from the server. Please try again.
-              </p>
-            )}
+                );
+              })}
+              {!submitResult && (
+                <p className="text-sm text-gray-500 italic text-center py-2">
+                  Results could not be retrieved from the server. Please try again.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Failed attempt — show right/wrong status only, no correct answers */
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-800 mb-1">Question Breakdown</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Review your lesson and try again after the cooldown period. Correct answers will be shown once you pass.
+            </p>
+            <div className="space-y-3">
+              {questions.map((q, idx) => {
+                const graded = submitResult?.answers.find(a => a.questionId === q.id);
+                const userAnswer = graded?.answer ?? answers[q.id];
+                const isCorrect = graded?.isCorrect ?? false;
+                return (
+                  <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div className="flex items-start space-x-3">
+                      {isCorrect ? (
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <p className="font-medium text-gray-800">{idx + 1}. {q.question || q.questionText}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Your answer: <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>{userAnswer || 'Not answered'}</span>
+                        </p>
+                        {/* Correct answer and explanation intentionally withheld on failure */}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {!submitResult && (
+                <p className="text-sm text-gray-500 italic text-center py-2">
+                  Results could not be retrieved from the server. Please try again.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

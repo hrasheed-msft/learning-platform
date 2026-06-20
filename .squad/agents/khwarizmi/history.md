@@ -134,9 +134,27 @@
 
 `tsc --noEmit` passes clean. All 10 files verified: 0 old `if (existing)` patterns, correct upsert counts across all files.
 
----
+### 2026-06-20T17:20:27-05:00 — Question Randomization + Attempt Cooldown Enforcement
 
-## Archived History
+**Task 1 — Fisher-Yates shuffle in `getQuestions()` (assessment.service.ts):**
+- Added `shuffle<T>()` utility (proper Fisher-Yates, unbiased) at module level.
+- `getQuestions()` now shuffles the questions array after DB fetch.
+- Also shuffles the `options` array within each question (guarded by `Array.isArray()`), so answer positions change across retries even for the same question.
+- Prisma `select` fields unchanged.
+
+**Task 2 — 15-minute cooldown after failed attempt:**
+- Added `CooldownError` class to `error.middleware.ts` (extends `AppError`, statusCode=429, carries `retryAfterMinutes` + `retryAt` fields).
+- Updated `errorHandler` to detect `CooldownError` and emit the flat response shape `{ error, retryAfterMinutes, retryAt }` expected by the frontend countdown UI.
+- Added `getCooldownStatus(memberId, unitId)` static method to `AssessmentService` — returns `{ onCooldown, retryAfterMinutes, retryAt }`. Cooldown only fires after a FAILED attempt; passed attempts have no cooldown.
+- `submitQuiz()` calls `getCooldownStatus()` before grading and throws `CooldownError` if active.
+- Added `AssessmentController.getCooldownStatus` handler (uses `resolveAccessibleMemberId` pattern, wraps in `{ success: true, data: ... }`).
+- Added `GET /units/:unitId/cooldown-status` route to `assessment.routes.ts`.
+- `COOLDOWN_MINUTES = 15` constant — centralized, easy to tune.
+- `tsc --noEmit` passes clean.
+
+**Key paths:** `backend/src/services/assessment.service.ts`, `backend/src/controllers/assessment.controller.ts`, `backend/src/routes/assessment.routes.ts`, `backend/src/middleware/error.middleware.ts`.
+
+
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`
 

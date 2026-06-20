@@ -4,6 +4,7 @@ import type {
   QuizSubmission,
   QuizSubmissionResponse,
   MemberProgress,
+  CooldownStatus,
 } from '@/types';
 
 // Backend response wrapper type
@@ -26,6 +27,14 @@ export const assessmentService = {
     const response = await api.post<ApiResponse<QuizSubmissionResponse>>(
       '/assessments/submit',
       submission
+    );
+    return response.data.data;
+  },
+
+  // Check cooldown status before a retry
+  async getCooldownStatus(unitId: string): Promise<CooldownStatus> {
+    const response = await api.get<ApiResponse<CooldownStatus>>(
+      `/assessments/units/${unitId}/cooldown-status`
     );
     return response.data.data;
   },

@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { NotFoundError, ForbiddenError } from '../middleware/error.middleware';
+import { NotFoundError, ForbiddenError, CooldownError } from '../middleware/error.middleware';
 import { recordActivity } from './activity.service';
 import { CourseService } from './course.service';
 
@@ -20,6 +20,17 @@ interface GenerateQuestionsInput {
   unitId: string;
   count?: number;
   types?: string[];
+}
+
+const COOLDOWN_MINUTES = 15;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 export class AssessmentService {
@@ -46,7 +57,37 @@ export class AssessmentService {
       },
     });
 
-    return questions;
+    // Shuffle questions and options so answer positions vary across retries
+    const shuffled = shuffle(questions).map(q => ({
+      ...q,
+      options: Array.isArray(q.options) ? shuffle(q.options as unknown[]) : q.options,
+    }));
+
+    return shuffled;
+  }
+
+  static async getCooldownStatus(memberId: string, unitId: string): Promise<{
+    onCooldown: boolean;
+    retryAfterMinutes: number;
+    retryAt: string | null;
+  }> {
+    const lastAttempt = await prisma.quizResult.findFirst({
+      where: { memberId, unitId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!lastAttempt || lastAttempt.passed) {
+      return { onCooldown: false, retryAfterMinutes: 0, retryAt: null };
+    }
+
+    const minutesSince = (Date.now() - lastAttempt.createdAt.getTime()) / 60000;
+    if (minutesSince >= COOLDOWN_MINUTES) {
+      return { onCooldown: false, retryAfterMinutes: 0, retryAt: null };
+    }
+
+    const retryAfterMinutes = Math.ceil(COOLDOWN_MINUTES - minutesSince);
+    const retryAt = new Date(lastAttempt.createdAt.getTime() + COOLDOWN_MINUTES * 60000).toISOString();
+    return { onCooldown: true, retryAfterMinutes, retryAt };
   }
 
   static async submitQuiz(input: SubmitQuizInput) {
@@ -59,6 +100,16 @@ export class AssessmentService {
 
     if (!member) {
       throw new ForbiddenError('Member not found or does not belong to your family');
+    }
+
+    // Enforce cooldown: block rapid retries after a failed attempt
+    const cooldown = await AssessmentService.getCooldownStatus(memberId, unitId);
+    if (cooldown.onCooldown) {
+      throw new CooldownError(
+        'You must wait before retrying this quiz.',
+        cooldown.retryAfterMinutes,
+        cooldown.retryAt!,
+      );
     }
 
     // Get questions with correct answers
@@ -261,3 +312,4 @@ export class AssessmentService {
     };
   }
 }
+

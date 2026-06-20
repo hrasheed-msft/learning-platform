@@ -11,6 +11,19 @@
 
 ## Quick Status (Most Recent)
 
+**Anti-Rush Frontend: Cooldown Countdown + Delayed Answer Reveal (2026-06-20T17:18:56-05:00):** ✅ COMPLETE
+- `CooldownStatus` type added to `assessment.ts`
+- `getCooldownStatus(unitId)` method added to `assessmentService.ts` → `GET /assessments/units/:unitId/cooldown-status`
+- On page load: cooldown status checked concurrently with questions fetch; if active, pre-quiz "Quiz Locked" screen shown
+- On submit failure (`passed: false`): cooldown status fetched from backend to get authoritative `retryAt`; falls back to `now + 15min` if endpoint fails
+- 429 handling: parses `retryAt`/`retryAfterMinutes` from error response body
+- Countdown useEffect ticks every second from `cooldownEndsAt` → `cooldownSecondsLeft`
+- "Try Again" button only visible when `cooldownSecondsLeft === 0`; replaced by amber countdown card while waiting
+- Review panel gated by `passed`: failed students see ✅/❌ + their own answer only; passed students get full `correctAnswer` + `explanation` reveal
+- `npx tsc --noEmit` passes clean
+
+---
+
 **Quiz Answer Security Fix (2026-06-20T14:01:24-05:00):** ✅ COMPLETE
 - Removed `correctAnswer`/`explanation` from GET question flow
 - Score and review panel now driven by `submitQuiz()` response
@@ -87,6 +100,14 @@ Key prior work:
 - 2026-05-20: Audio player, video player, audio sync (SyncedTextPlayer with real-time highlighting)
 - 2026-05-21: "Add a Learner" inline modal, performance optimization (507kB → 45kB bundle)
 
-## Session 2026-06-20T19:47:13Z
-- QuizPage.tsx answer flow update from GET to submit response documented
+## Learnings
+
+### Anti-Rush UX — Cooldown Countdown + Gated Answer Reveal (2026-06-20T17:18:56-05:00)
+- `Promise.all` in the questions-load `useEffect` lets cooldown check run concurrently with question fetch at zero latency cost. Both settle before `setLoading(false)`.
+- Cooldown state is `cooldownEndsAt: Date | null` — single source of truth. `cooldownSecondsLeft` is derived from it every second via a dedicated `useEffect` with `setInterval`. This keeps countdown logic isolated from everything else.
+- After a failed submit, always confirm the server's `retryAt` via `getCooldownStatus` rather than calculating locally — the backend is authoritative. Fall back to `now + 15min` only when the endpoint throws.
+- 429 body parsing: `err.response.data ?? {}` prevents destructuring crash when body is empty.
+- Gated review panel: `passed ? <FullReview/> : <StatusOnlyReview/>` cleanly separates the two paths. Failed panel intentionally omits `correctAnswer`/`explanation` in JSX — no conditional null check required, the fields simply aren't rendered.
+- When "Try Again" resets state, also call `setCooldownEndsAt(null)` to clear the countdown useEffect.
+
 
