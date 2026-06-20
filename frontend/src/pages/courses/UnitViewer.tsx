@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack, Play, Pause, Square } from 'lucide-react';
+import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
 import { courseService } from '@/services/courseService';
-import UnitAudioButton, { type UnitAudioSyncState } from '@/components/UnitAudioButton';
+import { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
 import type { Unit, VideoResource, AudioResource, ArabicTerm } from '@/types/course';
 import { getCourseLearnPath, getQuizPath, getUnitPath } from '@/utils/courseRoutePaths';
@@ -137,9 +136,6 @@ export default function UnitViewer() {
   const interactiveLessonUrl = hasInteractiveLessonLink
     ? `/lessons/masaar-irab-sarf/week-${unit.orderIndex + 1}.html`
     : null;
-  const hasActiveAudioSession = Boolean(audioSyncState?.togglePlayPause)
-    && (audioSyncState?.isPlaying || ((audioSyncState?.currentTime ?? 0) > 0 && (audioSyncState?.currentTime ?? 0) < (audioSyncState?.duration ?? 0)));
-  const shouldShowFloatingAudioControl = hasActiveAudioSession;
 
   return (
     <div className="space-y-6 animate-in">
@@ -183,20 +179,7 @@ export default function UnitViewer() {
         </h1>
         <p className="text-gray-600 mt-2">{unit.description}</p>
 
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            📚 Study Aids
-          </h3>
-          <div>
-            <span className="text-xs font-medium text-gray-500 mb-1 block">🔊 Listen</span>
-            <UnitAudioButton
-              unitId={unitId!}
-              hasArabic={arabicTerms.length > 0 || textContent.includes('arabic') || textContent.includes('bilingual')}
-              hasEnglish={true}
-              onSyncStateChange={setAudioSyncState}
-            />
-          </div>
-        </div>
+        {/* Audio buttons hidden until faithful Arabic pronunciation is available */}
       </div>
 
       {/* Content Sections */}
@@ -555,40 +538,7 @@ export default function UnitViewer() {
         </div>
       </div>
 
-      {shouldShowFloatingAudioControl && audioSyncState && typeof document !== 'undefined' && createPortal(
-        <div className="fixed bottom-6 right-4 z-[60] sm:right-6">
-          <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white/95 px-2 py-2 shadow-lg backdrop-blur">
-            <button
-              type="button"
-              onClick={audioSyncState.togglePlayPause}
-              className="flex h-10 min-w-10 items-center justify-center rounded-full bg-primary-600 px-3 text-white transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-              aria-label={audioSyncState.isPlaying ? 'Pause audio' : 'Play audio'}
-              title={audioSyncState.isPlaying ? 'Pause audio' : 'Resume audio'}
-            >
-              {audioSyncState.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </button>
-            <button
-              type="button"
-              onClick={audioSyncState.cyclePlaybackRate}
-              className="rounded-full bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-              aria-label={`Playback speed: ${audioSyncState.playbackRateLabel}`}
-              title="Change playback speed"
-            >
-              {audioSyncState.playbackRateLabel}
-            </button>
-            <button
-              type="button"
-              onClick={audioSyncState.stopPlayback}
-              className="flex h-10 min-w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-              aria-label="Stop audio"
-              title="Stop audio"
-            >
-              <Square className="h-4 w-4 fill-current" />
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
+      {/* Floating audio control hidden until faithful Arabic pronunciation is available */}
     </div>
   );
 }

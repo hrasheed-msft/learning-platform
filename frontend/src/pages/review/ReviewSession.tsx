@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Brain, CheckCircle, RotateCcw, Volume2, ChevronRight, Loader2, Users } from 'lucide-react';
+import { ArrowLeft, Brain, CheckCircle, RotateCcw, ChevronRight, Loader2, Users } from 'lucide-react';
 import { RATING_LABELS, type Rating, type MemorizationItem } from '@/types/srs';
 import { srsService } from '@/services/srsService';
 import { familyService } from '@/services/familyService';
@@ -133,12 +133,7 @@ export default function ReviewSession() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showAnswer, currentItem, selectedMemberId]);
 
-  const playAudio = (url?: string) => {
-    if (url) {
-      const audio = new Audio(url);
-      audio.play();
-    }
-  };
+  // Audio playback hidden until faithful Arabic pronunciation is available
 
   // Loading state
   if (loading) {
@@ -326,14 +321,7 @@ export default function ReviewSession() {
               {currentItem.source && (
                 <p className="text-gray-500 italic">{currentItem.source}</p>
               )}
-              {currentItem.audioUrl && (
-                <button
-                  onClick={() => playAudio(currentItem.audioUrl)}
-                  className="mt-2 p-2 text-primary-500 hover:bg-primary-50 rounded-full transition"
-                >
-                  <Volume2 className="w-6 h-6" />
-                </button>
-              )}
+              {/* Audio button hidden until faithful Arabic pronunciation is available */}
             </div>
           )}
           <p className="text-xl text-gray-800">{currentItem.title}</p>
