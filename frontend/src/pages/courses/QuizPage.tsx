@@ -4,9 +4,12 @@ import { ArrowLeft, Clock, CheckCircle, XCircle, HelpCircle, ChevronRight, Loade
 import { assessmentService } from '@/services/assessmentService';
 import { courseService } from '@/services/courseService';
 import { getCourseLearnPath, getUnitPath } from '@/utils/courseRoutePaths';
+import type { QuizSubmissionResponse } from '@/types';
 
 type QuestionType = 'multiple-choice' | 'true-false' | 'fill-blank' | 'ordering' | 'matching';
 
+// correctAnswer and explanation are NOT included — the backend withholds them
+// until after submission. Graded results come from QuizSubmissionResponse.answers.
 interface Question {
   id: string;
   unitId: string;
@@ -14,8 +17,6 @@ interface Question {
   question: string;
   questionText?: string;
   options?: string[];
-  correctAnswer: string;
-  explanation?: string;
   points: number;
   difficulty: string;
 }
@@ -35,6 +36,7 @@ export default function QuizPage() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [nextUnitId, setNextUnitId] = useState<string | null>(null);
+  const [submitResult, setSubmitResult] = useState<QuizSubmissionResponse | null>(null);
 
   // Fetch questions from API
   useEffect(() => {
@@ -45,15 +47,13 @@ export default function QuizPage() {
         setLoading(true);
         const data = await assessmentService.getQuizQuestions(unitId);
         
-        // Transform API response to Question format
+        // Transform API response to Question format (no correctAnswer/explanation from GET)
         const transformedQuestions: Question[] = data.map((q: any) => ({
           id: q.id,
           unitId: unitId,
           type: (q.type.toLowerCase().replaceAll('_', '-')) as QuestionType,
           question: q.questionText || q.question,
           options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
-          correctAnswer: q.correctAnswer,
-          explanation: q.explanation,
           points: 1,
           difficulty: q.difficulty || 'medium',
         }));
@@ -74,8 +74,6 @@ export default function QuizPage() {
               'The prophets of Allah',
               'The angels of Allah'
             ],
-            correctAnswer: 'The oneness of Allah',
-            explanation: 'Tawheed is the Islamic concept of the oneness and uniqueness of Allah.',
             points: 1,
             difficulty: 'medium'
           },
@@ -85,8 +83,6 @@ export default function QuizPage() {
             type: 'true-false',
             question: 'Muslims believe in all the prophets sent by Allah.',
             options: ['True', 'False'],
-            correctAnswer: 'True',
-            explanation: 'Belief in all prophets is one of the six pillars of Iman (faith).',
             points: 1,
             difficulty: 'easy'
           },
@@ -170,24 +166,23 @@ export default function QuizPage() {
     setSubmitting(true);
     
     try {
-      // Calculate results
+      // Build answers array — correctness is determined server-side
       const answersArray = questions.map((q) => ({
         questionId: q.id,
         answer: answers[q.id] || '',
-        isCorrect: answers[q.id] === q.correctAnswer,
       }));
       
-      // Try to submit to API for the active learner profile
       if (unitId) {
-        await assessmentService.submitQuiz({
+        const result = await assessmentService.submitQuiz({
           unitId,
           answers: answersArray,
           timeSpent: timeElapsed,
         });
+        setSubmitResult(result);
       }
     } catch (err) {
       console.error('Failed to submit quiz:', err);
-      // Continue showing results even if submission fails
+      // Continue showing results even if submission fails; score will be unavailable
     } finally {
       setSubmitting(false);
       setShowResults(true);
@@ -209,13 +204,15 @@ export default function QuizPage() {
   };
 
   const calculateScore = () => {
-    let correct = 0;
-    questions.forEach((q) => {
-      if (answers[q.id] === q.correctAnswer) {
-        correct++;
-      }
-    });
-    return { correct, total: questions.length, percentage: Math.round((correct / questions.length) * 100) };
+    if (submitResult) {
+      return {
+        correct: submitResult.correctCount,
+        total: submitResult.totalQuestions,
+        percentage: submitResult.score,
+      };
+    }
+    // Fallback when submit failed — show zeros
+    return { correct: 0, total: questions.length, percentage: 0 };
   };
 
   // Loading state
@@ -251,7 +248,7 @@ export default function QuizPage() {
 
   if (showResults) {
     const score = calculateScore();
-    const passed = score.percentage >= 70;
+    const passed = submitResult?.passed ?? score.percentage >= 70;
 
     return (
       <div className="max-w-2xl mx-auto space-y-6 animate-in">
@@ -306,6 +303,7 @@ export default function QuizPage() {
                   setAnswers({});
                   setSkipped(new Set());
                   setTimeElapsed(0);
+                  setSubmitResult(null);
                 }}
                 className="px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
               >
@@ -329,8 +327,9 @@ export default function QuizPage() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Review Your Answers</h2>
           <div className="space-y-4">
             {questions.map((q, idx) => {
-              const userAnswer = answers[q.id];
-              const isCorrect = userAnswer === q.correctAnswer;
+              const graded = submitResult?.answers.find(a => a.questionId === q.id);
+              const userAnswer = graded?.answer ?? answers[q.id];
+              const isCorrect = graded?.isCorrect ?? false;
               return (
                 <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
                   <div className="flex items-start space-x-3">
@@ -344,19 +343,24 @@ export default function QuizPage() {
                       <p className="text-sm text-gray-600 mt-1">
                         Your answer: <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>{userAnswer || 'Not answered'}</span>
                       </p>
-                      {!isCorrect && (
+                      {!isCorrect && graded?.correctAnswer && (
                         <p className="text-sm text-green-600 mt-1">
-                          Correct answer: {q.correctAnswer}
+                          Correct answer: {graded.correctAnswer}
                         </p>
                       )}
-                      {q.explanation && (
-                        <p className="text-sm text-gray-500 mt-2 italic">{q.explanation}</p>
+                      {graded?.explanation && (
+                        <p className="text-sm text-gray-500 mt-2 italic">{graded.explanation}</p>
                       )}
                     </div>
                   </div>
                 </div>
               );
             })}
+            {!submitResult && (
+              <p className="text-sm text-gray-500 italic text-center py-2">
+                Results could not be retrieved from the server. Please try again.
+              </p>
+            )}
           </div>
         </div>
       </div>

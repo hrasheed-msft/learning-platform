@@ -32,7 +32,36 @@ import { syncCourseTextFormatting } from '../src/services/course-content-formatt
 
 const prisma = new PrismaClient();
 
+// =============================================================================
+// ⚠️  DESTRUCTIVE SEED — READ BEFORE RUNNING
+// =============================================================================
+// This script deletes ALL data (users, enrollments, progress, families, content)
+// and rebuilds from scratch.  It is ONLY safe in a local development database.
+//
+// NEVER run this against a production database.  If you need to add or update
+// content in production, write a targeted, idempotent content-only seed script
+// and run that instead.
+// =============================================================================
+
 async function main() {
+  const env = process.env.NODE_ENV ?? 'development';
+
+  if (env === 'production') {
+    throw new Error(
+      'DANGER: seed.ts with full reset must not run in production. ' +
+      'Use a content-only seed script instead.'
+    );
+  }
+
+  console.log('');
+  console.log('⚠️  ════════════════════════════════════════════════════════');
+  console.log('⚠️  DESTRUCTIVE SEED: This will delete ALL data');
+  console.log('⚠️  (users, progress, enrollments, families, content).');
+  console.log(`⚠️  Environment: ${env}`);
+  console.log('⚠️  This script must NEVER run in production.');
+  console.log('⚠️  ════════════════════════════════════════════════════════');
+  console.log('');
+
   console.log('🌱 Starting database seed...');
   console.log('');
 

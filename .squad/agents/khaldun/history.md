@@ -130,6 +130,31 @@
 - **Concern-split seed files scale better than week-split.** The Sarf course precedent (seed-sarf-course.ts + part2-5 + quizzes + flashcards) proves this: each concern file is independently runnable, parallelizable, and debuggable. Week-split would require each file to locate the Course, creating coupling and order-sensitivity.
 - **`[IRAB]` / `[SARF]` question tagging in questionText** is a lightweight convention for sub-score filtering without adding a new column — the `QuizResult.answers` JSON already stores per-question results, so frontend filtering by prefix is sufficient.
 
+## Latest Session (2026-06-20)
+
+**Course Improvement Architecture — Three Concerns**  
+**Work:** Khaldun-9 — Analyzed question difficulty, anti-rush vulnerabilities, and course versioning gaps
+
+**Output:** `.squad/decisions/inbox/khaldun-course-improvements.md`
+
+**Key Findings:**
+
+1. **Question difficulty (Maktab seeds):** ~85% of all maktab questions are `difficulty: 'EASY'`. True/False questions are over-represented. No scenario/application questions exist. Distractors in MCQs are too easily eliminated without reading the lesson. Proposed: tiered pool (40/40/20 easy/medium/hard) with new question types (SEQUENCE, Arabic recall, scenario-based, negative-form).
+
+2. **CRITICAL anti-rush vulnerability:** `AssessmentService.getQuestions()` sends `correctAnswer` and `explanation` to the client in the HTTP response. Any child can view correct answers via DevTools before answering. Additional issues: no question randomization (same set every attempt), results screen reveals all answers immediately after failure ("Try Again" sits next to the answer key), no attempt cooldown, no reading-completion gate before quiz access. `UnitProgress.readingCompleted` exists in schema but is NOT enforced by `submitQuiz()`.
+
+3. **Course versioning disaster:** `seed.ts` executes `deleteMany()` across all tables including families, enrollments, progress, and quiz results — total wipe. Individual course seeds use find-first-skip pattern (not upsert), meaning question improvements can never be pushed to existing installations. No `slug` or `externalId` stable keys exist. Proposed: separate `seed-dev-reset.ts` (dev only, guarded) from `seed-content.ts` (upsert-safe, production-safe), add `Course.slug`, `Unit.slug`, `Question.externalId`, `Course.contentVersion`.
+
+**Critical priority:** Strip `correctAnswer` from `getQuestions` select — this is a live security exploit.
+
+**Key file paths confirmed:**
+- `backend/src/services/assessment.service.ts` — quiz grading, no cooldown, no reading gate, exposes correctAnswer
+- `backend/src/controllers/assessment.controller.ts` — thin passthrough to service
+- `backend/src/routes/assessment.routes.ts` — no attempt rate limiting beyond global limiter
+- `frontend/src/pages/courses/QuizPage.tsx` — instant Try Again button; results panel shows answers immediately
+- `backend/prisma/seed.ts` — destructive deleteMany at top; wires all course seeds
+- `backend/prisma/seed-maktab-coursebook*.ts` — all use find-first-skip pattern
+
 ## Next Steps
 
 - Parent Dashboard + Child Auth implementation

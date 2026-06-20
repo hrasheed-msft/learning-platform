@@ -11,8 +11,13 @@
 
 ## Quick Status (Most Recent)
 
-**Audio Text Sync Ownership (2026-05-24):** ✅ COMPLETE
-- Refactored text highlighting from popup into main content window
+**Quiz Answer Security Fix (2026-06-20T14:01:24-05:00):** ✅ COMPLETE
+- Removed `correctAnswer`/`explanation` from GET question flow
+- Score and review panel now driven by `submitQuiz()` response
+- `QuizSubmissionResponse` type aligned with actual backend shape
+- `npx tsc --noEmit` passes clean
+
+---
 - Created `SyncedTextContent` component for inline highlighting
 - Refactored `UnitAudioButton` to emit sync state via callback
 - Updated `UnitViewer` to coordinate highlighting from audio playback
@@ -159,6 +164,15 @@
 - Both agent streams completed without rework
 - Session log: `.squad/log/20260606T174246-masaar-course-complete.md`
 - Orchestration log: `.squad/orchestration-log/20260606T174246-masaar-course-build.md`
+
+### Quiz Answer Security — Submit-Response-Driven Grading (2026-06-20T14:01:24-05:00)
+- `getQuestions()` intentionally omits `correctAnswer`/`explanation` — never trust GET data for grading.
+- Score, `isCorrect`, `correctAnswer`, and `explanation` all come exclusively from `submitQuiz()` response (`answers[]` array).
+- Pattern: add `submitResult: QuizSubmissionResponse | null` state; populate it from the submit response; review panel does `.find(a => a.questionId === q.id)` to correlate with rendered questions.
+- Graceful degradation: if submit fails, show zeros for score and a "Results unavailable" note in review panel — never expose correctAnswers client-side before submission.
+- `QuizSubmissionResponse` was mismatched against the backend (`results` vs `answers`, extra fields `attemptNumber/bestScore/masteryThreshold`); fixed to `{id, score, passed, correctCount, totalQuestions, pointsEarned, answers: GradedAnswer[]}`.
+- Added `GradedAnswer` interface to `frontend/src/types/assessment.ts`.
+- Key files: `frontend/src/pages/courses/QuizPage.tsx`, `frontend/src/types/assessment.ts`, `backend/src/services/assessment.service.ts`.
 
 ### Interactive Lesson CTA Surfacing (2026-06-06T17:09:20-05:00)
 - `UnitViewer` already renders `unit.content.text` HTML directly (raw when idle, parsed/preserved through `SyncedTextContent` during audio sync), so backend-authored lesson `<a>` tags work without extra frontend parsing changes.

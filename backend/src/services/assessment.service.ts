@@ -32,6 +32,9 @@ export class AssessmentService {
       throw new NotFoundError('Unit not found');
     }
 
+    // correctAnswer and explanation are intentionally excluded — answers must not
+    // be sent to the client before submission. The graded submitQuiz() response
+    // carries correctAnswer + explanation for the post-quiz review panel.
     const questions = await prisma.question.findMany({
       where: { unitId },
       select: {
@@ -40,8 +43,6 @@ export class AssessmentService {
         questionText: true,
         options: true,
         difficulty: true,
-        correctAnswer: true,
-        explanation: true,
       },
     });
 

@@ -15,7 +15,9 @@ export interface Question {
   difficulty: QuestionDifficulty;
 }
 
-// Question without correct answer (for frontend)
+// Shape returned by GET /assessments/units/:unitId/questions
+// correctAnswer and explanation are intentionally omitted — the backend withholds
+// them until after submission to prevent answer leakage.
 export interface QuizQuestion {
   id: string;
   type: QuestionType;
@@ -24,8 +26,6 @@ export interface QuizQuestion {
   options?: string[];
   points?: number;
   difficulty?: QuestionDifficulty;
-  correctAnswer?: string;
-  explanation?: string;
 }
 
 export interface QuizSubmission {
@@ -41,21 +41,22 @@ export interface QuizAnswer {
   answer: string | string[];
 }
 
-export interface QuizResult {
+// Per-answer result returned inside QuizSubmissionResponse.answers
+export interface GradedAnswer {
   questionId: string;
-  correct: boolean;
-  correctAnswer: string | string[];
-  userAnswer: string | string[];
-  explanation: string;
-  pointsEarned: number;
-  pointsPossible: number;
+  answer: string;
+  isCorrect: boolean;
+  correctAnswer?: string | null;
+  explanation?: string | null;
 }
 
+// Shape returned by POST /assessments/submit
 export interface QuizSubmissionResponse {
+  id: string;
   score: number;
   passed: boolean;
-  results: QuizResult[];
-  attemptNumber: number;
-  bestScore: number;
-  masteryThreshold: number;
+  correctCount: number;
+  totalQuestions: number;
+  pointsEarned: number;
+  answers: GradedAnswer[];
 }

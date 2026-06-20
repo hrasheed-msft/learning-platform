@@ -103,6 +103,21 @@
 
 ## Learnings
 
+### 2026-06-20T14:01:24-05:00 — Security fix: strip correctAnswer from GET questions + seed.ts production guard
+
+**Security fix — assessment.service.ts `getQuestions()`:**
+- Removed `correctAnswer` and `explanation` from the Prisma `select` clause in `getQuestions()`.
+- `submitQuiz()` already returns `gradedAnswers` containing `correctAnswer` + `explanation` per question — that is the correct place for the client to receive answers.
+- `QuizPage.tsx` currently reads `q.correctAnswer` from the GET response for local grading AND for the review panel. It does NOT capture the `submitQuiz()` response (the `await` result is discarded). **Ibn Sina must update `QuizPage.tsx`** to: (a) capture the `submitQuiz()` response, (b) map `correctAnswer`/`explanation` from the graded results, and (c) use those in `calculateScore()` and the review panel instead of the now-absent GET fields.
+- Key files: `backend/src/services/assessment.service.ts`, `frontend/src/pages/courses/QuizPage.tsx`.
+
+**Seed guard — backend/prisma/seed.ts:**
+- Added a danger comment block above `main()` explaining the destructive nature.
+- Added `NODE_ENV` check at the start of `main()`: throws if `'production'`, warns but proceeds for all other values.
+- Logs a visible ⚠️ banner before the destructive deletes even in development so accidental runs are obvious.
+- Pattern: never refactor the full seed system to add a guard — just a 10-line check at the top is sufficient and safe.
+- Key file: `backend/prisma/seed.ts`.
+
 ### 2026-06-06T17:09:20-05:00 — al-Masār lesson summaries + linked static HTML delivery
 - `seed-masaar-course.ts` now stores concise HTML summaries instead of placeholders, with Arabic passage focus, English translation, grammar bullets, and a canonical `/lessons/masaar-irab-sarf/week-N.html` CTA embedded directly in each unit `content`.
 - The eight standalone HTML lessons now live under `frontend/public/lessons/masaar-irab-sarf/` as `week-1.html` through `week-8.html`, matching the production route shape expected by the frontend lesson CTA work.
