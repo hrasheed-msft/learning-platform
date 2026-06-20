@@ -109,15 +109,17 @@ model FamilyMember {
 // ============================================
 
 model Course {
-  id           String   @id @default(uuid())
-  title        String
-  description  String
-  category     String   // QURAN, HADITH, FIQH, SEERAH, ARABIC, ISLAMIC_HISTORY
-  ageLevels    String[] // Array of: EARLY_CHILD, CHILD, PRE_TEEN, TEEN, ADULT
-  thumbnailUrl String?
-  isPublished  Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  category       String   // QURAN, HADITH, FIQH, SEERAH, ARABIC, ISLAMIC_HISTORY
+  ageLevels      String[] // Array of: EARLY_CHILD, CHILD, PRE_TEEN, TEEN, ADULT
+  thumbnailUrl   String?
+  isPublished    Boolean  @default(false)
+  slug           String?  @unique // e.g. "maktab-coursebook-3"; nullable until backfilled
+  contentVersion Int      @default(1) // increment on breaking content changes
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   units       Unit[]
   flashCards  FlashCard[]
@@ -135,6 +137,7 @@ model Unit {
   description String?
   content     String?  @db.Text // Rich text / HTML content
   orderIndex  Int
+  slug        String?  // e.g. "maktab-3-fiqh"; nullable until backfilled
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -153,6 +156,7 @@ model Unit {
   videoCache     VideoCache[]
 
   @@unique([courseId, orderIndex])
+  @@unique([courseId, slug]) // composite unique; NULLs are treated as distinct in Postgres
   @@index([courseId])
   @@map("units")
 }
@@ -217,6 +221,7 @@ model Question {
   explanation   String?  @db.Text
   difficulty    String   @default("MEDIUM") // EASY, MEDIUM, HARD
   aiGenerated   Boolean  @default(false)
+  externalId    String?  @unique // e.g. "maktab-3-fiqh-q1"; nullable until backfilled
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

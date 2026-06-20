@@ -128,3 +128,24 @@ Key prior work:
 ## Session 2026-06-20T19:47:13Z
 - Security fix for correctAnswer stripping in getQuestions API documented
 
+## Session 2026-06-20T16:12:48-05:00 — Schema Migration: Content Slugs & Versioning
+
+### What was done
+- Added `slug String? @unique` and `contentVersion Int @default(1)` to Course model
+- Added `slug String?` and `@@unique([courseId, slug])` to Unit model
+- Added `externalId String? @unique` to Question model
+- Created migration manually (non-interactive env): `backend/prisma/migrations/20260620211248_add_content_slugs_versioning/migration.sql`
+- Wrote idempotent backfill script: `backend/prisma/backfill-slugs.ts`
+- Regenerated Prisma client; `tsc --noEmit` passes clean
+
+### Key decisions
+- Used nullable (`String?`) for all three new fields — Postgres treats NULLs as distinct in unique indexes, so multiple NULL rows don't collide. This avoids the default-empty-string footgun on Unit's composite unique.
+- Composite unique `@@unique([courseId, slug])` on Unit is safe with NULLs in Postgres.
+- Backfill script uses kebab-case slug generation, de-duplication with numeric suffixes, question externalIds follow pattern `{unit-slug}-q{n}`, and processes in 500-row transaction chunks for safety.
+- Did NOT run `migrate dev` (applied); migration is review-ready only.
+
+### Key file paths
+- `backend/prisma/schema.prisma` — Course, Unit, Question models updated
+- `backend/prisma/migrations/20260620211248_add_content_slugs_versioning/migration.sql`
+- `backend/prisma/backfill-slugs.ts`
+
