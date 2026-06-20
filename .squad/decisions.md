@@ -46,25 +46,6 @@ User directive capturing three related feature requests for improving audio and 
 
 ---
 
-### 19. Route-level Lazy Loading + Inline Modals for Pre-Auth Pages (2026-05-21)
-**Author:** Ibn Sina (Frontend Dev)
-**Status:** Implemented
-
-Two frontend issues required structural changes:
-
-1. The "Add a learner" button tried to navigate to `/settings` but got blocked by `ProtectedRoute` (requires `selectedMember`).
-2. Initial page load was ~507kB — all routes eagerly imported.
-
-**Key Decisions:**
-- **Inline modal pattern:** Pages rendered before a member is selected (like `/select-learner`) cannot navigate to protected routes. Actions like "Add a learner" use inline modals that call the API directly.
-- **Rule:** If a page exists outside the `ProtectedRoute` wrapper, it must be self-contained — no navigating to protected pages.
-- **Lazy loading convention:** Eager imports: Layouts, LoginPage, RegisterPage, SelectLearner (critical path). Lazy imports: Everything else via React.lazy().
-- **Vite code splitting:** Manual chunks: vendor-react, vendor-state, vendor-ui, vendor-content.
-
-**Impact:** Initial bundle: 507kB → 45kB (91% reduction). "Add a learner" now functional without navigating away.
-
----
-
 ### 20. Inline Audio Sync — Ownership and Page-Level Content Highlighting (2026-05-24)
 **Author:** Ibn Sina (Frontend Dev)
 **Status:** Implemented
@@ -77,22 +58,6 @@ Synced audio highlighting was rendering in a separate popup below the audio cont
 - **Convention:** Future synced readers should prefer page-level content highlighting over embedding a second text surface inside the control component.
 
 **Impact:** Improves reading flow and removes UI duplication.
-
----
-
-### 21. Coursebook Images — Served from Azure Blob Storage (2026-05-21)
-**Author:** Khwarizmi (Backend Dev)
-**Status:** Implemented
-
-Coursebook images (~188MB in `public/coursebook-images/`) were excluded from Docker builds via `.dockerignore` to keep image size manageable. This broke image display in production for all Maktab courses.
-
-**Key Decisions:**
-- Serve coursebook images from Azure Blob Storage instead of bundling them in Docker.
-- **Storage:** Account `stislamiclearning`, new container `coursebook-images`, public blob access.
-- **URL pattern:** https://stislamiclearning.blob.core.windows.net/coursebook-images/{filename}
-- **Backend:** `/coursebook-images/*` route redirects to blob storage in production, serves locally in dev. Course controller rewrites `src="/coursebook-images/..."` → direct blob URL.
-
-**Impact:** No database migration or frontend changes required. Image paths in DB content remain relative; URLs rewritten server-side.
 
 ---
 
@@ -934,4 +899,243 @@ Add a hard abort at the top of `main()`:
 This is a minimal, surgical guard — not a refactor of the seed system. A full content-only seed system is a separate future task.
 
 **Files changed:** `backend/prisma/seed.ts`
+
+---
+
+# Decision: Anti-Rush Backend — Question Randomization & Retry Cooldown
+
+**Date:** 2026-06-20T17:20:27-05:00  
+**Author:** Khwarizmi (Backend Dev)  
+**Status:** Implemented
+
+---
+
+## Context
+
+Students were able to memorize answer positions across quiz retries (questions returned in insertion order, options always in the same sequence) and could retry failed quizzes immediately with no delay.
+
+---
+
+## Decisions Made
+
+### 1. Fisher-Yates shuffle for questions and options
+
+- Questions are shuffled after DB fetch using an unbiased Fisher-Yates algorithm (not `sort(() => Math.random() - 0.5)`).
+- The `options` array within each question is also shuffled independently.
+- Only applied to `getQuestions()` (the GET endpoint) — grading in `submitQuiz()` still looks up by `questionId`, so shuffled order has no effect on correctness.
+
+### 2. 15-minute cooldown after failed attempts
+
+- `COOLDOWN_MINUTES = 15` — flat rate for all quizzes, no per-unit configuration yet.
+- Cooldown only applies after a **failed** attempt. Passed quizzes have no cooldown (retaking a passed quiz is review, not gaming).
+- First attempt has no cooldown.
+- Cooldown is enforced in `submitQuiz()` before grading (not just on the GET questions endpoint, which would be easy to bypass).
+
+### 3. CooldownError — custom error class with flat response shape
+
+- New `CooldownError extends AppError` (429) added to `error.middleware.ts`.
+- Carries `retryAfterMinutes` and `retryAt` (ISO string) as first-class fields.
+- The `errorHandler` detects `CooldownError` and emits a flat shape: `{ error, retryAfterMinutes, retryAt }` instead of the usual `{ success: false, error: { message } }`.
+- Rationale: the flat shape is intentional — the frontend needs to destructure these fields directly to drive a countdown timer, not dig into a nested `error` object.
+
+### 4. Cooldown status endpoint
+
+- `GET /api/assessment/units/:unitId/cooldown-status` returns `{ onCooldown, retryAfterMinutes, retryAt }`.
+- Frontend can poll this before rendering the quiz start button to show a live countdown without needing to attempt a submission.
+- Requires auth + active member (same middleware chain as all other assessment routes).
+
+---
+
+## Impact on Other Agents
+
+- **Ibn Sina (Frontend):** The quiz retry flow must now handle HTTP 429 from `POST /submit` with the flat `{ error, retryAfterMinutes, retryAt }` shape. The `GET /units/:unitId/cooldown-status` endpoint is available for proactive UI (disable "Retry" button + show countdown before the student clicks submit).
+
+---
+
+## Files Changed
+
+- `backend/src/services/assessment.service.ts`
+- `backend/src/controllers/assessment.controller.ts`
+- `backend/src/routes/assessment.routes.ts`
+- `backend/src/middleware/error.middleware.ts`
+
+---
+
+# Decision: Anti-Rush Frontend — Cooldown Countdown + Delayed Answer Reveal
+
+**Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-06-20T17:18:56-05:00  
+**Status:** Implemented
+
+---
+
+## Context
+
+After a failed quiz attempt students could immediately retry, and the review panel exposed all correct answers — making it trivial to memorize and re-submit. Khwarizmi is adding a 15-minute backend cooldown (429 on retry during window). This decision captures the matching frontend treatment.
+
+---
+
+## Decisions
+
+### 1. Cooldown state modeled as `cooldownEndsAt: Date | null`
+- Single authoritative timestamp. `cooldownSecondsLeft` is derived via a dedicated `setInterval` useEffect — no drift, no duplicate logic.
+
+### 2. Cooldown checked concurrently with questions on page load
+- `Promise.all([getQuizQuestions(), getCooldownStatus()])` — zero added latency. If the cooldown endpoint fails, it is silently swallowed (non-blocking). Quiz continues normally.
+
+### 3. After failed submit: backend is the source of truth for `retryAt`
+- After `submitQuiz()` returns `passed: false`, immediately call `getCooldownStatus()` to get the server's authoritative `retryAt` ISO timestamp. Fall back to `now + 15 minutes` only if that call throws.
+
+### 4. 429 from submit sets cooldown from error body
+- If a student somehow bypasses the frontend guard, the 429 body's `retryAt` / `retryAfterMinutes` is parsed and `cooldownEndsAt` is set. Graceful degradation: `err.response.data ?? {}` prevents crash on empty body.
+
+### 5. "Try Again" button only visible when `cooldownSecondsLeft === 0`
+- While countdown is active: amber countdown card shown ("Retry available in MM:SS"). Once countdown hits 0, "Try Again" button appears. `setCooldownEndsAt(null)` called on retry to clear the countdown interval.
+
+### 6. Review panel gated by `passed`
+- **Passed:** Full review — `correctAnswer` + `explanation` for every question.  
+- **Failed:** Status-only review — ✅/❌ indicator + student's own answer. `correctAnswer` and `explanation` intentionally not rendered. Message: "Review your lesson and try again after the cooldown period."
+
+**Rationale:** Failed students know *what* they got wrong, but not *what the right answer is*. This forces return to lesson material rather than answer memorization.
+
+---
+
+## Files Changed
+- `frontend/src/types/assessment.ts` — added `CooldownStatus` interface
+- `frontend/src/services/assessmentService.ts` — added `getCooldownStatus(unitId)` → `GET /assessments/units/:unitId/cooldown-status`
+- `frontend/src/pages/courses/QuizPage.tsx` — cooldown state, countdown useEffect, pre-quiz locked screen, results page with gated review
+
+---
+
+# Decision: Content Slugs & Versioning Schema
+
+**Author:** Khwarizmi  
+**Date:** 2026-06-20T16:12:48-05:00  
+**Status:** Implemented (migration created, not yet applied)  
+**Relates to:** Course Improvements Architecture — Item 3
+
+---
+
+## Summary
+
+Added stable content identifiers to Course, Unit, and Question models so that seed files can upsert content without destroying student progress data.
+
+## Changes Made
+
+| Model    | Field            | Type            | Notes                                        |
+|----------|------------------|-----------------|----------------------------------------------|
+| Course   | `slug`           | `String? @unique` | Nullable; backfill before making required  |
+| Course   | `contentVersion` | `Int @default(1)` | Increment on breaking content changes      |
+| Unit     | `slug`           | `String?`       | Nullable; composite unique with `courseId`   |
+| Question | `externalId`     | `String? @unique` | Nullable; e.g. "maktab-3-fiqh-q1"         |
+
+## Key Design Decision: Nullable vs Default Empty String
+
+All new fields are nullable (`String?`) rather than defaulting to empty string.
+
+**Rationale:** Postgres treats NULLs as distinct values in unique indexes. This means:
+- `courses_slug_key` (`slug`) allows many rows with NULL slug — no collision
+- `units_courseId_slug_key` (`courseId, slug`) allows many units in the same course to all have NULL slug — no collision
+
+Using `@default("")` instead would cause an immediate constraint violation on apply: every existing unit in the same course would get `slug=""`, violating the composite unique.
+
+## Migration File
+
+`backend/prisma/migrations/20260620211248_add_content_slugs_versioning/migration.sql`
+
+**Not applied yet.** Apply manually with `npx prisma migrate deploy` (or `migrate dev` interactively).
+
+## Backfill Script
+
+`backend/prisma/backfill-slugs.ts`
+
+Run after applying the migration:
+```bash
+npx ts-node --project tsconfig.json prisma/backfill-slugs.ts
+```
+
+Slug generation rules:
+- **Course slug:** kebab-case of title, de-duplicated with `-2`, `-3` suffix if needed
+- **Unit slug:** `{course-slug}-{unit-title-kebab}`, truncated to 80 chars
+- **Question externalId:** `{unit-slug}-q{n}` where n is sequential within the unit
+
+## Next Steps (for seed files)
+
+After applying migration + backfill, seed files can upsert using:
+- `Course`: `upsert` on `slug`
+- `Unit`: `upsert` on `{ courseId_slug: { courseId, slug } }`
+- `Question`: `upsert` on `externalId`
+
+---
+
+# Decision: Maktab Seed Files — Idempotent Upsert Pattern
+
+**Date:** 2026-06-20T16:18:48-05:00  
+**Author:** Khwarizmi  
+**Status:** Implemented
+
+## Context
+
+All 10 maktab seed files used a "find-first-skip" guard that made them non-idempotent: a second run would silently skip every seed. With the addition of `Course.slug`, `Unit.slug`, and `Question.externalId` unique fields (migration `20260620211248_add_content_slugs_versioning`), we now have stable keys to drive proper upserts.
+
+## Decision
+
+Convert all 10 maktab seed files from:
+```typescript
+const existing = await prisma.course.findFirst({ where: { title: '...' } });
+if (existing) { console.log('⏭️ Already exists — skipping.'); return; }
+const course = await prisma.course.create({ ... });
+```
+
+To an idempotent upsert chain:
+```typescript
+const course = await prisma.course.upsert({ where: { slug }, create: { slug, ... }, update: { ... } });
+const unit = await prisma.unit.upsert({ where: { courseId_slug: { courseId: course.id, slug } }, ... });
+await Promise.all(questions.map(q => prisma.question.upsert({ where: { externalId }, ... })));
+await Promise.all(flashcards.map(fc => prisma.flashCard.upsert({ where: { unitId_orderIndex }, ... })));
+await prisma.arabicTerm.deleteMany({ where: { unitId } });
+await prisma.arabicTerm.createMany({ data: [...] });
+```
+
+## Rationale
+
+- **Preserves student data**: `CourseEnrollment`, `UnitProgress`, `QuizResult`, `FlashCardProgress` are never touched.
+- **Safe re-runs**: Curriculum content (questions, flashcards) can be corrected in seed files and re-run without losing student progress.
+- **ArabicTerm exception**: No unique constraint on `ArabicTerm`, so `deleteMany` + `createMany` is used per-unit. No student data references `ArabicTerm` directly.
+- **FlashCard safe**: `FlashCardProgress` references by `flashCardId`. Since we upsert by `unitId_orderIndex` (not by text), the same `id` UUID is preserved on update, so student progress remains intact.
+
+## Slug Assignments
+
+| File | Course slug | Unit slug prefix |
+|------|-------------|-----------------|
+| CB1 | `maktab-coursebook-1` | `maktab-1-` |
+| CB2 | `maktab-coursebook-2` | `maktab-2-` |
+| CB3 | `maktab-coursebook-3` | `maktab-3-` |
+| CB4 | `maktab-coursebook-4` | `maktab-4-` |
+| CB5 | `maktab-coursebook-5` | `maktab-5-` |
+| CB6 Boys | `maktab-coursebook-6-boys` | `maktab-6b-` |
+| CB6 Girls | `maktab-coursebook-6-girls` | `maktab-6g-` |
+| CB7 | `maktab-coursebook-7` | `maktab-7-` |
+| CB8 | `maktab-coursebook-8` | `maktab-8-` |
+| Further Studies NW | `maktab-further-studies-nw` | `maktab-fs-` |
+
+Unit slugs: `{prefix}fiqh`, `{prefix}ahadith`, `{prefix}sirah`, `{prefix}tarikh`, `{prefix}aqaid`, `{prefix}akhlaq`, `{prefix}adab`  
+Further Studies units: `maktab-fs-essentials-1`, `maktab-fs-essentials-2`, `maktab-fs-faith`, `maktab-fs-devotional`, `maktab-fs-identity`, `maktab-fs-living`, `maktab-fs-money`, `maktab-fs-contemporary`, `maktab-fs-hadith`
+
+## Question externalId Pattern
+
+`{unit-slug}-q{N}` where N is 1-indexed within the unit's question array.
+
+## Files Changed
+
+- `backend/prisma/seed-maktab-coursebook1.ts`
+- `backend/prisma/seed-maktab-coursebook2.ts`
+- `backend/prisma/seed-maktab-coursebook3.ts`
+- `backend/prisma/seed-maktab-coursebook4.ts`
+- `backend/prisma/seed-maktab-coursebook5.ts`
+- `backend/prisma/seed-maktab-coursebook6boys.ts`
+- `backend/prisma/seed-maktab-coursebook6girls.ts`
+- `backend/prisma/seed-maktab-coursebook7.ts`
+- `backend/prisma/seed-maktab-coursebook8.ts`
+- `backend/prisma/seed-maktab-further-studies-nw.ts`
 

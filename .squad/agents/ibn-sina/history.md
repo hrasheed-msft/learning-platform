@@ -111,3 +111,22 @@ Key prior work:
 - When "Try Again" resets state, also call `setCooldownEndsAt(null)` to clear the countdown useEffect.
 
 
+## Team Coordination — Anti-Rush Implementation (2026-06-20T22:18:56Z)
+
+**Cross-Agent Update:** Orchestrated with Khwarizmi (Backend) on integrated anti-rush measures.
+
+### Decisions Merged from Inbox
+1. **Anti-Rush Frontend — Cooldown Countdown + Delayed Answer Reveal** — Cooldown countdown UI, locked quiz screen, delayed answer reveal on fail, gated review panel
+2. **Khwarizmi's Backend Changes** — Fisher-Yates shuffle, 15-min cooldown, CooldownError 429 response, cooldown-status endpoint ready for consumption
+
+### Implementation Summary
+- Cooldown state: `cooldownEndsAt: Date | null` with derived `cooldownSecondsLeft` from dedicated `setInterval` useEffect
+- On load: `Promise.all([getQuizQuestions(), getCooldownStatus()])` for zero-latency concurrent fetch
+- On failed submit: Backend authoritative; fallback to `now + 15min` if endpoint fails
+- 429 handling: Parses flat response shape `{ error, retryAfterMinutes, retryAt }`
+- UI: Amber countdown card during cooldown, "Try Again" button appears at 0 seconds
+- Review panel: Passed = full review; Failed = status-only (abilityage answers hidden)
+
+### Ready for Testing
+All frontend code complete and type-safe. Ready for e2e testing with backend 429 responses.
+

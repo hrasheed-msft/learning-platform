@@ -190,3 +190,23 @@ Key prior work:
 - `backend/prisma/migrations/20260620211248_add_content_slugs_versioning/migration.sql`
 - `backend/prisma/backfill-slugs.ts`
 
+---
+
+## Team Coordination — Anti-Rush Implementation (2026-06-20T22:18:56Z)
+
+**Cross-Agent Update:** Orchestrated with Ibn Sina (Frontend) on integrated anti-rush measures.
+
+### Decisions Merged from Inbox
+1. **Anti-Rush Backend — Question Randomization & Retry Cooldown** — Fisher-Yates shuffle for questions/options, 15-min cooldown after failed attempts, CooldownError 429 response, new cooldown-status endpoint
+2. **Content Slugs & Versioning Schema** — Course.slug, Unit.slug, Question.externalId for safe idempotent seeding
+3. **Maktab Seed Files — Idempotent Upsert Pattern** — All 10 seed files converted to upsert pattern for student data preservation
+
+### Impact on Current Work
+- Schema migration created; backfill script ready for post-migration slug generation
+- Assessment service updated with Fisher-Yates and cooldown enforcement
+- New CooldownError class carries flat response shape for frontend timer consumption
+- All seed files now safe for re-runs; student progress preserved across course updates
+
+### Handoff to Ibn Sina
+Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen, delayed answer reveal on fail, gated review panel.
+

@@ -477,4 +477,38 @@ English audio narration was reading "one word at a time with pauses" because `bu
 
 ---
 
+### 19. Route-level Lazy Loading + Inline Modals for Pre-Auth Pages (2026-05-21)
+**Author:** Ibn Sina (Frontend Dev)
+**Status:** Implemented
+
+Two frontend issues required structural changes:
+
+1. The "Add a learner" button tried to navigate to `/settings` but got blocked by `ProtectedRoute` (requires `selectedMember`).
+2. Initial page load was ~507kB — all routes eagerly imported.
+
+**Key Decisions:**
+- **Inline modal pattern:** Pages rendered before a member is selected (like `/select-learner`) cannot navigate to protected routes. Actions like "Add a learner" use inline modals that call the API directly.
+- **Rule:** If a page exists outside the `ProtectedRoute` wrapper, it must be self-contained — no navigating to protected pages.
+- **Lazy loading convention:** Eager imports: Layouts, LoginPage, RegisterPage, SelectLearner (critical path). Lazy imports: Everything else via React.lazy().
+- **Vite code splitting:** Manual chunks: vendor-react, vendor-state, vendor-ui, vendor-content.
+
+**Impact:** Initial bundle: 507kB → 45kB (91% reduction). "Add a learner" now functional without navigating away.
+
+---
+
+### 21. Coursebook Images — Served from Azure Blob Storage (2026-05-21)
+**Author:** Khwarizmi (Backend Dev)
+**Status:** Implemented
+
+Coursebook images (~188MB in `public/coursebook-images/`) were excluded from Docker builds via `.dockerignore` to keep image size manageable. This broke image display in production for all Maktab courses.
+
+**Key Decisions:**
+- Serve coursebook images from Azure Blob Storage instead of bundling them in Docker.
+- **Storage:** Account `stislamiclearning`, new container `coursebook-images`, public blob access.
+- **URL pattern:** https://stislamiclearning.blob.core.windows.net/coursebook-images/{filename}
+- **Backend:** `/coursebook-images/*` route redirects to blob storage in production, serves locally in dev. Course controller rewrites `src="/coursebook-images/..."` → direct blob URL.
+
+**Impact:** No database migration or frontend changes required. Image paths in DB content remain relative; URLs rewritten server-side.
+
+---
 
