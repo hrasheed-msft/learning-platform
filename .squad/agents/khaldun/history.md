@@ -164,3 +164,7 @@
 - Video Phase 2 (1–2 weeks)
 - **Next coding task:** Integrate review gate into Squad spawning (include REVIEW_REQUEST directive)
 - **al-Masār:** hrasheed approval on 3 open decisions → Khwarizmi migration + seeds → Ibn Sina HTML weeks 2–8
+
+## Session 2026-06-20T19:47:13Z
+- Architecture proposal on course improvements merged to decisions
+
