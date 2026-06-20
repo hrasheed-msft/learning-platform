@@ -113,6 +113,29 @@
 
 ---
 
+### 2026-06-20T16:18:48-05:00 — Maktab Seed Files Refactored to Upsert Pattern
+
+**All 10 maktab seed files converted from find-first-skip to idempotent upsert:**
+- `course.create` → `course.upsert` keyed on `slug` (new `Course.slug @unique`)
+- `unit.create` → `unit.upsert` keyed on `courseId_slug` composite unique
+- `question.createMany` → `Promise.all([question.upsert(...)])` keyed on `externalId`
+- `flashCard.createMany` → `Promise.all([flashCard.upsert(...)])` keyed on `unitId_orderIndex`
+- `arabicTerm.createMany` → `deleteMany` per unit + `createMany` (no unique constraint on ArabicTerm)
+
+**Slug assignments:**
+- CB1–CB5, CB7, CB8: `maktab-coursebook-{N}`, units `maktab-{N}-{subject}`
+- CB6 Boys: `maktab-coursebook-6-boys`, units `maktab-6b-{subject}`
+- CB6 Girls: `maktab-coursebook-6-girls`, units `maktab-6g-{subject}`
+- Further Studies NW: `maktab-further-studies-nw`, units `maktab-fs-{subject}`
+
+**Question externalId pattern:** `{unit-slug}-q{N}` (1-indexed)
+
+**Student data never touched:** `CourseEnrollment`, `UnitProgress`, `QuizResult`, `FlashCardProgress`
+
+`tsc --noEmit` passes clean. All 10 files verified: 0 old `if (existing)` patterns, correct upsert counts across all files.
+
+---
+
 ## Archived History
 
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`
