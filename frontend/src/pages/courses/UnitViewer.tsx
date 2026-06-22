@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
 import { courseService } from '@/services/courseService';
 import { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
+import QuranAudioPlayer from '@/components/QuranAudioPlayer';
 import type { Unit, VideoResource, AudioResource, ArabicTerm } from '@/types/course';
 import { getCourseLearnPath, getQuizPath, getUnitPath } from '@/utils/courseRoutePaths';
 
@@ -34,6 +36,7 @@ export default function UnitViewer() {
   });
   const [updatingProgress, setUpdatingProgress] = useState(false);
   const [audioSyncState, setAudioSyncState] = useState<UnitAudioSyncState | null>(null);
+  const contentContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setAudioSyncState(null);
@@ -70,6 +73,45 @@ export default function UnitViewer() {
 
     fetchUnit();
   }, [courseId, unitId]);
+
+  // Enhance .quran-verse audio elements with custom player (loop, speed, progress)
+  useEffect(() => {
+    if (loading || !unit) return;
+
+    const container = contentContainerRef.current;
+    if (!container) return;
+
+    const roots: ReturnType<typeof createRoot>[] = [];
+
+    // Defer until after paint so dangerouslySetInnerHTML DOM is ready
+    const timerId = window.setTimeout(() => {
+      const audioEls = container.querySelectorAll<HTMLAudioElement>('.quran-verse audio');
+
+      audioEls.forEach((audioEl) => {
+        if (audioEl.dataset.qapEnhanced) return;
+        audioEl.dataset.qapEnhanced = '1';
+        audioEl.removeAttribute('controls');
+
+        const host = document.createElement('div');
+        host.className = 'quran-audio-player-host';
+        audioEl.after(host);
+
+        const root = createRoot(host);
+        root.render(<QuranAudioPlayer audioEl={audioEl} />);
+        roots.push(root);
+      });
+    }, 50);
+
+    return () => {
+      window.clearTimeout(timerId);
+      roots.forEach((root) => root.unmount());
+      container.querySelectorAll<HTMLElement>('.quran-audio-player-host').forEach((el) => el.remove());
+      container.querySelectorAll<HTMLAudioElement>('.quran-verse audio[data-qap-enhanced]').forEach((el) => {
+        delete el.dataset.qapEnhanced;
+        el.setAttribute('controls', '');
+      });
+    };
+  }, [loading, unit]);
 
   const handleMarkComplete = async (type: 'video' | 'reading') => {
     if (!unitId) return;
@@ -388,8 +430,15 @@ export default function UnitViewer() {
                 font-weight: 500;
               }
               .unit-content .arabic-large {
-                font-size: 2rem;
+                font-family: 'Amiri', serif;
+                font-size: 2.75rem;
+                line-height: 2;
                 color: #1f2937;
+              }
+              @media (min-width: 768px) {
+                .unit-content .arabic-large {
+                  font-size: 3rem;
+                }
               }
               .unit-content .hadith-box {
                 background-color: #f9fafb;
@@ -419,13 +468,15 @@ export default function UnitViewer() {
                 object-fit: contain;
               }
             `}</style>
-            <SyncedTextContent
-              html={textContent}
-              currentWordIndex={audioSyncState?.currentWordIndex ?? -1}
-              language={audioSyncState?.language ?? null}
-              isPlaying={audioSyncState?.isPlaying ?? false}
-              className="unit-content prose-lg max-w-none text-gray-700 leading-relaxed"
-            />
+            <div ref={contentContainerRef}>
+              <SyncedTextContent
+                html={textContent}
+                currentWordIndex={audioSyncState?.currentWordIndex ?? -1}
+                language={audioSyncState?.language ?? null}
+                isPlaying={audioSyncState?.isPlaying ?? false}
+                className="unit-content prose-lg max-w-none text-gray-700 leading-relaxed"
+              />
+            </div>
             
             {/* Mark as Read — prominent bottom CTA */}
             {progress.readingCompleted ? (

@@ -1,10 +1,29 @@
 name: CI/CD Pipeline
 
+# ─────────────────────────────────────────────────────────────────────────────
+# GitHub Environments used:  prod  |  dev
+#
+# Each environment must be configured in GitHub → Settings → Environments with
+# the following secrets:
+#
+#   AZURE_CREDENTIALS      — Service principal JSON
+#                            (az ad sp create-for-rbac --sdk-auth)
+#   SWA_DEPLOYMENT_TOKEN   — Azure Static Web App deployment token
+#   ACR_NAME               — Container registry name  (e.g. cr34odstpjgaabg)
+#   CONTAINER_APP_NAME     — Container App name       (e.g. ca-api-islamic-learning)
+#   RESOURCE_GROUP         — Resource group name      (e.g. rg-islamic-learning-centralus)
+#
+# prod environment → existing production resources (centralus)
+# dev  environment → resources provisioned by:  azd env new islamic-learning-dev
+#
+# See docs/dev-environment-setup.md for full provisioning instructions.
+# ─────────────────────────────────────────────────────────────────────────────
+
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   test-backend:
@@ -32,30 +51,76 @@ jobs:
       - run: cd frontend && npm ci
       - run: cd frontend && npm run test:ci
 
-  deploy-backend:
+  # ── Dev deployment ──────────────────────────────────────────────────────────
+  deploy-backend-dev:
     needs: [test-backend, test-frontend]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - uses: actions/checkout@v4
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: |
-          az acr build --registry cr34odstpjgaabg \
+          az acr build --registry ${{ secrets.ACR_NAME }} \
             --image islamic-learning-api:${{ github.sha }} \
             --file backend/Dockerfile \
             backend
       - run: |
           az containerapp update \
-            --name ca-api-islamic-learning \
-            --resource-group rg-islamic-learning-centralus \
-            --image cr34odstpjgaabg.azurecr.io/islamic-learning-api:${{ github.sha }}
+            --name ${{ secrets.CONTAINER_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ secrets.ACR_NAME }}.azurecr.io/islamic-learning-api:${{ github.sha }}
+
+  deploy-frontend-dev:
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci && npm run build
+      - uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.SWA_DEPLOYMENT_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "frontend"
+          output_location: "dist"
+
+  # ── Prod deployment ─────────────────────────────────────────────────────────
+  deploy-backend:
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - run: |
+          az acr build --registry ${{ secrets.ACR_NAME }} \
+            --image islamic-learning-api:${{ github.sha }} \
+            --file backend/Dockerfile \
+            backend
+      - run: |
+          az containerapp update \
+            --name ${{ secrets.CONTAINER_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ secrets.ACR_NAME }}.azurecr.io/islamic-learning-api:${{ github.sha }}
 
   deploy-frontend:
     needs: [test-backend, test-frontend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

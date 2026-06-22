@@ -102,6 +102,14 @@ Key prior work:
 
 ## Learnings
 
+### Quran Audio Player — DOM Injection with createRoot (2026-06-22T12:33:25.396-05:00)
+- Pattern: `useEffect` with `window.setTimeout(50ms)` defers DOM query until after `dangerouslySetInnerHTML` has painted. Roots array declared in the effect closure so cleanup can unmount them.
+- `audioEl.dataset.qapEnhanced = '1'` guard prevents double-injection when effect re-runs (e.g., strict mode double-invoke).
+- Cleanup: `clearTimeout` + `roots.forEach(r => r.unmount())` + remove host divs + restore `controls` attribute. Covers unit navigation and unmount.
+- Arabic font: `font-family: 'Amiri', serif` already configured in tailwind as `font-arabic` and in `index.css`. Apply it directly in the `<style>` block inside UnitViewer — no new config needed.
+- Speed options [0.5, 0.75, 1, 1.25, 1.5] are child-optimized (includes slow 0.5× that the AI audio hook doesn't offer).
+- Key files: `frontend/src/components/QuranAudioPlayer.tsx` (new), `frontend/src/pages/courses/UnitViewer.tsx` (updated).
+
 ### Mark-as-Read UX — Reading Gate for Quiz Access (2026-06-20T17:31:22-05:00)
 - `UnitViewer` already had `progress.readingCompleted` state and `handleMarkComplete('reading')` wired to `courseService.updateProgress` — but state was never loaded from the backend, so it reset to `false` on every page load. Fix: add `courseService.getUnitProgress(memberId, unitId)` to the `Promise.all` on mount.
 - `getMemberProgress` returns an array of `{ courseId, unitProgress: [{ unitId, videoCompleted, readingCompleted, quizCompleted }] }` — filter by `unitId` to find the current unit's saved progress.

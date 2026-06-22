@@ -179,6 +179,35 @@
 
 **tsc --noEmit:** passes clean.
 
+### 2026-06-22T12:40:20-05:00 — Dev Azure Environment + CI/CD Multi-Environment Setup
+
+**Task:** Wire up a dev Azure environment alongside prod, with `dev` branch CI/CD.
+
+**Changes made:**
+
+**`.github/workflows/ci-cd.yml` — refactored to use GitHub Environments:**
+- `on.push.branches` and `on.pull_request.branches` expanded to `[main, dev]`
+- Added `deploy-backend-dev` + `deploy-frontend-dev` jobs guarded by `github.ref == 'refs/heads/dev'`; both reference `environment: dev`
+- Existing `deploy-backend` + `deploy-frontend` jobs now reference `environment: prod`
+- Removed all hardcoded resource names (`cr34odstpjgaabg`, `ca-api-islamic-learning`, `rg-islamic-learning-centralus`) — replaced with environment-scoped secrets: `ACR_NAME`, `CONTAINER_APP_NAME`, `RESOURCE_GROUP`
+- `AZURE_CREDENTIALS` and `SWA_DEPLOYMENT_TOKEN` remain the same names but are now scoped to the environment (not repo-level)
+- Block comment at top of workflow documents every required secret and where to find it
+
+**`docs/dev-environment-setup.md` — new file:**
+- Full provisioning walkthrough: azd commands, SP creation, secret retrieval
+- GitHub Environments setup (both `prod` migration and `dev` new setup)
+- Dev DB seed instructions
+- Cost-reduction tips (scale-to-zero, smaller PostgreSQL SKU)
+- Tear-down instructions
+
+**`azure.yaml` — no changes needed:** already parameterised by `environmentName`; azd handles multiple environments natively.
+
+**Key decisions:**
+- GitHub Environments used for secret scoping (not separate workflow files)
+- Resource names moved from hardcoded strings to environment-scoped secrets — makes the workflow logic identical for dev and prod, eliminating future drift
+- Prod migration is non-breaking: secret names unchanged, just the source moves from repo-level to environment-scoped
+- Bicep templates are environment-agnostic by design — `resourceToken = uniqueString(subscriptionId, environmentName, location)` ensures no naming collisions
+
 For detailed work history prior to 2026-05-20, see `.squad/agents/khwarizmi/history-archive.md`
 
 Key prior work:
