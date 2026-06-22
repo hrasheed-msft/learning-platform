@@ -36,6 +36,7 @@ vi.mock('@/services/assessmentService', () => ({
     getMemberResults: vi.fn().mockResolvedValue([]),
     getQuizResult: vi.fn().mockResolvedValue({}),
     getMemberProgress: vi.fn().mockResolvedValue({}),
+    getCooldownStatus: vi.fn().mockResolvedValue({ onCooldown: false }),
   },
 }));
 
