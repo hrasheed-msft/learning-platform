@@ -13,12 +13,19 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock stores
+// Mock stores — provide all exports to prevent transitive import failures
 vi.mock('@/stores', () => ({
   useAuthStore: vi.fn(() => ({
     family: { id: 'family-1' },
-    user: { id: 'user-1' }
+    user: { id: 'user-1' },
   })),
+  useChildAuthStore: vi.fn(() => ({})),
+  useFamilyStore: vi.fn(() => ({ members: [], fetchMembers: vi.fn() })),
+  useCourseStore: vi.fn(() => ({ courses: [], fetchCourses: vi.fn() })),
+  useFlashCardStore: vi.fn(() => ({})),
+  useDashboardStore: vi.fn(() => ({})),
+  useNotificationStore: vi.fn(() => ({ notifications: [] })),
+  useGameStore: vi.fn(() => ({})),
 }));
 
 // Mock services to prevent network calls
