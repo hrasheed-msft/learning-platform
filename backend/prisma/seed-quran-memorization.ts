@@ -199,11 +199,28 @@ async function fetchSurahData(surahNumber: number): Promise<SurahData> {
 }
 
 // ---------------------------------------------------------------------------
+// Slug generation — stable identifiers that survive re-seeds
+// ---------------------------------------------------------------------------
+
+function surahSlug(surahName: string): string {
+  return surahName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function ayahSlug(surahName: string, ayahNum: number): string {
+  return `${surahSlug(surahName)}-ayah-${ayahNum}`;
+}
+
+function reviewSlug(surahName: string): string {
+  return `${surahSlug(surahName)}-review`;
+}
+
+// ---------------------------------------------------------------------------
 // Main seed function
 // ---------------------------------------------------------------------------
 
 export async function seedQuranMemorizationCourse() {
   console.log('📖 Starting Quran Memorization — Short Surahs (Juz Amma) course seed...');
+  console.log('   Mode: UPSERT (preserves enrollments and progress)');
   console.log('');
 
   const demoFamily = await prisma.family.findFirst({
@@ -217,36 +234,67 @@ export async function seedQuranMemorizationCourse() {
 
   console.log('✅ Found demo family:', demoFamily.name);
 
-  const existingCourse = await prisma.course.findFirst({
+  // Upsert the course — find by title, create if missing, update if exists
+  let course = await prisma.course.findFirst({
     where: { title: COURSE_TITLE },
   });
 
-  if (existingCourse) {
-    console.log('⚠️  Quran Memorization course already exists. Deleting old version...');
-    await prisma.course.delete({ where: { id: existingCourse.id } });
-    console.log('✅ Deleted old version');
+  if (course) {
+    console.log('✅ Found existing course — updating in place (enrollments preserved)');
+    course = await prisma.course.update({
+      where: { id: course.id },
+      data: {
+        description:
+          'Memorize the short surahs of Juz Amma one ayah at a time. This course covers ' +
+          'Al-Fatiha and surahs 93–114, presented in a child-friendly sequence with Arabic ' +
+          'text, audio recitation by Sheikh Khalefa Al-Tunaiji, transliteration, and ' +
+          'Saheeh International translation. Perfect for ages 3–10.',
+        category: 'QURAN',
+        ageLevels: ['EARLY_CHILD', 'CHILD'],
+        thumbnailUrl: '/images/courses/quran-memorization-short-surahs.jpg',
+        isPublished: true,
+        contentVersion: { increment: 1 },
+      },
+    });
+  } else {
+    console.log('✅ Creating new course');
+    course = await prisma.course.create({
+      data: {
+        title: COURSE_TITLE,
+        description:
+          'Memorize the short surahs of Juz Amma one ayah at a time. This course covers ' +
+          'Al-Fatiha and surahs 93–114, presented in a child-friendly sequence with Arabic ' +
+          'text, audio recitation by Sheikh Khalefa Al-Tunaiji, transliteration, and ' +
+          'Saheeh International translation. Perfect for ages 3–10.',
+        category: 'QURAN',
+        ageLevels: ['EARLY_CHILD', 'CHILD'],
+        thumbnailUrl: '/images/courses/quran-memorization-short-surahs.jpg',
+        isPublished: true,
+      },
+    });
   }
 
-  const course = await prisma.course.create({
-    data: {
-      title: COURSE_TITLE,
-      description:
-        'Memorize the short surahs of Juz Amma one ayah at a time. This course covers ' +
-        'Al-Fatiha and surahs 93–114, presented in a child-friendly sequence with Arabic ' +
-        'text, audio recitation by Sheikh Khalefa Al-Tunaiji, transliteration, and ' +
-        'Saheeh International translation. Perfect for ages 3–10.',
-      category: 'QURAN',
-      ageLevels: ['EARLY_CHILD', 'CHILD'],
-      thumbnailUrl: '/images/courses/quran-memorization-short-surahs.jpg',
-      isPublished: true,
-    },
-  });
-
-  console.log('✅ Created course:', course.title);
+  console.log(`   Course ID: ${course.id}`);
   console.log('');
 
+  // Pre-cleanup: remove units without slugs (legacy format) to free orderIndex slots
+  const legacyUnits = await prisma.unit.findMany({
+    where: { courseId: course.id, slug: null },
+    select: { id: true, title: true },
+  });
+  if (legacyUnits.length > 0) {
+    console.log(`   🧹 Removing ${legacyUnits.length} legacy units (no slug) from previous seed format...`);
+    await prisma.unit.deleteMany({
+      where: { id: { in: legacyUnits.map(u => u.id) } },
+    });
+    console.log('   ✅ Legacy units removed');
+    console.log('');
+  }
+
   let globalOrderIndex = 0;
-  let totalUnits = 0;
+  let created = 0;
+  let updated = 0;
+  const activeUnitSlugs: string[] = [];
 
   for (const surah of SURAHS) {
     console.log(
@@ -264,57 +312,116 @@ export async function seedQuranMemorizationCourse() {
       throw err;
     }
 
+    // Upsert each ayah unit
     for (let ayahIndex = 0; ayahIndex < surah.ayahCount; ayahIndex++) {
       const ayahNum = ayahIndex + 1;
       const arabic = surahData.arabicTexts[ayahIndex] ?? '';
       const translit = surahData.transliterations[ayahIndex] ?? '';
       const translation = surahData.translations[ayahIndex] ?? '';
       const audio = buildAudioUrl(surah.number, ayahNum);
+      const slug = ayahSlug(surah.name, ayahNum);
+      activeUnitSlugs.push(slug);
 
-      const unit = await prisma.unit.create({
-        data: {
-          courseId: course.id,
-          title: `${surah.name} - Ayah ${ayahNum}`,
-          description: `Memorize Ayah ${ayahNum} of Surah ${surah.name} (${surah.number}:${ayahNum})`,
-          orderIndex: globalOrderIndex,
-          content: buildUnitContent(arabic, audio, translit, translation),
-        },
+      const existingUnit = await prisma.unit.findFirst({
+        where: { courseId: course.id, slug },
       });
 
+      let unitId: string;
+      if (existingUnit) {
+        await prisma.unit.update({
+          where: { id: existingUnit.id },
+          data: {
+            title: `${surah.name} - Ayah ${ayahNum}`,
+            description: `Memorize Ayah ${ayahNum} of Surah ${surah.name} (${surah.number}:${ayahNum})`,
+            orderIndex: globalOrderIndex,
+            content: buildUnitContent(arabic, audio, translit, translation),
+          },
+        });
+        unitId = existingUnit.id;
+        updated++;
+      } else {
+        const newUnit = await prisma.unit.create({
+          data: {
+            courseId: course.id,
+            slug,
+            title: `${surah.name} - Ayah ${ayahNum}`,
+            description: `Memorize Ayah ${ayahNum} of Surah ${surah.name} (${surah.number}:${ayahNum})`,
+            orderIndex: globalOrderIndex,
+            content: buildUnitContent(arabic, audio, translit, translation),
+          },
+        });
+        unitId = newUnit.id;
+        created++;
+      }
+
+      // Upsert audio resource and arabic term (delete old, create new for simplicity)
+      await prisma.audioResource.deleteMany({ where: { unitId } });
       await prisma.audioResource.create({
         data: {
-          unitId: unit.id,
+          unitId,
           title: `${surah.name} — Ayah ${ayahNum} (Khalefa Al-Tunaiji)`,
           url: audio,
           orderIndex: 0,
         },
       });
 
+      await prisma.arabicTerm.deleteMany({ where: { unitId } });
       await prisma.arabicTerm.create({
         data: {
-          unitId: unit.id,
+          unitId,
           arabicText: arabic,
           transliteration: translit,
-          translation: translation,
+          translation,
           audioUrl: audio,
         },
       });
 
       globalOrderIndex++;
-      totalUnits++;
     }
 
-    const reviewUnit = await prisma.unit.create({
-      data: {
-        courseId: course.id,
-        title: `${surah.name} - Full Surah Review`,
-        description:
-          `Review the complete Surah ${surah.name}. ` +
-          `Listen to the full recitation and check your memorization.`,
-        orderIndex: globalOrderIndex,
-        content: buildSurahReviewContent(surah.name, surahData, surah.number),
-      },
+    // Upsert surah review unit
+    const revSlug = reviewSlug(surah.name);
+    activeUnitSlugs.push(revSlug);
+
+    const existingReview = await prisma.unit.findFirst({
+      where: { courseId: course.id, slug: revSlug },
     });
+
+    let reviewUnitId: string;
+    if (existingReview) {
+      await prisma.unit.update({
+        where: { id: existingReview.id },
+        data: {
+          title: `${surah.name} - Full Surah Review`,
+          description:
+            `Review the complete Surah ${surah.name}. ` +
+            `Listen to the full recitation and check your memorization.`,
+          orderIndex: globalOrderIndex,
+          content: buildSurahReviewContent(surah.name, surahData, surah.number),
+        },
+      });
+      reviewUnitId = existingReview.id;
+      updated++;
+    } else {
+      const newReview = await prisma.unit.create({
+        data: {
+          courseId: course.id,
+          slug: revSlug,
+          title: `${surah.name} - Full Surah Review`,
+          description:
+            `Review the complete Surah ${surah.name}. ` +
+            `Listen to the full recitation and check your memorization.`,
+          orderIndex: globalOrderIndex,
+          content: buildSurahReviewContent(surah.name, surahData, surah.number),
+        },
+      });
+      reviewUnitId = newReview.id;
+      created++;
+    }
+
+    // Refresh audio/arabic for review unit
+    await prisma.audioResource.deleteMany({ where: { unitId: reviewUnitId } });
+    await prisma.arabicTerm.deleteMany({ where: { unitId: reviewUnitId } });
 
     await Promise.all(
       surahData.arabicTexts.map((arabicText, index) => {
@@ -324,7 +431,7 @@ export async function seedQuranMemorizationCourse() {
         return Promise.all([
           prisma.audioResource.create({
             data: {
-              unitId: reviewUnit.id,
+              unitId: reviewUnitId,
               title: `${surah.name} — Full Review Ayah ${ayahNum} (Khalefa Al-Tunaiji)`,
               url: audio,
               orderIndex: index,
@@ -332,7 +439,7 @@ export async function seedQuranMemorizationCourse() {
           }),
           prisma.arabicTerm.create({
             data: {
-              unitId: reviewUnit.id,
+              unitId: reviewUnitId,
               arabicText,
               transliteration: surahData.transliterations[index] ?? '',
               translation: surahData.translations[index] ?? '',
@@ -344,18 +451,40 @@ export async function seedQuranMemorizationCourse() {
     );
 
     globalOrderIndex++;
-    totalUnits++;
 
-    console.log(`   ✅ ${surah.name}: ${surah.ayahCount + 1} units created (including review)`);
+    console.log(`   ✅ ${surah.name}: ${surah.ayahCount + 1} units processed`);
 
     // Be polite to the quran.com API — 300ms between surahs
     await sleep(300);
   }
 
+  // Clean up orphaned units (units in this course that no longer have a valid slug)
+  const orphanedUnits = await prisma.unit.findMany({
+    where: {
+      courseId: course.id,
+      OR: [
+        { slug: null },
+        { slug: { notIn: activeUnitSlugs } },
+      ],
+    },
+    select: { id: true, title: true },
+  });
+
+  if (orphanedUnits.length > 0) {
+    console.log(`   🧹 Removing ${orphanedUnits.length} orphaned units from previous format...`);
+    for (const orphan of orphanedUnits) {
+      console.log(`      - ${orphan.title}`);
+    }
+    await prisma.unit.deleteMany({
+      where: { id: { in: orphanedUnits.map(u => u.id) } },
+    });
+  }
+
   console.log('');
   console.log(
-    `✅ Quran Memorization course complete — ${totalUnits} units across ${SURAHS.length} surahs`,
+    `✅ Quran Memorization course complete — ${created} created, ${updated} updated, ${orphanedUnits.length} removed`,
   );
+  console.log(`   Total active units: ${activeUnitSlugs.length} across ${SURAHS.length} surahs`);
 }
 
 // Allow standalone execution
