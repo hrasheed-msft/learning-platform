@@ -116,33 +116,54 @@ function buildSurahReviewContent(
   surahData: SurahData,
   surahNumber: number,
 ): string {
-  const ayahSections = surahData.arabicTexts
-    .map((arabicText, index) => {
-      const ayahNumber = index + 1;
-      const audioSrc = buildAudioUrl(surahNumber, ayahNumber);
+  // Continuous Arabic text block — all ayahs together
+  const arabicBlock = surahData.arabicTexts
+    .map((text, i) => `<span>${text}</span> <span style="color:#9ca3af;font-size:0.7em;">(${i + 1})</span>`)
+    .join(' ');
+
+  // Build audio sources for sequential playback (all ayahs in order)
+  const audioSources = surahData.arabicTexts
+    .map((_, index) => {
+      const audioSrc = buildAudioUrl(surahNumber, index + 1);
+      return `<source src="${audioSrc}" type="audio/mpeg" />`;
+    })
+    .join('\n    ');
+
+  // Transliteration + translation listed per ayah below
+  const ayahDetails = surahData.arabicTexts
+    .map((_, index) => {
       const transliteration = surahData.transliterations[index] ?? '';
       const translation = surahData.translations[index] ?? '';
-
-      return `<div class="quran-verse" style="margin-bottom: 2rem;">
-  <p class="arabic-large" dir="rtl" lang="ar">${arabicText}</p>
-  <audio controls style="width:100%; margin-top: 1rem;">
-    <source src="${audioSrc}" type="audio/mpeg" />
-    Your browser does not support the audio element.
-  </audio>
-  <p style="font-size: 1.1rem; color: #4b5563; font-style: italic; margin-top: 1rem;">${transliteration}</p>
-  <p style="font-size: 1.1rem; color: #374151; margin-top: 0.75rem;">${translation}</p>
+      return `<div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb;">
+  <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 0.25rem;">Ayah ${index + 1}</p>
+  <p style="font-size: 1.1rem; color: #4b5563; font-style: italic;">${transliteration}</p>
+  <p style="font-size: 1.05rem; color: #374151; margin-top: 0.5rem;">${translation}</p>
 </div>`;
     })
     .join('\n');
 
+  // Use a single audio element with just the first ayah — the QuranAudioPlayer
+  // will handle playback. We include a playlist data attribute for sequential play.
+  const firstAudioSrc = buildAudioUrl(surahNumber, 1);
+  const allAudioUrls = surahData.arabicTexts
+    .map((_, i) => buildAudioUrl(surahNumber, i + 1))
+    .join(',');
+
   return `<h2>Full Surah Review: ${surahName}</h2>
-<p>Review every ayah of Surah ${surahName} together. Listen carefully, recite along, and check your memorization.</p>
+<p style="margin-bottom: 1.5rem;">Review the complete surah. Listen to the full recitation, follow along, and check your memorization.</p>
 
-${ayahSections}
+<div class="quran-verse">
+  <p class="arabic-large" dir="rtl" lang="ar" style="line-height: 2.5;">${arabicBlock}</p>
+  <audio controls style="width:100%; margin-top: 1.5rem;" data-playlist="${allAudioUrls}">
+    <source src="${firstAudioSrc}" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+</div>
 
-<div style="margin-top: 2rem;">
-  <p>Listen to the complete surah, review your memorization, then click "Surah Completed" below.</p>
-</div>`;
+<h3 style="margin-top: 2rem;">Transliteration &amp; Translation</h3>
+${ayahDetails}
+
+<p style="margin-top: 1.5rem; font-weight: 600;">Listen to the complete surah, review your memorization, then click &ldquo;Surah Completed&rdquo; below.</p>`;
 }
 
 // ---------------------------------------------------------------------------

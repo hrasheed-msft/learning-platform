@@ -39,8 +39,10 @@ export default function UnitViewer() {
   const [audioSyncState, setAudioSyncState] = useState<UnitAudioSyncState | null>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
 
+  // Reset ALL local state when navigating to a different unit
   useEffect(() => {
     setAudioSyncState(null);
+    setProgress({ videoCompleted: false, readingCompleted: false, quizCompleted: false });
   }, [unitId]);
 
   useEffect(() => {
@@ -48,7 +50,6 @@ export default function UnitViewer() {
       if (!courseId || !unitId) return;
       
       try {
-        setProgress(DEFAULT_UNIT_PROGRESS);
         setLoading(true);
         const memberId = currentUnitState?.memberId;
         const [data, unitsData, savedProgress] = await Promise.all([
@@ -481,30 +482,35 @@ export default function UnitViewer() {
             </div>
             
             {/* Mark as Read — prominent bottom CTA */}
-            {progress.readingCompleted ? (
-              <div className="flex justify-center mt-6 mb-2">
-                <p className="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 font-medium rounded-xl border border-green-200">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  Lesson completed ✅
-                </p>
-              </div>
-            ) : (
-              <div className="flex justify-center mt-6 mb-2">
-                <button
-                  type="button"
-                  onClick={() => handleMarkComplete('reading')}
-                  disabled={updatingProgress}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-green-500 text-white font-semibold text-base rounded-xl hover:bg-green-600 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {updatingProgress ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="w-5 h-5" />
-                  )}
-                  {updatingProgress ? 'Saving…' : "✅ I've read this lesson"}
-                </button>
-              </div>
-            )}
+            {(() => {
+              const isSurahReview = unit?.title?.includes('Full Surah Review');
+              const completedLabel = isSurahReview ? 'Surah Completed ✅' : 'Lesson completed ✅';
+              const actionLabel = isSurahReview ? '✅ Surah Completed' : "✅ I've read this lesson";
+              return progress.readingCompleted ? (
+                <div className="flex justify-center mt-6 mb-2">
+                  <p className="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 font-medium rounded-xl border border-green-200">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    {completedLabel}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex justify-center mt-6 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => handleMarkComplete('reading')}
+                    disabled={updatingProgress}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-green-500 text-white font-semibold text-base rounded-xl hover:bg-green-600 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {updatingProgress ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <CheckCircle className="w-5 h-5" />
+                    )}
+                    {updatingProgress ? 'Saving…' : actionLabel}
+                  </button>
+                </div>
+              );
+            })()}
 
             {/* Bottom Navigation */}
             <div className="flex items-center justify-between pt-6 mt-4 border-t border-gray-200">

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Repeat } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Play, Pause, RotateCcw, Repeat, SkipForward } from 'lucide-react';
 
 interface QuranAudioPlayerProps {
   audioEl: HTMLAudioElement;
@@ -22,7 +22,7 @@ function formatTime(seconds: number): string {
 /**
  * Custom audio player for Quran memorization units.
  * Mounts directly onto an existing <audio> DOM element.
- * Supports loop/repeat toggle and per-ayah playback speed.
+ * Supports loop/repeat toggle, playback speed, and playlist (data-playlist) for sequential ayah playback.
  */
 export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(!audioEl.paused);
@@ -33,10 +33,49 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
     isSpeedOption(audioEl.playbackRate) ? audioEl.playbackRate : 1,
   );
 
+  // Playlist support: parse comma-separated URLs from data-playlist
+  const playlistAttr = audioEl.dataset.playlist || '';
+  const playlist = playlistAttr ? playlistAttr.split(',') : [];
+  const hasPlaylist = playlist.length > 1;
+  const [trackIndex, setTrackIndex] = useState(0);
+  const trackIndexRef = useRef(0);
+
   useEffect(() => {
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
+    const onEnded = () => {
+      if (hasPlaylist && !audioEl.loop) {
+        const nextIdx = trackIndexRef.current + 1;
+        if (nextIdx < playlist.length) {
+          trackIndexRef.current = nextIdx;
+          setTrackIndex(nextIdx);
+          const source = audioEl.querySelector('source');
+          if (source) {
+            source.src = playlist[nextIdx];
+          } else {
+            audioEl.src = playlist[nextIdx];
+          }
+          audioEl.load();
+          audioEl.playbackRate = audioEl.playbackRate; // preserve speed
+          audioEl.play().catch(() => {});
+          return;
+        } else if (loop) {
+          // Loop the entire playlist from the beginning
+          trackIndexRef.current = 0;
+          setTrackIndex(0);
+          const source = audioEl.querySelector('source');
+          if (source) {
+            source.src = playlist[0];
+          } else {
+            audioEl.src = playlist[0];
+          }
+          audioEl.load();
+          audioEl.play().catch(() => {});
+          return;
+        }
+      }
+      setIsPlaying(false);
+    };
     const onTimeUpdate = () => setCurrentTime(audioEl.currentTime);
     const onDurationChange = () => {
       if (isFinite(audioEl.duration)) setDuration(audioEl.duration);
@@ -60,7 +99,7 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
       audioEl.removeEventListener('durationchange', onDurationChange);
       audioEl.removeEventListener('loadedmetadata', onLoadedMetadata);
     };
-  }, [audioEl]);
+  }, [audioEl, hasPlaylist, loop, playlist]);
 
   const togglePlay = useCallback(() => {
     if (audioEl.paused) {
@@ -71,15 +110,50 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
   }, [audioEl]);
 
   const restart = useCallback(() => {
-    audioEl.currentTime = 0;
-    audioEl.play().catch(() => {});
-  }, [audioEl]);
+    if (hasPlaylist) {
+      // Restart from beginning of playlist
+      trackIndexRef.current = 0;
+      setTrackIndex(0);
+      const source = audioEl.querySelector('source');
+      if (source) {
+        source.src = playlist[0];
+      } else {
+        audioEl.src = playlist[0];
+      }
+      audioEl.load();
+      audioEl.playbackRate = audioEl.playbackRate;
+      audioEl.play().catch(() => {});
+    } else {
+      audioEl.currentTime = 0;
+      audioEl.play().catch(() => {});
+    }
+  }, [audioEl, hasPlaylist, playlist]);
+
+  const skipNext = useCallback(() => {
+    if (!hasPlaylist) return;
+    const nextIdx = trackIndexRef.current + 1;
+    if (nextIdx < playlist.length) {
+      trackIndexRef.current = nextIdx;
+      setTrackIndex(nextIdx);
+      const source = audioEl.querySelector('source');
+      if (source) {
+        source.src = playlist[nextIdx];
+      } else {
+        audioEl.src = playlist[nextIdx];
+      }
+      audioEl.load();
+      audioEl.playbackRate = audioEl.playbackRate;
+      audioEl.play().catch(() => {});
+    }
+  }, [audioEl, hasPlaylist, playlist]);
 
   const toggleLoop = useCallback(() => {
-    const next = !audioEl.loop;
-    audioEl.loop = next;
+    const next = !loop;
+    if (!hasPlaylist) {
+      audioEl.loop = next;
+    }
     setLoop(next);
-  }, [audioEl]);
+  }, [audioEl, hasPlaylist, loop]);
 
   const handleSpeedChange = useCallback(
     (speed: SpeedOption) => {
@@ -106,6 +180,13 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
       dir="ltr"
       aria-label="Quran audio player"
     >
+      {/* Track indicator for playlists */}
+      {hasPlaylist && (
+        <div className="text-xs text-center text-amber-700 font-medium mb-2">
+          Ayah {trackIndex + 1} of {playlist.length}
+        </div>
+      )}
+
       {/* Main controls row */}
       <div className="flex items-center gap-2">
         {/* Restart */}
@@ -113,7 +194,7 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
           type="button"
           onClick={restart}
           className="w-9 h-9 flex items-center justify-center rounded-full text-amber-700 hover:bg-amber-100 transition-colors flex-shrink-0"
-          aria-label="Restart ayah"
+          aria-label={hasPlaylist ? 'Restart surah' : 'Restart ayah'}
           title="Restart"
         >
           <RotateCcw className="w-4 h-4" />
@@ -128,6 +209,20 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
         >
           {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
         </button>
+
+        {/* Skip next (playlist only) */}
+        {hasPlaylist && (
+          <button
+            type="button"
+            onClick={skipNext}
+            disabled={trackIndex >= playlist.length - 1}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-amber-700 hover:bg-amber-100 transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Next ayah"
+            title="Next ayah"
+          >
+            <SkipForward className="w-4 h-4" />
+          </button>
+        )}
 
         {/* Seek bar + timestamps */}
         <div className="flex-1 min-w-0">
@@ -161,7 +256,7 @@ export default function QuranAudioPlayer({ audioEl }: QuranAudioPlayerProps) {
           }`}
           aria-label={loop ? 'Loop on — tap to disable' : 'Loop off — tap to enable'}
           aria-pressed={loop}
-          title={loop ? 'Loop: ON' : 'Loop: OFF'}
+          title={loop ? (hasPlaylist ? 'Loop surah: ON' : 'Loop: ON') : (hasPlaylist ? 'Loop surah: OFF' : 'Loop: OFF')}
         >
           <Repeat className="w-4 h-4" />
         </button>
