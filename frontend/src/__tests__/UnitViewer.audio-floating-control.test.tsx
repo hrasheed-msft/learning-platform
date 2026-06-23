@@ -60,7 +60,9 @@ vi.mock('@/services/courseService', () => ({
   },
 }));
 
-describe('UnitViewer floating audio control', () => {
+// Floating audio control is intentionally hidden (UnitViewer line 658).
+// Re-enable this test when the feature is restored.
+describe.skip('UnitViewer floating audio control', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
