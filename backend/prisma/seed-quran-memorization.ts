@@ -111,6 +111,40 @@ function buildUnitContent(
 <p style="font-size: 1.1rem; color: #374151;">${translation}</p>`;
 }
 
+function buildSurahReviewContent(
+  surahName: string,
+  surahData: SurahData,
+  surahNumber: number,
+): string {
+  const ayahSections = surahData.arabicTexts
+    .map((arabicText, index) => {
+      const ayahNumber = index + 1;
+      const audioSrc = buildAudioUrl(surahNumber, ayahNumber);
+      const transliteration = surahData.transliterations[index] ?? '';
+      const translation = surahData.translations[index] ?? '';
+
+      return `<div class="quran-verse" style="margin-bottom: 2rem;">
+  <p class="arabic-large" dir="rtl" lang="ar">${arabicText}</p>
+  <audio controls style="width:100%; margin-top: 1rem;">
+    <source src="${audioSrc}" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+  <p style="font-size: 1.1rem; color: #4b5563; font-style: italic; margin-top: 1rem;">${transliteration}</p>
+  <p style="font-size: 1.1rem; color: #374151; margin-top: 0.75rem;">${translation}</p>
+</div>`;
+    })
+    .join('\n');
+
+  return `<h2>Full Surah Review: ${surahName}</h2>
+<p>Review every ayah of Surah ${surahName} together. Listen carefully, recite along, and check your memorization.</p>
+
+${ayahSections}
+
+<div style="margin-top: 2rem;">
+  <p>Listen to the complete surah, review your memorization, then click "Surah Completed" below.</p>
+</div>`;
+}
+
 // ---------------------------------------------------------------------------
 // API fetching
 // ---------------------------------------------------------------------------
@@ -249,7 +283,49 @@ export async function seedQuranMemorizationCourse() {
       totalUnits++;
     }
 
-    console.log(`   ✅ ${surah.name}: ${surah.ayahCount} units created`);
+    const reviewUnit = await prisma.unit.create({
+      data: {
+        courseId: course.id,
+        title: `${surah.name} - Full Surah Review`,
+        description:
+          `Review the complete Surah ${surah.name}. ` +
+          `Listen to the full recitation and check your memorization.`,
+        orderIndex: globalOrderIndex,
+        content: buildSurahReviewContent(surah.name, surahData, surah.number),
+      },
+    });
+
+    await Promise.all(
+      surahData.arabicTexts.map((arabicText, index) => {
+        const ayahNum = index + 1;
+        const audio = buildAudioUrl(surah.number, ayahNum);
+
+        return Promise.all([
+          prisma.audioResource.create({
+            data: {
+              unitId: reviewUnit.id,
+              title: `${surah.name} — Full Review Ayah ${ayahNum} (Khalefa Al-Tunaiji)`,
+              url: audio,
+              orderIndex: index,
+            },
+          }),
+          prisma.arabicTerm.create({
+            data: {
+              unitId: reviewUnit.id,
+              arabicText,
+              transliteration: surahData.transliterations[index] ?? '',
+              translation: surahData.translations[index] ?? '',
+              audioUrl: audio,
+            },
+          }),
+        ]);
+      }),
+    );
+
+    globalOrderIndex++;
+    totalUnits++;
+
+    console.log(`   ✅ ${surah.name}: ${surah.ayahCount + 1} units created (including review)`);
 
     // Be polite to the quran.com API — 300ms between surahs
     await sleep(300);

@@ -102,6 +102,12 @@ Key prior work:
 
 ## Learnings
 
+### UnitViewer Progress Reset on Unit Navigation (2026-06-23T09:49:39-05:00)
+- `UnitViewer` must reset local `progress` immediately when `courseId` or `unitId` changes; otherwise unit-to-unit navigation can leak stale completion flags into the next lesson before backend progress loads.
+- Preferred pattern: define a shared `DEFAULT_UNIT_PROGRESS` constant and reuse it both for `useState` initialization and at the top of the unit-fetch `useEffect`.
+- User preference: "I've read the lesson" should only complete the current lesson; completion badges must reflect saved per-unit progress, never prior navigation state.
+- Key file paths: `frontend/src/pages/courses/UnitViewer.tsx`, `.squad/agents/ibn-sina/history.md`.
+
 ### Quran Audio Player — DOM Injection with createRoot (2026-06-22T12:33:25.396-05:00)
 - Pattern: `useEffect` with `window.setTimeout(50ms)` defers DOM query until after `dangerouslySetInnerHTML` has painted. Roots array declared in the effect closure so cleanup can unmount them.
 - `audioEl.dataset.qapEnhanced = '1'` guard prevents double-injection when effect re-runs (e.g., strict mode double-invoke).
@@ -145,4 +151,3 @@ Key prior work:
 
 ### Ready for Testing
 All frontend code complete and type-safe. Ready for e2e testing with backend 429 responses.
-

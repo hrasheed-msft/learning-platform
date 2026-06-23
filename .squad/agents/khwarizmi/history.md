@@ -262,3 +262,10 @@ Key prior work:
 ### Handoff to Ibn Sina
 Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen, delayed answer reveal on fail, gated review panel.
 
+## Learnings
+
+### 2026-06-23T09:49:39-05:00 — Quran memorization surah review units
+- `backend/prisma/seed-quran-memorization.ts` now treats each surah as a sequence of ayah units followed by a final full-surah review unit, so downstream consumers should expect one extra unit per surah.
+- Pattern: keep single-ayah HTML generation in `buildUnitContent()` and build aggregate review HTML in a separate helper (`buildSurahReviewContent()`) to avoid overloading the per-ayah path.
+- Review units can safely reuse the existing everyayah URL scheme (`https://everyayah.com/data/khalefa_al_tunaiji_64kbps/{SSS}{VVV}.mp3`) for each ayah instead of introducing a new audio source format.
+- Key file path: `backend/prisma/seed-quran-memorization.ts`.

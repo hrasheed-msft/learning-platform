@@ -16,6 +16,11 @@ interface UnitProgress {
 }
 
 const MASAAR_LESSON_PATH_PATTERN = /\/lessons\/masaar-irab-sarf\/week-\d+\.html/i;
+const DEFAULT_UNIT_PROGRESS: UnitProgress = {
+  videoCompleted: false,
+  readingCompleted: false,
+  quizCompleted: false,
+};
 
 export default function UnitViewer() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
@@ -29,11 +34,7 @@ export default function UnitViewer() {
   const [allUnits, setAllUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState<UnitProgress>({
-    videoCompleted: false,
-    readingCompleted: false,
-    quizCompleted: false,
-  });
+  const [progress, setProgress] = useState<UnitProgress>(DEFAULT_UNIT_PROGRESS);
   const [updatingProgress, setUpdatingProgress] = useState(false);
   const [audioSyncState, setAudioSyncState] = useState<UnitAudioSyncState | null>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
@@ -47,6 +48,7 @@ export default function UnitViewer() {
       if (!courseId || !unitId) return;
       
       try {
+        setProgress(DEFAULT_UNIT_PROGRESS);
         setLoading(true);
         const memberId = currentUnitState?.memberId;
         const [data, unitsData, savedProgress] = await Promise.all([
