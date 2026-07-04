@@ -41,6 +41,31 @@ function hasUnitStarted(progress?: EnrollmentUnitProgress) {
   return Boolean(progress.videoCompleted || progress.readingCompleted || progress.quizCompleted);
 }
 
+function getProgressTimestamp(progress: EnrollmentUnitProgress): number {
+  const updatedAt = progress.updatedAt ? Date.parse(progress.updatedAt) : Number.NaN;
+  if (!Number.isNaN(updatedAt)) {
+    return updatedAt;
+  }
+
+  const createdAt = progress.createdAt ? Date.parse(progress.createdAt) : Number.NaN;
+  return Number.isNaN(createdAt) ? 0 : createdAt;
+}
+
+function findTargetEnrollment(
+  enrollments: CourseEnrollment[],
+  courseId: string,
+  enrollmentId?: string,
+): CourseEnrollment | null {
+  if (enrollmentId) {
+    const byId = enrollments.find((enrollment) => enrollment.id === enrollmentId);
+    if (byId) {
+      return byId;
+    }
+  }
+
+  return enrollments.find((enrollment) => enrollment.courseId === courseId) ?? null;
+}
+
 export default function CourseLearner() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
@@ -88,15 +113,10 @@ export default function CourseLearner() {
 
         let nextEnrollment = state?.enrollment?.courseId === courseId ? state.enrollment : storeEnrollment ?? null;
 
-        if ((!nextEnrollment || nextEnrollment.unitProgress === undefined) && activeMemberId) {
+        if (activeMemberId) {
           const memberEnrollments = await courseService.getEnrollments(activeMemberId);
-          nextEnrollment = memberEnrollments.find((enrollment) => {
-            if (state?.enrollmentId) {
-              return enrollment.id === state.enrollmentId;
-            }
-
-            return enrollment.courseId === courseId;
-          }) ?? nextEnrollment;
+          const freshEnrollment = findTargetEnrollment(memberEnrollments, courseId, state?.enrollmentId);
+          nextEnrollment = freshEnrollment ?? nextEnrollment;
         }
 
         setResolvedEnrollment(nextEnrollment ?? null);
@@ -116,8 +136,12 @@ export default function CourseLearner() {
       return null;
     }
 
-    const unitProgress = resolvedEnrollment?.unitProgress ?? [];
-    const partiallyStartedUnit = unitProgress.find((progress) => !isUnitCompleted(progress) && hasUnitStarted(progress));
+    const unitProgress = [...(resolvedEnrollment?.unitProgress ?? [])].sort(
+      (a, b) => getProgressTimestamp(b) - getProgressTimestamp(a),
+    );
+    const partiallyStartedUnit = unitProgress.find(
+      (progress) => !isUnitCompleted(progress) && hasUnitStarted(progress),
+    );
 
     if (partiallyStartedUnit) {
       return units.find((unit) => unit.id === partiallyStartedUnit.unitId) ?? units[0];

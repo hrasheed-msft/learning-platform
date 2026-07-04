@@ -242,7 +242,20 @@ export class CourseService {
       where: { memberId },
       include: {
         course: true,
-        unitProgress: true,
+        unitProgress: {
+          orderBy: [
+            { updatedAt: 'desc' },
+            { createdAt: 'desc' },
+          ],
+          include: {
+            unit: {
+              select: {
+                id: true,
+                orderIndex: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });

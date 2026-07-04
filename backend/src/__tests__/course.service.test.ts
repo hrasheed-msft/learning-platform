@@ -230,6 +230,33 @@ describe('CourseService', () => {
 
       expect(result).toHaveLength(0);
     });
+
+    it('should request unit progress sorted by latest activity for resume behavior', async () => {
+      vi.mocked(prisma.courseEnrollment.findMany).mockResolvedValue([]);
+
+      await CourseService.getMemberEnrollments('family-1', 'member-1');
+
+      expect(prisma.courseEnrollment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            unitProgress: {
+              orderBy: [
+                { updatedAt: 'desc' },
+                { createdAt: 'desc' },
+              ],
+              include: {
+                unit: {
+                  select: {
+                    id: true,
+                    orderIndex: true,
+                  },
+                },
+              },
+            },
+          }),
+        }),
+      );
+    });
   });
 
   describe('getUnits', () => {
