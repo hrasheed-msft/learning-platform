@@ -151,3 +151,9 @@ Key prior work:
 
 ### Ready for Testing
 All frontend code complete and type-safe. Ready for e2e testing with backend 429 responses.
+
+### Course Resume Source of Truth (2026-07-04T00:23:33.053-04:00)
+- `CourseLearner` should always refresh enrollments from `courseService.getEnrollments(memberId)` when member context exists; route-state enrollment is a hint, not truth.
+- Resume target must be derived against ordered `units`: first partially started incomplete unit, else first incomplete unit, else fallback to first unit.
+- This avoids stale `location.state.enrollment` snapshots forcing "Continue Learning" back to unit 1 after progress updates in `UnitViewer`.
+- Key files: `frontend/src/pages/courses/CourseLearner.tsx`, `frontend/src/__tests__/pages/CourseLearner.test.tsx`.

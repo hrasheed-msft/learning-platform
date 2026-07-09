@@ -134,3 +134,9 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 - The new-course QA template should verify both enrollment entry points: `POST /api/v1/courses/enrollments` returns 201 for parent-managed enrollments, while `POST /api/v1/courses/:courseId/enroll` uses the active learner and stays idempotent-friendly.
 - For deployment safety, the highest-value regression checks are: slug-style course IDs must fail with 422 before service calls, valid-but-missing UUIDs should surface 404s from the service layer, and duplicate enrollments should preserve the conflict/idempotent behavior of each endpoint.
 
+
+### 2026-07-04T00:23:33.053-04:00 — Resume progress regression
+
+- `frontend/src/pages/courses/CourseLearner.tsx` must refresh enrollments from `courseService.getEnrollments(memberId)` on learner entry instead of trusting route-state enrollment snapshots; child-course links pass mutable progress in navigation state and it can go stale after unit activity.
+- `frontend/src/__tests__/pages/CourseLearner.test.tsx` now covers both the normal resume path and the stale-route-state regression where the API has newer `unitProgress` than the navigation payload.
+- For resume QA, assert the destination unit ID, not just that navigation happened; otherwise the “always resumes at unit 1” bug can slip through.

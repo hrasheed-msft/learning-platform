@@ -1,4 +1,4 @@
-# Squad Decisions
+﻿# Squad Decisions
 
 ## Active Decisions
 
@@ -311,831 +311,404 @@ Site hanging; lessons not loading. Video generation non-essential vs. audio/less
 - Document architectural decisions here
 - Keep history focused on work, decisions focused on direction
 
-### 2026-06-06T17:05:11-05:00: Enrollment QA template coverage
+
+
+### 2026-07-04T00:23:33.053-04:00: Refresh learner progress from API on resume
 **By:** Biruni
-**What:** New course deployment QA should include a route-level enrollment template that mounts `course.routes.ts` with real validation middleware, mocked auth, and mocked course services.
-**Why:** This catches UUID validation regressions like slug-based course IDs returning 422, while also verifying 200/201/404/409 behavior for course lookup, units, enrollment, and duplicate handling without touching production data.
+**What:** CourseLearner should re-fetch the active member's enrollments when the learner page loads and prefer the fresh enrollment over any enrollment object passed in router state.
+**Why:** Child course links carry an enrollment snapshot in navigation state. After a learner makes progress inside a unit, that snapshot can be stale on return, causing “Continue where you left off” to point back to unit 1 even though newer `unitProgress` exists server-side.
 
+# Decision: Custom Quran Audio Player for Memorization Units
 
-### 2026-06-06T17:05:11-05:00: User directive
-**By:** Hamza Rasheed (via Copilot)
-**What:** New courses must include enrollment tests as part of the QA process before going live.
-**Why:** User request — captured for team memory
-
-
-### 2026-06-20T12:10:14-05:00: User directive
-**By:** hrasheed (via Copilot)
-**What:** Hide audio buttons across all courses until we figure out how to get faithful pronunciation of Arabic words.
-**Why:** User request — pronunciation quality not yet acceptable for production use.
-
-
-### 2026-06-06T17:09:20-05:00: Unit lesson CTA gating
-**By:** Ibn Sina
-**What:** The unit detail page should keep rendering backend-authored lesson HTML links as-is, but also surface a dedicated `Open Full Interactive Lesson` CTA above the content only when `unit.content.text` already includes the `/lessons/masaar-irab-sarf/week-N.html` pattern. The CTA URL is derived from `orderIndex + 1` using the canonical `/lessons/masaar-irab-sarf/week-{N}.html` route and opens in a new tab.
-**Why:** This preserves backend control over which units expose standalone HTML lessons while giving learners a highly visible, consistent launch affordance on al-Masār unit pages.
-
-
-# Decision: Quiz Answer Flow — Submit-Response-Driven Grading
-
-**Date:** 2026-06-20T14:01:24-05:00  
 **Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-06-22T12:33:25.396-05:00  
 **Status:** Implemented
-
-## Context
-
-Khwarizmi's security fix removed `correctAnswer` and `explanation` from the backend
-`getQuestions()` endpoint. These fields are now withheld until after submission to
-prevent answer leakage to the client before the quiz is completed.
 
 ## Decision
 
-**All grading logic in `QuizPage.tsx` must be driven exclusively by the `submitQuiz()` response.**
+Added a `QuranAudioPlayer` React component that replaces the native `<audio controls>` element inside any `.quran-verse` container with a child-friendly custom player featuring loop/repeat, playback speed (0.5×–1.5×), a seek bar, and restart.
 
-Specifically:
-1. The local `Question` interface and the shared `QuizQuestion` type no longer carry
-   `correctAnswer` or `explanation`.
-2. Score calculation (`calculateScore`) reads from `submitResult.score`,
-   `submitResult.correctCount`, and `submitResult.totalQuestions`.
-3. The "Review Your Answers" panel reads `correctAnswer` and `explanation` from
-   `submitResult.answers[]` (the `GradedAnswer` array).
-4. `passed` is read from `submitResult.passed`, not recomputed on the client.
-5. If `submitQuiz()` throws, the results screen still renders (graceful degradation)
-   but shows zero score and a "Results unavailable" message — **no correctAnswers
-   are ever inferred client-side**.
+## Approach
 
-## Type Changes
+**DOM injection via `createRoot`** — after content renders, a `useEffect` in `UnitViewer` queries `.quran-verse audio` elements within a `contentContainerRef`, hides native controls, and mounts `<QuranAudioPlayer audioEl={el} />` into a host div inserted after each audio element. Cleanup unmounts React roots and restores native controls on unit navigation.
 
-- `QuizQuestion`: removed `correctAnswer?` and `explanation?` fields entirely.
-- `QuizResult` interface: **removed** (was wrong shape; replaced by `GradedAnswer`).
-- `GradedAnswer` interface: **added** — `{questionId, answer, isCorrect, correctAnswer?, explanation?}`.
-- `QuizSubmissionResponse`: corrected to `{id, score, passed, correctCount, totalQuestions, pointsEarned, answers: GradedAnswer[]}`.
+This was chosen over modifying `SyncedTextContent` (would require threading audio player logic through the parser) and over a full "replace native player" approach (would require duplicating audio element or using media sessions API).
 
-## Rationale
+## Key Details
 
-Keeping `correctAnswer` in the GET type or computing `isCorrect` client-side would
-re-introduce the vulnerability that Khwarizmi's fix closed. The source of truth for
-all graded data is the server.
+- **New file:** `frontend/src/components/QuranAudioPlayer.tsx`
+- **Modified:** `frontend/src/pages/courses/UnitViewer.tsx`
+  - Imports: `useRef`, `createRoot`, `QuranAudioPlayer`
+  - CSS: `.arabic-large` → 2.75rem (3rem on md+), `line-height: 2`, `font-family: 'Amiri', serif`
+  - Injection effect deps: `[loading, unit]`
+- **Speed options:** `[0.5, 0.75, 1, 1.25, 1.5]` — includes 0.5× for slow recitation practice
+- **Loop icon:** Active state uses green ring + bg to give clear visual feedback
+- **Guard:** `data-qap-enhanced` attribute prevents double-injection in React Strict Mode
 
-## Key Files
+## Scope
 
-- `frontend/src/pages/courses/QuizPage.tsx`
-- `frontend/src/types/assessment.ts`
-- `backend/src/services/assessment.service.ts` (read-only reference)
+Works for **any unit** that has `.quran-verse` containers with `<audio>` elements — not tied to a specific course.
 
+# Decision: Mark-as-Read UX + Quiz Gate in UnitViewer
 
-# Course Improvements Architecture
-
-**Prepared by:** Khaldun (Lead Architect)  
-**Date:** 2026-06-20  
-**Status:** PROPOSAL — Pending hrasheed approval  
-**Covers:** Question difficulty, anti-rush mechanisms, course versioning
-
----
-
-## Concern 1: Harder Maktab Course Questions
-
-### Current State
-
-Analyzed CB1, CB2, CB3 (as representative sample) across all maktab seed files.
-
-**Difficulty distribution in CB3 (typical across all books):**
-- ~85% of questions: `difficulty: 'EASY'`
-- ~12% of questions: `difficulty: 'MEDIUM'`
-- ~3% of questions: `difficulty: 'HARD'` (barely any)
-
-**Root problems identified:**
-
-1. **Direct recall dominates.** Almost every question tests whether a student can retrieve a fact that appears verbatim in the lesson. Example: *"How long did the boycott of Banū Hāshim last?"* — the answer "Three years" is literally in the preceding paragraph. A student who speed-reads the last sentence before quizzing can answer correctly.
-
-2. **True/False questions are 50/50 by design.** They're trivial to guess. There are too many of them relative to the question pool.
-
-3. **Multiple-choice distractors are weak.** Options like `['Farmer', 'Idol-maker', 'Merchant', 'Blacksmith']` for *"What was the occupation of Āzar?"* require no reasoning — the correct answer is the only one that sounds like it fits the story. A child who only read the title "Ibrahim and the idols" can eliminate three distractors without reading the unit.
-
-4. **No application-layer questions.** No questions that ask a student to *apply* a ruling to a scenario, *compare* two concepts, *explain why* something is the case, or *sequence* events from memory (without the text in front of them).
-
-5. **No Arabic/transliteration recall.** Questions about Arabic terminology never ask students to recall the Arabic word from its meaning, only to match an already-presented English label to a definition.
-
----
-
-### Proposed Solution
-
-**Strategy: Tiered question pools with mandatory hard-tier exposure**
-
-Each unit should hold questions across three tiers:
-
-| Tier | Difficulty | % of Pool | Question Style |
-|------|-----------|-----------|----------------|
-| Tier 1 | EASY | 40% | Direct recall from text; true/false for basic facts |
-| Tier 2 | MEDIUM | 40% | Inference, comparison, sequencing, "which of these is NOT" |
-| Tier 3 | HARD | 20% | Scenario application, Arabic recall, multi-step reasoning |
-
-**For each existing EASY question, add at least one harder companion.** Examples:
-
-*Existing (EASY):* "How many farā'iḍ are there in ghusl?" → Answer: "Three"  
-*New companion (MEDIUM):* "If a person washes their entire body and rinses their nose but forgets to gargle their mouth, is their ghusl valid?" → Answer: "No — gargling the mouth is a farḍ of ghusl"
-
-*Existing (EASY):* "What is Najāsah Ghalīẓah?" → Recognition from a list  
-*New (HARD):* "A child's trousers have a stain of ḥalāl animal urine covering one-quarter of the garment. Can they pray in these trousers according to the Ḥanafī ruling?" → Applies Najāsah Khafīfah + quarter rule
-
-*Existing (EASY):* "How many prophets are mentioned in the Qur'ān?" → "25"  
-*New (HARD):* "Name four prophets sent before Ibrāhīm عليه السلام in chronological order." → Tests recall without a hint list
-
-**New question types to introduce:**
-
-1. **SEQUENCE / ORDERING** — "Place these events of al-Isrā' wal-Mi'rāj in order: Sidrah al-Muntahā, Masjid al-Aqṣā, meeting Ādam عليه السلام, meeting Ibrāhīm عليه السلام." (Frontend: drag-and-drop)
-
-2. **ARABIC RECALL** — "What is the Arabic term for an action that Allāh has absolutely forbidden?" (Answer: حَرَام / Ḥarām). This forces engagement with the Arabic terminology sections.
-
-3. **SCENARIO-BASED** — "Zayd is praying and realises he forgot to face the Qiblah. He has already completed two rak'āt. What should he do?" (Tests applied fiqh understanding)
-
-4. **NEGATIVE-FORM** — "Which of the following is NOT a minor sign of the Day of Judgement?" — adds thinking load vs. simple recognition
-
-**Minimum targets per unit (replacing the current all-EASY model):**
-- Minimum 8 questions per unit (currently ~5–7)
-- At least 2 HARD questions
-- At least 3 MEDIUM questions
-- True/False capped at 20% of questions per unit
-- At least 1 FILL_BLANK per unit
-
----
-
-### Trade-offs & Complexity
-
-| Factor | Assessment |
-|--------|-----------|
-| Content quality | High cost — each harder question needs careful Islamic content review |
-| Implementation complexity | LOW for schema (difficulty already exists), MEDIUM for new question types (SEQUENCE requires frontend work) |
-| Risk of frustration | Medium — must tune carefully for age range; CB1 (age 6-7) should stay mostly EASY |
-| Time estimate | 3–4 days per book for question expansion |
-
-**Age-gated difficulty targets:**
-- CB1–2 (ages 6–9): pool can stay EASY-dominant; add 1–2 MEDIUM per unit
-- CB3–5 (ages 8–12): introduce MEDIUM and begin HARD
-- CB6–8 (ages 12+): full three-tier with scenario questions
-
----
-
-### Implementation Order
-
-1. Khaldun defines question templates for each new type (this doc)
-2. Khwarizmi adds SEQUENCE question type handling to the schema and assessment service
-3. Ibn Sina builds SEQUENCE/ordering UI in QuizPage
-4. Content expansion of CB3 first (pilot, then replicate to all books)
-
-**Owner:** Khwarizmi (schema + service changes), Ibn Sina (QuizPage ordering UI), content author (question writing — hrasheed or designated reviewer)
-
----
-
-## Concern 2: Anti-Rush Mechanism
-
-### Current State — Critical Issues Found
-
-After analyzing `assessment.service.ts`, `assessment.controller.ts`, and `QuizPage.tsx`:
-
-**Issue 1 — CRITICAL: Correct answers are sent to the client.**
-`AssessmentService.getQuestions()` includes `correctAnswer` in the select clause and sends it in the API response. Any child can open DevTools → Network tab → see all correct answers before answering a single question. This is a fundamental security gap.
-
-**Issue 2: Same question set every attempt.**
-No randomization. Questions are returned in database insertion order (`findMany` with no `orderBy` shuffle). A child who fails, sees the answers on the results screen, and immediately retries will see questions in the exact same order — making memorization trivial after 2 attempts.
-
-**Issue 3: Results screen exposes all correct answers immediately after failure.**
-`QuizPage.tsx` renders a full "Review Your Answers" panel with `correctAnswer` and `explanation` for every question — right after the failed attempt. The "Try Again" button sits next to this panel. The pathway is: fail → read answers → click Try Again → pass.
-
-**Issue 4: No attempt cooldown.**
-`QuizPage.tsx` lines 301–313: the "Try Again" button resets all state and immediately allows another attempt. There is no server-side or client-side delay.
-
-**Issue 5: No minimum time-on-lesson enforcement.**
-`UnitProgress.readingCompleted` exists on the schema but the quiz submit endpoint (`POST /assessment/submit`) does NOT verify that the student has marked reading as complete before accepting a quiz submission. A student can navigate directly to `/courses/:id/units/:id/quiz` without ever opening the lesson.
-
-**Issue 6: No attempt count limit.**
-There is no rate limiting on `POST /assessment/submit` beyond the global rate limiter. A student can submit unlimited quiz attempts in rapid succession.
-
----
-
-### Proposed Solution
-
-These are ordered from highest to lowest impact-to-effort ratio:
-
-#### Fix 1 — Strip `correctAnswer` from `getQuestions` response (Priority: CRITICAL, 30 min)
-
-`AssessmentService.getQuestions()` must remove `correctAnswer` and `explanation` from the select. These fields are only needed server-side during grading. The frontend does not need them until after submission.
-
-```typescript
-// BEFORE (exposes answers to client)
-select: {
-  id, type, questionText, options, difficulty,
-  correctAnswer,  // ← DELETE THIS
-  explanation,    // ← DELETE THIS
-}
-
-// AFTER
-select: {
-  id, type, questionText, options, difficulty
-  // correctAnswer and explanation served only in QuizResult.answers
-}
-```
-
-The results panel in `QuizPage.tsx` should draw correct answers from the `QuizResult.answers` array returned by the submit endpoint — which already includes `correctAnswer` and `explanation` per graded answer. The frontend already receives this from `assessmentService.submitQuiz()`.
-
-#### Fix 2 — Question randomization + pool sampling (Priority: HIGH, 1–2 days)
-
-**Backend:** `getQuestions()` should shuffle and optionally sample:
-```typescript
-// Shuffle all questions for this unit
-const shuffled = questions.sort(() => Math.random() - 0.5);
-// If pool > quiz size, sample (e.g. pick 8 from 12)
-const sampled = shuffled.slice(0, quizSize);
-return sampled;
-```
-
-**Longer term:** With the expanded question pool (Concern 1), implement stratified sampling — always pick N_easy + N_medium + N_hard — so each attempt has a different but difficulty-balanced set.
-
-**Schema change needed:** Add `quizPoolSize: Int? @default(null)` to `Unit` model — lets admin configure how many questions to draw per attempt. If null, all questions used.
-
-#### Fix 3 — Attempt cooldown (Priority: HIGH, 1 day)
-
-**Schema change:** Add a `cooldownMinutes` field to `Unit` OR implement it as application logic using `QuizResult.createdAt`.
-
-**Service logic:** In `AssessmentService.submitQuiz()`, before grading, check if the member has a recent failed attempt on this unit:
-
-```typescript
-const lastAttempt = await prisma.quizResult.findFirst({
-  where: { memberId, unitId },
-  orderBy: { createdAt: 'desc' },
-});
-
-const COOLDOWN_MINUTES = 30; // configurable
-if (lastAttempt && !lastAttempt.passed) {
-  const minutesSince = (Date.now() - lastAttempt.createdAt.getTime()) / 60000;
-  if (minutesSince < COOLDOWN_MINUTES) {
-    throw new TooManyRequestsError(
-      `You must wait ${Math.ceil(COOLDOWN_MINUTES - minutesSince)} minutes before retrying.`
-    );
-  }
-}
-```
-
-**Frontend:** The "Try Again" button should check the last attempt's `createdAt` and show a countdown timer instead of being immediately available.
-
-**Suggested cooldowns by age:**
-- EARLY_CHILD / CHILD: 15 minutes
-- PRE_TEEN: 30 minutes
-- TEEN / ADULT: 60 minutes
-
-Since `FamilyMember.ageCategory` is known at submit time, the service can use it to set the right cooldown.
-
-#### Fix 4 — Reading completion gate (Priority: MEDIUM, 1 day)
-
-`submitQuiz()` should verify `readingCompleted` before accepting a submission:
-
-```typescript
-if (enrollment) {
-  const unitProg = await prisma.unitProgress.findUnique({
-    where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
-  });
-  if (!unitProg?.readingCompleted) {
-    throw new BadRequestError('You must complete the lesson reading before taking the quiz.');
-  }
-}
-```
-
-**What this requires upstream:** The course unit page must actually set `readingCompleted = true` when the student scrolls to the bottom or explicitly marks it done. Check whether this is currently implemented in the frontend lesson page — if not, Ibn Sina needs to add a "Mark as Read" / scroll-to-bottom trigger that hits `PATCH /courses/:id/progress`.
-
-**Edge case:** First-time visitors who have never had a UnitProgress row. The gate should only apply when an enrollment exists (existing students) to avoid blocking new learners on their first pass.
-
-#### Fix 5 — Delayed answer reveal (Priority: MEDIUM, half day)
-
-On the results screen, don't show the full "Review Your Answers" panel with correct answers until:
-- The student has passed, OR
-- After the cooldown period has elapsed
-
-When the student fails, show only their score and "Wait X minutes, then review your answers." This removes the memorization exploit without removing educational value — students can still review after the cooldown expires.
-
-This is a frontend-only change in `QuizPage.tsx`.
-
-#### Fix 6 — Attempt counter & max attempts per day (Priority: LOW, 1 day)
-
-For parents who want stronger controls, add a `maxDailyAttempts: Int @default(3)` to the `Unit` model or use `GameParentalSettings` as a pattern for a `QuizParentalSettings` model. Count today's attempts from `QuizResult` filtered by `createdAt >= today`.
-
----
-
-### Trade-offs
-
-| Fix | Impact | Complexity | Risk |
-|-----|--------|-----------|------|
-| Strip `correctAnswer` from GET | Critical security fix | 30 min | Frontend must source from submit response |
-| Randomization | High anti-rush | 1–2 days | Requires pool expansion to be meaningful |
-| Cooldown | High anti-rush | 1 day | Age-category detection adds coupling |
-| Reading gate | High anti-rush | 1 day | Requires `readingCompleted` to be reliably set |
-| Delayed answer reveal | Medium anti-rush | 0.5 day | Pure frontend |
-| Max daily attempts | Low, parental control | 1 day | Schema migration needed |
-
-**Recommended minimum viable anti-rush set:** Fix 1 + Fix 2 (partial randomization) + Fix 3 (cooldown) + Fix 5 (delayed reveal). This covers the core exploit without requiring reading-gate plumbing.
-
----
-
-### Implementation Owner
-
-- Khwarizmi: Fixes 1, 3, 4, 6 (all backend)
-- Ibn Sina: Fixes 2 (shuffle in getQuestions call), 3 (cooldown countdown UI), 5 (delayed answer reveal)
-- Review gate: Biruni reviews assessment.service.ts changes before merge (Fix 1 is a security change)
-
----
-
-## Concern 3: Course Versioning & Data Preservation
-
-### Current State — Severe Problems Found
-
-**Problem 1: seed.ts nukes all student data.**
-
-`seed.ts` lines 40–58 execute `deleteMany()` in this order:
-```
-notifications → activityEvents → reviewLogs → memorizationItems →
-achievements → quizResults → flashCardProgress → unitProgress →
-courseEnrollments → questions → arabicTerms → audioResources →
-videoResources → units → courses → familyMembers → users → families
-```
-
-This is total destruction of all student progress, enrollments, quiz history, and family accounts. Running `npx prisma db seed` on a live database would wipe every family currently using the platform. The intent is "dev reset," but there is no guard preventing it from running in production.
-
-**Problem 2: Individual seed files use find-first-skip, not upsert.**
-
-Every maktab seed file follows this pattern:
-```typescript
-const existing = await prisma.course.findFirst({
-  where: { title: 'Maktab Coursebook 3' },
-});
-if (existing) {
-  console.log('⏭️  Already exists — skipping.');
-  return;
-}
-```
-
-This means once a course is seeded, it can **never be updated** via the seed system. Improved question content, corrected errors, new questions — none of these can be pushed to existing installations without manual database surgery.
-
-**Problem 3: No version tracking.**
-
-The `Course`, `Unit`, and `Question` models have no `version`, `contentHash`, or `updatedAt` fields that would allow a seed to detect "this question has changed since it was last seeded."
-
-**Problem 4: No stable IDs for content.**
-
-Questions and units are created with auto-generated UUIDs (`@id @default(uuid())`). If a unit is deleted and recreated, all `UnitProgress` records referencing the old UUID become orphans. There is no concept of a "canonical course slug" that survives re-seeding.
-
----
-
-### Proposed Solution
-
-Three layers of protection needed: **safe seed architecture**, **upsert-based content updates**, and **schema versioning**.
-
-#### Layer 1 — Separate dev-reset from content seeding
-
-Split seed.ts into two distinct scripts:
-
-**`seed-dev-reset.ts`** — Wipes everything, creates demo data. Only runs in `NODE_ENV=development`. Guards:
-```typescript
-if (process.env.NODE_ENV !== 'development') {
-  throw new Error('seed-dev-reset.ts must not run in production. Use seed-content.ts instead.');
-}
-```
-
-**`seed-content.ts`** — Runs all course seeds using upsert logic. Safe for production. No `deleteMany()` at the top.
-
-Wire the Prisma `seed` command to `seed-content.ts` so a production `prisma db seed` is always safe.
-
-#### Layer 2 — Stable slug IDs + upsert content
-
-**Schema change:** Add a `slug` field to `Course` and `Unit`:
-```prisma
-model Course {
-  slug  String  @unique  // e.g. "maktab-coursebook-3"
-  ...
-}
-
-model Unit {
-  slug  String  // e.g. "maktab-3-fiqh"
-  // @@unique([courseId, slug])
-  ...
-}
-```
-
-Slugs are static, assigned by the seed author, and survive re-seeding. UUIDs remain the runtime primary key, but slugs are the seed's stable reference.
-
-**Seed upsert pattern for courses:**
-```typescript
-const course = await prisma.course.upsert({
-  where: { slug: 'maktab-coursebook-3' },
-  create: { slug: 'maktab-coursebook-3', title: 'Maktab Coursebook 3', ... },
-  update: { title: 'Maktab Coursebook 3', description: '...', isPublished: true },
-  // Never touch enrollments, progress, or quiz results
-});
-```
-
-**For Units** — upsert by `[courseId, slug]` (add composite unique):
-```typescript
-const unit = await prisma.unit.upsert({
-  where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-fiqh' } },
-  create: { ..., slug: 'maktab-3-fiqh', courseId: course.id },
-  update: { title: '...', content: '...', description: '...' },
-  // orderIndex update is safe; never touches UnitProgress
-});
-```
-
-**For Questions** — upsert by stable external key. Add a `externalId` field:
-```prisma
-model Question {
-  externalId  String?  @unique  // e.g. "maktab-3-fiqh-q1"
-  ...
-}
-```
-
-Seed upsert:
-```typescript
-await prisma.question.upsert({
-  where: { externalId: 'maktab-3-fiqh-q1' },
-  create: { externalId: 'maktab-3-fiqh-q1', unitId: unit.id, ... },
-  update: { questionText: '...', options: ..., correctAnswer: '...', difficulty: 'HARD' },
-  // Updating a question does NOT affect QuizResult.answers (those are snapshots)
-});
-```
-
-**Why `QuizResult.answers` is safe to ignore during updates:** The `answers` JSON already stores `{ questionId, answer, isCorrect, correctAnswer, explanation }` as a snapshot. A question update doesn't retroactively change a student's historical result. Only future attempts use the new question text. This is correct behavior — a student's past score remains valid.
-
-#### Layer 3 — Course version field for compatibility signaling
-
-Add a `contentVersion: Int @default(1)` to `Course`. The seed increments this when a breaking change is made (e.g., a unit is removed or its orderIndex fundamentally changes). Application code can check: "Student's enrollment progress was last computed against version N. Course is now version M. Show a 'course has been updated' notice." This is a soft notification, not destructive.
-
-```prisma
-model Course {
-  contentVersion  Int  @default(1)
-  ...
-}
-```
-
-No action required on `CourseEnrollment` — the existing `progress` percentage remains valid. Only surfaced as a UI notice.
-
-#### Layer 4 — Enrollment & progress preservation guarantee
-
-The upsert pattern at Layer 2 naturally preserves:
-- `CourseEnrollment` — not touched by seed (references courseId, not slug)
-- `UnitProgress` — not touched by seed (references unitId UUID, which persists via upsert)
-- `QuizResult` — not touched by seed (references unitId UUID)
-- `FlashCardProgress` — not touched by seed (references flashCardId UUID)
-
-The only risk is if a unit is **deleted** from the course. In that case, its UUID is gone and progress is orphaned. Mitigation: never delete units via seed — instead set a `isPublished: Boolean @default(true)` on `Unit` and use `update: { isPublished: false }` to hide deprecated content. The orphan progress stays valid and the student retains their completion.
-
----
-
-### Migration Plan
-
-**Step 1 — Schema migration (Khwarizmi, ~2 hrs):**
-- Add `Course.slug String @unique`
-- Add `Unit.slug String` + `@@unique([courseId, slug])`
-- Add `Question.externalId String? @unique`
-- Add `Course.contentVersion Int @default(1)`
-- Write Prisma migration file
-
-**Step 2 — Backfill slugs (Khwarizmi, ~1 hr):**
-Write a one-time migration script that generates slugs for all existing `Course` and `Unit` rows from their titles (kebab-case conversion). Assign `externalId` to existing `Question` rows using `unitId + orderIndex` as a deterministic basis.
-
-**Step 3 — Refactor seed files (Khwarizmi, ~1 day):**
-Convert each maktab seed file from `find-first-skip` + `create` to `upsert` with slugs. Add the dev-reset guard to `seed.ts`.
-
-**Step 4 — Validate (Biruni, ~half day):**
-Test that running the refactored seeds twice produces no duplicate rows, that existing `UnitProgress` records survive a re-seed, and that updated question text appears in a new quiz attempt.
-
----
-
-### Trade-offs
-
-| Approach | Pro | Con |
-|----------|-----|-----|
-| Slug + upsert | Simple, safe, preserves data | One-time backfill migration needed |
-| contentVersion | Lightweight versioning signal | Doesn't auto-migrate student progress |
-| `externalId` on Question | Enables question-level updates | Manual burden on seed authors to assign stable IDs |
-| Hard delete of units | Simplest content removal | Orphans UnitProgress; prefer isPublished=false |
-
----
-
-## Recommended Implementation Order
-
-Priority order accounts for urgency, dependencies, and safety.
-
-| Priority | Item | Why | Owner | Est |
-|----------|------|-----|-------|-----|
-| 1 | Strip `correctAnswer` from GET questions | Security — live exploit right now | Khwarizmi | 30 min |
-| 2 | Dev-reset guard on seed.ts | Safety — prevent accidental prod data loss | Khwarizmi | 30 min |
-| 3 | Schema: slug + externalId + contentVersion | Enables everything else in Concern 3 | Khwarizmi | 2 hrs |
-| 4 | Refactor all maktab seeds to upsert | Preserves student data going forward | Khwarizmi | 1 day |
-| 5 | Question randomization in getQuestions | Anti-rush; requires pool to be worth randomizing | Khwarizmi | 1 hr |
-| 6 | Attempt cooldown (service + UI) | Core anti-rush mechanism | Khwarizmi + Ibn Sina | 1.5 days |
-| 7 | Delayed answer reveal | Removes memorization exploit | Ibn Sina | 0.5 day |
-| 8 | Question difficulty expansion — CB3 pilot | Content work, not code | Content author | 2–3 days |
-| 9 | Reading completion gate | Requires readingCompleted to be reliably set | Khwarizmi + Ibn Sina | 1 day |
-| 10 | Expand hard questions to all maktab books | Content work at scale | Content author | 2–3 days/book |
-| 11 | SEQUENCE question type (UI + service) | New question type for ordering | Khwarizmi + Ibn Sina | 2 days |
-
-**Total engineering estimate:** ~10 days (items 1–9, excluding content authoring)
-
----
-
-## Summary
-
-| Concern | Core Fix | Risk Level |
-|---------|----------|-----------|
-| Harder questions | Tiered pool with mandatory MEDIUM/HARD, new question types | Low code, high content effort |
-| Anti-rush | Fix GET response (critical), randomize, cooldown, delayed reveal | Items 1+2 are trivial; full solution is 3–4 days |
-| Versioning | Slug+upsert pattern, separate dev-reset script, contentVersion signal | Schema migration required; backfill needed once |
-
-The anti-rush item 1 (stripping correctAnswer from the GET endpoint) should be treated as an emergency fix — it is live right now.
-
-
-### 2026-06-06T17:09:20-05:00: Canonical al-Masār lesson asset routing
-**By:** Khwarizmi
-**What:** al-Masār standalone HTML workbooks should be published as static frontend assets under `frontend/public/lessons/masaar-irab-sarf/week-{N}.html`, and backend unit `content` should store only concise summary HTML plus links to that canonical route instead of embedding the full lesson payload.
-**Why:** This keeps database lesson bodies lightweight, preserves rich interactive HTML as deployable static artifacts, and gives both backend and frontend one stable URL convention for launching the full lesson experience.
-
-
-# Decision: Strip correctAnswer from GET /questions + seed.ts Production Guard
-
-**Date:** 2026-06-20T14:01:24-05:00
-**Author:** Khwarizmi
+**Date:** 2026-06-20T17:31:22-05:00  
+**Author:** Ibn Sina (Frontend Dev)  
 **Status:** Implemented
 
 ---
 
-## Decision 1 — Never expose correctAnswer/explanation in GET questions response
+## Context
 
-**Context:**
-`AssessmentService.getQuestions()` was including `correctAnswer` and `explanation` in the Prisma select, returning them to the client on the initial question fetch. Students could read all answers in browser DevTools before submitting.
+The backend (Item 9 — Backend) is adding a gate that blocks quiz submissions unless `readingCompleted` is true for the unit. The frontend needed a reliable, discoverable way for students to mark a lesson as read, and needed to surface the quiz gate as a UX hint.
 
-**Decision:**
-Remove `correctAnswer` and `explanation` from the `getQuestions()` select clause. These fields must only travel over the wire as part of the graded `submitQuiz()` response, which already includes `correctAnswer` and `explanation` per answer in the `gradedAnswers` array.
+## Decisions
 
-**Frontend impact (action required by Ibn Sina):**
-`QuizPage.tsx` currently:
-1. Reads `q.correctAnswer` from the GET response for the `calculateScore()` function (local client-side grading).
-2. Shows `q.correctAnswer` and `q.explanation` in the post-quiz review panel.
-3. Calls `await assessmentService.submitQuiz(...)` but **discards the return value**.
+### 1. Persist Reading Status Across Page Loads
+- On mount, `UnitViewer` now calls `courseService.getUnitProgress(memberId, unitId)` concurrently via `Promise.all` alongside the existing unit + units fetches.
+- This uses the existing `GET /courses/progress/member/:memberId` endpoint, filtering by `unitId`.
+- A load failure is caught silently (`.catch(() => null)`) so it never blocks content display.
 
-Ibn Sina must update `QuizPage.tsx` to:
-- Capture the `submitQuiz()` response: `const result = await assessmentService.submitQuiz(...)`
-- Map `result.answers` (array of `{ questionId, correctAnswer, explanation, isCorrect }`) back to the local `questions` array for the review panel.
-- Derive `calculateScore()` from `result.answers` or `result.score` instead of `q.correctAnswer`.
+### 2. Prominent "Mark as Read" Bottom CTA
+- Added a large `bg-green-500` button "✅ I've read this lesson" at the bottom of the lesson body — this is the **primary** action surface.
+- The existing small header button remains as a secondary/quick shortcut and now shows a green "Read ✅" badge when already completed instead of disappearing.
+- When completed, the bottom CTA becomes a muted "Lesson completed ✅" banner (non-clickable).
 
-**Files changed:** `backend/src/services/assessment.service.ts`
+### 3. Quiz Button Gating (UX Hint Only)
+- Both "Take Quiz" surfaces (bottom-nav inside the content card and the sidebar card) are conditionally rendered:
+  - `readingCompleted === true` → active `<Link>` styled normally
+  - `readingCompleted === false` → disabled `<button>` with `title="Complete the lesson reading first"` and gray styling
+- This is a **UX hint only**. The backend enforces the real gate via the quiz submission endpoint.
+
+## Files Changed
+- `frontend/src/services/courseService.ts` — added `getUnitProgress(memberId, unitId)` method
+- `frontend/src/pages/courses/UnitViewer.tsx` — progress fetch on mount, bottom CTA, quiz gate
+
+## Verification
+- `npx tsc --noEmit` passes clean
+
+# Decision: Resume highlight must mirror Continue Learning target
+
+**Author:** Ibn Sina (Frontend Dev)  
+**Date:** 2026-07-04T00:55:10-04:00  
+**Status:** Proposed
+
+## Context
+Course landing page could show the resume highlight as locked (or effectively hide the resume badge) when the true resume target was a later in-progress unit. Meanwhile, **Continue Learning** already navigated to that later unit.
+
+## Decision
+When rendering the unit list, treat the computed `resumeUnit` as unlocked for UI gating so the highlighted row and resume badge always represent the same unit that **Continue Learning** opens.
+
+Implementation detail in `CourseLearner.tsx`:
+- Lock calculation now excludes the resume target: previous-unit lock applies only when `!isResumeTarget`.
+
+## Why
+Learners need one consistent source of truth for “where to continue.” If CTA and row highlight diverge, trust is lost and navigation feels broken.
+
+## Validation
+Updated `CourseLearner.test.tsx` with a mismatch regression case (earlier unit incomplete, later unit in-progress) asserting:
+1. Resume badge highlights Unit 3 (true resume target)
+2. Unit 2 is not highlighted
+3. Continue Learning navigates to Unit 3
+
+### 2026-07-04T00:23:33.053-04:00: Refresh learner enrollment before selecting resume unit
+**By:** Ibn Sina
+**What:** On `CourseLearner` load, always fetch enrollments for the active learner when `memberId` is available, then derive the resume target from ordered course units plus fresh `unitProgress`.
+**Why:** Enrollment objects passed through route state can be stale after lesson progress updates, which incorrectly sends learners back to unit 1 instead of where they left off.
+
+# Decision: Maktab Online School — Architecture Decisions
+
+**Author:** Khaldun (Lead Architect)  
+**Date:** 2026-07-09T11:20:00.559-05:00  
+**Status:** Proposed — awaiting hrasheed confirmation on 4 open items  
+**Spike document:** `docs/maktab-online-school-spike.html`
 
 ---
 
-## Decision 2 — Seed.ts must never run in production (NODE_ENV guard)
+## Context
 
-**Context:**
-`seed.ts` opens with a cascade of `deleteMany()` calls that wipe all user data, enrollments, and progress. There was no guard preventing it from running against a production database.
+hrasheed wants to launch a structured "Online Maktab" product built on top of the existing platform, aligned to the An Nasihah Islamic Curriculum (12 stages, ages 4–14+, two learning paths).
 
-**Decision:**
-Add a hard abort at the top of `main()`:
-- `NODE_ENV === 'production'` → throw an error immediately, no destructive work done.
-- Any other `NODE_ENV` (including unset) → print a loud ⚠️ warning banner and proceed.
-
-This is a minimal, surgical guard — not a refactor of the seed system. A full content-only seed system is a separate future task.
-
-**Files changed:** `backend/prisma/seed.ts`
+A full gap analysis confirmed ~82% content coverage exists. The following architecture decisions are required to launch MVP.
 
 ---
 
-# Decision: Anti-Rush Backend — Question Randomization & Retry Cooldown
+## Decision 1: New Schema Models — Program/Stage/Enrollment
 
-**Date:** 2026-06-20T17:20:27-05:00  
+**Decision:** Introduce three new Prisma models:
+- `Program` — the maktab curriculum wrapper (slug, name, learningPaths[], stages[])
+- `ProgramStage` — one per year level (stageNumber, name, ageMin/Max, courses[], orderIndex)  
+- `ProgramEnrollment` — links a FamilyMember to a Program+Stage+Path (familyMemberId, programId, currentStageId, path: LearningPath, status)
+
+**Rationale:** The existing Course model is an atomic learning unit, not a curriculum program. Repurposing it would require adding nullable fields to a model with 11 existing consumers. A clean Program hierarchy is the correct abstraction.
+
+**Impact:** Migration required. Non-destructive additions only. No existing data affected.
+
+---
+
+## Decision 2: LearningPath Filtering at Unit Level
+
+**Decision:** Add `LearningPath` enum (AFTER_SCHOOL, WEEKEND) and `Unit.includedInPaths: LearningPath[]`. An empty array means "included in all paths." Weekend-excluded units are tagged `[AFTER_SCHOOL]`. Courses remain neutral; filtering is unit-level.
+
+**Rationale:** Tārīkh and Aqā'id are dropped entirely for weekend (all units excluded). Other subjects have partial topic reduction (some units excluded). Unit-level tagging handles both cases with a single mechanism. No content duplication.
+
+**Impact:** One seed script per coursebook (`seed-weekend-tags-cb*.ts`). Query adds `WHERE includedInPaths = '{}' OR 'WEEKEND' = ANY(includedInPaths)` for weekend-path learners.
+
+---
+
+## Decision 3: Du'ā and 99 Names — Reuse FlashCard SRS, No New Models
+
+**Decision:** Add `stageTag: String?` and `subjectTag: String?` to FlashCard. Tag existing maktab flashcards with `subjectTag = 'DUA'` or `subjectTag = '99NAMES'` and `stageTag = 'CB1'` etc. Build `/child/duas` and `/child/99-names` views that query FlashCard by subjectTag and aggregate FlashCardProgress (SRS status).
+
+**Rationale:** The SM-2 SRS system is already implemented and working. Du'ā review naturally benefits from spaced repetition. No new model needed — two nullable fields on FlashCard unlock the entire progression view. Avoids a separate DuaProgress model with duplicate SRS logic.
+
+---
+
+## Decision 4: CB6 Gender Routing
+
+**Decision:** Add `gender: Gender?` (MALE | FEMALE) to FamilyMember. At ProgramEnrollment Stage 6 advancement, the service checks `familyMember.gender` and auto-enrolls in `maktab-coursebook-6-boys` or `maktab-coursebook-6-girls`. If gender is null, the API returns a `GENDER_REQUIRED` response and the parent is prompted to set it before advancing.
+
+**Rationale:** Both CB6 variants are already seeded. Gender routing is a one-time enrollment decision, not a content delivery concern. Storing gender on FamilyMember is minimal and enables the routing without additional session state.
+
+---
+
+## Open Items (hrasheed to confirm before Sprint 1)
+
+1. **Foundation UI approach:** Full new child-first UI (higher quality, 3–4 weeks extra) vs. adapted existing UI (faster, lower quality for 4–5 year olds)?
+2. **Longer surahs for CB5–8:** Block advancement until seeded, or note as a known gap in the dashboard?
+3. **Du'ā audio:** TTS for MVP, or source human recitation audio? Significant timeline impact.
+4. **Teacher/Facilitator role:** Confirmed Phase 2 and not in MVP scope?
+
+---
+
+## Sprint 1 Plan (2 weeks)
+
+See spike document §7 for full backlog. Summary:
+- Week 1: Khwarizmi — Schema migration + Program seed + API endpoints
+- Week 2: Ibn Sina — Enrollment wizard UI + Grade dashboard + Parent Maktab widget
+- Parallel: Weekend path CB1 pilot tags
+
+# Resume Progress Source of Truth
+
+- **Author:** Khaldun
+- **Date:** 2026-07-04T00:23:33.053-04:00
+
+## Decision
+Course resume behavior must treat route state and in-memory enrollment snapshots as hints, not the source of truth. `CourseLearner` should always refresh the active learner's enrollment from the backend on load when a member context is available, then derive the resume target from ordered course units.
+
+## Rationale
+The bug was caused by stale enrollment snapshots being reused after progress changed inside a unit flow. That left `unitProgress` empty or outdated on the learn page, so "Continue where you left off" fell back to the first unit even though the backend already had the correct progress.
+
+## Implementation Notes
+- Refresh enrollments in `frontend/src/pages/courses/CourseLearner.tsx` using the active learner/member context.
+- Match by `enrollmentId` when present; otherwise by `courseId`.
+- Choose the resume unit by walking the ordered `units` list: first partially started unit, else first incomplete unit, else unit 1.
+- No backend API change is required because `/courses/enrollments/member/:memberId` already returns `unitProgress`.
+
+## Key Files
+- `frontend/src/pages/courses/CourseLearner.tsx`
+- `frontend/src/__tests__/pages/CourseLearner.test.tsx`
+- `frontend/src/services/courseService.ts`
+- `backend/src/services/course.service.ts`
+
+# Decision: Dev Azure Environment + CI/CD Multi-Environment
+
+**Agent:** Khwarizmi  
+**Date:** 2026-06-22T12:40:20-05:00  
+**Status:** Accepted
+
+---
+
+## Context
+
+The project had a single Azure environment (`islamic-learning`) deployed from `main`. The team needed a separate dev environment wired to a `dev` branch for safe iteration before promoting to prod.
+
+---
+
+## Decision
+
+### 1. GitHub Environments for secret scoping (not separate workflow files)
+
+Use the GitHub [Environments](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment) feature to scope secrets. A single workflow file (`ci-cd.yml`) handles both environments — jobs select the correct secret set by declaring `environment: dev` or `environment: prod`.
+
+**Alternatives considered:**
+- Separate workflow files (`ci-cd-dev.yml`, `ci-cd-prod.yml`) — rejected; duplicates workflow logic and creates drift risk
+- Separate repos — rejected; overkill for two environments
+
+### 2. Resource names moved to environment-scoped secrets
+
+The three previously hardcoded resource names (`cr34odstpjgaabg`, `ca-api-islamic-learning`, `rg-islamic-learning-centralus`) are now `ACR_NAME`, `CONTAINER_APP_NAME`, and `RESOURCE_GROUP` secrets inside each GitHub environment. This means:
+- The workflow YAML contains zero environment-specific strings
+- Dev and prod deploy jobs are structurally identical (DRY)
+- Adding a third environment (e.g., staging) requires no YAML changes
+
+### 3. azd `environmentName` is the single source of truth for resource naming
+
+The Bicep template uses `resourceToken = toLower(uniqueString(subscription().id, environmentName, location))` to generate stable but unique suffixes. Two environments with different `environmentName` values are guaranteed to produce non-colliding resource names within the same subscription.
+
+### 4. Prod migration is non-breaking
+
+Existing secret names (`AZURE_CREDENTIALS`, `SWA_DEPLOYMENT_TOKEN`) are preserved. The operator moves them from repo-level → `prod` environment. The YAML secret references are unchanged. CI passes as long as the `prod` environment exists with the correct secrets.
+
+---
+
+## Consequences
+
+- CI/CD is now multi-environment by default; adding staging = create GitHub environment + run `azd provision`
+- Prod deployments require the `prod` GitHub environment to be configured (one-time migration step)
+- `az acr build` (remote build in ACR) is retained for both environments — no local Docker daemon required in CI
+- `docs/dev-environment-setup.md` is the authoritative provisioning runbook
+
+---
+
+## Files Changed
+
+- `.github/workflows/ci-cd.yml` — primary change
+- `docs/dev-environment-setup.md` — new provisioning guide
+- `azure.yaml` — no change needed
+
+# Decision: Quran Memorization Seed — Design Choices
+
+**Author:** Khwarizmi
+**Date:** 2026-06-22
+**File:** `backend/prisma/seed-quran-memorization.ts`
+
+---
+
+## What was built
+
+A live-data seed script for a "Quran Memorization — Short Surahs (Juz Amma)" course targeting `EARLY_CHILD` and `CHILD` age levels under category `QURAN`.
+
+The course covers 23 surahs (Al-Fatiha first, then An-Nas down to Ad-Duha), with each ayah as its own Unit — **171 units total**.
+
+---
+
+## Key Decisions
+
+### 1. Live API fetch at seed time
+
+Arabic text, transliteration (resource 57), and Saheeh International translation (resource 20) are fetched from `api.quran.com` during seeding rather than being hardcoded. This ensures accuracy and keeps the file a manageable size.
+
+**Trade-off:** Seed requires internet access. Mitigated by explicit HTTP error handling that throws with clear messages so failures are obvious.
+
+### 2. Three parallel fetches per surah, one surah at a time
+
+Each surah fires all three API calls concurrently (`Promise.all`), then the loop proceeds to the next surah with a 300ms `sleep()` between surahs. This is polite to quran.com while still being reasonably fast (~7 seconds for 23 surahs).
+
+### 3. One Unit per ayah — not one Unit per surah
+
+The brief specified ayah-level granularity so children can memorize one short verse at a time, track progress per ayah, and revisit individual verses. Grouping by surah would lose that granularity.
+
+### 4. AudioResource + ArabicTerm per unit
+
+Each unit gets:
+- An `AudioResource` pointing to the everyayah.com Khalefa Al-Tunaiji recording — consumed by the audio player UI
+- An `ArabicTerm` with arabicText, transliteration, translation, and audioUrl — consumed by the TTS normalization service and games engine
+
+This follows the data contract established in `seed-habits-course.ts` and the broader seed pattern.
+
+### 5. HTML template uses `.quran-verse` and `.arabic-large` CSS classes
+
+These classes are expected by the frontend renderer. Using `dir="rtl" lang="ar"` on the `<p>` tag ensures correct RTL layout even if the parent container is LTR.
+
+### 6. Translation HTML stripping
+
+Saheeh International (resource 20) returns text with `<sup>` footnote markers and occasional inline tags. A simple regex `/<[^>]+>/g` strips all tags cleanly. Footnote content is lost but the translation text remains accurate.
+
+### 7. Course title used as delete key (not slug)
+
+Follows the `seed-habits-course.ts` find-first-delete pattern rather than the newer upsert pattern. Rationale: this is a brand-new course with no student data to preserve yet. If the course is promoted to production and gets enrollments, it should be converted to the upsert pattern at that time (see maktab upsert migration, 2026-06-20).
+
+---
+
+## Surah coverage
+
+Al-Fatiha (1), then surahs 114 → 93 in reverse:
+An-Nas, Al-Falaq, Al-Ikhlas, Al-Masad, An-Nasr, Al-Kafirun, Al-Kawthar, Al-Ma'un, Quraysh, Al-Fil, Al-Humazah, Al-Asr, At-Takathur, Al-Qari'ah, Al-Adiyat, Az-Zalzalah, Al-Bayyinah, Al-Qadr, Al-Alaq, At-Tin, Ash-Sharh, Ad-Duha.
+
+Total: **23 surahs, 171 units**.
+
+# Decision: Reading Completion Gate for Quiz Submission
+
+**Date:** 2026-06-20T17:31:22-05:00  
 **Author:** Khwarizmi (Backend Dev)  
 **Status:** Implemented
 
 ---
 
-## Context
-
-Students were able to memorize answer positions across quiz retries (questions returned in insertion order, options always in the same sequence) and could retry failed quizzes immediately with no delay.
-
----
-
-## Decisions Made
-
-### 1. Fisher-Yates shuffle for questions and options
-
-- Questions are shuffled after DB fetch using an unbiased Fisher-Yates algorithm (not `sort(() => Math.random() - 0.5)`).
-- The `options` array within each question is also shuffled independently.
-- Only applied to `getQuestions()` (the GET endpoint) — grading in `submitQuiz()` still looks up by `questionId`, so shuffled order has no effect on correctness.
-
-### 2. 15-minute cooldown after failed attempts
-
-- `COOLDOWN_MINUTES = 15` — flat rate for all quizzes, no per-unit configuration yet.
-- Cooldown only applies after a **failed** attempt. Passed quizzes have no cooldown (retaking a passed quiz is review, not gaming).
-- First attempt has no cooldown.
-- Cooldown is enforced in `submitQuiz()` before grading (not just on the GET questions endpoint, which would be easy to bypass).
-
-### 3. CooldownError — custom error class with flat response shape
-
-- New `CooldownError extends AppError` (429) added to `error.middleware.ts`.
-- Carries `retryAfterMinutes` and `retryAt` (ISO string) as first-class fields.
-- The `errorHandler` detects `CooldownError` and emits a flat shape: `{ error, retryAfterMinutes, retryAt }` instead of the usual `{ success: false, error: { message } }`.
-- Rationale: the flat shape is intentional — the frontend needs to destructure these fields directly to drive a countdown timer, not dig into a nested `error` object.
-
-### 4. Cooldown status endpoint
-
-- `GET /api/assessment/units/:unitId/cooldown-status` returns `{ onCooldown, retryAfterMinutes, retryAt }`.
-- Frontend can poll this before rendering the quiz start button to show a live countdown without needing to attempt a submission.
-- Requires auth + active member (same middleware chain as all other assessment routes).
-
----
-
-## Impact on Other Agents
-
-- **Ibn Sina (Frontend):** The quiz retry flow must now handle HTTP 429 from `POST /submit` with the flat `{ error, retryAfterMinutes, retryAt }` shape. The `GET /units/:unitId/cooldown-status` endpoint is available for proactive UI (disable "Retry" button + show countdown before the student clicks submit).
-
----
-
-## Files Changed
-
-- `backend/src/services/assessment.service.ts`
-- `backend/src/controllers/assessment.controller.ts`
-- `backend/src/routes/assessment.routes.ts`
-- `backend/src/middleware/error.middleware.ts`
-
----
-
-# Decision: Anti-Rush Frontend — Cooldown Countdown + Delayed Answer Reveal
-
-**Author:** Ibn Sina (Frontend Dev)  
-**Date:** 2026-06-20T17:18:56-05:00  
-**Status:** Implemented
-
----
-
-## Context
-
-After a failed quiz attempt students could immediately retry, and the review panel exposed all correct answers — making it trivial to memorize and re-submit. Khwarizmi is adding a 15-minute backend cooldown (429 on retry during window). This decision captures the matching frontend treatment.
-
----
-
-## Decisions
-
-### 1. Cooldown state modeled as `cooldownEndsAt: Date | null`
-- Single authoritative timestamp. `cooldownSecondsLeft` is derived via a dedicated `setInterval` useEffect — no drift, no duplicate logic.
-
-### 2. Cooldown checked concurrently with questions on page load
-- `Promise.all([getQuizQuestions(), getCooldownStatus()])` — zero added latency. If the cooldown endpoint fails, it is silently swallowed (non-blocking). Quiz continues normally.
-
-### 3. After failed submit: backend is the source of truth for `retryAt`
-- After `submitQuiz()` returns `passed: false`, immediately call `getCooldownStatus()` to get the server's authoritative `retryAt` ISO timestamp. Fall back to `now + 15 minutes` only if that call throws.
-
-### 4. 429 from submit sets cooldown from error body
-- If a student somehow bypasses the frontend guard, the 429 body's `retryAt` / `retryAfterMinutes` is parsed and `cooldownEndsAt` is set. Graceful degradation: `err.response.data ?? {}` prevents crash on empty body.
-
-### 5. "Try Again" button only visible when `cooldownSecondsLeft === 0`
-- While countdown is active: amber countdown card shown ("Retry available in MM:SS"). Once countdown hits 0, "Try Again" button appears. `setCooldownEndsAt(null)` called on retry to clear the countdown interval.
-
-### 6. Review panel gated by `passed`
-- **Passed:** Full review — `correctAnswer` + `explanation` for every question.  
-- **Failed:** Status-only review — ✅/❌ indicator + student's own answer. `correctAnswer` and `explanation` intentionally not rendered. Message: "Review your lesson and try again after the cooldown period."
-
-**Rationale:** Failed students know *what* they got wrong, but not *what the right answer is*. This forces return to lesson material rather than answer memorization.
-
----
-
-## Files Changed
-- `frontend/src/types/assessment.ts` — added `CooldownStatus` interface
-- `frontend/src/services/assessmentService.ts` — added `getCooldownStatus(unitId)` → `GET /assessments/units/:unitId/cooldown-status`
-- `frontend/src/pages/courses/QuizPage.tsx` — cooldown state, countdown useEffect, pre-quiz locked screen, results page with gated review
-
----
-
-# Decision: Content Slugs & Versioning Schema
-
-**Author:** Khwarizmi  
-**Date:** 2026-06-20T16:12:48-05:00  
-**Status:** Implemented (migration created, not yet applied)  
-**Relates to:** Course Improvements Architecture — Item 3
-
----
-
-## Summary
-
-Added stable content identifiers to Course, Unit, and Question models so that seed files can upsert content without destroying student progress data.
-
-## Changes Made
-
-| Model    | Field            | Type            | Notes                                        |
-|----------|------------------|-----------------|----------------------------------------------|
-| Course   | `slug`           | `String? @unique` | Nullable; backfill before making required  |
-| Course   | `contentVersion` | `Int @default(1)` | Increment on breaking content changes      |
-| Unit     | `slug`           | `String?`       | Nullable; composite unique with `courseId`   |
-| Question | `externalId`     | `String? @unique` | Nullable; e.g. "maktab-3-fiqh-q1"         |
-
-## Key Design Decision: Nullable vs Default Empty String
-
-All new fields are nullable (`String?`) rather than defaulting to empty string.
-
-**Rationale:** Postgres treats NULLs as distinct values in unique indexes. This means:
-- `courses_slug_key` (`slug`) allows many rows with NULL slug — no collision
-- `units_courseId_slug_key` (`courseId, slug`) allows many units in the same course to all have NULL slug — no collision
-
-Using `@default("")` instead would cause an immediate constraint violation on apply: every existing unit in the same course would get `slug=""`, violating the composite unique.
-
-## Migration File
-
-`backend/prisma/migrations/20260620211248_add_content_slugs_versioning/migration.sql`
-
-**Not applied yet.** Apply manually with `npx prisma migrate deploy` (or `migrate dev` interactively).
-
-## Backfill Script
-
-`backend/prisma/backfill-slugs.ts`
-
-Run after applying the migration:
-```bash
-npx ts-node --project tsconfig.json prisma/backfill-slugs.ts
-```
-
-Slug generation rules:
-- **Course slug:** kebab-case of title, de-duplicated with `-2`, `-3` suffix if needed
-- **Unit slug:** `{course-slug}-{unit-title-kebab}`, truncated to 80 chars
-- **Question externalId:** `{unit-slug}-q{n}` where n is sequential within the unit
-
-## Next Steps (for seed files)
-
-After applying migration + backfill, seed files can upsert using:
-- `Course`: `upsert` on `slug`
-- `Unit`: `upsert` on `{ courseId_slug: { courseId, slug } }`
-- `Question`: `upsert` on `externalId`
-
----
-
-# Decision: Maktab Seed Files — Idempotent Upsert Pattern
-
-**Date:** 2026-06-20T16:18:48-05:00  
-**Author:** Khwarizmi  
-**Status:** Implemented
-
-## Context
-
-All 10 maktab seed files used a "find-first-skip" guard that made them non-idempotent: a second run would silently skip every seed. With the addition of `Course.slug`, `Unit.slug`, and `Question.externalId` unique fields (migration `20260620211248_add_content_slugs_versioning`), we now have stable keys to drive proper upserts.
-
 ## Decision
 
-Convert all 10 maktab seed files from:
-```typescript
-const existing = await prisma.course.findFirst({ where: { title: '...' } });
-if (existing) { console.log('⏭️ Already exists — skipping.'); return; }
-const course = await prisma.course.create({ ... });
-```
-
-To an idempotent upsert chain:
-```typescript
-const course = await prisma.course.upsert({ where: { slug }, create: { slug, ... }, update: { ... } });
-const unit = await prisma.unit.upsert({ where: { courseId_slug: { courseId: course.id, slug } }, ... });
-await Promise.all(questions.map(q => prisma.question.upsert({ where: { externalId }, ... })));
-await Promise.all(flashcards.map(fc => prisma.flashCard.upsert({ where: { unitId_orderIndex }, ... })));
-await prisma.arabicTerm.deleteMany({ where: { unitId } });
-await prisma.arabicTerm.createMany({ data: [...] });
-```
+Enrolled students are blocked from submitting a quiz attempt until they have marked the lesson reading as complete (`UnitProgress.readingCompleted = true`). Unenrolled users browsing freely are not blocked.
 
 ## Rationale
 
-- **Preserves student data**: `CourseEnrollment`, `UnitProgress`, `QuizResult`, `FlashCardProgress` are never touched.
-- **Safe re-runs**: Curriculum content (questions, flashcards) can be corrected in seed files and re-run without losing student progress.
-- **ArabicTerm exception**: No unique constraint on `ArabicTerm`, so `deleteMany` + `createMany` is used per-unit. No student data references `ArabicTerm` directly.
-- **FlashCard safe**: `FlashCardProgress` references by `flashCardId`. Since we upsert by `unitId_orderIndex` (not by text), the same `id` UUID is preserved on update, so student progress remains intact.
+Students were bypassing lesson content by navigating directly to quiz URLs. The gate enforces pedagogical sequencing: read → quiz.
 
-## Slug Assignments
+## Implementation
 
-| File | Course slug | Unit slug prefix |
-|------|-------------|-----------------|
-| CB1 | `maktab-coursebook-1` | `maktab-1-` |
-| CB2 | `maktab-coursebook-2` | `maktab-2-` |
-| CB3 | `maktab-coursebook-3` | `maktab-3-` |
-| CB4 | `maktab-coursebook-4` | `maktab-4-` |
-| CB5 | `maktab-coursebook-5` | `maktab-5-` |
-| CB6 Boys | `maktab-coursebook-6-boys` | `maktab-6b-` |
-| CB6 Girls | `maktab-coursebook-6-girls` | `maktab-6g-` |
-| CB7 | `maktab-coursebook-7` | `maktab-7-` |
-| CB8 | `maktab-coursebook-8` | `maktab-8-` |
-| Further Studies NW | `maktab-further-studies-nw` | `maktab-fs-` |
+**Gate location:** `submitQuiz()` in `backend/src/services/assessment.service.ts`, immediately after member-family verification and **before** the cooldown check.
 
-Unit slugs: `{prefix}fiqh`, `{prefix}ahadith`, `{prefix}sirah`, `{prefix}tarikh`, `{prefix}aqaid`, `{prefix}akhlaq`, `{prefix}adab`  
-Further Studies units: `maktab-fs-essentials-1`, `maktab-fs-essentials-2`, `maktab-fs-faith`, `maktab-fs-devotional`, `maktab-fs-identity`, `maktab-fs-living`, `maktab-fs-money`, `maktab-fs-contemporary`, `maktab-fs-hadith`
+**Error response:** HTTP 400 `BadRequestError` — "You must complete the lesson reading before taking the quiz."
 
-## Question externalId Pattern
+**Edge cases:**
+- No enrollment → gate skipped (free exploration allowed)
+- Enrollment + no `UnitProgress` row → blocked (no row = not read)
+- `readingCompleted: false` → blocked
+- `readingCompleted: true` → allowed
 
-`{unit-slug}-q{N}` where N is 1-indexed within the unit's question array.
+## Frontend Contract (for Ibn Sina)
 
-## Files Changed
+**Mark reading complete:**
+```
+POST /api/v1/courses/progress
+Authorization: Bearer <token>
+Body: { "unitId": "<uuid>", "readingCompleted": true }
+```
 
-- `backend/prisma/seed-maktab-coursebook1.ts`
-- `backend/prisma/seed-maktab-coursebook2.ts`
-- `backend/prisma/seed-maktab-coursebook3.ts`
-- `backend/prisma/seed-maktab-coursebook4.ts`
-- `backend/prisma/seed-maktab-coursebook5.ts`
-- `backend/prisma/seed-maktab-coursebook6boys.ts`
-- `backend/prisma/seed-maktab-coursebook6girls.ts`
-- `backend/prisma/seed-maktab-coursebook7.ts`
-- `backend/prisma/seed-maktab-coursebook8.ts`
-- `backend/prisma/seed-maktab-further-studies-nw.ts`
+Call this before or when the student finishes reading (e.g., on scroll-to-bottom or explicit "Mark as Read" button). The quiz submit button / navigation should only activate after this call succeeds.
 
+**Quiz blocked response (400):**
+```json
+{ "error": "You must complete the lesson reading before taking the quiz." }
+```
+
+Ibn Sina should display this message and surface the "Mark as Read" CTA if the student hits it.
+
+# Decision: Resume target must be latest active progress
+
+**Date:** 2026-07-04T00:23:33.053-04:00  
+**Author:** Khwarizmi (Backend Dev)  
+**Status:** Implemented
+
+## Context
+Learners returning to a course kept landing on Unit 1 because resume logic effectively favored the first in-order incomplete unit. When older units remain partially complete, this masks the most recent work.
+
+## Decision
+Backend enrollment payloads now return `unitProgress` ordered by latest activity (`updatedAt`, then `createdAt`) and include lightweight unit metadata (`orderIndex`). Frontend resume selection must prioritize the most recently active incomplete unit from that ordered progress list, then fall back to first incomplete by course order.
+
+## Impact
+- “Continue where you left off” now reflects recent learner activity.
+- Resume behavior is deterministic across API consumers.
+- Contract expectation is now test-covered in backend service tests.
+
+# Decision: Quran Memorization Surah Review Units
+
+**Author:** Khwarizmi
+**Date:** 2026-06-23T09:49:39-05:00
+**File:** `backend/prisma/seed-quran-memorization.ts`
+
+---
+
+## Decision
+
+After the last ayah unit of each surah in the Quran memorization seed, create one additional review unit titled `{SurahName} - Full Surah Review`.
+
+## Why
+
+The ayah-by-ayah flow is good for memorization, but learners also need a final per-surah checkpoint that presents the complete text and recitation sequence in one place before they mark the surah complete.
+
+## Implementation notes
+
+- Keep `buildUnitContent()` for single-ayah units and add a separate `buildSurahReviewContent()` helper for aggregate surah HTML.
+- Insert the review unit immediately after the surah's last ayah and increment `globalOrderIndex` so unit ordering remains stable across the whole course.
+- Reuse the existing everyayah Khalefa Al-Tunaiji URL pattern for each ayah audio clip in the review unit rather than introducing a new audio source format.
+- Seed `AudioResource` and `ArabicTerm` rows for the review unit as well, one per ayah, so backend consumers still have structured access to the same verse-level data.
