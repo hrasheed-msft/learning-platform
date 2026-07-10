@@ -29,7 +29,7 @@ interface EnrollModalProps {
 }
 
 function EnrollModal({ program, onClose }: EnrollModalProps) {
-  const { members, fetchLearners, isLoading: isLoadingLearners } = useFamilyStore();
+  const { members, fetchLearners, isLoading: isLoadingLearners, selectMember } = useFamilyStore();
   const { enrollInProgram, isEnrolling, error, clearError } = useProgramStore();
   const navigate = useNavigate();
 
@@ -42,9 +42,11 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
 
   useEffect(() => {
     if (!selectedMemberId && learners.length > 0) {
-      setSelectedMemberId(learners[0].id);
+      const firstLearner = learners[0];
+      setSelectedMemberId(firstLearner.id);
+      selectMember(firstLearner);
     }
-  }, [learners, selectedMemberId]);
+  }, [learners, selectedMemberId, selectMember]);
 
   useEffect(() => {
     void fetchLearners();
@@ -54,7 +56,10 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
   function detectStageNumber(member: FamilyMember | undefined): number | undefined {
     if (!member) return undefined;
     const age = member.age;
-    const match = program.stages.find((s) => age >= s.ageMin && age <= s.ageMax);
+    const stages = Array.isArray(program.stages) && program.stages.length > 0
+      ? program.stages
+      : DEFAULT_STAGES;
+    const match = stages.find((s) => age >= s.ageMin && age <= s.ageMax);
     return match?.stageNumber;
   }
 
@@ -135,7 +140,10 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
               {learners.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setSelectedMemberId(m.id)}
+                  onClick={() => {
+                    setSelectedMemberId(m.id);
+                    selectMember(m);
+                  }}
                   className={`p-3 rounded-xl border-2 text-left transition min-h-[44px] ${
                     selectedMemberId === m.id
                       ? 'border-[#1a5632] bg-green-50'
