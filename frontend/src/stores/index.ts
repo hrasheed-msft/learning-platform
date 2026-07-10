@@ -6,3 +6,5 @@ export { useFlashCardStore } from './flashcardStore';
 export { useDashboardStore } from './dashboardStore';
 export { useNotificationStore } from './notificationStore';
 export { useGameStore } from './gameStore';
+export { useProgramStore } from './programStore';
+export { useDuaProgressStore } from './duaProgressStore';

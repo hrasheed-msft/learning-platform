@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maktab Online School — Research Spike & Gap Analysis</title>
+<style>
+  :root {
+    --primary:       #1a5632;
+    --primary-dark:  #123d23;
+    --primary-light: #2d7a4a;
+    --accent:        #c0392b;
+    --accent-light:  #fdecea;
+    --gold:          #b8860b;
+    --gold-light:    #fdf8e1;
+    --bg:            #f5f2ec;
+    --surface:       #ffffff;
+    --surface-alt:   #f9f6f0;
+    --border:        #d8d0c4;
+    --text:          #1c1c1c;
+    --text-muted:    #666057;
+    --success:       #1a5632;
+    --success-bg:    #e8f5e9;
+    --warn:          #b8860b;
+    --warn-bg:       #fdf8e1;
+    --danger:        #c0392b;
+    --danger-bg:     #fdecea;
+    --info:          #1a5276;
+    --info-bg:       #eaf0fb;
+    --radius:        10px;
+    --shadow:        0 2px 12px rgba(0,0,0,0.08);
+    --shadow-md:     0 4px 24px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Georgia, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
+    color: #fff;
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 0.3rem 1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .hero .subtitle {
+    font-size: 1.15rem;
+    opacity: 0.85;
+    margin-bottom: 1.8rem;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .hero-stat {
+    text-align: center;
+  }
+  .hero-stat .num {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .hero-stat .lbl {
+    font-size: 0.78rem;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.2rem;
+  }
+  .hero-meta {
+    font-size: 0.78rem;
+    opacity: 0.6;
+    margin-top: 2rem;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* ── TOC ── */
+  .toc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow);
+  }
+  .toc-card h2 {
+    color: var(--primary);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.3rem 1.5rem;
+  }
+  .toc-grid a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.92rem;
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.15s;
+  }
+  .toc-grid a:hover { border-bottom-color: var(--primary); }
+  .toc-num {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 3rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-icon {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .section-title h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .section-title p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-top: 0.15rem;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.05rem;
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Call-out boxes ── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    font-size: 0.93rem;
+  }
+  .callout-success { background: var(--success-bg); border-color: var(--success); color: #154d28; }
+  .callout-warn    { background: var(--warn-bg);    border-color: var(--warn);    color: #7a5c00; }
+  .callout-danger  { background: var(--danger-bg);  border-color: var(--danger);  color: #7b1c14; }
+  .callout-info    { background: var(--info-bg);    border-color: var(--info);    color: #123260; }
+  .callout strong  { display: block; margin-bottom: 0.3rem; }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  thead { background: var(--primary); color: #fff; }
+  thead th {
+    padding: 0.75rem 0.9rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  tbody tr:nth-child(even) { background: var(--surface-alt); }
+  tbody tr:hover { background: #eef6f0; }
+  td, th { padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.center, th.center { text-align: center; }
+  .stage-badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 5px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .stage-badge.found { background: var(--accent); }
+  .stage-badge.further { background: var(--gold); }
+
+  /* ── Status icons ── */
+  .ic-ok   { color: #1a7a3a; font-size: 1.1rem; }
+  .ic-part { color: #b8860b; font-size: 1.1rem; }
+  .ic-no   { color: #c0392b; font-size: 1.1rem; }
+
+  /* ── Progress bars ── */
+  .prog-wrap { margin-bottom: 0.85rem; }
+  .prog-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-muted);
+  }
+  .prog-label span:last-child { font-weight: 700; color: var(--text); }
+  .prog-bar {
+    height: 10px;
+    background: #e0dbd4;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary-light));
+    transition: width 0.8s ease;
+  }
+  .prog-fill.partial { background: linear-gradient(90deg, #9c7a00, #d4aa00); }
+  .prog-fill.low     { background: linear-gradient(90deg, #922b21, #c0392b); }
+
+  /* ── Effort tags ── */
+  .effort {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .effort-s  { background: #c8f7d8; color: #0f5225; }
+  .effort-m  { background: #d4ebff; color: #0b3d6b; }
+  .effort-l  { background: #fdf0d0; color: #7a5000; }
+  .effort-xl { background: #ffd9d9; color: #7a1010; }
+
+  /* ── Priority tags ── */
+  .priority {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .p0 { background: #c0392b; color: #fff; }
+  .p1 { background: var(--warn); color: #fff; }
+  .p2 { background: #888; color: #fff; }
+
+  /* ── Gap cards grid ── */
+  .gap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .gap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    box-shadow: var(--shadow);
+    border-top: 3px solid var(--primary);
+  }
+  .gap-card.content-gap  { border-top-color: var(--accent); }
+  .gap-card.model-gap    { border-top-color: var(--info); }
+  .gap-card.feature-gap  { border-top-color: var(--warn); }
+  .gap-card.infra-gap    { border-top-color: #888; }
+  .gap-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .gap-card p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+  /* ── Architecture code blocks ── */
+  .code-block {
+    background: #1a1a1a;
+    color: #e8e8e8;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+  .code-block .cm  { color: #6a9955; }
+  .code-block .kw  { color: #569cd6; }
+  .code-block .tp  { color: #4ec9b0; }
+  .code-block .st  { color: #ce9178; }
+  .code-block .nm  { color: #dcdcaa; }
+  .code-block .op  { color: #d4d4d4; }
+
+  /* ── Collapsible ── */
+  details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  summary {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    user-select: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '▼';
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    color: var(--text-muted);
+  }
+  details[open] summary::after { transform: rotate(180deg); }
+  .details-body { padding: 1.25rem; }
+
+  /* ── Sprint backlog ── */
+  .sprint-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .sprint-card-header {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sprint-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .sprint-item:last-child { border-bottom: none; }
+  .sprint-item:hover { background: var(--surface-alt); }
+  .sprint-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .sprint-item-body { flex: 1; }
+  .sprint-item-title { font-weight: 600; font-size: 0.9rem; }
+  .sprint-item-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .sprint-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.4rem; }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .tag-be  { background: #e0f0ff; color: #0b3d6b; }
+  .tag-fe  { background: #e8f5e9; color: #1a5632; }
+  .tag-db  { background: #fff3e0; color: #7a3c00; }
+  .tag-seed { background: #f3e5f5; color: #4a1060; }
+  .tag-arch { background: #e8eaf6; color: #1a237e; }
+  .tag-days { background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+
+  /* ── Reuse meter ── */
+  .reuse-meter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .reuse-meter::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary-light));
+  }
+  .big-pct {
+    font-size: 5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .big-pct span { font-size: 2.5rem; }
+
+  /* ── Two-column layout ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 680px) {
+    .two-col { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.8rem; }
+    .hero-stats { gap: 1.5rem; }
+  }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    margin-top: 3rem;
+  }
+
+  /* ── Arch diagram ── */
+  .arch-box {
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--success-bg);
+    font-size: 0.85rem;
+  }
+  .arch-box.new-model { border-color: var(--accent); background: var(--accent-light); }
+  .arch-box.extended  { border-color: var(--warn);   background: var(--warn-bg); }
+  .arch-box h5 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; opacity: 0.7; }
+  .arch-box strong { color: var(--primary); }
+  .arch-box.new-model strong { color: var(--accent); }
+  .arch-box.extended strong { color: var(--gold); }
+
+  /* ── Sticky header ── */
+  .sticky-toc {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--primary-dark);
+    color: #fff;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sticky-toc::-webkit-scrollbar { display: none; }
+  .sticky-toc a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    padding: 0.7rem 1.1rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .sticky-toc a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+    border-bottom-color: #fff;
+  }
+
+  p { margin-bottom: 0.8rem; }
+  ul, ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  li { margin-bottom: 0.3rem; font-size: 0.92rem; }
+  h3 { color: var(--primary); font-size: 1.15rem; margin: 1.2rem 0 0.6rem; }
+  h4 { color: var(--primary-dark); font-size: 1rem; margin: 1rem 0 0.4rem; }
+  strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="badge">Research Spike · Architecture</div>
+  <h1>📿 Maktab Online School</h1>
+  <p class="subtitle">Gap Analysis &amp; Architecture Blueprint for the Online Islamic School Product — An Nasihah Curriculum, Ages 4–14+</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="num">12</div>
+      <div class="lbl">Stages</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">2</div>
+      <div class="lbl">Learning Paths</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">485</div>
+      <div class="lbl">After-School Topics</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">248</div>
+      <div class="lbl">Weekend Topics</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">~82%</div>
+      <div class="lbl">Content Coverage</div>
+    </div>
+  </div>
+  <p class="hero-meta">Prepared by Khaldun (Lead Architect) · 2026-07-09 · Islamic Learning Platform</p>
+</div>
+
+<!-- Sticky nav -->
+<nav class="sticky-toc">
+  <a href="#exec">1. Executive Summary</a>
+  <a href="#inventory">2. Asset Inventory</a>
+  <a href="#gaps">3. Gap Analysis</a>
+  <a href="#effort">4. Effort Estimates</a>
+  <a href="#arch">5. Architecture</a>
+  <a href="#reuse">6. Reuse Analysis</a>
+  <a href="#sprint">7. First Sprint</a>
+</nav>
+
+<div class="container">
+
+  <!-- ── TOC ── -->
+  <div class="toc-card">
+    <h2>📋 Table of Contents</h2>
+    <div class="toc-grid">
+      <a href="#exec"><span class="toc-num">1</span> Executive Summary</a>
+      <a href="#inventory"><span class="toc-num">2</span> Current Asset Inventory</a>
+      <a href="#gaps"><span class="toc-num">3</span> Gap Analysis</a>
+      <a href="#effort"><span class="toc-num">4</span> Effort Estimation</a>
+      <a href="#arch"><span class="toc-num">5</span> Architecture Recommendations</a>
+      <a href="#reuse"><span class="toc-num">6</span> Reuse Analysis</a>
+      <a href="#sprint"><span class="toc-num">7</span> Recommended First Sprint</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       §1 — EXECUTIVE SUMMARY
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="exec">
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div class="section-title">
+        <h2>Executive Summary</h2>
+        <p>Product vision, scope, and the single biggest insight from this spike</p>
+      </div>
+    </div>
+
+    <div class="callout callout-success">
+      <strong>🔑 The Key Insight</strong>
+      The platform already contains ~82% of the syllabus content. The "Online Maktab" product is primarily a <em>structural and enrollment challenge</em>, not a content-creation challenge. We need to organize what we have, fill two missing stages, and add program-level navigation — not rebuild the curriculum.
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">🎯 Product Vision</div>
+        <p>A structured, family-operated Islamic school-in-a-box where parents enroll children by age, choose a learning intensity (after-school or weekend), and the platform delivers a 10-year progressive curriculum across all major Islamic studies subjects — with built-in SRS, quizzes, games, and progress tracking.</p>
+        <p>This is not a standalone course catalog. It is a <strong>multi-year program</strong> with clear grade levels, subject progression, and completion milestones — aligned to the An Nasihah Islamic Curriculum.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">👨‍👩‍👧 Target Users</div>
+        <ul>
+          <li><strong>Families</strong> with children aged 4–14+ attending after-school or weekend Islamic studies</li>
+          <li><strong>Parents</strong> want visibility into all subjects, stage completion, and child progress</li>
+          <li><strong>Children</strong> need age-appropriate interfaces; Foundation stages (4–6) require child-first design</li>
+          <li><strong>Weekend schools</strong> (Phase 2): teacher/facilitator roles and class cohort management</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🗺️ The Two Learning Paths</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>After-School (Full)</th>
+              <th>Weekend (Essentials)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Session frequency</td><td>3–4 evenings per week</td><td>Once per week</td></tr>
+            <tr><td>Session duration</td><td>2–3 hours</td><td>2–3 hours</td></tr>
+            <tr><td>Total topics</td><td>~485</td><td>~248 (51%)</td></tr>
+            <tr><td>Tārīkh (History)</td><td>✅ Included</td><td>❌ Dropped</td></tr>
+            <tr><td>Aqā'id (Theology)</td><td>✅ Included</td><td>❌ Dropped</td></tr>
+            <tr><td>Subject depth</td><td>Full topic list per stage</td><td>Reduced topic counts</td></tr>
+            <tr><td>Target family</td><td>Dedicated daily learners</td><td>Weekend school attendees</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏗️ What We're Building</div>
+      <p>Three components need to exist on top of the current platform to form the "Maktab Online School" product:</p>
+      <ol>
+        <li><strong>Program enrollment layer:</strong> A structured program model that groups existing courses into a grade/stage sequence, with a path-aware enrollment flow ("Enroll Fatima in Year 1 — Weekend Path").</li>
+        <li><strong>Grade-level dashboard:</strong> A new view (for parents and children) showing a progress summary across all subjects for the current stage — not just individual course cards.</li>
+        <li><strong>Missing content (Foundation 1 &amp; 2):</strong> Two stages for ages 4–6 currently have no seeded content in the platform and must be created from scratch.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       §2 — ASSET INVENTORY
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="inventory">
+    <div class="section-header">
+      <div class="section-icon">📦</div>
+      <div class="section-title">
+        <h2>Current Asset Inventory</h2>
+        <p>Stage-by-stage matrix of what exists in the platform vs. what the syllabus requires</p>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>Legend:</strong>
+      ✅ Fully exists in platform &nbsp;·&nbsp; ⚠️ Partially exists (embedded in other content, no standalone tracking) &nbsp;·&nbsp; ❌ Does not exist / not seeded
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Ages</th>
+            <th>Course Seed</th>
+            <th>Qur'ān</th>
+            <th>Du'ā</th>
+            <th>99 Names</th>
+            <th>Flashcards</th>
+            <th>Quizzes</th>
+            <th>Games</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="stage-badge found">Foundation 1</span></td>
+            <td>4–5 yrs</td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge found">Foundation 2</span></td>
+            <td>5–6 yrs</td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+            <td class="center"><span class="ic-no">❌</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 1</span></td>
+            <td>6–7 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span> <small>Juz Amma</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 2</span></td>
+            <td>7–8 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span> <small>Juz Amma</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 3</span></td>
+            <td>8–9 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span> <small>Juz Amma</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 4</span></td>
+            <td>9–10 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span> <small>Juz Amma</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 5</span></td>
+            <td>10–11 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-part">⚠️</span> <small>Yāsīn needed</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 6 ♂</span></td>
+            <td>11–12 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-part">⚠️</span> <small>As-Sajdah needed</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 6 ♀</span></td>
+            <td>11–12 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-part">⚠️</span> <small>As-Sajdah needed</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 7</span></td>
+            <td>12–13 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-part">⚠️</span> <small>Al-Mulk needed</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge">Coursebook 8</span></td>
+            <td>13–14 yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-part">⚠️</span> <small>Al-Wāqi'ah, Ar-Raḥmān, Al-Kahf (first 10) needed</small></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-badge further">Further Studies</span></td>
+            <td>14+ yrs</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center"><span class="ic-part">⚠️</span></td>
+            <td class="center">—</td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+            <td class="center"><span class="ic-ok">✅</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <strong>⚠️ Du'ā and 99 Names — Important Distinction</strong>
+      Both subjects have their content embedded <em>within</em> Coursebook units. They exist as HTML, flashcards, and quiz questions. However, they have <strong>no standalone progression tracking</strong>. The syllabus treats these as cumulative, stage-to-stage programs (a child should know all du'ās from stages 1–3 before moving to stage 4). This progressive tracking does not currently exist as a distinct feature.
+    </div>
+
+    <div class="callout callout-warn">
+      <strong>⚠️ Longer Sūrahs — Quran Memorization Gap (CB5–8)</strong>
+      The existing Quran Memorization course covers Juz Amma (surahs 78–114 approximately, seeded 114→93). Stages CB5 through CB8 require <strong>Yāsīn, As-Sajdah, Al-Mulk, Al-Wāqi'ah, Ar-Raḥmān, and Al-Kahf (first 10 āyāt)</strong>. None of these are seeded. These are longer surahs (60–83 āyāt each) and represent meaningful content work.
+    </div>
+
+    <h3>Subject-Level Coverage Map</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>After-School</th>
+            <th>Weekend</th>
+            <th>Platform Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Qur'ān Memorization</td><td>✅</td><td>✅</td><td>⚠️ Partial</td><td>Juz Amma seeded; longer surahs (CB5–8) missing</td></tr>
+          <tr><td>Du'ā &amp; Kalimahs</td><td>✅</td><td>✅</td><td>⚠️ Partial</td><td>Content in CB units; no standalone progression</td></tr>
+          <tr><td>99 Names of Allāh</td><td>✅</td><td>✅</td><td>⚠️ Partial</td><td>Content in CB units; no standalone progression</td></tr>
+          <tr><td>Fiqh</td><td>✅</td><td>✅</td><td>✅ Seeded (CB1–8)</td><td>CB6 gendered — both variants exist</td></tr>
+          <tr><td>Aḥādīth</td><td>✅</td><td>✅</td><td>✅ Seeded (CB1–8)</td><td>Also Quduri Hadith course exists</td></tr>
+          <tr><td>Sīrah</td><td>✅</td><td>✅</td><td>✅ Seeded (CB1–8)</td><td></td></tr>
+          <tr><td>Tārīkh (History)</td><td>✅</td><td>❌ Dropped</td><td>✅ Seeded (CB1–8)</td><td>Only in after-school path</td></tr>
+          <tr><td>Aqā'id (Theology)</td><td>✅</td><td>❌ Dropped</td><td>✅ Seeded (CB1–8)</td><td>Only in after-school path</td></tr>
+          <tr><td>Akhlāq (Character)</td><td>✅</td><td>✅</td><td>✅ Seeded (CB1–8)</td><td></td></tr>
+          <tr><td>Ādāb (Etiquette)</td><td>✅</td><td>✅</td><td>✅ Seeded (CB1–8)</td><td></td></tr>
+          <tr><td>Further Studies (8 mods)</td><td>✅</td><td>✅</td><td>✅ Seeded</td><td>FurtherStudiesNW seed complete</td></tr>
+          <tr><td>Foundation content (4–6)</td><td>✅</td><td>✅</td><td>❌ Missing</td><td>Foundation 1 &amp; 2 not yet created</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       §3 — GAP ANALYSIS
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="gaps">
+    <div class="section-header">
+      <div class="section-icon">🔍</div>
+      <div class="section-title">
+        <h2>Gap Analysis</h2>
+        <p>Four categories of gaps between the current platform and the Maktab Online School product</p>
+      </div>
+    </div>
+
+    <!-- A. Content Gaps -->
+    <details open>
+      <summary>
+        <span>📄 A. Content Gaps</span>
+        <span class="effort effort-l">High Impact</span>
+      </summary>
+      <div class="details-body">
+        <div class="gap-grid">
+          <div class="gap-card content-gap">
+            <h4>Foundation 1 — Full Stage Content <span class="priority p0">P0</span></h4>
+            <p>Ages 4–5. Requires: HTML course units (age-appropriate, minimal text, heavy visuals), basic du'ā (Bismillah, eating/sleeping du'ās), kalimahs (Kalimah Tawhid introduction), Al-Fātiḥah memorization with audio, 5 pillars introduction, basic ādāb. Needs quizzes adapted for age (picture-based), flashcards, and an early-reader-friendly UI.</p>
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.4rem;">
+              <span class="effort effort-l">L Effort</span>
+              <span class="priority p0">MVP Blocker</span>
+            </div>
+          </div>
+          <div class="gap-card content-gap">
+            <h4>Foundation 2 — Full Stage Content <span class="priority p0">P0</span></h4>
+            <p>Ages 5–6. Builds on F1. Additional short surahs (Al-Ikhlās, Al-Falaq, An-Nās), du'ā expansion, Kalimah Shahādah, basic fiqh (wuḍū steps), continuation of ādāb and akhlāq. Same content format needs as F1 — child-first, audio-heavy, visual.</p>
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.4rem;">
+              <span class="effort effort-l">L Effort</span>
+              <span class="priority p0">MVP Blocker</span>
+            </div>
+          </div>
+          <div class="gap-card content-gap">
+            <h4>Longer Surahs — Qur'ān (CB5–8) <span class="priority p1">P1</span></h4>
+            <p>Stages CB5–CB8 require: Yāsīn (83 āyāt), As-Sajdah (30 āyāt), Al-Mulk (30 āyāt), Al-Wāqi'ah (96 āyāt), Ar-Raḥmān (78 āyāt), Al-Kahf first 10 āyāt. The existing Quran course architecture supports per-ayah unit seeding with audio from everyayah.com — the pattern is established, but the content seeds do not exist.</p>
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.4rem;">
+              <span class="effort effort-xl">XL Effort</span>
+              <span class="priority p1">P1</span>
+            </div>
+          </div>
+          <div class="gap-card content-gap">
+            <h4>Du'ā — Standalone Progression <span class="priority p1">P1</span></h4>
+            <p>The syllabus treats du'ā as a cumulative 12-stage program (Kalimah Tawhid → salāh du'ās → daily du'ās → advanced supplications). This content exists within CB units but needs to be extractable/linkable as a standalone trackable journey. Two options: (a) extract into a dedicated Du'ā course with SRS; (b) tag existing flashcards with dua_stage metadata and build a progression view on top.</p>
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.4rem;">
+              <span class="effort effort-m">M Effort</span>
+              <span class="priority p1">P1</span>
+            </div>
+          </div>
+          <div class="gap-card content-gap">
+            <h4>99 Names — Standalone Progression <span class="priority p1">P1</span></h4>
+            <p>5–15 names per stage; all 99 completed by CB8. Content in CB flashcards, but no cross-stage progress bar, no "names mastered so far" counter, no dedicated review track. Relatively contained: tag existing flashcards, build a progress view, add a completion badge. Less work than du'ā.</p>
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.4rem;">
+              <span class="effort effort-s">S Effort</span>
+              <span class="priority p1">P1</span>
+            </div>
+          </div>
+          <div class="gap-card content-gap">
+            <h4>Weekend Path Curation <span class="priority p1">P1</span></h4>
+            <p>The weekend path drops Tārīkh and Aqā'id entirely, and reduces topic counts in remaining subjects. This requires tagging ~237 topics across CB1–8 as "weekend-excluded" — not creating new content, but curating the existing content. Implementation: add <code>includedInPaths: LearningPath[]</code> to Unit model and filter at enrollment time.</p>
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.4rem;">
+              <span class="effort effort-m">M Effort</span>
+              <span class="priority p1">P1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- B. Data Model Gaps -->
+    <details open>
+      <summary>
+        <span>🗄️ B. Data Model Gaps</span>
+        <span class="effort effort-m">Schema Changes Required</span>
+      </summary>
+      <div class="details-body">
+        <div class="gap-grid">
+          <div class="gap-card model-gap">
+            <h4>Learning Path Concept <span class="priority p0">P0</span></h4>
+            <p>No <code>LearningPath</code> enum (AFTER_SCHOOL / WEEKEND) exists on any model. Needs to be added to: ProgramEnrollment (which path is the child on?), and Unit (which path includes this unit?). The Course model itself is neutral — it's the units within it that are included/excluded per path.</p>
+          </div>
+          <div class="gap-card model-gap">
+            <h4>Program / Stage Model <span class="priority p0">P0</span></h4>
+            <p>No model grouping courses into a multi-year program. The current schema has individual Course enrollments. We need: <code>Program</code> (the 12-stage maktab program) → <code>ProgramStage</code> (one per year level, ordered) → <code>ProgramStage.courses[]</code> (ordered list of courses in that stage). ProgramEnrollment links a FamilyMember to a Program + current stage.</p>
+          </div>
+          <div class="gap-card model-gap">
+            <h4>Stage Prerequisites &amp; Ordering <span class="priority p1">P1</span></h4>
+            <p>No concept of "must complete Stage N before starting Stage N+1." The existing schema has individual course enrollments with no ordering. ProgramStage needs an <code>orderIndex</code> and the enrollment logic needs to gate advancement. MVP can be soft-gated (parent manually advances; no hard lock).</p>
+          </div>
+          <div class="gap-card model-gap">
+            <h4>Du'ā Progression Tracking <span class="priority p1">P1</span></h4>
+            <p>Option A: New <code>DuaProgress</code> model (duaId, memberId, status). Option B: Tag existing <code>FlashCard</code>s with <code>category: 'DUA'</code> and use the existing SRS system. Option B is strongly preferred — we don't add a new model; we leverage the existing FlashCardProgress + SRS infrastructure that already works.</p>
+          </div>
+          <div class="gap-card model-gap">
+            <h4>FamilyMember.gender Field <span class="priority p0">P0</span></h4>
+            <p>Coursebook 6 is gendered — two separate courses exist (CB6Boys, CB6Girls). But the schema has no <code>gender</code> field on <code>FamilyMember</code>. Without it, enrollment logic cannot auto-route to the correct CB6 variant. The parent needs to choose, or we infer from profile. Add <code>gender: Gender?</code> enum field to FamilyMember.</p>
+          </div>
+          <div class="gap-card model-gap">
+            <h4>Stage Completion Certificate <span class="priority p2">P2</span></h4>
+            <p>No <code>StageCompletion</code> or certificate model. This would need: a completion record (memberId, stageId, completedAt, certificateUrl). Low schema complexity but requires PDF generation or a static certificate template system. Low priority for MVP.</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- C. Feature Gaps -->
+    <details open>
+      <summary>
+        <span>🖥️ C. Feature Gaps</span>
+        <span class="effort effort-l">Largest Build Category</span>
+      </summary>
+      <div class="details-body">
+        <div class="gap-grid">
+          <div class="gap-card feature-gap">
+            <h4>Program Enrollment Flow <span class="priority p0">P0</span></h4>
+            <p>A new onboarding flow (3–4 steps): (1) select child from family, (2) confirm/set age → system suggests the correct stage, (3) choose learning path (After-School or Weekend), (4) review which courses are included → confirm enrollment. This is a new UI surface that does not exist at all.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Grade-Level Dashboard <span class="priority p0">P0</span></h4>
+            <p>A new dashboard view showing a child's progress across all subjects in their current stage — not the current ChildDashboardHome (which is a course card grid). Needed: a stage header ("Year 3 — Coursebook 3"), subject progress bars (Fiqh, Sīrah, Aḥādīth, Qur'ān, Du'ā, 99 Names…), next session recommendation, stage completion percentage.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Age-Appropriate UI — Foundation Stages <span class="priority p0">P0</span></h4>
+            <p>The current UI is designed for 7+ year olds. Foundation 1 (4–5) and Foundation 2 (5–6) need: larger text, image-heavy question formats (can't read MCQ text at 4 years old), audio prompts, more animations, parent-guided mode, and extremely simple navigation. This is a non-trivial frontend investment.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Parent Progress Reports <span class="priority p1">P1</span></h4>
+            <p>Per-stage, per-subject progress reports exportable by parents. Currently, the ParentDashboard shows basic enrollment status. A Maktab product needs: time-spent by subject, quiz scores per stage, memorization milestones, attendance-style weekly progress summary. Builds on existing ActivityEvent + UnitProgress data.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Stage Completion &amp; Milestones <span class="priority p1">P1</span></h4>
+            <p>A completion ceremony: all required units in all stage courses done → stage marked complete → achievement unlocked → certificate rendered → parent notified → next stage unlocked. Builds on existing Achievements + Notifications systems. Not technically complex but requires wiring multiple existing systems together.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Teacher / Facilitator Role <span class="priority p2">P2</span></h4>
+            <p>Weekend schools need a teacher who can see all their enrolled students, assign homework, and track class progress. Requires: new <code>TEACHER</code> role, class/cohort model, teacher dashboard, student roster view. This is a significant product expansion — scope it as Phase 2.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Class / Cohort Management <span class="priority p2">P2</span></h4>
+            <p>Organizing families into a class under a teacher. Requires: Class model (teacherId, programId, stage, members[]), class enrollment, class leaderboard, bulk assignment. Pairs with Teacher role feature. Phase 2.</p>
+          </div>
+          <div class="gap-card feature-gap">
+            <h4>Stage Completion Certificates <span class="priority p2">P2</span></h4>
+            <p>Printable/downloadable PDF certificates with child's name, stage name, and completion date. Can be implemented as a server-side PDF render (Puppeteer/HTML-to-PDF) or a client-side Canvas/print template. Delightful but not blocking MVP.</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- D. Infrastructure Gaps -->
+    <details>
+      <summary>
+        <span>⚙️ D. Infrastructure Gaps</span>
+        <span class="effort effort-m">Audio Content Primary Concern</span>
+      </summary>
+      <div class="details-body">
+        <div class="gap-grid">
+          <div class="gap-card infra-gap">
+            <h4>Audio — Du'ā Recitations <span class="priority p2">P2</span></h4>
+            <p>For each supplication in the du'ā progression, learners need to hear the correct recitation (with tajweed). The platform has a TTS audio system and an AudioCache for pre-generated audio. However, du'ā recitations need a human voice (or high-quality Arabic TTS), not generic TTS. This requires sourcing/recording recitation audio files, storing them in Blob Storage, and linking to Unit audioResources. Significant content production work.</p>
+          </div>
+          <div class="gap-card infra-gap">
+            <h4>Audio — 99 Names Pronunciation <span class="priority p2">P2</span></h4>
+            <p>Each of the 99 Names needs a clear pronunciation audio clip. This is more tractable than du'ā (99 short clips vs. many longer supplications). Could leverage existing Arabic TTS for initial version. Deferred to P2.</p>
+          </div>
+          <div class="gap-card infra-gap">
+            <h4>Image Assets — Foundation Stages <span class="priority p0">P0</span></h4>
+            <p>Foundation 1 &amp; 2 content will be heavily visual (children's illustrations for concepts, picture-based quizzes). These images need to be sourced or created. This is a content production dependency that blocks Foundation stage readiness.</p>
+          </div>
+          <div class="gap-card infra-gap">
+            <h4>PDF Certificate Generation <span class="priority p2">P2</span></h4>
+            <p>Stage completion certificates require server-side PDF generation (Puppeteer or similar) or a client-side print template. The platform has no PDF generation infrastructure today. Low priority — add when Teacher/Certificate features are scoped.</p>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       §4 — EFFORT ESTIMATION
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="effort">
+    <div class="section-header">
+      <div class="section-icon">📏</div>
+      <div class="section-title">
+        <h2>Effort Estimation</h2>
+        <p>T-shirt sizing grouped by priority tier. S=days, M=1-2 weeks, L=2-4 weeks, XL=4-8 weeks.</p>
+      </div>
+    </div>
+
+    <!-- P0 -->
+    <div class="card" style="border-top: 3px solid var(--danger); margin-bottom: 1.5rem;">
+      <div class="card-title" style="color: var(--danger);">🔴 P0 — Must Have for MVP</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Effort</th>
+              <th>Owner</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Foundation 1 Content</strong><br><small>HTML units, quizzes, flashcards, age-appropriate UI</small></td>
+              <td>Content + Frontend</td>
+              <td><span class="effort effort-l">L</span></td>
+              <td>Ibn Sina + Khwarizmi</td>
+              <td>Ages 4–5 is the entry point. Without this, the product can't serve its youngest users.</td>
+            </tr>
+            <tr>
+              <td><strong>Foundation 2 Content</strong><br><small>HTML units, quizzes, flashcards</small></td>
+              <td>Content + Frontend</td>
+              <td><span class="effort effort-l">L</span></td>
+              <td>Ibn Sina + Khwarizmi</td>
+              <td>Ages 5–6, direct dependency on F1 work. Sequentially after F1.</td>
+            </tr>
+            <tr>
+              <td><strong>Schema: LearningPath enum</strong><br><small>Enum + Unit.includedInPaths, ProgramEnrollment.path</small></td>
+              <td>Data Model</td>
+              <td><span class="effort effort-s">S</span></td>
+              <td>Khwarizmi</td>
+              <td>Foundational. Every path-aware feature depends on this.</td>
+            </tr>
+            <tr>
+              <td><strong>Schema: Program + ProgramStage + ProgramEnrollment</strong><br><small>3 new models, migration, seed data</small></td>
+              <td>Data Model</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Khwarizmi</td>
+              <td>The structural backbone of the whole product. All dashboards and enrollment depend on this.</td>
+            </tr>
+            <tr>
+              <td><strong>Schema: FamilyMember.gender</strong><br><small>Enum field, migration, CB6 routing logic</small></td>
+              <td>Data Model</td>
+              <td><span class="effort effort-s">S</span></td>
+              <td>Khwarizmi</td>
+              <td>Required to route CB6 to the correct boys/girls variant. Simple schema change.</td>
+            </tr>
+            <tr>
+              <td><strong>Program Enrollment Flow</strong><br><small>3-step onboarding UI: select child → stage → path</small></td>
+              <td>Feature (Frontend)</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Ibn Sina</td>
+              <td>The user-facing entry point. Without it, families can't join the maktab program.</td>
+            </tr>
+            <tr>
+              <td><strong>Grade-Level Dashboard</strong><br><small>New view: all subjects + progress per stage</small></td>
+              <td>Feature (Frontend + Backend)</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Ibn Sina + Khwarizmi</td>
+              <td>The daily interface for students. Replaces the generic course card grid for maktab enrollees.</td>
+            </tr>
+            <tr>
+              <td><strong>Foundation Stage UI (ages 4–6)</strong><br><small>Child-first, audio-guided, picture-based quiz format</small></td>
+              <td>Feature (Frontend)</td>
+              <td><span class="effort effort-l">L</span></td>
+              <td>Ibn Sina</td>
+              <td>Ages 4–6 cannot use the current adult-oriented UI. This is a prerequisite for the Foundation content being usable.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-danger" style="margin-top: 0.5rem; margin-bottom: 0;">
+        <strong>P0 Total Estimate: 8–12 weeks of parallel team effort</strong>
+        Schema changes are S–M and can be completed in Sprint 1. Content + UI for Foundation stages is the long pole — plan for 4–6 weeks of focused work. Grade dashboard and enrollment flow are M effort, parallelizable with content creation.
+      </div>
+    </div>
+
+    <!-- P1 -->
+    <div class="card" style="border-top: 3px solid var(--gold); margin-bottom: 1.5rem;">
+      <div class="card-title" style="color: var(--gold);">🟡 P1 — Should Have</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Effort</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Du'ā Standalone Tracking</strong></td>
+              <td>Feature + Schema</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Tag existing FlashCards as category='DUA', add stage tags, build progression view. Use existing SRS — no new model needed.</td>
+            </tr>
+            <tr>
+              <td><strong>99 Names Standalone Tracking</strong></td>
+              <td>Feature</td>
+              <td><span class="effort effort-s">S</span></td>
+              <td>Tag existing flashcards with stage number. Build a dedicated 99 Names progress page. Simpler than du'ā.</td>
+            </tr>
+            <tr>
+              <td><strong>Weekend Path Content Curation</strong></td>
+              <td>Content + Schema</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Tag all CB1–8 units with includedInPaths. Audit ~485 topics and mark which 237 are weekend-excluded. Data work more than dev work.</td>
+            </tr>
+            <tr>
+              <td><strong>Longer Surahs (Quran CB5–8)</strong></td>
+              <td>Content</td>
+              <td><span class="effort effort-xl">XL</span></td>
+              <td>Yāsīn (83 āyāt) + As-Sajdah + Al-Mulk + Al-Wāqi'ah + Ar-Raḥmān + Al-Kahf first 10. Pattern exists in Juz Amma seed. Labor-intensive content seeding.</td>
+            </tr>
+            <tr>
+              <td><strong>Stage Completion</strong></td>
+              <td>Feature</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Detection logic (all units done) + achievement unlock + parent notification + next stage unlock. Wires existing Achievements + Notifications systems.</td>
+            </tr>
+            <tr>
+              <td><strong>Parent Progress Reports</strong></td>
+              <td>Feature (Backend + Frontend)</td>
+              <td><span class="effort effort-m">M</span></td>
+              <td>Aggregate UnitProgress + ActivityEvents into per-subject, per-stage views. Builds on existing data. New report UI needed.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- P2 -->
+    <div class="card" style="border-top: 3px solid #888;">
+      <div class="card-title" style="color: #555;">⚪ P2 — Nice to Have (Phase 2)</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Effort</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Teacher / Facilitator Role</strong></td><td><span class="effort effort-xl">XL</span></td><td>New role, class management, teacher dashboard. Full feature expansion.</td></tr>
+            <tr><td><strong>Class / Cohort Management</strong></td><td><span class="effort effort-xl">XL</span></td><td>Depends on Teacher role. Significant schema + UI work.</td></tr>
+            <tr><td><strong>Stage Completion Certificates</strong></td><td><span class="effort effort-m">M</span></td><td>PDF generation infrastructure needed. Content + design work.</td></tr>
+            <tr><td><strong>Audio — Du'ā Recitations</strong></td><td><span class="effort effort-l">L</span></td><td>Content production (recording/sourcing ~50+ audio files) + storage + linking.</td></tr>
+            <tr><td><strong>Audio — 99 Names Pronunciation</strong></td><td><span class="effort effort-m">M</span></td><td>99 short audio clips. Could use Arabic TTS initially.</td></tr>
+            <tr><td><strong>Maktab-Specific Game Content</strong></td><td><span class="effort effort-m">M</span></td><td>Games system exists. Needs maktab-specific question sets for stage-locked game sessions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       §5 — ARCHITECTURE RECOMMENDATIONS
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="arch">
+    <div class="section-header">
+      <div class="section-icon">🏗️</div>
+      <div class="section-title">
+        <h2>Architecture Recommendations</h2>
+        <p>Concrete decisions on schema changes, new models, and integration patterns</p>
+      </div>
+    </div>
+
+    <!-- 5.1 Program Model -->
+    <details open>
+      <summary><span>5.1 — Program &amp; Stage Model Design</span></summary>
+      <div class="details-body">
+        <div class="callout callout-info">
+          <strong>Decision:</strong> Introduce a lightweight <code>Program</code> → <code>ProgramStage</code> → <code>ProgramEnrollment</code> hierarchy. Do NOT repurpose the existing Course model for this — courses remain atomic learning units. The Program model is a curriculum wrapper.
+        </div>
+
+        <div class="two-col">
+          <div>
+            <h4>New Models</h4>
+            <div class="arch-box new-model">
+              <h5>NEW — Program</h5>
+              <strong>Program</strong> { id, name, slug, description,<br>
+              learningPaths: LearningPath[], isPublished }<br>
+              <small>e.g. "Maktab An Nasihah — After-School"</small>
+            </div>
+            <div class="arch-box new-model">
+              <h5>NEW — ProgramStage</h5>
+              <strong>ProgramStage</strong> { id, programId, stageNumber,<br>
+              name, ageMin, ageMax, courses: Course[],<br>
+              isOptional, orderIndex }<br>
+              <small>e.g. Stage 1 = Foundation 1, stages[0].courses = [cb1-fiqh, cb1-sirah…]</small>
+            </div>
+            <div class="arch-box new-model">
+              <h5>NEW — ProgramEnrollment</h5>
+              <strong>ProgramEnrollment</strong> { id, familyMemberId,<br>
+              programId, currentStageId,<br>
+              path: LearningPath, enrolledAt,<br>
+              status: ACTIVE|PAUSED|COMPLETED }<br>
+              <small>One per child per program</small>
+            </div>
+          </div>
+          <div>
+            <h4>Extended Models</h4>
+            <div class="arch-box extended">
+              <h5>EXTENDED — Unit</h5>
+              <strong>Unit</strong> + includedInPaths: LearningPath[]<br>
+              <small>Default: [AFTER_SCHOOL, WEEKEND]. Weekend-excluded units: [AFTER_SCHOOL].</small>
+            </div>
+            <div class="arch-box extended">
+              <h5>EXTENDED — FamilyMember</h5>
+              <strong>FamilyMember</strong> + gender: Gender? (MALE | FEMALE)<br>
+              <small>Used for CB6 routing at enrollment time</small>
+            </div>
+            <div class="arch-box extended">
+              <h5>EXTENDED — FlashCard</h5>
+              <strong>FlashCard</strong> + stageTag: String? + subjectTag: String?<br>
+              <small>e.g. stageTag="CB3", subjectTag="DUA" — enables cross-stage du'ā and 99 Names views without new models</small>
+            </div>
+            <h4 style="margin-top: 1rem;">New Enum</h4>
+            <div class="arch-box new-model">
+              <h5>NEW — LearningPath enum</h5>
+              <strong>LearningPath</strong> { AFTER_SCHOOL, WEEKEND }<br>
+              <small>Used on Unit, ProgramEnrollment</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+<span class="cm">// Prisma schema additions (abbreviated)</span>
+
+<span class="kw">enum</span> <span class="tp">LearningPath</span> {
+  AFTER_SCHOOL
+  WEEKEND
+}
+
+<span class="kw">enum</span> <span class="tp">Gender</span> {
+  MALE
+  FEMALE
+}
+
+<span class="kw">model</span> <span class="tp">Program</span> {
+  id            String           <span class="st">@id @default(cuid())</span>
+  slug          String           <span class="st">@unique</span>
+  name          String
+  learningPaths LearningPath[]
+  stages        ProgramStage[]
+  enrollments   ProgramEnrollment[]
+  isPublished   Boolean          <span class="st">@default(false)</span>
+}
+
+<span class="kw">model</span> <span class="tp">ProgramStage</span> {
+  id          String   <span class="st">@id @default(cuid())</span>
+  program     Program  <span class="st">@relation(fields: [programId], references: [id])</span>
+  programId   String
+  stageNumber Int
+  name        String
+  ageMin      Int
+  ageMax      Int
+  orderIndex  Int
+  courses     Course[]
+  <span class="st">@@unique([programId, stageNumber])</span>
+}
+
+<span class="kw">model</span> <span class="tp">ProgramEnrollment</span> {
+  id             String        <span class="st">@id @default(cuid())</span>
+  familyMember   FamilyMember  <span class="st">@relation(fields: [familyMemberId], references: [id])</span>
+  familyMemberId String
+  program        Program       <span class="st">@relation(fields: [programId], references: [id])</span>
+  programId      String
+  currentStage   ProgramStage  <span class="st">@relation(fields: [currentStageId], references: [id])</span>
+  currentStageId String
+  path           LearningPath
+  enrolledAt     DateTime      <span class="st">@default(now())</span>
+  status         EnrollmentStatus <span class="st">@default(ACTIVE)</span>
+  <span class="st">@@unique([familyMemberId, programId])</span>
+}
+
+<span class="cm">// Extensions to existing models</span>
+<span class="kw">model</span> <span class="tp">Unit</span> {
+  <span class="cm">// ... existing fields ...</span>
+  includedInPaths LearningPath[]  <span class="cm">// [] means all paths</span>
+}
+
+<span class="kw">model</span> <span class="tp">FamilyMember</span> {
+  <span class="cm">// ... existing fields ...</span>
+  gender   Gender?
+}
+
+<span class="kw">model</span> <span class="tp">FlashCard</span> {
+  <span class="cm">// ... existing fields ...</span>
+  stageTag   String?   <span class="cm">// e.g. "CB1", "CB3", "F1"</span>
+  subjectTag String?   <span class="cm">// e.g. "DUA", "99NAMES", "FIQH"</span>
+}
+        </div>
+      </div>
+    </details>
+
+    <!-- 5.2 CB6 Gender Routing -->
+    <details>
+      <summary><span>5.2 — CB6 Gender Routing</span></summary>
+      <div class="details-body">
+        <div class="callout callout-info">
+          <strong>Decision:</strong> Both CB6Boys and CB6Girls courses already exist as separate Course records. Gender routing is an enrollment-time decision, not a content-delivery decision. When a child's ProgramEnrollment reaches Stage 6, the enrollment logic checks <code>FamilyMember.gender</code> and auto-enrolls in the matching CB6 course.
+        </div>
+        <p>Implementation steps:</p>
+        <ol>
+          <li>Add <code>FamilyMember.gender: Gender?</code> to schema (migration required)</li>
+          <li>Add gender prompt to the family member creation flow (optional initially — can be set later in settings)</li>
+          <li>In the ProgramEnrollment advancement logic, when <code>currentStage.stageNumber === 6</code>: if gender is MALE, enroll in maktab-coursebook-6-boys; if FEMALE, enroll in maktab-coursebook-6-girls; if null, prompt parent to set gender before advancing</li>
+          <li>No content changes needed — the two courses already handle gendered fiqh content correctly</li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- 5.3 Weekend Path Filtering -->
+    <details>
+      <summary><span>5.3 — Weekend Path Filtering Strategy</span></summary>
+      <div class="details-body">
+        <div class="callout callout-info">
+          <strong>Decision:</strong> Filter at the Unit level using <code>includedInPaths</code>, not at the Course level. Courses remain neutral containers. A Weekend-path learner sees fewer units within each course — they don't see fewer courses.
+        </div>
+        <p><strong>Why unit-level, not course-level?</strong></p>
+        <ul>
+          <li>Tārīkh and Aqā'id are dropped in their entirety for weekend → mark ALL units in those courses as <code>includedInPaths: [AFTER_SCHOOL]</code></li>
+          <li>Other subjects have reduced topic counts → mark specific units as <code>includedInPaths: [AFTER_SCHOOL]</code> (the "extra depth" units beyond essentials)</li>
+          <li>This means the same course seed works for both paths — no duplicate content, just metadata tags</li>
+        </ul>
+        <p><strong>Query pattern:</strong> When loading course units for a weekend-path learner, add <code>WHERE (includedInPaths = '{}' OR 'WEEKEND' = ANY(includedInPaths))</code>. Empty array means "all paths" (default).</p>
+        <p><strong>Implementation:</strong> The weekend path curation is primarily a <em>data tagging exercise</em>. Go through all CB1–8 units, identify the ~237 weekend-excluded topics from the syllabus, and update their <code>includedInPaths</code> accordingly. Write a <code>seed-weekend-path-tags.ts</code> script to apply the tags idempotently.</p>
+      </div>
+    </details>
+
+    <!-- 5.4 Du'a & 99 Names -->
+    <details>
+      <summary><span>5.4 — Du'ā &amp; 99 Names Progression (No New Models)</span></summary>
+      <div class="details-body">
+        <div class="callout callout-success">
+          <strong>Decision:</strong> Reuse the existing FlashCard + SRS infrastructure. Add <code>stageTag</code> and <code>subjectTag</code> fields to FlashCard. Build a dedicated "My Du'ā Progress" and "99 Names Progress" view that queries FlashCards filtered by <code>subjectTag</code> and aggregates SRS status (NEW / LEARNING / REVIEWING / MASTERED). No new model needed.
+        </div>
+        <p><strong>Advantages:</strong></p>
+        <ul>
+          <li>SRS (SM-2 algorithm) already implemented and proven — du'ā review benefits from spaced repetition natively</li>
+          <li>FlashCardProgress already tracks mastery per card — we get a "mastered X of Y du'ās" counter for free</li>
+          <li>The content already exists in coursebook flashcards — we tag, don't duplicate</li>
+          <li>Zero schema migration risk (nullable fields)</li>
+        </ul>
+        <p><strong>New UI needed:</strong></p>
+        <ul>
+          <li><code>/child/duas</code> — Progressive du'ā list ordered by stage. Shows: mastered (green), in review (yellow), not started (gray). Tapping an item launches a SRS review of that specific du'ā</li>
+          <li><code>/child/99-names</code> — Grid of 99 names. Color-coded by SRS status. Tapping shows meaning + audio (when available). Progress bar: "X of 99 names mastered"</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- 5.5 Grade Dashboard -->
+    <details>
+      <summary><span>5.5 — Grade-Level Dashboard Architecture</span></summary>
+      <div class="details-body">
+        <p>The grade dashboard is a new backend aggregate endpoint <code>GET /api/program/enrollment/:memberId/stage-summary</code> that returns:</p>
+        <div class="code-block">
+<span class="cm">// Response shape for stage summary</span>
+{
+  stage: { number: <span class="tp">3</span>, name: <span class="st">"Coursebook 3"</span>, ageRange: <span class="st">"8-9"</span> },
+  path: <span class="st">"AFTER_SCHOOL"</span>,
+  overallProgress: <span class="tp">0.42</span>,   <span class="cm">// 42% of stage complete</span>
+  subjects: [
+    {
+      subject:   <span class="st">"Fiqh"</span>,
+      courseSlug: <span class="st">"maktab-coursebook-3"</span>,
+      totalUnits:  <span class="tp">8</span>,
+      completedUnits: <span class="tp">4</span>,
+      progressPct: <span class="tp">0.50</span>,
+      nextUnit: { id: <span class="st">"..."</span>, title: <span class="st">"Zakāh — Nisāb"</span> }
+    },
+    <span class="cm">// ... one entry per subject in stage ...</span>
+  ],
+  milestones: [
+    { type: <span class="st">"QURAN"</span>, label: <span class="st">"Memorising Surah Al-Fīl"</span>, status: <span class="st">"IN_PROGRESS"</span> },
+    { type: <span class="st">"DUA"</span>,   label: <span class="st">"Du'ā before eating"</span>, status: <span class="st">"MASTERED"</span> }
+  ]
+}
+        </div>
+        <p>The frontend renders this as a stage progress overview — subject cards with progress bars, a "next session" recommendation, and a stage completion percentage ring. This replaces (or supplements) the generic ChildDashboardHome for maktab-enrolled children.</p>
+      </div>
+    </details>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       §6 — REUSE ANALYSIS
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="reuse">
+    <div class="section-header">
+      <div class="section-icon">♻️</div>
+      <div class="section-title">
+        <h2>Reuse Analysis</h2>
+        <p>How much of the Maktab product is already built?</p>
+      </div>
+    </div>
+
+    <div class="reuse-meter">
+      <div class="big-pct">82<span>%</span></div>
+      <p style="font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 0.5rem;">of the syllabus content is already seeded in the platform</p>
+      <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto;">400 of ~485 after-school topics are covered by the CB1–8 and Further Studies seeds. The remaining 18% is Foundation 1 &amp; 2 content and the longer surahs for CB5–8.</p>
+    </div>
+
+    <h3>Subject Coverage</h3>
+    <div class="card">
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Fiqh (all stages)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Sīrah (all stages)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Aḥādīth (all stages)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Tārīkh / History (CB1–8)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Aqā'id / Theology (CB1–8)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Akhlāq / Character (CB1–8)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Ādāb / Etiquette (CB1–8)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Further Studies (8 modules)</span><span>100%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Qur'ān Memorization (Juz Amma + longer surahs)</span><span>55%</span></div>
+        <div class="prog-bar"><div class="prog-fill partial" style="width:55%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Du'ā &amp; Kalimahs (content seeded, no standalone track)</span><span>70%</span></div>
+        <div class="prog-bar"><div class="prog-fill partial" style="width:70%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>99 Names (content seeded, no standalone track)</span><span>70%</span></div>
+        <div class="prog-bar"><div class="prog-fill partial" style="width:70%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Foundation Stages (ages 4–6)</span><span>0%</span></div>
+        <div class="prog-bar"><div class="prog-fill low" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <h3>Platform Feature Readiness</h3>
+    <div class="card">
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Flashcard SRS system</span><span>100% ready</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Quiz / Assessment engine</span><span>100% ready</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Games system (10 game types)</span><span>100% ready</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Family + child auth</span><span>100% ready</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Achievements + Notifications</span><span>100% ready</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Audio (TTS + pre-gen + text sync)</span><span>80% ready</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:80%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Program enrollment flow</span><span>0% — needs build</span></div>
+        <div class="prog-bar"><div class="prog-fill low" style="width:0%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Grade-level dashboard</span><span>0% — needs build</span></div>
+        <div class="prog-bar"><div class="prog-fill low" style="width:0%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Program / Stage schema models</span><span>0% — needs schema design</span></div>
+        <div class="prog-bar"><div class="prog-fill low" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="callout callout-success">
+      <strong>Summary: We're building a structure, not a content library.</strong>
+      The platform has world-class SRS, quiz, games, audio, and auth infrastructure. It has 10 of 12 stages fully content-seeded. The gap is structural: we need the Program → Stage → Enrollment scaffolding, two missing Foundation stages, and a grade-level UI to wire it all together. That's a 6–8 week focused build, not a 12-month green-field effort.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       §7 — FIRST SPRINT
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="sprint">
+    <div class="section-header">
+      <div class="section-icon">🚀</div>
+      <div class="section-title">
+        <h2>Recommended First Sprint (2 Weeks)</h2>
+        <p>Concrete backlog to go from current platform to a working MVP skeleton</p>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>Sprint Goal:</strong> A parent can open the platform, enroll their 7-year-old child in "Maktab Coursebook 1 — Weekend Path," and the child sees a grade-level dashboard showing all subjects for Stage 1 with their progress. The structural foundation is in place for all other stages to follow.
+    </div>
+
+    <!-- Week 1 -->
+    <div class="sprint-card">
+      <div class="sprint-card-header">
+        <span>📅 Week 1 — Schema, Enrollment Backend &amp; Data Wiring</span>
+        <span style="opacity: 0.75; font-size: 0.78rem;">Khwarizmi (Backend)</span>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">1. Schema migration: LearningPath enum + Program/ProgramStage/ProgramEnrollment models + Unit.includedInPaths + FamilyMember.gender</div>
+          <div class="sprint-item-desc">One migration file. Follows the architecture blueprint in §5.1. Non-destructive additions only. Run <code>prisma migrate deploy</code>. Update TypeScript types.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-db">DB</span>
+            <span class="tag tag-be">Backend</span>
+            <span class="tag tag-days">2 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">2. Seed: Program record + ProgramStages 1–12 for "Maktab An Nasihah" (both paths)</div>
+          <div class="sprint-item-desc">Create <code>seed-maktab-program.ts</code>. Define the 12 stages (Foundation 1 &amp; 2 as stubs initially), map existing CB1–8 + Further Studies courses to their stages. Wire into <code>seed.ts</code>. Use upsert pattern.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-seed">Seed</span>
+            <span class="tag tag-be">Backend</span>
+            <span class="tag tag-days">1 day</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">3. API: Program enrollment endpoints</div>
+          <div class="sprint-item-desc"><code>GET /api/program/list</code> — available programs. <code>POST /api/program/enroll</code> — body: {memberId, programId, stageId, path}. <code>GET /api/program/enrollment/:memberId</code> — current enrollment status. Include CB6 gender routing logic.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-be">Backend</span>
+            <span class="tag tag-days">2 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">4. API: Stage summary endpoint for grade dashboard</div>
+          <div class="sprint-item-desc"><code>GET /api/program/enrollment/:memberId/stage-summary</code> — returns per-subject progress within current stage (as per §5.5 response shape). Aggregates UnitProgress records against stage courses.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-be">Backend</span>
+            <span class="tag tag-days">1.5 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 2 -->
+    <div class="sprint-card">
+      <div class="sprint-card-header">
+        <span>📅 Week 2 — Enrollment UI &amp; Grade Dashboard Frontend</span>
+        <span style="opacity: 0.75; font-size: 0.78rem;">Ibn Sina (Frontend)</span>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">5. Enrollment Flow UI — 3-step wizard</div>
+          <div class="sprint-item-desc">New page <code>/enroll</code>. Step 1: Select child (from family members). Step 2: Confirm age → show suggested stage with brief stage summary. Step 3: Choose path (After-School card vs. Weekend card with clear differences). Step 4: Review courses in stage → "Start Learning" CTA. Accessible from Parent Dashboard "Enroll in Maktab" button.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-days">3 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">6. Grade-Level Dashboard — MaktabDashboard component</div>
+          <div class="sprint-item-desc">New page <code>/child/maktab</code>. Displays: stage header ("Year 1 — Coursebook 1 · Weekend Path"), subject progress cards (Fiqh, Sīrah, Aḥādīth, Qur'ān, Du'ā, 99 Names), an overall stage completion ring, and a "Continue Learning" next-unit button. Fetches from stage-summary endpoint. Replaces generic course grid for maktab-enrolled children.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-days">3 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">7. Parent Dashboard: Maktab enrollment status widget</div>
+          <div class="sprint-item-desc">On ParentDashboard (per child), show a "Maktab Program" card: current stage, path, overall stage progress %, last activity. If not enrolled, show "Enroll in Maktab" button leading to the enrollment wizard.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-days">1 day</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">8. FamilyMember gender field — profile UI</div>
+          <div class="sprint-item-desc">Add optional Gender selection to the Add/Edit Child form in FamilySettings. Not required but surfaced with a tooltip: "Required for Year 6 content routing." CB6 enrollment proceeds with a parent-choice modal if gender is unset.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-days">0.5 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-item">
+        <div class="sprint-checkbox"></div>
+        <div class="sprint-item-body">
+          <div class="sprint-item-title">9. Weekend path unit tags — CB1 pilot</div>
+          <div class="sprint-item-desc">As a parallel P1 kickoff: tag all CB1 units with <code>includedInPaths</code> according to the weekend syllabus. Produces a <code>seed-weekend-tags-cb1.ts</code> script. Validates the unit-level filtering approach with real data before committing to all 8 coursebooks.</div>
+          <div class="sprint-tags">
+            <span class="tag tag-seed">Seed</span>
+            <span class="tag tag-be">Backend</span>
+            <span class="tag tag-days">0.5 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-sprint -->
+    <div class="card">
+      <div class="card-title">📌 Immediately After Sprint 1</div>
+      <ul>
+        <li><strong>Foundation 1 content sprint</strong> — Dedicated 3–4 week content sprint to create age 4–5 stage. Khwarizmi seeds, Ibn Sina builds Foundation UI variant.</li>
+        <li><strong>Foundation 2 content sprint</strong> — Follows Foundation 1. 2–3 weeks.</li>
+        <li><strong>Weekend path curation (CB2–8)</strong> — Extend the CB1 pilot to all remaining coursebooks. Data exercise, 1 week.</li>
+        <li><strong>Du'ā progression view</strong> — After FlashCard.stageTag field is added in Sprint 1 migration, tag du'ā flashcards and build the /child/duas page. 1 week.</li>
+        <li><strong>99 Names progress page</strong> — Parallelizable with du'ā view. 3–4 days.</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-success">
+      <strong>After Sprint 1, the platform will have:</strong>
+      A family can enroll any child ages 6–14 in the full maktab program (either path). The child sees a structured grade dashboard. The parent sees enrollment status. CB6 gender routing works. The structural backbone supports all remaining content and feature work to proceed in parallel.
+    </div>
+  </section>
+
+  <hr>
+
+  <div class="callout callout-warn">
+    <strong>⚠️ Open Decisions for hrasheed to Confirm Before Sprint 1</strong>
+    <ol style="margin-top: 0.5rem; padding-left: 1.2rem;">
+      <li><strong>Foundation UI approach:</strong> Do we build a brand-new child-first UI for ages 4–6, or adapt the existing ChildDashboard with larger fonts/images? The former is higher quality; the latter is faster.</li>
+      <li><strong>Longer surahs (CB5–8):</strong> Should we skip these for MVP and note them as a known gap in the grade dashboard, or block CB5+ enrollment until they're seeded?</li>
+      <li><strong>Du'ā audio:</strong> Accept TTS for MVP, or source human recitation audio? This affects timeline significantly.</li>
+      <li><strong>Teacher role:</strong> Confirm this is Phase 2 and not blocking any MVP definition.</li>
+    </ol>
+  </div>
+
+</div><!-- /container -->
+
+<footer class="footer">
+  <p><strong>Maktab Online School — Research Spike &amp; Gap Analysis</strong></p>
+  <p>Prepared by Khaldun (Lead Architect) · Islamic Learning Platform</p>
+  <p>Generated: 2026-07-09 · Based on An Nasihah Islamic Curriculum Syllabus</p>
+</footer>
+
+<script>
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Animate progress bars on scroll
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.width = e.target.dataset.width;
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.prog-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.dataset.width = w;
+    bar.style.width = '0';
+    observer.observe(bar);
+  });
+</script>
+</body>
+</html>

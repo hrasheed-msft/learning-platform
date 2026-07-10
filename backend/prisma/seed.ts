@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
+import { seedMaktabFoundation1 } from './seed-maktab-foundation1';
+import { seedMaktabFoundation2 } from './seed-maktab-foundation2';
 import { seedMaktabCoursebook1 } from './seed-maktab-coursebook1';
 import { seedMaktabCoursebook2 } from './seed-maktab-coursebook2';
 import { seedMaktabCoursebook3 } from './seed-maktab-coursebook3';
@@ -29,7 +31,9 @@ import { seedMasaarFlashcards } from './seed-masaar-flashcards';
 import { seedMasaarTerms } from './seed-masaar-terms';
 import { seedGames } from './seed-games';
 import { seedQuranMemorizationCourse } from './seed-quran-memorization';
+import { seedQuranLongerSurahs } from './seed-quran-longer-surahs';
 import { syncCourseTextFormatting } from '../src/services/course-content-formatting.service';
+import { seedWeekendPathTags } from './seed-weekend-path-tags';
 
 const prisma = new PrismaClient();
 
@@ -2767,6 +2771,8 @@ async function main() {
   console.log('✅ Created memorization items for SRS');
 
   // Maktab Coursebooks
+  await seedMaktabFoundation1();
+  await seedMaktabFoundation2();
   await seedMaktabCoursebook1();
   await seedMaktabCoursebook2();
   await seedMaktabCoursebook3();
@@ -2790,6 +2796,7 @@ async function main() {
 
   // Quran Memorization
   await seedQuranMemorizationCourse();
+  await seedQuranLongerSurahs();
 
   // Advanced Sarf (Arabic Morphology) — sequential parts
   await seedSarfCourse();
@@ -2812,6 +2819,9 @@ async function main() {
 
   // Games — must run after courses exist
   await seedGames();
+
+  // Weekend path tagging — post-processing step, must run after all content seeds
+  await seedWeekendPathTags();
 
   console.log('');
   console.log('🎉 Database seed completed successfully!');

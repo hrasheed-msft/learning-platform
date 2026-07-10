@@ -5,3 +5,4 @@ export { default as assessmentRoutes } from './assessment.routes';
 export { default as srsRoutes } from './srs.routes';
 export { default as userRoutes } from './user.routes';
 export { default as flashCardRoutes } from './flashcard/flashcard.routes';
+export { default as programRoutes } from './program.routes';

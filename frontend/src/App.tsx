@@ -59,6 +59,14 @@ const ChildCoursesPage = lazy(() => import('@/pages/child/ChildCoursesPage'));
 const ChildFlashcardsPage = lazy(() => import('@/pages/child/ChildFlashcardsPage'));
 const ChildAchievementsPage = lazy(() => import('@/pages/child/ChildAchievementsPage'));
 
+// Program Pages (lazy)
+const ProgramCatalog = lazy(() => import('@/pages/program/ProgramCatalog'));
+const GradeDashboard = lazy(() => import('@/pages/program/GradeDashboard'));
+
+// Child Islamic Progress Pages (lazy)
+const ChildDuaProgressPage = lazy(() => import('@/pages/child/ChildDuaProgressPage'));
+const ChildNamesProgressPage = lazy(() => import('@/pages/child/ChildNamesProgressPage'));
+
 // Loading fallback for lazy routes
 function PageLoader() {
   return (
@@ -193,6 +201,9 @@ function App() {
         <Route path="courses/:courseId/units/:unitId/quiz" element={<QuizPage />} />
         <Route path="flashcards" element={<ChildFlashcardsPage />} />
         <Route path="achievements" element={<ChildAchievementsPage />} />
+        <Route path="maktab" element={<GradeDashboard />} />
+        <Route path="duas" element={<ChildDuaProgressPage />} />
+        <Route path="99-names" element={<ChildNamesProgressPage />} />
         <Route path="games" element={<GamesHub />} />
         <Route path="games/:gameSlug/launch" element={<GameLauncher />} />
         <Route path="games/:gameSlug/play" element={<GamePlay />} />
@@ -245,6 +256,10 @@ function App() {
 
         {/* Settings */}
         <Route path="settings" element={<FamilySettings />} />
+
+        {/* Programs */}
+        <Route path="programs" element={<ProgramCatalog />} />
+        <Route path="program/:slug" element={<ProgramCatalog />} />
       </Route>
 
       {/* Catch all - 404 */}

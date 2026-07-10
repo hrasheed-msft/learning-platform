@@ -305,8 +305,8 @@ export default function CourseLearner() {
                 : undefined;
               const isCompleted = isUnitCompleted(unitProgress);
               const isInProgress = !isCompleted && hasUnitStarted(unitProgress);
-              const isLocked = index > 0 && !isUnitCompleted(previousProgress);
               const isResumeTarget = resumeUnit?.id === unit.id;
+              const isLocked = index > 0 && !isUnitCompleted(previousProgress) && !isResumeTarget;
 
               return (
                 <div

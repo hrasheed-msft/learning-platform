@@ -30,6 +30,12 @@ export interface UnitProgress {
   id: string;
   enrollmentId: string;
   unitId: string;
+  createdAt?: string;
+  updatedAt?: string;
+  unit?: {
+    id: string;
+    orderIndex: number;
+  };
   status?: UnitStatus;
   attempts?: number;
   bestScore?: number;

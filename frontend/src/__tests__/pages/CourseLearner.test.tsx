@@ -32,6 +32,20 @@ describe('CourseLearner', () => {
     return <div>Unit page: {unitId}</div>;
   }
 
+  function getUnitRow(unitTitle: string) {
+    const row = screen.getByText(unitTitle).closest('.flex.items-center.justify-between.p-4');
+    expect(row).not.toBeNull();
+    return row as HTMLElement;
+  }
+
+  async function expectResumeRow(unitTitle: string) {
+    await screen.findByText(unitTitle);
+    const row = getUnitRow(unitTitle);
+    expect(within(row).getByText(/continue where you left off/i)).toBeInTheDocument();
+    expect(row.className).toContain('bg-primary-50/60');
+    return row;
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
     Element.prototype.scrollIntoView = vi.fn();
@@ -145,7 +159,8 @@ describe('CourseLearner', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText(/continue where you left off/i)).toBeInTheDocument();
+    await expectResumeRow('Unit 2');
+    expect(within(getUnitRow('Unit 1')).queryByText(/continue where you left off/i)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /continue learning/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /continue learning/i }));
@@ -153,7 +168,7 @@ describe('CourseLearner', () => {
     expect(await screen.findByText('Unit page: unit-2')).toBeInTheDocument();
   });
 
-  it('prefers latest enrollment progress over stale route state when resuming', async () => {
+  it('keeps the highlighted resume row aligned with the continue CTA after stale route state refreshes', async () => {
     vi.mocked(useCourseStore).mockReturnValue({
       selectedCourse: {
         id: 'course-1',
@@ -187,7 +202,7 @@ describe('CourseLearner', () => {
         memberId: 'member-1',
         courseId: 'course-1',
         status: 'ACTIVE',
-        progress: 66,
+        progress: 80,
         startedAt: '2026-05-25T16:26:06-05:00',
         createdAt: '2026-05-25T16:26:06-05:00',
         updatedAt: '2026-05-25T16:26:06-05:00',
@@ -206,6 +221,14 @@ describe('CourseLearner', () => {
             unitId: 'unit-2',
             videoCompleted: true,
             readingCompleted: true,
+            quizCompleted: true,
+          },
+          {
+            id: 'progress-3',
+            enrollmentId: 'enrollment-1',
+            unitId: 'unit-3',
+            videoCompleted: true,
+            readingCompleted: false,
             quizCompleted: false,
           },
         ],
@@ -225,11 +248,28 @@ describe('CourseLearner', () => {
                 memberId: 'member-1',
                 courseId: 'course-1',
                 status: 'ACTIVE',
-                progress: 0,
+                progress: 33,
                 startedAt: '2026-05-25T16:26:06-05:00',
                 createdAt: '2026-05-25T16:26:06-05:00',
                 updatedAt: '2026-05-25T16:26:06-05:00',
-                unitProgress: [],
+                unitProgress: [
+                  {
+                    id: 'progress-1',
+                    enrollmentId: 'enrollment-1',
+                    unitId: 'unit-1',
+                    videoCompleted: true,
+                    readingCompleted: true,
+                    quizCompleted: true,
+                  },
+                  {
+                    id: 'progress-2',
+                    enrollmentId: 'enrollment-1',
+                    unitId: 'unit-2',
+                    videoCompleted: true,
+                    readingCompleted: false,
+                    quizCompleted: false,
+                  },
+                ],
               },
             },
           },
@@ -246,13 +286,68 @@ describe('CourseLearner', () => {
       expect(courseService.getEnrollments).toHaveBeenCalledWith('member-1');
     });
 
-    const resumeBadge = await screen.findByText(/continue where you left off/i);
-    const resumeRow = resumeBadge.closest('div');
-    expect(resumeRow).not.toBeNull();
-    expect(within(resumeRow as HTMLElement).getByText('Unit 2')).toBeInTheDocument();
+    await expectResumeRow('Unit 3');
+    expect(within(getUnitRow('Unit 2')).queryByText(/continue where you left off/i)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /continue learning/i }));
 
-    expect(await screen.findByText('Unit page: unit-2')).toBeInTheDocument();
+    expect(await screen.findByText('Unit page: unit-3')).toBeInTheDocument();
+  });
+
+  it('highlights the true resume target even when an earlier unit is unfinished', async () => {
+    vi.mocked(courseService.getEnrollments).mockResolvedValue([
+      {
+        id: 'enrollment-1',
+        memberId: 'member-1',
+        courseId: 'course-1',
+        status: 'ACTIVE',
+        progress: 40,
+        startedAt: '2026-05-25T16:26:06-05:00',
+        createdAt: '2026-05-25T16:26:06-05:00',
+        updatedAt: '2026-05-25T16:26:06-05:00',
+        unitProgress: [
+          {
+            id: 'progress-1',
+            enrollmentId: 'enrollment-1',
+            unitId: 'unit-1',
+            status: 'completed',
+            updatedAt: '2026-05-25T16:26:06-05:00',
+          },
+          {
+            id: 'progress-3',
+            enrollmentId: 'enrollment-1',
+            unitId: 'unit-3',
+            status: 'in_progress',
+            updatedAt: '2026-07-04T00:52:00-04:00',
+          },
+        ],
+      },
+    ] as any);
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: '/child/courses/course-1/learn',
+            state: {
+              memberId: 'member-1',
+              enrollmentId: 'enrollment-1',
+            },
+          },
+        ]}
+      >
+        <Routes>
+          <Route path="/child/courses/:courseId/learn" element={<CourseLearner />} />
+          <Route path="/child/courses/:courseId/units/:unitId" element={<UnitPageProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await expectResumeRow('Unit 3');
+    expect(within(getUnitRow('Unit 2')).queryByText(/continue where you left off/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /continue learning/i }));
+
+    expect(await screen.findByText('Unit page: unit-3')).toBeInTheDocument();
   });
 });

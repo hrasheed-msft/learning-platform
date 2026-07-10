@@ -9,3 +9,5 @@ export { flashcardService } from './flashcardService';
 export { dashboardService } from './dashboardService';
 export { gameService } from './gameService';
 export { audioService } from './audioService';
+export { programService } from './program.service';
+export { duaProgressService } from './dua-progress.service';

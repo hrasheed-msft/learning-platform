@@ -24,6 +24,7 @@ import gameRoutes from './routes/game.routes';
 import audioRoutes from './routes/audio.routes';
 import audioAdminRoutes from './routes/audio-admin.routes';
 import videoRoutes from './routes/video.routes';
+import programRoutes from './routes/program.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -136,6 +137,7 @@ app.use('/api/v1/games', gameRoutes);
 app.use('/api/v1/units', audioRoutes);
 app.use('/api/v1', audioAdminRoutes);
 app.use('/api/v1', videoRoutes);
+app.use('/api/v1/programs', programRoutes);
 
 // Error handling
 app.use(notFoundHandler);

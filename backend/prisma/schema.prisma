@@ -100,6 +100,9 @@ model FamilyMember {
   gameParentalSettings    GameParentalSettings?
   gameTimeLogs            GameTimeLog[]
 
+  gender              Gender?
+  programEnrollments  ProgramEnrollment[]
+
   @@index([familyId])
   @@map("family_members")
 }
@@ -125,6 +128,7 @@ model Course {
   flashCards  FlashCard[]
   enrollments CourseEnrollment[]
   games       Game[]
+  programStages ProgramStage[]
 
   @@index([category])
   @@index([isPublished])
@@ -138,6 +142,7 @@ model Unit {
   content     String?  @db.Text // Rich text / HTML content
   orderIndex  Int
   slug        String?  // e.g. "maktab-3-fiqh"; nullable until backfilled
+  includedInPaths LearningPath[]  // Empty = all paths; [AFTER_SCHOOL] = after-school only
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -253,6 +258,20 @@ model QuizResult {
 }
 
 // ============================================
+// PROGRAM / MAKTAB ENUMS
+// ============================================
+
+enum LearningPath {
+  AFTER_SCHOOL
+  WEEKEND
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// ============================================
 // FLASH CARD MODELS
 // ============================================
 
@@ -279,6 +298,8 @@ model FlashCard {
   tags        String[]             // Array of tags for filtering
   difficulty  FlashCardDifficulty  @default(MEDIUM)
   orderIndex  Int                  // Order within unit
+  stageTag    String?              // e.g. "F1", "CB3", "CB6B" — cross-stage view grouping
+  subjectTag  String?              // e.g. "DUA", "99NAMES", "FIQH", "HADITH"
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
@@ -947,4 +968,70 @@ model VideoCache {
   @@unique([unitId, language])
   @@index([unitId])
   @@map("video_cache")
+}
+
+// ============================================
+// PROGRAM / MAKTAB MODELS
+// ============================================
+
+model Program {
+  id            String              @id @default(uuid())
+  slug          String              @unique
+  name          String
+  description   String?             @db.Text
+  learningPaths LearningPath[]
+  isPublished   Boolean             @default(false)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  stages        ProgramStage[]
+  enrollments   ProgramEnrollment[]
+
+  @@map("programs")
+}
+
+model ProgramStage {
+  id          String   @id @default(uuid())
+  stageNumber Int
+  name        String
+  description String?
+  ageMin      Int
+  ageMax      Int
+  orderIndex  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  courses     Course[]
+  enrollments ProgramEnrollment[]
+
+  @@unique([programId, stageNumber])
+  @@index([programId])
+  @@map("program_stages")
+}
+
+model ProgramEnrollment {
+  id             String       @id @default(uuid())
+  path           LearningPath
+  status         String       @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED
+  enrolledAt     DateTime     @default(now())
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  familyMemberId String
+  familyMember   FamilyMember @relation(fields: [familyMemberId], references: [id], onDelete: Cascade)
+
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  currentStageId String
+  currentStage   ProgramStage @relation(fields: [currentStageId], references: [id])
+
+  @@unique([familyMemberId, programId])
+  @@index([familyMemberId])
+  @@index([programId])
+  @@map("program_enrollments")
 }
