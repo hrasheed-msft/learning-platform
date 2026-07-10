@@ -29,7 +29,7 @@ interface EnrollModalProps {
 }
 
 function EnrollModal({ program, onClose }: EnrollModalProps) {
-  const { members } = useFamilyStore();
+  const { members, fetchLearners, isLoading: isLoadingLearners } = useFamilyStore();
   const { enrollInProgram, isEnrolling, error, clearError } = useProgramStore();
   const navigate = useNavigate();
 
@@ -45,6 +45,10 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
       setSelectedMemberId(learners[0].id);
     }
   }, [learners, selectedMemberId]);
+
+  useEffect(() => {
+    void fetchLearners();
+  }, [fetchLearners]);
 
   // Detect starting stage based on age
   function detectStageNumber(member: FamilyMember | undefined): number | undefined {
@@ -114,7 +118,11 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             👧 Who is enrolling?
           </label>
-          {learners.length === 0 ? (
+          {isLoadingLearners ? (
+            <div className="py-4 text-center text-sm text-gray-500">
+              Loading learners…
+            </div>
+          ) : learners.length === 0 ? (
             <div className="py-4 text-center text-sm text-gray-500">
               No child learner profiles found.{' '}
               <a href="/settings" className="text-[#1a5632] underline font-medium">
