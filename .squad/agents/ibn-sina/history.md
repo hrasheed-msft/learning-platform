@@ -102,6 +102,13 @@ Key prior work:
 
 ## Learnings
 
+### Program Enrollment UI — Graceful Fallback Pattern (2026-07-09T18:43:25.089-05:00)
+- When building UI ahead of backend API completion, ship static fallback data (constants) so the page renders correctly before the API is live. Use the same TypeScript interfaces for both real and fallback data — this guarantees zero type drift when the backend connects.
+- For enrollment modals that touch both family state (member list) and program state (enrollment action), keep them as local component state pulling from two stores; don't merge unrelated stores.
+- `isEnrolling` should be a separate boolean from `isLoading` in Zustand stores for multi-action domains — prevents the full page shimmer from triggering during a focused modal submit action.
+- Age-based auto-detection: iterate `program.stages` on the client using `ageMin/ageMax` bounds — show the detected stage inline on each member card in the enrollment modal so parents can confirm before submitting.
+- SVG `ProgressRing` component pattern: use `strokeDasharray/strokeDashoffset` on a `<circle>` with `-rotate-90` transform on the SVG. Overlay absolute-positioned text for the percentage label. Keep `transition: stroke-dashoffset 0.6s ease` for smooth animation on mount.
+
 ### UnitViewer Progress Reset on Unit Navigation (2026-06-23T09:49:39-05:00)
 - `UnitViewer` must reset local `progress` immediately when `courseId` or `unitId` changes; otherwise unit-to-unit navigation can leak stale completion flags into the next lesson before backend progress loads.
 - Preferred pattern: define a shared `DEFAULT_UNIT_PROGRESS` constant and reuse it both for `useState` initialization and at the top of the unit-fetch `useEffect`.
@@ -157,3 +164,35 @@ All frontend code complete and type-safe. Ready for e2e testing with backend 429
 - Resume target must be derived against ordered `units`: first partially started incomplete unit, else first incomplete unit, else fallback to first unit.
 - This avoids stale `location.state.enrollment` snapshots forcing "Continue Learning" back to unit 1 after progress updates in `UnitViewer`.
 - Key files: `frontend/src/pages/courses/CourseLearner.tsx`, `frontend/src/__tests__/pages/CourseLearner.test.tsx`.
+
+## Team Coordination — Sprint 1 Completion (2026-07-09T18:59)
+
+**Scribe Update:** Sprint 1 batch completed with all agents unblocked.
+
+### Decisions Documented
+- #40 — Maktab Online School — 4 Key Decisions Confirmed (Foundation UI, Longer surahs, Du'ā audio, Teacher role Phase 2)
+- #41 — Ibn Sina Decision — Program Enrollment UI + Grade Dashboard (Implemented ✓)
+
+### What Was Delivered (2026-07-09T18:43:25.089-05:00)
+- **New files:** `frontend/src/types/program.ts`, `program.service.ts`, `programStore.ts`, `ProgramCatalog.tsx`, `GradeDashboard.tsx`
+- **Modified:** `ChildDashboardHome.tsx`, `App.tsx`, routes/stores/services index files
+- **Validation:** `npx tsc --noEmit` clean ✓
+
+### Key Design Decisions
+1. **TypeScript-first + Graceful Fallback** — Components ship static `PLACEHOLDER_PROGRAM` + `DEFAULT_STAGES` so page renders perfectly before backend API is live; zero type drift when API connects
+2. **Separate Zustand store** — `programStore` isolated from `courseStore`; `isEnrolling` separate boolean from `isLoading` prevents full-page shimmer on modal-only actions
+3. **Child-first design** — Touch targets min-h-44px, emoji-based subject cards (kids recognize emoji faster than text), circular `ProgressRing` SVG component more engaging than bars
+4. **Age-based auto-detection** — `detectStageNumber()` finds first stage where `ageMin <= member.age <= ageMax`; displayed inline on enrollment modal so parents confirm before submitting
+5. **Routing strategy** — `/programs` (parents), `/program/:slug` (browse), `/child/maktab` (kids view); both use `lazy()` for code splitting
+
+### Cross-Agent Status
+- ✅ Backend (Khwarizmi): Schema + service + routes complete; pending migration
+- ✅ Frontend (Ibn Sina): UI components + stores + types all ready; gracefully fallback until API live
+- ✅ Integration ready: Type contracts aligned; API endpoints documented in Decisions #44
+
+### Next Steps
+1. Backend migration scheduling (after schema review)
+2. Connect frontend to live API endpoints
+3. Integration test enrollment flow (parent enroll → child sees enrolled course)
+4. Child-first UI enhancement (Decision #40 — Foundation UI, 3–4 weeks)
+

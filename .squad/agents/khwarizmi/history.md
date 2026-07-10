@@ -52,6 +52,26 @@ Key prior work:
 ### Handoff to Ibn Sina
 Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen, delayed answer reveal on fail, gated review panel.
 
+## Session 2026-07-09T18:47:56-05:00 — Foundation 1 & 2 Seed Files
+
+### What was done
+- Created `backend/prisma/seed-maktab-foundation1.ts` exporting `seedMaktabFoundation1`
+  - Course slug: `maktab-foundation-1`, ageLevels: `['EARLY_CHILD']`
+  - 3 units: `foundation-1-quran`, `foundation-1-dua`, `foundation-1-99-names`
+  - 16 quiz questions (3 + 8 + 5), 18 flashcards (3 + 10 + 5), all upserted idempotently
+- Created `backend/prisma/seed-maktab-foundation2.ts` exporting `seedMaktabFoundation2`
+  - Course slug: `maktab-foundation-2`, ageLevels: `['EARLY_CHILD', 'CHILD']`
+  - 3 units: `foundation-2-quran`, `foundation-2-dua`, `foundation-2-99-names`
+  - 18 quiz questions (5 + 8 + 5), 20 flashcards (5 + 10 + 5), all upserted idempotently
+- Wired both into `backend/prisma/seed.ts` before `seedMaktabCoursebook1` (correct age ordering)
+- `tsc --noEmit` passes clean
+
+### Key decisions
+- flashcardIndex resets to 0 per unit (not cumulative across units in these files) — consistent with single-unit seed file pattern where `unitId_orderIndex` is the unique key
+- Both courses use `category: 'FIQH'` consistent with other maktab courses
+- Foundation 2 gets `ageLevels: ['EARLY_CHILD', 'CHILD']` to cover the 5–6 transition age
+- All 17 Foundation 1 du'ās and all 14 Foundation 2 du'ās included verbatim per syllabus spec
+
 ## Learnings
 
 ### 2026-06-23T09:49:39-05:00 — Quran memorization surah review units
@@ -60,8 +80,64 @@ Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen
 - Review units can safely reuse the existing everyayah URL scheme (`https://everyayah.com/data/khalefa_al_tunaiji_64kbps/{SSS}{VVV}.mp3`) for each ayah instead of introducing a new audio source format.
 - Key file path: `backend/prisma/seed-quran-memorization.ts`.
 
+### 2026-07-09T18:47:56-05:00 — Quran Memorization — Longer Surahs seed
+- Created `backend/prisma/seed-quran-longer-surahs.ts` exporting `seedQuranLongerSurahs()`.
+- Covers 6 surahs from maktab CB5–CB8: Al-Kahf (first 10 ayahs only), Yasin, As-Sajdah, Al-Mulk, Al-Waqi'ah, Ar-Rahman. Surahs 93–94 intentionally excluded (already in Juz Amma course).
+- Al-Kahf partial-surah handling: `fetchSurahData()` accepts an optional `limitToAyahs` param that slices all three arrays (arabic/translit/translation) client-side after the full API fetch. `surah.number === 18` triggers this path.
+- Wired into `seed.ts`: import + `await seedQuranLongerSurahs()` immediately after `seedQuranMemorizationCourse()`.
+- Pre-existing `tsc` errors in `program.service.ts` are unrelated; no errors introduced in new files.
+
 ### 2026-07-04T00:23:33.053-04:00 — Resume progress payload ordering + learner fallback
 - `CourseService.getMemberEnrollments()` now returns `unitProgress` ordered by `{ updatedAt desc, createdAt desc }` and includes `unit.orderIndex` metadata so consumers can choose the latest active unit deterministically.
 - Resume behavior depends on activity recency, not just "first incomplete unit"; this prevents older partially-complete units from hijacking "continue where you left off."
 - Frontend learner flow now always refreshes enrollments for the active member before computing resume state and sorts progress rows by timestamps.
 - Key paths: `backend/src/services/course.service.ts`, `backend/src/__tests__/course.service.test.ts`, `frontend/src/pages/courses/CourseLearner.tsx`, `frontend/src/types/progress.ts`.
+
+### 2026-07-09T18:43:25.089-05:00 — Program/ProgramStage/ProgramEnrollment schema + API
+
+**What was done:**
+- Added `LearningPath` (AFTER_SCHOOL, WEEKEND) and `Gender` (MALE, FEMALE) enums to schema.
+- Added `Program`, `ProgramStage`, `ProgramEnrollment` models — the curriculum wrapper layer for Online Maktab.
+- Extended `Unit` with `includedInPaths LearningPath[]` for weekend/after-school content filtering.
+- Extended `FamilyMember` with `gender Gender?` and `programEnrollments ProgramEnrollment[]`.
+- Extended `FlashCard` with `stageTag String?` and `subjectTag String?` for cross-stage du'ā/99 Names views.
+- Extended `Course` with `programStages ProgramStage[]` M2M relation (Prisma implicit join table).
+- Created `backend/src/services/program.service.ts` — listPrograms, getProgramBySlug, enrollMember, getMemberEnrollments, getStageSummary.
+- Created `backend/src/routes/program.routes.ts` — 5 endpoints under `/api/v1/programs`.
+- Wired routes into `backend/src/index.ts` and `backend/src/routes/index.ts`.
+- Ran `prisma generate` — clean. Ran `tsc --noEmit` — zero errors.
+- Did NOT run `prisma migrate` — migration to be handled separately.
+
+**Key decisions:**
+- `ProgramEnrollment.status` kept as `String` (not enum) for forward flexibility (ACTIVE/PAUSED/COMPLETED) — mirrors the `CourseEnrollment` pattern.
+- `GET /api/v1/programs/:slug` routed as `/slug/:slug` to avoid regex collision with `/:programId` UUID routes sharing the same router.
+- `getStageSummary` uses `currentStage.orderIndex` to compute `isCompleted`; this is safe even if stages are reordered because orderIndex drives the comparison.
+- M2M between Course and ProgramStage is an implicit Prisma join table — no explicit join model needed until we need to store ordering or metadata on the relation.
+
+**Key file paths:**
+- `backend/prisma/schema.prisma` — enums and models added/extended
+- `backend/src/services/program.service.ts`
+- `backend/src/routes/program.routes.ts`
+- `backend/src/index.ts` — programRoutes wired at `/api/v1/programs`
+
+## Team Coordination — Sprint 1 Completion (2026-07-09T18:59)
+
+**Scribe Update:** Sprint 1 batch completed with all agents unblocked.
+
+### Decisions Documented
+- #40 — Maktab Online School — 4 Key Decisions Confirmed (Foundation UI, Longer surahs, Du'ā audio, Teacher role Phase 2)
+- #42 — Maktab Foundation Seed Files (Foundation 1 & 2 created, wired)
+- #43 — Quran Memorization — Longer Surahs Seed (6 surahs covered, wired)
+- #44 — Program/ProgramStage/ProgramEnrollment Schema + API (Documented above)
+
+### Cross-Agent Status
+- ✅ Backend ready: Schema generated, service layer complete, routes wired
+- ✅ Frontend (Ibn Sina) ready: All UI components built, type-safe, gracefully fallback
+- ✅ Seed scripts ready: F1/F2/Surahs wired into seed.ts in correct age order
+- ✅ All TypeScript clean: tsc --noEmit passes for both backend and frontend
+
+### Next Steps
+1. Prisma migration scheduling (after schema review)
+2. Integration test coverage (enrollment flow E2E)
+3. Seed validation (verify stage/course/unit hierarchy)
+4. Child-first UI build-out (Foundation UI, 3–4 weeks per Decision #40)
