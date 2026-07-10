@@ -108,6 +108,7 @@ export default function GradeDashboard() {
     enrollments,
     stageSummary,
     isLoading,
+    error,
     fetchMemberEnrollments,
     fetchMemberStageSummary,
   } = useProgramStore();
@@ -165,6 +166,14 @@ export default function GradeDashboard() {
 
   return (
     <div className="space-y-8 animate-in">
+      {/* Inline error banner — shown when stage-summary or enrollments fetch fails */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 text-sm text-red-700">
+          <span>⚠️</span>
+          <span>{error} — Some progress data may be unavailable.</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-br from-[#1a5632] to-[#0d3320] rounded-2xl p-6 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -260,10 +269,10 @@ export default function GradeDashboard() {
             />
             ))}
           </div>
-        ) : (
-          // Placeholder cards when progress data isn't loaded yet
+        ) : (currentStage?.courses ?? []).length > 0 ? (
+          // Placeholder cards when progress data isn't loaded yet but stage has course list
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {currentStage.courses.map((course) => (
+            {(currentStage.courses ?? []).map((course) => (
               <SubjectCard
                 key={course.id}
                 subject={{
@@ -286,6 +295,15 @@ export default function GradeDashboard() {
                 }}
               />
             ))}
+          </div>
+        ) : (
+          // No course data available — stage-summary failed and enrollment has no courses array
+          <div className="bg-gray-50 rounded-2xl border border-gray-200 p-8 text-center">
+            <div className="text-4xl mb-3">🕌</div>
+            <h3 className="font-semibold text-gray-700 mb-2">Your Maktab journey is being prepared</h3>
+            <p className="text-gray-500 text-sm">
+              No lessons available yet. Check back soon, or ask your parent for help.
+            </p>
           </div>
         )}
       </div>
