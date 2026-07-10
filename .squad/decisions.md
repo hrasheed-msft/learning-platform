@@ -267,6 +267,54 @@ Seeded the new `Program` / `ProgramStage` layer for "Maktab An Nasihah" curricul
 
 ---
 
+### 48. Ibn Sina Decision — ProgramCatalog Must Fetch Family Members on Mount (2026-07-09)
+**Author:** Ibn Sina (Frontend Dev)
+**Status:** Implemented
+
+## Problem
+
+The "Enroll in Maktab An Naṣīḥah" popup showed no children to select, and the "Start the Journey" button stayed permanently disabled. Root cause: `ProgramCatalog` (`/programs`) fetched programs on mount but never fetched family members. `EnrollModal` (nested in the same file) reads its learner list from `useFamilyStore().members`. Navigating directly to `/programs` via the new Maktab sidebar link left the family store empty → empty learner grid → `selectedMemberId` stuck at `''` → disabled CTA.
+
+## Decision
+
+Apply the same `fetchMembers(family.id)` on-mount pattern already used across sibling parent pages (CourseDetail, GamesHub, FamilyDashboard):
+
+```tsx
+const { family } = useAuthStore();
+const { fetchMembers } = useFamilyStore();
+
+useEffect(() => {
+  if (family?.id) void fetchMembers(family.id);
+}, [family?.id, fetchMembers]);
+```
+
+Added this to the `ProgramCatalog` default export component alongside the existing `fetchPrograms()` effect.
+
+Also added a minimal empty-state in `EnrollModal` for families that genuinely have zero active learners:
+- When `learners.length === 0`, render "No active learners found. Add a learner in Settings first." with a `/settings` link instead of an empty, unusable grid.
+- This prevents the same UX confusion for a different, legitimate scenario.
+
+## Rationale
+
+- Matches the established app-wide pattern — no new abstractions.
+- `useAuthStore` provides `family.id`; `useFamilyStore.fetchMembers(familyId)` populates `members`.
+- Guard `if (family?.id)` prevents a crash on the (edge-case) unauthenticated render.
+- Empty-state is the minimal safe default: a parent who sees a blank modal has no path forward without it.
+
+## Files Changed
+
+- **Modified:** `frontend/src/pages/program/ProgramCatalog.tsx`
+  - Added `useAuthStore` import from `@/stores`
+  - Added `family` from `useAuthStore()` and `fetchMembers` from `useFamilyStore()` in `ProgramCatalog`
+  - Added `useEffect` to call `fetchMembers(family.id)` on mount
+  - Added empty-state UI in `EnrollModal` when `learners.length === 0`
+
+## Validation
+
+`npx tsc --noEmit` passes clean (exit 0).
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus

@@ -1,4 +1,23 @@
-﻿## Session 2026-07-10T03:09Z
+﻿## Session 2026-07-10T04:04Z
+
+**Cross-Agent Note: EnrollModal Pattern — fetchMembers(family.id) on Mount**
+**From:** Scribe, noting Ibn Sina's fix
+
+**Pattern:** All parent pages using `EnrollModal` or other components dependent on `useFamilyStore().members` must call `fetchMembers(family.id)` on component mount. This ensures the family member list is populated before the modal renders.
+
+**Established Implementations:**
+- `CourseDetail.tsx` ✓
+- `GamesHub.tsx` ✓
+- `FamilyDashboard.tsx` ✓
+- `ProgramCatalog.tsx` ✓ (Ibn Sina fix, decision #48)
+
+**Design Rationale:** Navigating directly to any of these pages via deep links (sidebar, direct URL) bypasses initialization code that may have populated the family store elsewhere. Explicit on-mount fetch ensures consistency.
+
+**Reference:** `.squad/decisions.md` decision #48; `.squad/orchestration-log/2026-07-10T04-04-03Z-ibn-sina-enroll-fix.md`
+
+---
+
+## Session 2026-07-10T03:09Z
 
 **Maktab Path-Selection Now Discoverable (Ibn Sina + Scribe)**
 **Work:** Scribe — Archived Ibn Sina's navigation fix to decisions and orchestration log.
