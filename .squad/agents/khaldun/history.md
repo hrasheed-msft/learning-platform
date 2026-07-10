@@ -1,4 +1,20 @@
-﻿## Session 2026-07-10T02:51Z
+﻿## Session 2026-07-10T03:09Z
+
+**Maktab Path-Selection Now Discoverable (Ibn Sina + Scribe)**
+**Work:** Scribe — Archived Ibn Sina's navigation fix to decisions and orchestration log.
+
+**Context:** Ibn Sina added a single sidebar entry (`Maktab 🕌` → `/programs`) to expose the Maktab curriculum enrollment flow. The learning-path selector (After-School vs Weekend) lives in `frontend/src/pages/program/ProgramCatalog.tsx` in the `EnrollModal` component. Now discoverable in prod (commit 95d5ed1, CI/CD GREEN).
+
+**Files Documented:**
+- `.squad/decisions.md` — merged decision #1
+- `.squad/orchestration-log/2026-07-10T03-09-08Z-ibn-sina-maktab-nav.md` — full orchestration event
+- `.squad/log/2026-07-10T03-09-08Z-ibn-sina-maktab-nav-discoverability.md` — session summary
+
+**Status:** ✅ Feature now linked from parent sidebar.
+
+---
+
+## Session 2026-07-10T02:51Z
 
 **skip_app_build Regression & Revert**
 **Work:** Khaldun-Lead — Detected and resolved regression in cache-control fix deployment.

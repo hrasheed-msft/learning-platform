@@ -2,6 +2,27 @@
 
 ## Active Decisions
 
+### 1. Ibn Sina Decision — Maktab Nav Entry Point (2026-07-09)
+**Author:** Ibn Sina (Frontend Dev)
+**Status:** Implemented
+
+Parents reported inability to find the evening (After-School) vs Weekend learning path selector. The feature was fully built in `ProgramCatalog` (`/programs`) with an `EnrollModal` but had no navigation entry in `MainLayout.tsx`, so the page was unreachable via sidebar.
+
+**Decision:** Added `{ name: 'Maktab 🕌', href: '/programs', icon: GraduationCap }` to the navigation array in `frontend/src/components/layouts/MainLayout.tsx`, placed after "Courses". Added `GraduationCap` to lucide-react imports.
+
+**Rationale:**
+- Minimal, targeted fix — only one missing array entry.
+- Emoji style matches "Games 🎮"; 🕌 signals Islamic school context.
+- `GraduationCap` signals formal curriculum-level learning, distinct from `BookOpen` (Courses) and `Brain` (Reviews).
+- Active state via `location.pathname.startsWith('/programs')`.
+
+**Files Changed:**
+- **Modified:** `frontend/src/components/layouts/MainLayout.tsx`
+
+**Validation:** `npx tsc --noEmit` passes clean.
+
+---
+
 ### 2. Quduri Taharah Seed — Bilingual Content Format (2026-07-14)
 **Author:** Khwarizmi
 
