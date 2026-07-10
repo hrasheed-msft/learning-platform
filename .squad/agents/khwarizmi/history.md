@@ -72,6 +72,27 @@ Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen
 - Foundation 2 gets `ageLevels: ['EARLY_CHILD', 'CHILD']` to cover the 5–6 transition age
 - All 17 Foundation 1 du'ās and all 14 Foundation 2 du'ās included verbatim per syllabus spec
 
+## Session 2026-07-09T19:14:32-05:00 — Weekend Path Content Tagging Script
+
+### What was done
+- Created `backend/prisma/seed-weekend-path-tags.ts` exporting `seedWeekendPathTags()`
+- Script is fully idempotent: resets all `maktab-*` units to `includedInPaths: []` first, then applies restrictions
+- Three categories restricted to `['AFTER_SCHOOL']`:
+  1. Tārīkh units — matched by slug suffix `-tarikh` (CB1–CB8, 6B, 6G)
+  2. Aqā'id units — matched by slug suffix `-aqaid` (CB1–CB8, 6B, 6G)
+  3. Further Studies NW: `maktab-fs-faith`, `maktab-fs-identity`, `maktab-fs-money`, `maktab-fs-contemporary`
+- Wired into `seed.ts` as a post-processing step after `seedGames()`, at the very end of content seeding
+- `tsc --noEmit` passes clean; also supports standalone `npx ts-node prisma/seed-weekend-path-tags.ts`
+
+### Key decisions
+- MVP uses unit-level tagging only. Per-topic splits within a subject (e.g., "Fiqh keeps first 4 of 8 topics") deferred — that requires splitting large subject units into smaller ones
+- Reset-then-tag pattern for idempotency: `updateMany` with `startsWith: 'maktab-'` sets all to `[]` first, then three targeted `updateMany` calls apply AFTER_SCHOOL restrictions
+- Used `endsWith: '-tarikh'` and `endsWith: '-aqaid'` rather than `contains` to avoid false positives from any future slug that might embed these strings mid-word
+
+### Key file paths
+- `backend/prisma/seed-weekend-path-tags.ts` — new file
+- `backend/prisma/seed.ts` — import + call added after `seedGames()`
+
 ## Learnings
 
 ### 2026-06-23T09:49:39-05:00 — Quran memorization surah review units
@@ -141,3 +162,27 @@ Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen
 2. Integration test coverage (enrollment flow E2E)
 3. Seed validation (verify stage/course/unit hierarchy)
 4. Child-first UI build-out (Foundation UI, 3–4 weeks per Decision #40)
+
+## Session 2026-07-09T19:14:32-05:00 — Weekend Path Content Tagging Script (Background Agent)
+
+### What was completed
+- Created `backend/prisma/seed-weekend-path-tags.ts` exporting `seedWeekendPathTags()`
+- Script is fully idempotent: resets all `maktab-*` units to `includedInPaths: []` first, then applies restrictions
+- Three categories restricted to `['AFTER_SCHOOL']`:
+  1. Tārīkh units — matched by slug suffix `-tarikh` (CB1–CB8, 6B, 6G)
+  2. Aqā'id units — matched by slug suffix `-aqaid` (CB1–CB8, 6B, 6G)
+  3. Further Studies NW: `maktab-fs-faith`, `maktab-fs-identity`, `maktab-fs-money`, `maktab-fs-contemporary`
+- Wired into `seed.ts` as a post-processing step after `seedGames()`, at the very end of content seeding
+- `tsc --noEmit` passes clean; also supports standalone `npx ts-node prisma/seed-weekend-path-tags.ts`
+
+### Key design decisions
+- MVP uses unit-level tagging only. Per-topic splits within a subject (e.g., "Fiqh keeps first 4 of 8 topics") deferred — that requires splitting large subject units into smaller ones
+- Reset-then-tag pattern for idempotency: `updateMany` with `startsWith: 'maktab-'` sets all to `[]` first, then three targeted `updateMany` calls apply AFTER_SCHOOL restrictions
+- Used `endsWith: '-tarikh'` and `endsWith: '-aqaid'` rather than `contains` to avoid false positives from any future slug that might embed these strings mid-word
+
+### Files touched
+- **New:** `backend/prisma/seed-weekend-path-tags.ts`
+- **Modified:** `backend/prisma/seed.ts` (import + call added after `seedGames()`)
+
+### Agent Outcome
+✅ **COMPLETED** — Background agent delivered working seed file, wired into pipeline, tsc clean.
