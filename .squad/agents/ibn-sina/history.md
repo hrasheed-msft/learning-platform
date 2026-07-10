@@ -11,6 +11,15 @@
 
 ## Quick Status (Most Recent)
 
+**Prod Deploy Gap — SWA Cache-Control Fix (2026-07-10T02:35:34Z):** ✅ COMPLETE
+- **Context:** New frontend features (ChildDuaProgressPage, ChildNamesProgressPage, GradeDashboard, Maktab section) not visible in production despite successful CI/CD.
+- **Root Cause:** `frontend/public/staticwebapp.config.json` had no `Cache-Control` headers. Azure SWA + CDN served cached old index.html referencing old JS chunks.
+- **Fix:** Added `no-cache, no-store, must-revalidate` for HTML routes and `public, max-age=31536000, immutable` for `/assets/*`. Deleted orphan `frontend/staticwebapp.config.json` (root level, never deployed by Vite). Added `skip_app_build: true` to CI SWA deploy steps.
+- **Commit:** 96b3a01 pushed to main.
+- **Relevant to:** All future frontend deployments must ensure SPA cache headers are correct to prevent stale app shells.
+
+---
+
 **Anti-Rush Frontend: Cooldown Countdown + Delayed Answer Reveal (2026-06-20T17:18:56-05:00):** ✅ COMPLETE
 - `CooldownStatus` type added to `assessment.ts`
 - `getCooldownStatus(unitId)` method added to `assessmentService.ts` → `GET /assessments/units/:unitId/cooldown-status`

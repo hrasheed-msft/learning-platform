@@ -190,6 +190,62 @@ Kept as plain strings (e.g., `"F1"`, `"DUA"`) rather than enums. Stage codes are
 
 ---
 
+### 45. Prod Deploy Gap — SWA Cache-Control + Orphan Config + skip_app_build (2026-07-09)
+**Author:** Khaldun (Lead/Architect)
+**Status:** Applied (commit 96b3a01, pushed to main)
+
+**Problem:** New frontend features (ChildDuaProgressPage, ChildNamesProgressPage, GradeDashboard, Maktab section in ChildDashboardHome) were not visible in production even though CI/CD reported success.
+
+**Root Cause:**
+- **Primary:** `frontend/public/staticwebapp.config.json` had no `Cache-Control` headers. Azure SWA + CDN served cached old index.html, which referenced old JS chunks.
+- **Secondary:** `frontend/staticwebapp.config.json` (root level) is never deployed by Vite; it's a silent maintenance trap.
+- **Tertiary:** CI workflow lacked `skip_app_build: true`, causing ambiguous double-builds.
+
+**Decisions:**
+1. **Explicit Cache-Control:** In `frontend/public/staticwebapp.config.json`, add `routes` block with `no-cache` for `/ ` and `*.html`, and `public, max-age=31536000, immutable` for `/assets/*`.
+2. **Delete orphan config:** Remove `frontend/staticwebapp.config.json`.
+3. **skip_app_build: true:** Add to both `deploy-frontend` and `deploy-frontend-dev` SWA action steps in CI.
+
+**Files Changed:**
+- Modified: `frontend/public/staticwebapp.config.json`
+- Deleted: `frontend/staticwebapp.config.json`
+- Modified: `.github/workflows/ci-cd.yml`
+
+---
+
+### 46. FlashCard tag backfill decisions (2026-07-09)
+**Author:** Khwarizmi (Backend Dev)
+
+Added idempotent post-processing seed `backend/prisma/seed-flashcard-tags.ts` to backfill `FlashCard.stageTag` and `FlashCard.subjectTag` for all existing maktab flashcards.
+
+**Key Decisions:**
+1. **Scope by course slug, not unit slug:** Query uses `course.slug startsWith 'maktab-'` to catch Foundation 1/2 which have unit slugs like `foundation-1-*`.
+2. **Slug parsing is explicit and fail-fast:** Known patterns handled directly; unknown slugs throw immediately instead of silently leaving null tags.
+3. **Further Studies normalization:** Mixed modules map to broad subject tags (e.g., `maktab-fs-identity` → `AKHLAQ`, essentials/devotional → `FIQH`).
+4. **Idempotency via overwrite:** Re-running always overwrites `stageTag` and `subjectTag`; updates batched and chunked to avoid row-at-a-time writes.
+
+**Files:**
+- `backend/prisma/seed-flashcard-tags.ts`
+
+---
+
+### 47. Program seed decisions (2026-07-09)
+**Author:** Khwarizmi (Backend Dev)
+
+Seeded the new `Program` / `ProgramStage` layer for "Maktab An Nasihah" curriculum using existing course slugs as source of truth.
+
+**Key Decisions:**
+1. **Content-only and idempotent:** Uses `program.upsert()` and `programStage.upsert()`; stage-course links reset with `set: []` + `connect`.
+2. **Quran memorization cross-cutting:** Stage 12 is the explicit "Quran Memorization" stage; both Quran courses also connected to stages 1–11.
+3. **Open-ended age ranges use `ageMax: 99`:** For "14+" ranges, seed uses `99` as explicit upper bound.
+4. **Seed ordering:** `seedMaktabProgram()` called in `seed.ts` after all course seeds and `seedWeekendPathTags()` so all referenced course slugs exist first.
+
+**Files:**
+- `backend/prisma/seed-maktab-program.ts`
+- Modified: `backend/prisma/seed.ts`
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
