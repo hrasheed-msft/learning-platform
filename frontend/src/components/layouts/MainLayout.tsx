@@ -14,6 +14,7 @@ import {
   BarChart3,
   Gamepad2,
   ArrowLeftRight,
+  GraduationCap,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Parent Dashboard', href: '/dashboard/parent', icon: BarChart3 },
   { name: 'Courses', href: '/courses', icon: BookOpen },
+  { name: 'Maktab 🕌', href: '/programs', icon: GraduationCap },
   { name: 'Reviews', href: '/reviews', icon: Brain },
   { name: 'Games 🎮', href: '/games', icon: Gamepad2 },
   { name: 'Settings', href: '/settings', icon: Settings },
