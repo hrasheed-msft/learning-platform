@@ -34,6 +34,8 @@ import { seedQuranMemorizationCourse } from './seed-quran-memorization';
 import { seedQuranLongerSurahs } from './seed-quran-longer-surahs';
 import { syncCourseTextFormatting } from '../src/services/course-content-formatting.service';
 import { seedWeekendPathTags } from './seed-weekend-path-tags';
+import { seedFlashcardTags } from './seed-flashcard-tags';
+import { seedMaktabProgram } from './seed-maktab-program';
 
 const prisma = new PrismaClient();
 
@@ -2823,6 +2825,12 @@ async function main() {
   // Weekend path tagging — post-processing step, must run after all content seeds
   await seedWeekendPathTags();
 
+  // Flashcard stage/subject tagging — post-processing step after weekend path tags
+  await seedFlashcardTags();
+
+  // Program seeding — final content step, must run after all course seeds and path tagging
+  await seedMaktabProgram();
+
   console.log('');
   console.log('🎉 Database seed completed successfully!');
   console.log('');
@@ -2830,9 +2838,10 @@ async function main() {
   console.log('   - 1 Demo Family (The Ahmad Family)');
   console.log('   - 1 Parent User (demo@example.com)');
   console.log('   - 3 Family Members (Ahmed, Fatima, Yusuf)');
-  console.log('   - 27 Seed files loaded (Maktab CB1-8, CB6B/6G, Further Studies, Quduri,');
-  console.log('     Tazkiyah, Habits, Rawai Hadaratina, Hujjatullah, Quran Memorization,');
-  console.log('     Sarf Parts 1-5 + Quizzes + Flashcards, Masaar Course + Quizzes + Terms)');
+  console.log('   - 29 Seed files loaded (Maktab Foundations, CB1-8, CB6B/6G, Further Studies,');
+  console.log('     Quduri, Tazkiyah, Habits, Rawai Hadaratina, Hujjatullah, Quran Memorization,');
+  console.log('     Sarf Parts 1-5 + Quizzes + Flashcards, Masaar Course + Quizzes + Terms,');
+  console.log('     Weekend path tags, flashcard tags, Maktab program stages)');
   console.log('   - All courses with units, quizzes, flashcards, and Arabic terms');
   console.log('   - Multiple enrollments per member');
   console.log('   - Unit progress records');

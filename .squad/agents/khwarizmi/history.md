@@ -95,6 +95,13 @@ Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen
 
 ## Learnings
 
+### 2026-07-09T19:58:03-05:00 — FlashCard stage/subject backfill
+- `backend/prisma/seed-flashcard-tags.ts` queries FlashCards by `course.slug startsWith 'maktab-'` rather than `unit.slug startsWith 'maktab-'` so Foundation 1/2 cards are included even though their unit slugs are `foundation-1-*` / `foundation-2-*`.
+- Foundation unit slug mapping is explicit: `foundation-1-quran|dua|99-names` → `F1`, `foundation-2-quran|dua|99-names` → `F2`, with subject tags `QURAN`, `DUA`, `99NAMES`.
+- Coursebook mapping is regex-safe: `maktab-{1..5,6b,6g,7,8}-{fiqh|ahadith|sirah|tarikh|aqaid|akhlaq|adab}` → `CB*` stage tags plus subject tags from the suffix.
+- Further Studies uses explicit slug-to-subject mapping: `faith → AQAID`, `hadith → AHADITH`, `identity → AKHLAQ`, `living → ADAB`, and the mixed/legal modules (`essentials-1`, `essentials-2`, `devotional`, `money`, `contemporary`) normalize to `FIQH`.
+- Wired `seedFlashcardTags()` into `backend/prisma/seed.ts` immediately after `seedWeekendPathTags()` as the second maktab post-processing pass.
+
 ### 2026-06-23T09:49:39-05:00 — Quran memorization surah review units
 - `backend/prisma/seed-quran-memorization.ts` now treats each surah as a sequence of ayah units followed by a final full-surah review unit, so downstream consumers should expect one extra unit per surah.
 - Pattern: keep single-ayah HTML generation in `buildUnitContent()` and build aggregate review HTML in a separate helper (`buildSurahReviewContent()`) to avoid overloading the per-ayah path.
@@ -107,6 +114,14 @@ Ibn Sina implements matching frontend: cooldown countdown UI, locked quiz screen
 - Al-Kahf partial-surah handling: `fetchSurahData()` accepts an optional `limitToAyahs` param that slices all three arrays (arabic/translit/translation) client-side after the full API fetch. `surah.number === 18` triggers this path.
 - Wired into `seed.ts`: import + `await seedQuranLongerSurahs()` immediately after `seedQuranMemorizationCourse()`.
 - Pre-existing `tsc` errors in `program.service.ts` are unrelated; no errors introduced in new files.
+
+### 2026-07-09T20:00:07.116-05:00 — Maktab program seed wiring
+- `backend/prisma/seed-maktab-program.ts` follows the standalone/imported pattern used by `seed-weekend-path-tags.ts`: exported seed function plus `require.main === module` runner with Prisma disconnect in `finally`.
+- Program-stage seeding is idempotent via `program.upsert()` and `programStage.upsert()` keyed by `slug` and `programId_stageNumber`; stage-course relations are normalized on re-run with `courses: { set: [], connect: [...] }`.
+- Quran memorization is modeled as both a dedicated Stage 12 and a cross-cutting attachment on stages 1–11, so the same two Quran course slugs appear throughout the age ladder without needing a separate join model.
+- Open-ended age bands in `ProgramStage` use explicit integer caps (`ageMax: 99`) because the schema requires concrete `Int` bounds for `ageMax`.
+- User preference: place the program seed as the final step in `backend/prisma/seed.ts`, after all course seeds and `seedWeekendPathTags()`, because it depends on existing course slugs.
+- Key file paths: `backend/prisma/seed-maktab-program.ts`, `backend/prisma/seed.ts`.
 
 ### 2026-07-04T00:23:33.053-04:00 — Resume progress payload ordering + learner fallback
 - `CourseService.getMemberEnrollments()` now returns `unitProgress` ordered by `{ updatedAt desc, createdAt desc }` and includes `unit.orderIndex` metadata so consumers can choose the latest active unit deterministically.
