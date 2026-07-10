@@ -18,18 +18,6 @@ export async function seedMaktabFoundation1() {
   console.log('📚 Starting Maktab Foundation 1 seed...');
   console.log('');
 
-  // Require demo family from main seed
-  const demoFamily = await prisma.family.findFirst({
-    where: { name: 'Ahmad Family' },
-  });
-
-  if (!demoFamily) {
-    console.log('⚠️  Demo family not found. Please run main seed first.');
-    return;
-  }
-
-  console.log('✅ Found demo family:', demoFamily.name);
-
   // ──────────────────────────────────────────────
   // COURSE
   // ──────────────────────────────────────────────

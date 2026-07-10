@@ -219,17 +219,6 @@ export async function seedQuranLongerSurahs() {
   console.log('   Mode: UPSERT (preserves enrollments and progress)');
   console.log('');
 
-  const demoFamily = await prisma.family.findFirst({
-    where: { name: 'Ahmad Family' },
-  });
-
-  if (!demoFamily) {
-    console.log('⚠️  Demo family not found. Please run main seed first.');
-    return;
-  }
-
-  console.log('✅ Found demo family:', demoFamily.name);
-
   // Upsert the course — find by title, create if missing, update if exists
   let course = await prisma.course.findFirst({
     where: { title: COURSE_TITLE },
