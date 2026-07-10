@@ -7,7 +7,27 @@
 
 ## Learnings
 
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
+### 2026-07-10 — Production Completion Gate + Authenticated E2E Suite
+
+**Governance Change:** All features now require authenticated E2E test against production before completion claim. This closes a critical gap found in enrollment feature: CI showed green but users saw failures in production.
+
+**What This Means for You (Quality Auditor):**
+- E2E infrastructure now in place: Playwright + authenticated flows against production
+- Test credentials (email/password) passed via env vars, never in source code
+- Test account: hassan.rasheed1@live.com (production account)
+- Runbook: `docs/e2e-authenticated-testing.md`
+- **Reference:** `.squad/decisions.md` (decision #49), `.squad/orchestration-log/2026-07-10T16-40-26Z-coordinator-enrollment-e2e.md`
+
+**Related Bugs Fixed:**
+1. EnrollModal member filtering (missing isActive field treated as falsy)
+2. ProgramCatalog didn't fetch family members on mount
+3. EnrollModal crashed on live programs without stages array
+4. Frontend service routes misaligned to backend (program.service.ts)
+5. CI/CD: Removed Windows-only rollup plugin breaking Linux builds
+
+**Quality Impact:** Production code now verified end-to-end before "done" claim. Future security/quality audits should flag any features without passing authenticated E2E test.
+
+---
 
 ### 2026-05-16 — Full Quality Audit
 

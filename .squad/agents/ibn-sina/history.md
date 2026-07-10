@@ -9,6 +9,32 @@
 - **Stack:** React 18 + Vite + TypeScript (frontend), Node.js + Express + Prisma + PostgreSQL + Redis (backend), TailwindCSS, Zustand, JWT auth
 - **Created:** 2026-05-16
 
+## Learnings
+
+### Authenticated E2E Testing — Playwright Against Production (2026-07-10T16:40:00Z)
+- **Infrastructure Added:** `frontend/playwright.config.ts`, `frontend/e2e/authenticated-enrollment.spec.ts`, `frontend/.env.e2e.example`, `docs/e2e-authenticated-testing.md`
+- **Credential Strategy:** Test email/password passed via `process.env.TEST_EMAIL` / `process.env.TEST_PASSWORD` (env vars only, never in source code)
+- **Test Account:** hassan.rasheed1@live.com (designated production account for E2E)
+- **Workflow:** Log in with test credentials, enroll child in Maktab An Naṣīḥah, verify stage display renders
+- **Status:** ✅ Production E2E PASS 1/1 in 9.7s
+- **Pattern for Future Work:** All feature work now requires authenticated E2E test before completion claim
+
+### Program Service Routes Must Match Backend Exactly (2026-07-10T16:40:00Z)
+- **Root Cause:** Frontend `program.service.ts` routes differed from backend:
+  - Frontend (WRONG): `/programs/enrollments`, `/programs/${slug}`, `/programs/stage-summary/member/{id}`
+  - Backend (CORRECT): `/programs/${programId}/enroll`, `/programs/slug/${slug}`, `/programs/enrollment/${id}`, `/programs/enrollment/${id}/stage-summary`
+- **Fix:** Updated all routes in `frontend/src/services/program.service.ts` to match backend exactly
+- **Learning:** Always cross-reference backend `routes.ts` when building frontend service methods. Route mismatch is a silent failure (API returns 404 but frontend may not surface the error clearly)
+- **Related Decision:** Decision #49 documents all 4 enrollment bugs and their fixes
+
+### ProgramCatalog Must Fetch Family Members on Mount (2026-07-09T22:53:10-05:00)
+- `EnrollModal` in `ProgramCatalog.tsx` builds its learner list from `useFamilyStore().members`. When a parent navigates directly to `/programs` via the Maktab sidebar link, the family store is empty → no learner buttons render → `selectedMemberId` stays `''` → "Start the Journey" stays disabled.
+- Fix: call `fetchMembers(family.id)` on mount in `ProgramCatalog`, where `family` comes from `useAuthStore()`. Guard with `if (family?.id)`.
+- App-wide pattern: CourseDetail, GamesHub, FamilyDashboard all use this exact shape.
+- Also added empty-state message in `EnrollModal` when `learners.length === 0`: "Add a learner in Settings first" with a `/settings` link.
+
+---
+
 ## Quick Status (Most Recent)
 
 **Prod Deploy Gap — SWA Cache-Control Fix (2026-07-10T02:35:34Z):** ✅ COMPLETE
@@ -17,6 +43,14 @@
 - **Fix:** Added `no-cache, no-store, must-revalidate` for HTML routes and `public, max-age=31536000, immutable` for `/assets/*`. Deleted orphan `frontend/staticwebapp.config.json` (root level, never deployed by Vite). Added `skip_app_build: true` to CI SWA deploy steps.
 - **Commit:** 96b3a01 pushed to main.
 - **Relevant to:** All future frontend deployments must ensure SPA cache headers are correct to prevent stale app shells.
+
+---
+
+**Maktab Nav Entry Point (2026-07-09T21:58:27-05:00):** ✅ COMPLETE
+- **Problem:** Parents couldn't find the evening/weekend learning-path selector. The feature existed in `ProgramCatalog`'s `EnrollModal` but had no sidebar link.
+- **Fix:** Added `GraduationCap` icon import and `{ name: 'Maktab 🕌', href: '/programs', icon: GraduationCap }` entry to the `navigation` array in `frontend/src/components/layouts/MainLayout.tsx`, placed after "Courses".
+- **Key Learning:** The evening (After-School) vs Weekend learning-path selector lives inside `ProgramCatalog`'s `EnrollModal` (rendered at `/programs`). The only thing missing was the sidebar nav entry. Active-state highlighting uses `location.pathname.startsWith('/programs')` which correctly highlights for both `/programs` and `/program/:slug`.
+- `npx tsc --noEmit` passes clean.
 
 ---
 
@@ -49,6 +83,12 @@
 ---
 
 ## Key Recent Learnings (2026-06-05 onwards)
+
+### Maktab Nav Entry — Path Selection Lives in EnrollModal (2026-07-09T21:58:27-05:00)
+- The AFTER_SCHOOL vs WEEKEND learning-path picker is inside `ProgramCatalog`'s `EnrollModal` at `/programs`.
+- Parents previously had no route to this page from the sidebar — the feature was invisible despite being fully built.
+- Fix is always a single-line nav entry: `{ name: 'Maktab 🕌', href: '/programs', icon: GraduationCap }` in `MainLayout`'s `navigation` array.
+- `startsWith('/programs')` active-state check correctly highlights for both the catalog page and individual program slug pages (`/program/:slug`).
 
 ### Quiz Answer Security — Submit-Response-Driven Grading (2026-06-20T14:01:24-05:00)
 - `getQuestions()` intentionally omits `correctAnswer`/`explanation` — never trust GET data for grading.

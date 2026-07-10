@@ -315,8 +315,62 @@ Also added a minimal empty-state in `EnrollModal` for families that genuinely ha
 
 ---
 
+### 49. Production Completion Gate (Mandatory) + Enrollment E2E Suite (2026-07-10)
+**Author:** Coordinator + Ibn Sina + Khwarizmi (Backend Dev)
+**Status:** Implemented — green in production
+
+**Context:**
+Enrollment feature hit production with undetected bugs (members filtered incorrectly, modal crashed on live payloads, routes misaligned). CI showed green but real users saw failures. This decision formalizes mandatory production verification before reporting task completion.
+
+**Key Decisions:**
+
+#### 1. Production Completion Gate is mandatory
+No feature is "done" until:
+- Code deploys to production (`git push main` → CI passes)
+- Authenticated end-to-end test passes against production
+- Real user journeys verified with designated test account (hassan.rasheed1@live.com)
+
+This replaces "code review + CI green" as the completion bar.
+
+#### 2. Authenticated E2E infrastructure
+- `frontend/playwright.config.ts` — configured for both local and CI environments
+- `frontend/e2e/authenticated-enrollment.spec.ts` — logs in as test account, enrolls child in Maktab An Naṣīḥah, verifies stage display
+- `frontend/.env.e2e.example` — template for test credentials (email/password never committed)
+- `docs/e2e-authenticated-testing.md` — runbook for developers
+- `package.json` test:e2e scripts — `test:e2e:ui` for dev, `test:e2e` for CI
+- Credentials passed via `process.env.TEST_EMAIL` / `process.env.TEST_PASSWORD`; never in source
+
+#### 3. Root causes fixed
+- **(a) EnrollModal member filtering:** Backend didn't return `isActive` → frontend treated missing as falsy → users vanished. Fixed: treat missing `isActive` as `true`, exclude `isAccountOwner`.
+- **(b) ProgramCatalog didn't hydrate family:** Direct nav to `/programs` left family store empty. Fixed: added `fetchMembers(family.id)` on mount.
+- **(c) Live program payload crash:** Enrollment stage list sometimes empty. Fixed: fallback to `DEFAULT_STAGES`.
+- **(d) Routes misaligned:** Frontend service routes differed from backend (`/programs/enrollments`, `/programs/${slug}` vs. `/programs/${programId}/enroll`, `/programs/slug/${slug}`). Fixed: aligned to backend.routes.ts exactly.
+
+#### 4. CI/CD fix
+- Removed `@rollup/rollup-win32-x64-msvc` from frontend deps (breaking Linux npm ci)
+- Re-tested: `npm ci` succeeds on both Windows and Linux
+
+**Files Changed/Created:**
+- Created: `frontend/e2e/authenticated-enrollment.spec.ts`
+- Created: `frontend/.env.e2e.example`
+- Created: `frontend/playwright.config.ts`
+- Created: `docs/e2e-authenticated-testing.md`
+- Modified: `frontend/src/services/program.service.ts` (routes fixed)
+- Modified: `frontend/src/pages/program/ProgramCatalog.tsx` (fetchMembers on mount)
+- Modified: `frontend/src/components/program/EnrollModal.tsx` (DEFAULT_STAGES, member filter, empty state)
+- Modified: `frontend/package.json` (test:e2e scripts)
+- Modified: `package.json` (dependencies)
+
+**Verification:**
+- Authenticated Playwright E2E against production: **PASS 1/1 (9.7s)**
+- Enrollment flow end-to-end in production with test account: **✓ Verified**
+- Commits green on main: `486e75b` (E2E), `85b2f34` (rollup fix), `9dd913d` (program routes)
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
 - Document architectural decisions here
 - Keep history focused on work, decisions focused on direction
+- **PRODUCTION COMPLETION GATE (mandatory):** Feature is not complete until authenticated E2E passes against production

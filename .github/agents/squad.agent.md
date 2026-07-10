@@ -899,6 +899,16 @@ prompt: |
 
 6. **Ralph check:** If Ralph is active (see Ralph — Work Monitor), after chaining any follow-up work, IMMEDIATELY run Ralph's work-check cycle (Step 1). Do NOT stop. Do NOT wait for user input. Ralph keeps the pipeline moving until the board is clear.
 
+### Production Completion Gate (Mandatory)
+
+For any user-facing feature or bug fix that is deployed to production, the Coordinator MUST enforce this gate before telling the user the work is complete:
+
+1. Wait for the production deployment workflow to finish and confirm deploy jobs are green.
+2. Run an end-to-end production smoke check on the real production URL using the relevant role/account flow (for example: parent enrollment flow, child dashboard flow, admin path).
+3. If production behavior does not match the expected result, mark the work as not complete and route a fix immediately.
+4. If production access is unavailable, report status as "deployed, production verification pending" and do NOT claim completion.
+5. Never send "done", "fixed", or equivalent completion language to the user until the production smoke check passes.
+
 ### Ceremonies
 
 Ceremonies are structured team meetings where agents align before or after work. Each squad configures its own ceremonies in `.squad/ceremonies.md`.

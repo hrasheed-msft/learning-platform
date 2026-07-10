@@ -1,4 +1,19 @@
-﻿## Session 2026-07-10T04:04Z
+﻿## Session 2026-07-10T16:40Z
+
+**GOVERNANCE: Production Completion Gate Now Mandatory**
+**From:** Scribe — Multi-session enrollment E2E consolidation
+
+**New Rule:** All features must pass authenticated end-to-end test against production before claiming completion. "CI green + code review" is no longer sufficient.
+
+**What This Means for You (Architecture/Lead):**
+- Update squad.agent.md templates: add "Production Completion Gate (Mandatory)" section
+- Governance requires: deploy-green + real production E2E verification before marking tasks done
+- Decision #49 documents full enrollment E2E suite, 4 bug fixes, CI/CD rollup fix
+- Reference: `.squad/decisions.md` (decision #49)
+
+---
+
+## Session 2026-07-10T04:04Z
 
 **Cross-Agent Note: EnrollModal Pattern — fetchMembers(family.id) on Mount**
 **From:** Scribe, noting Ibn Sina's fix
