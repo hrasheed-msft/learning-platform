@@ -18,7 +18,7 @@ export const programService = {
   },
 
   async getProgram(slug: string): Promise<Program> {
-    const response = await api.get<ApiResponse<Program>>(`/programs/${slug}`);
+    const response = await api.get<ApiResponse<Program>>(`/programs/slug/${slug}`);
     return response.data.data;
   },
 
@@ -28,8 +28,7 @@ export const programService = {
     path: LearningPath,
     stageNumber?: number
   ): Promise<ProgramEnrollment> {
-    const response = await api.post<ApiResponse<ProgramEnrollment>>('/programs/enrollments', {
-      programId,
+    const response = await api.post<ApiResponse<ProgramEnrollment>>(`/programs/${programId}/enroll`, {
       familyMemberId,
       path,
       stageNumber,
@@ -39,14 +38,14 @@ export const programService = {
 
   async getMemberEnrollments(memberId: string): Promise<ProgramEnrollment[]> {
     const response = await api.get<ApiResponse<ProgramEnrollment[]>>(
-      `/programs/enrollments/member/${memberId}`
+      `/programs/enrollment/${memberId}`
     );
     return response.data.data;
   },
 
   async getMemberStageSummary(memberId: string): Promise<StageProgressSummary | null> {
     const response = await api.get<ApiResponse<StageProgressSummary | null>>(
-      `/programs/stage-summary/member/${memberId}`
+      `/programs/enrollment/${memberId}/stage-summary`
     );
     return response.data.data;
   },
