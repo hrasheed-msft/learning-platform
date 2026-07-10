@@ -160,3 +160,44 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 - `frontend/src/pages/courses/CourseLearner.tsx` must refresh enrollments from `courseService.getEnrollments(memberId)` on learner entry instead of trusting route-state enrollment snapshots; child-course links pass mutable progress in navigation state and it can go stale after unit activity.
 - `frontend/src/__tests__/pages/CourseLearner.test.tsx` now covers both the normal resume path and the stale-route-state regression where the API has newer `unitProgress` than the navigation payload.
 - For resume QA, assert the destination unit ID, not just that navigation happened; otherwise the “always resumes at unit 1” bug can slip through.
+
+---
+
+### 2026-07-10T18:32:12-05:00 — Child /child/maktab Empty Page Diagnosis
+
+**Status:** REPRODUCED — root cause identified, fix handed off
+
+**Reproduction:** `frontend/e2e/authenticated-child-learning.spec.ts` — Playwright test confirms blank page for child `ibnsharif` at `/child/maktab`.
+
+**Child Auth Mechanism (documented for future tests):**
+- Endpoint: `POST /api/v1/auth/child-login` with `{ username, password }` (not email)
+- Response shape: `{ accessToken, member: { id, name, ageCategory, avatarUrl }, family: { id, name } }` — **no refreshToken** (child sessions are access-token only)
+- localStorage key: `child-auth-storage` (Zustand persist), fields: `{ member, accessToken, refreshToken: null, isAuthenticated: true, isChildSession: true }`
+- Auth guard: `ChildProtectedRoute` checks `childAuthStore.isAuthenticated && isChildSession`
+
+**Root Cause (Primary — Backend):**
+- `GET /api/v1/programs/enrollment/:memberId/stage-summary` returns **HTTP 500**
+- Prisma error: `"Please either use include or select, but not both at the same time."`
+- File: `backend/src/services/program.service.ts` lines 172–185
+- Bug: `getStageSummary()` uses both `select` and `include` on the `program` relation in the same `findMany()` call — Prisma forbids this.
+
+**Secondary Crash Trigger (Frontend):**
+- With `stageSummary = null` (500 error), `GradeDashboard.tsx` falls through to the fallback render path (lines 265–289)
+- Fallback calls `currentStage.courses.map(...)` but `currentStage` from the enrollment API only returns `{ id, stageNumber, name, orderIndex }` — no `courses` array
+- `TypeError: Cannot read properties of undefined (reading 'map')` → React unmounts component → blank page
+
+**Additional Shape Mismatch (Backend):**
+- Even after fixing the Prisma bug, `getStageSummary()` returns `[{ enrollmentId, program, completedStages, totalStages, progressPct, stages }]`
+- Frontend expects `StageProgressSummary: { stageId, stageName, totalCourses, completedCourses, overallProgress, subjectProgress[] }`
+- These shapes are completely mismatched — backend needs to return the correct shape.
+
+**Evidence:**
+- Enrollment API: HTTP 200, active enrollment confirmed (enrolled in "Maktab An Nasihah", Stage 1 "Foundation 1")
+- Stage summary API: HTTP 500 with Prisma error (see above)
+- Page text: empty string — React crash from `TypeError`
+- Screenshot: `test-results/child-maktab-page.png` (blank page)
+- Network call log captured in test output
+
+**Fix Owners:**
+- **Khwarizmi (Backend):** Fix Prisma query — replace `select + include` with just `include` on the `program` relation. Also align response shape to the `StageProgressSummary` interface expected by frontend.
+- **Ibn Sina (Frontend):** Add null-safety guard: `currentStage.courses?.map(...)` and guard `currentStage.ageMin`/`ageMax` rendering against undefined.
