@@ -164,60 +164,98 @@ export class ProgramService {
   }
 
   // ─── Stage Progress Summary ───────────────────────────────────────────────
+  // Returns the StageProgressSummary shape the frontend expects, or null when
+  // the member has no active enrollment.
 
-  static async getStageSummary(memberId: string) {
-    const enrollments = await prisma.programEnrollment.findMany({
+  static async getStageSummary(memberId: string): Promise<{
+    stageId: string;
+    stageName: string;
+    totalCourses: number;
+    completedCourses: number;
+    overallProgress: number; // 0-100
+    subjectProgress: {
+      courseId: string;
+      courseTitle: string;
+      category: string;
+      progress: number;
+      totalUnits: number;
+      completedUnits: number;
+    }[];
+  } | null> {
+    // Fetch the active enrollment and its current stage with published courses.
+    // Uses ONLY `include` on every relation — no mixed select+include.
+    const enrollment = await prisma.programEnrollment.findFirst({
       where: { familyMemberId: memberId, status: 'ACTIVE' },
       include: {
-        program: {
-          select: { id: true, slug: true, name: true },
+        currentStage: {
           include: {
-            stages: {
-              orderBy: { orderIndex: 'asc' },
+            courses: {
+              where: { isPublished: true },
               select: {
                 id: true,
-                stageNumber: true,
-                name: true,
-                orderIndex: true,
-                _count: { select: { courses: true } },
+                title: true,
+                category: true,
+                _count: { select: { units: true } },
               },
             },
           },
         },
-        currentStage: {
-          select: { id: true, stageNumber: true, name: true, orderIndex: true },
+      },
+    });
+
+    if (!enrollment) return null;
+
+    const stage = enrollment.currentStage;
+    const courseIds = stage.courses.map(c => c.id);
+
+    // Load course enrollments for this member within the current stage.
+    const courseEnrollments = await prisma.courseEnrollment.findMany({
+      where: { memberId, courseId: { in: courseIds } },
+      select: {
+        courseId: true,
+        progress: true,   // 0-100 stored value
+        status: true,
+        unitProgress: {
+          select: { completedAt: true },
         },
       },
     });
 
-    return enrollments.map(e => {
-      const stages = e.program.stages;
-      const currentIdx = stages.findIndex(s => s.id === e.currentStageId);
-      const completedStages = currentIdx > 0 ? currentIdx : 0;
-      const totalStages = stages.length;
+    const ceMap = new Map(courseEnrollments.map(ce => [ce.courseId, ce]));
 
+    const subjectProgress = stage.courses.map(course => {
+      const ce = ceMap.get(course.id);
       return {
-        enrollmentId: e.id,
-        program: {
-          id: e.program.id,
-          slug: e.program.slug,
-          name: e.program.name,
-        },
-        path: e.path,
-        status: e.status,
-        currentStage: e.currentStage,
-        completedStages,
-        totalStages,
-        progressPct: totalStages > 0
-          ? Math.round((completedStages / totalStages) * 100)
+        courseId: course.id,
+        courseTitle: course.title,
+        category: course.category,
+        progress: ce?.progress ?? 0,
+        totalUnits: course._count.units,
+        completedUnits: ce
+          ? ce.unitProgress.filter(up => up.completedAt !== null).length
           : 0,
-        stages: stages.map(s => ({
-          ...s,
-          courseCount: s._count.courses,
-          isCurrent: s.id === e.currentStageId,
-          isCompleted: s.orderIndex < (e.currentStage?.orderIndex ?? 0),
-        })),
       };
     });
+
+    const totalCourses = stage.courses.length;
+    const completedCourses = courseEnrollments.filter(
+      ce => ce.status === 'COMPLETED'
+    ).length;
+    const overallProgress =
+      totalCourses > 0
+        ? Math.round(
+            subjectProgress.reduce((sum, sp) => sum + sp.progress, 0) /
+              totalCourses
+          )
+        : 0;
+
+    return {
+      stageId: stage.id,
+      stageName: stage.name,
+      totalCourses,
+      completedCourses,
+      overallProgress,
+      subjectProgress,
+    };
   }
 }
