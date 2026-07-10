@@ -33,12 +33,18 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
   const { enrollInProgram, isEnrolling, error, clearError } = useProgramStore();
   const navigate = useNavigate();
 
-  const learners = members.filter((m) => m.isActive);
+  const learners = members.filter((m) => (m.isActive ?? true) && !m.isAccountOwner);
   const [selectedMemberId, setSelectedMemberId] = useState(learners[0]?.id ?? '');
   const [selectedPath, setSelectedPath] = useState<LearningPath>('AFTER_SCHOOL');
   const [enrolled, setEnrolled] = useState(false);
 
   const selectedMember = learners.find((m) => m.id === selectedMemberId);
+
+  useEffect(() => {
+    if (!selectedMemberId && learners.length > 0) {
+      setSelectedMemberId(learners[0].id);
+    }
+  }, [learners, selectedMemberId]);
 
   // Detect starting stage based on age
   function detectStageNumber(member: FamilyMember | undefined): number | undefined {
@@ -110,7 +116,7 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
           </label>
           {learners.length === 0 ? (
             <div className="py-4 text-center text-sm text-gray-500">
-              No active learners found.{' '}
+              No child learner profiles found.{' '}
               <a href="/settings" className="text-[#1a5632] underline font-medium">
                 Add a learner in Settings first
               </a>

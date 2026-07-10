@@ -32,7 +32,8 @@ export interface FamilyMember {
   ageCategory: AgeCategory;
   avatarUrl?: string;
   createdAt: string;
-  isActive: boolean;
+  isActive?: boolean;
+  isAccountOwner?: boolean;
 }
 
 export interface CreateMemberRequest {
