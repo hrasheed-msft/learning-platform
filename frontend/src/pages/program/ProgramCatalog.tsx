@@ -199,7 +199,7 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
 export default function ProgramCatalog() {
   const { programs, fetchPrograms, isLoading } = useProgramStore();
   const { family } = useAuthStore();
-  const { fetchMembers } = useFamilyStore();
+  const { fetchMembers, fetchLearners } = useFamilyStore();
   const [showModal, setShowModal] = useState(false);
   const [activeProgram, setActiveProgram] = useState<Program | null>(null);
 
@@ -208,8 +208,12 @@ export default function ProgramCatalog() {
   }, [fetchPrograms]);
 
   useEffect(() => {
-    if (family?.id) void fetchMembers(family.id);
-  }, [family?.id, fetchMembers]);
+    if (family?.id) {
+      void fetchMembers(family.id);
+      return;
+    }
+    void fetchLearners();
+  }, [family?.id, fetchMembers, fetchLearners]);
 
   function handleEnrollClick(program: Program) {
     setActiveProgram(program);
