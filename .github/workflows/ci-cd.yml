@@ -93,7 +93,6 @@ jobs:
           action: "upload"
           app_location: "frontend"
           output_location: "dist"
-          skip_app_build: true
 
   # ── Prod deployment ─────────────────────────────────────────────────────────
   deploy-backend:
@@ -137,4 +136,3 @@ jobs:
           action: "upload"
           app_location: "frontend"
           output_location: "dist"
-          skip_app_build: true
