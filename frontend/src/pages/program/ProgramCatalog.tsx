@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramStore } from '@/stores/programStore';
 import { useFamilyStore } from '@/stores/familyStore';
+import { useAuthStore } from '@/stores';
 import type { LearningPath, Program } from '@/types/program';
 import type { FamilyMember } from '@/types';
 
@@ -107,27 +108,37 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             👧 Who is enrolling?
           </label>
-          <div className="grid grid-cols-2 gap-2">
-            {learners.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setSelectedMemberId(m.id)}
-                className={`p-3 rounded-xl border-2 text-left transition min-h-[44px] ${
-                  selectedMemberId === m.id
-                    ? 'border-[#1a5632] bg-green-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <p className="font-semibold text-gray-800">{m.name}</p>
-                <p className="text-xs text-gray-500">Age {m.age}</p>
-                {detectStageNumber(m) && (
-                  <p className="text-xs text-green-700 font-medium mt-1">
-                    → Stage {detectStageNumber(m)}
-                  </p>
-                )}
-              </button>
-            ))}
-          </div>
+          {learners.length === 0 ? (
+            <div className="py-4 text-center text-sm text-gray-500">
+              No active learners found.{' '}
+              <a href="/settings" className="text-[#1a5632] underline font-medium">
+                Add a learner in Settings first
+              </a>
+              .
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {learners.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedMemberId(m.id)}
+                  className={`p-3 rounded-xl border-2 text-left transition min-h-[44px] ${
+                    selectedMemberId === m.id
+                      ? 'border-[#1a5632] bg-green-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <p className="font-semibold text-gray-800">{m.name}</p>
+                  <p className="text-xs text-gray-500">Age {m.age}</p>
+                  {detectStageNumber(m) && (
+                    <p className="text-xs text-green-700 font-medium mt-1">
+                      → Stage {detectStageNumber(m)}
+                    </p>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Step 2: Choose path */}
@@ -181,12 +192,18 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
 
 export default function ProgramCatalog() {
   const { programs, fetchPrograms, isLoading } = useProgramStore();
+  const { family } = useAuthStore();
+  const { fetchMembers } = useFamilyStore();
   const [showModal, setShowModal] = useState(false);
   const [activeProgram, setActiveProgram] = useState<Program | null>(null);
 
   useEffect(() => {
     void fetchPrograms();
   }, [fetchPrograms]);
+
+  useEffect(() => {
+    if (family?.id) void fetchMembers(family.id);
+  }, [family?.id, fetchMembers]);
 
   function handleEnrollClick(program: Program) {
     setActiveProgram(program);
