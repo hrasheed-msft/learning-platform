@@ -130,7 +130,7 @@ export class ProgramService {
       },
       include: {
         program: { select: { id: true, slug: true, name: true } },
-        currentStage: { select: { id: true, stageNumber: true, name: true } },
+        currentStage: { select: { id: true, stageNumber: true, name: true, ageMin: true, ageMax: true } },
       },
     });
 
@@ -155,7 +155,7 @@ export class ProgramService {
           },
         },
         currentStage: {
-          select: { id: true, stageNumber: true, name: true, orderIndex: true },
+          select: { id: true, stageNumber: true, name: true, orderIndex: true, ageMin: true, ageMax: true },
         },
       },
     });
