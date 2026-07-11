@@ -93,7 +93,7 @@ router.post(
   async (req: AuthenticatedRequest, res, next) => {
     try {
       const result = await ParentPinService.verifyPin(req.body.memberId, req.body.pin);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (err) {
       next(err);
     }
@@ -111,7 +111,7 @@ router.get(
         return;
       }
       const status = await ParentPinService.getPinStatus(req.user.id);
-      res.json({ success: true, ...status });
+      res.json({ success: true, data: status });
     } catch (err) {
       next(err);
     }

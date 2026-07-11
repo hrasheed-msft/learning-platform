@@ -188,7 +188,17 @@ export class ProgramService {
           },
         },
         currentStage: {
-          select: { id: true, stageNumber: true, name: true, orderIndex: true, ageMin: true, ageMax: true },
+          select: {
+            id: true,
+            stageNumber: true,
+            name: true,
+            orderIndex: true,
+            ageMin: true,
+            ageMax: true,
+            courses: {
+              select: { id: true, title: true, slug: true, category: true },
+            },
+          },
         },
       },
     });
