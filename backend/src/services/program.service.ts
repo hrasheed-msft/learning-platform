@@ -2,6 +2,48 @@ import prisma from '../config/database';
 import { LearningPath } from '@prisma/client';
 import { NotFoundError, BadRequestError, ConflictError } from '../middleware/error.middleware';
 
+// ─── Shared types exported for Ibn Sina / frontend contract ──────────────────
+
+export interface NextUnitShape {
+  id: string;
+  title: string;
+  orderIndex: number;
+  courseId: string;
+  courseSlug: string | null;
+}
+
+export interface SubjectProgressEntry {
+  courseId: string;
+  courseTitle: string;
+  category: string;
+  progress: number;              // 0-100
+  totalUnits: number;
+  completedUnits: number;
+  nextUnit: NextUnitShape | null;
+  lastActivityAt: string | null; // ISO string
+  unitsCompletedLast7Days: number;
+}
+
+export interface StageProgressSummary {
+  stageId: string;
+  stageName: string;
+  totalCourses: number;
+  completedCourses: number;
+  overallProgress: number; // 0-100
+  subjectProgress: SubjectProgressEntry[];
+  nextUp: {
+    subjectSlug: string;
+    courseId: string;
+    unit: NextUnitShape;
+  } | null;
+  streak: {
+    current: number;
+    longest: number;
+    lastActivityAt: string | null;
+  };
+  weeklyActivity: { date: string; unitsCompleted: number }[];
+}
+
 // ─── List Programs ────────────────────────────────────────────────────────────
 
 export class ProgramService {
@@ -209,24 +251,19 @@ export class ProgramService {
   // ─── Stage Progress Summary ───────────────────────────────────────────────
   // Returns the StageProgressSummary shape the frontend expects, or null when
   // the member has no active enrollment.
+  //
+  // Phase 2 additions (additive only):
+  //   subjectProgress[].nextUnit        — first incomplete unit per course
+  //   subjectProgress[].lastActivityAt  — most recent UnitProgress activity
+  //   subjectProgress[].unitsCompletedLast7Days
+  //   nextUp                            — top-level "what to do next" CTA pointer
+  //   streak                            — current / longest streak + lastActivityAt
+  //   weeklyActivity                    — 7-day bar-chart data (oldest→newest)
+  //
+  // Query strategy: 4 batched queries, zero N+1 per course.
 
-  static async getStageSummary(memberId: string): Promise<{
-    stageId: string;
-    stageName: string;
-    totalCourses: number;
-    completedCourses: number;
-    overallProgress: number; // 0-100
-    subjectProgress: {
-      courseId: string;
-      courseTitle: string;
-      category: string;
-      progress: number;
-      totalUnits: number;
-      completedUnits: number;
-    }[];
-  } | null> {
-    // Fetch the active enrollment and its current stage with published courses.
-    // Uses ONLY `include` on every relation — no mixed select+include.
+  static async getStageSummary(memberId: string): Promise<StageProgressSummary | null> {
+    // ── Query 1: enrollment + stage + courses ─────────────────────────────
     const enrollment = await prisma.programEnrollment.findFirst({
       where: { familyMemberId: memberId, status: 'ACTIVE' },
       include: {
@@ -238,6 +275,7 @@ export class ProgramService {
                 id: true,
                 title: true,
                 category: true,
+                slug: true,
                 _count: { select: { units: true } },
               },
             },
@@ -249,47 +287,183 @@ export class ProgramService {
     if (!enrollment) return null;
 
     const stage = enrollment.currentStage;
+    const learningPath = enrollment.path; // AFTER_SCHOOL | WEEKEND
     const courseIds = stage.courses.map(c => c.id);
 
-    // Load course enrollments for this member within the current stage.
+    // ── Query 2: CourseEnrollments for this member in the current stage ───
     const courseEnrollments = await prisma.courseEnrollment.findMany({
       where: { memberId, courseId: { in: courseIds } },
-      select: {
-        courseId: true,
-        progress: true,   // 0-100 stored value
-        status: true,
-        unitProgress: {
-          select: { completedAt: true },
-        },
-      },
+      select: { id: true, courseId: true, progress: true, status: true },
     });
 
     const ceMap = new Map(courseEnrollments.map(ce => [ce.courseId, ce]));
+    const enrollmentIds = courseEnrollments.map(ce => ce.id);
 
-    const subjectProgress = stage.courses.map(course => {
+    // ── Query 3: All UnitProgress rows across the stage (batched) ─────────
+    // Index: unit_progress(enrollmentId, completedAt) covers both filters.
+    const allUnitProgress = enrollmentIds.length > 0
+      ? await prisma.unitProgress.findMany({
+          where: { enrollmentId: { in: enrollmentIds } },
+          select: { enrollmentId: true, unitId: true, completedAt: true, updatedAt: true },
+        })
+      : [];
+
+    // Group by enrollmentId for per-course lookups
+    const upByEnrollment = new Map<string, typeof allUnitProgress>();
+    for (const up of allUnitProgress) {
+      const list = upByEnrollment.get(up.enrollmentId);
+      if (list) list.push(up); else upByEnrollment.set(up.enrollmentId, [up]);
+    }
+
+    // ── Query 4: All Units for courses in the stage (for nextUnit) ────────
+    const allUnits = courseIds.length > 0
+      ? await prisma.unit.findMany({
+          where: { courseId: { in: courseIds } },
+          select: { id: true, title: true, orderIndex: true, courseId: true, includedInPaths: true },
+          orderBy: [{ orderIndex: 'asc' }, { id: 'asc' }],
+        })
+      : [];
+
+    // Group units by courseId
+    const unitsByCourse = new Map<string, typeof allUnits>();
+    for (const unit of allUnits) {
+      const list = unitsByCourse.get(unit.courseId);
+      if (list) list.push(unit); else unitsByCourse.set(unit.courseId, [unit]);
+    }
+
+    // ── Streak + weekly-activity aggregation (UTC calendar days) ─────────
+    const nowUtc = new Date();
+    const todayUTC = utcDay(nowUtc);
+
+    // Build weekly map: last 7 days, oldest first
+    const weeklyMap = new Map<string, number>();
+    for (let i = 6; i >= 0; i--) {
+      weeklyMap.set(utcDayOffset(nowUtc, -i), 0);
+    }
+
+    const completedDaySet = new Set<string>();
+    let lastActivityAt: string | null = null;
+
+    for (const up of allUnitProgress) {
+      if (up.completedAt) {
+        const day = utcDay(up.completedAt);
+        completedDaySet.add(day);
+        if (weeklyMap.has(day)) weeklyMap.set(day, (weeklyMap.get(day) ?? 0) + 1);
+        const iso = up.completedAt.toISOString();
+        if (!lastActivityAt || iso > lastActivityAt) lastActivityAt = iso;
+      }
+      // Also track updatedAt for lastActivityAt (per-course use)
+    }
+
+    const weeklyActivity = Array.from(weeklyMap.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, unitsCompleted]) => ({ date, unitsCompleted }));
+
+    // Longest streak (iterate sorted unique days)
+    const sortedDays = Array.from(completedDaySet).sort();
+    let longestStreak = 0;
+    let currentRun = 0;
+    let prevDay: string | null = null;
+    for (const day of sortedDays) {
+      if (prevDay === null) {
+        currentRun = 1;
+      } else {
+        const diffMs = new Date(day).getTime() - new Date(prevDay).getTime();
+        currentRun = diffMs === 86400000 ? currentRun + 1 : 1;
+      }
+      if (currentRun > longestStreak) longestStreak = currentRun;
+      prevDay = day;
+    }
+
+    // Current streak: consecutive days ending today (or yesterday if not active today)
+    let currentStreak = 0;
+    const yesterdayUTC = utcDayOffset(nowUtc, -1);
+    if (completedDaySet.has(todayUTC) || completedDaySet.has(yesterdayUTC)) {
+      let checkDay = completedDaySet.has(todayUTC) ? todayUTC : yesterdayUTC;
+      while (completedDaySet.has(checkDay)) {
+        currentStreak++;
+        checkDay = utcDayOffset(new Date(checkDay), -1);
+      }
+    }
+
+    const sevenDaysAgoMs = new Date(Date.UTC(
+      nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate() - 6
+    )).getTime();
+
+    // ── Per-subject aggregation ───────────────────────────────────────────
+    const subjectProgress: SubjectProgressEntry[] = stage.courses.map(course => {
       const ce = ceMap.get(course.id);
+      const ceId = ce?.id;
+      const ups = ceId ? (upByEnrollment.get(ceId) ?? []) : [];
+
+      const completedUnits = ups.filter(up => up.completedAt !== null).length;
+
+      // lastActivityAt for this course: max(updatedAt, completedAt)
+      let courseLastActivity: string | null = null;
+      for (const up of ups) {
+        const ts = [up.updatedAt?.toISOString(), up.completedAt?.toISOString()]
+          .filter(Boolean)
+          .reduce((max: string | null, v) =>
+            v && (!max || v > max) ? v : max, null);
+        if (ts && (!courseLastActivity || ts > courseLastActivity)) courseLastActivity = ts;
+      }
+
+      const unitsCompletedLast7Days = ups.filter(
+        up => up.completedAt && up.completedAt.getTime() >= sevenDaysAgoMs
+      ).length;
+
+      // nextUnit: first eligible unit not yet completed
+      const completedUnitIdsForCourse = new Set(
+        ups.filter(up => up.completedAt !== null).map(up => up.unitId)
+      );
+      const courseUnits = unitsByCourse.get(course.id) ?? [];
+      const eligibleUnits = courseUnits.filter(
+        u => u.includedInPaths.length === 0 || u.includedInPaths.includes(learningPath)
+      );
+      const nextUnitRaw = eligibleUnits.find(u => !completedUnitIdsForCourse.has(u.id)) ?? null;
+
+      const nextUnit: NextUnitShape | null = nextUnitRaw
+        ? {
+            id: nextUnitRaw.id,
+            title: nextUnitRaw.title,
+            orderIndex: nextUnitRaw.orderIndex,
+            courseId: course.id,
+            courseSlug: course.slug ?? null,
+          }
+        : null;
+
       return {
         courseId: course.id,
         courseTitle: course.title,
         category: course.category,
         progress: ce?.progress ?? 0,
         totalUnits: course._count.units,
-        completedUnits: ce
-          ? ce.unitProgress.filter(up => up.completedAt !== null).length
-          : 0,
+        completedUnits,
+        nextUnit,
+        lastActivityAt: courseLastActivity,
+        unitsCompletedLast7Days,
       };
     });
 
+    // ── nextUp: first subject (stage course order) with an incomplete unit ─
+    let nextUp: StageProgressSummary['nextUp'] = null;
+    for (const sp of subjectProgress) {
+      if (sp.nextUnit) {
+        const course = stage.courses.find(c => c.id === sp.courseId)!;
+        nextUp = {
+          subjectSlug: course.slug ?? sp.courseId,
+          courseId: sp.courseId,
+          unit: sp.nextUnit,
+        };
+        break;
+      }
+    }
+
     const totalCourses = stage.courses.length;
-    const completedCourses = courseEnrollments.filter(
-      ce => ce.status === 'COMPLETED'
-    ).length;
+    const completedCourses = courseEnrollments.filter(ce => ce.status === 'COMPLETED').length;
     const overallProgress =
       totalCourses > 0
-        ? Math.round(
-            subjectProgress.reduce((sum, sp) => sum + sp.progress, 0) /
-              totalCourses
-          )
+        ? Math.round(subjectProgress.reduce((sum, sp) => sum + sp.progress, 0) / totalCourses)
         : 0;
 
     return {
@@ -299,6 +473,21 @@ export class ProgramService {
       completedCourses,
       overallProgress,
       subjectProgress,
+      nextUp,
+      streak: { current: currentStreak, longest: longestStreak, lastActivityAt },
+      weeklyActivity,
     };
   }
+}
+
+// ─── UTC day helpers ──────────────────────────────────────────────────────────
+
+function utcDay(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function utcDayOffset(d: Date, offsetDays: number): string {
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + offsetDays)
+  ).toISOString().slice(0, 10);
 }

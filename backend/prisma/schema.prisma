@@ -398,6 +398,7 @@ model UnitProgress {
   @@unique([enrollmentId, unitId])
   @@index([enrollmentId])
   @@index([unitId])
+  @@index([enrollmentId, completedAt]) // phase-2: activity queries
   @@map("unit_progress")
 }
 
