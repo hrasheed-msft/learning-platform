@@ -15,8 +15,8 @@ const WEAK_PINS = new Set([
 
 export class ParentPinService {
   /**
-   * Set or update the PIN for the account-owner member in the calling user's family.
-   * Hashes the PIN with bcrypt cost 10 before storing.
+   * Set or update the PIN for the authenticated parent User.
+   * Hashes the PIN with bcrypt cost 10 before storing on the users table.
    */
   static async setPin(userId: string, pin: string): Promise<void> {
     if (!/^\d{4}$/.test(pin)) {
@@ -28,29 +28,10 @@ export class ParentPinService {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { familyId: true },
-    });
-
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
-
-    // Find the account-owner member for this family
-    const ownerMember = await prisma.familyMember.findFirst({
-      where: { familyId: user.familyId, isAccountOwner: true },
-      select: { id: true },
-    });
-
-    if (!ownerMember) {
-      throw new NotFoundError('No account-owner member profile found for this family');
-    }
-
     const pinHash = await bcrypt.hash(pin, PIN_BCRYPT_COST);
 
-    await prisma.familyMember.update({
-      where: { id: ownerMember.id },
+    await prisma.user.update({
+      where: { id: userId },
       data: {
         parentPinHash: pinHash,
         pinSetAt: new Date(),
@@ -61,56 +42,59 @@ export class ParentPinService {
   }
 
   /**
-   * Returns whether the account-owner member for this user's family has set a PIN.
+   * Returns whether the authenticated parent has set a PIN.
    */
   static async getPinStatus(userId: string): Promise<{ hasPin: boolean }> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { familyId: true },
-    });
-
-    if (!user) {
-      return { hasPin: false };
-    }
-
-    const ownerMember = await prisma.familyMember.findFirst({
-      where: { familyId: user.familyId, isAccountOwner: true },
       select: { parentPinHash: true },
     });
 
-    return { hasPin: !!ownerMember?.parentPinHash };
+    return { hasPin: !!user?.parentPinHash };
   }
 
   /**
-   * Verifies the PIN against the account-owner FamilyMember identified by memberId.
-   * Enforces a 3-attempt / 30-second lockout per member.
+   * Verifies the PIN for the parent who owns the family of the given memberId.
+   * The memberId identifies any FamilyMember; we find the parent User for that family.
+   * Enforces a 3-attempt / 30-second lockout.
    */
   static async verifyPin(
     memberId: string,
     pin: string
   ): Promise<{ verified: boolean; remainingAttempts?: number }> {
+    // Resolve the parent User from memberId → familyId → User (PARENT role)
     const member = await prisma.familyMember.findUnique({
       where: { id: memberId },
+      select: { familyId: true },
+    });
+
+    if (!member) {
+      throw new NotFoundError('Member not found');
+    }
+
+    // Find the parent user for this family (there should be at least one)
+    const parentUser = await prisma.user.findFirst({
+      where: { familyId: member.familyId, role: 'PARENT' },
       select: {
+        id: true,
         parentPinHash: true,
         pinAttempts: true,
         pinLockedUntil: true,
-        isAccountOwner: true,
       },
     });
 
-    if (!member || !member.isAccountOwner) {
-      throw new NotFoundError('Member not found or is not an account owner');
+    if (!parentUser) {
+      throw new NotFoundError('No parent user found for this family');
     }
 
-    if (!member.parentPinHash) {
+    if (!parentUser.parentPinHash) {
       throw new BadRequestError('No PIN has been set for this account');
     }
 
     // Lockout check
-    if (member.pinLockedUntil && member.pinLockedUntil > new Date()) {
+    if (parentUser.pinLockedUntil && parentUser.pinLockedUntil > new Date()) {
       const secsLeft = Math.ceil(
-        (member.pinLockedUntil.getTime() - Date.now()) / 1000
+        (parentUser.pinLockedUntil.getTime() - Date.now()) / 1000
       );
       throw new AppError(
         `Too many failed PIN attempts. Try again in ${secsLeft} seconds.`,
@@ -118,25 +102,25 @@ export class ParentPinService {
       );
     }
 
-    const verified = await bcrypt.compare(pin, member.parentPinHash);
+    const verified = await bcrypt.compare(pin, parentUser.parentPinHash);
 
     if (verified) {
-      await prisma.familyMember.update({
-        where: { id: memberId },
+      await prisma.user.update({
+        where: { id: parentUser.id },
         data: { pinAttempts: 0, pinLockedUntil: null },
       });
       return { verified: true };
     }
 
     // Increment failure counter
-    const newAttempts = (member.pinAttempts ?? 0) + 1;
+    const newAttempts = (parentUser.pinAttempts ?? 0) + 1;
     const lockedUntil =
       newAttempts >= MAX_ATTEMPTS
         ? new Date(Date.now() + LOCKOUT_SECONDS * 1000)
         : null;
 
-    await prisma.familyMember.update({
-      where: { id: memberId },
+    await prisma.user.update({
+      where: { id: parentUser.id },
       data: { pinAttempts: newAttempts, pinLockedUntil: lockedUntil },
     });
 
@@ -144,3 +128,4 @@ export class ParentPinService {
     return { verified: false, remainingAttempts };
   }
 }
+
