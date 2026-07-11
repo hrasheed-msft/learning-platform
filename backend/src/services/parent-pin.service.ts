@@ -15,7 +15,7 @@ const WEAK_PINS = new Set([
 
 export class ParentPinService {
   /**
-   * Set or update the PIN for the account-owner member associated with userId.
+   * Set or update the PIN for the account-owner member in the calling user's family.
    * Hashes the PIN with bcrypt cost 10 before storing.
    */
   static async setPin(userId: string, pin: string): Promise<void> {
@@ -30,17 +30,27 @@ export class ParentPinService {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { selfMemberId: true },
+      select: { familyId: true },
     });
 
-    if (!user?.selfMemberId) {
-      throw new NotFoundError('No member profile linked to this account');
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    // Find the account-owner member for this family
+    const ownerMember = await prisma.familyMember.findFirst({
+      where: { familyId: user.familyId, isAccountOwner: true },
+      select: { id: true },
+    });
+
+    if (!ownerMember) {
+      throw new NotFoundError('No account-owner member profile found for this family');
     }
 
     const pinHash = await bcrypt.hash(pin, PIN_BCRYPT_COST);
 
     await prisma.familyMember.update({
-      where: { id: user.selfMemberId },
+      where: { id: ownerMember.id },
       data: {
         parentPinHash: pinHash,
         pinSetAt: new Date(),
@@ -51,24 +61,24 @@ export class ParentPinService {
   }
 
   /**
-   * Returns whether the account-owner member associated with userId has set a PIN.
+   * Returns whether the account-owner member for this user's family has set a PIN.
    */
   static async getPinStatus(userId: string): Promise<{ hasPin: boolean }> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { selfMemberId: true },
+      select: { familyId: true },
     });
 
-    if (!user?.selfMemberId) {
+    if (!user) {
       return { hasPin: false };
     }
 
-    const member = await prisma.familyMember.findUnique({
-      where: { id: user.selfMemberId },
+    const ownerMember = await prisma.familyMember.findFirst({
+      where: { familyId: user.familyId, isAccountOwner: true },
       select: { parentPinHash: true },
     });
 
-    return { hasPin: !!member?.parentPinHash };
+    return { hasPin: !!ownerMember?.parentPinHash };
   }
 
   /**
