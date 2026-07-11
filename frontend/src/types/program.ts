@@ -46,6 +46,38 @@ export interface StageProgressSummary {
   completedCourses: number;
   overallProgress: number; // 0-100
   subjectProgress: SubjectProgress[];
+  /** Primary "what to do next" pointer across all subjects */
+  nextUp?: NextUp | null;
+  streak?: StreakData;
+  weeklyActivity?: WeeklyActivityDay[];
+}
+
+
+export interface NextUnit {
+  id: string;
+  title: string;
+  orderIndex: number;
+  courseId: string;
+  courseSlug: string;
+  type?: string;
+}
+
+export interface StreakData {
+  current: number;
+  longest: number;
+  lastActivityAt: string | null;
+}
+
+export interface WeeklyActivityDay {
+  /** 'YYYY-MM-DD' */
+  date: string;
+  unitsCompleted: number;
+}
+
+export interface NextUp {
+  subjectSlug: string;
+  courseId: string;
+  unit: NextUnit;
 }
 
 export interface SubjectProgress {
@@ -55,4 +87,8 @@ export interface SubjectProgress {
   progress: number;
   totalUnits: number;
   completedUnits: number;
+  /** First incomplete unit for this subject — null when all done */
+  nextUnit?: NextUnit | null;
+  lastActivityAt?: string | null;
+  unitsCompletedLast7Days?: number;
 }

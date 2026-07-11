@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Loader2, BookOpen, PlayCircle, CheckCircle, Lock } from 'lucide-react';
 import { useCourseStore } from '@/stores';
 import { useFamilyStore } from '@/stores/familyStore';
@@ -70,6 +70,8 @@ export default function CourseLearner() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const unitIdFromParam = searchParams.get('unit');
   const state = location.state as LocationState | null;
   const { selectedMember } = useFamilyStore();
   const { member: childMember } = useChildAuthStore();
@@ -134,6 +136,12 @@ export default function CourseLearner() {
   const resumeUnit = (() => {
     if (units.length === 0) {
       return null;
+    }
+
+    // ?unit=<id> from a "Next lesson" CTA — prefer the requested unit if it exists
+    if (unitIdFromParam) {
+      const requested = units.find((unit) => unit.id === unitIdFromParam);
+      if (requested) return requested;
     }
 
     const unitProgress = [...(resolvedEnrollment?.unitProgress ?? [])].sort(

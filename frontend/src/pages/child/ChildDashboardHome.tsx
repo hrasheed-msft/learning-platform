@@ -4,22 +4,95 @@ import { useChildAuthStore } from '@/stores/childAuthStore';
 import { useChildEnrollments } from '@/hooks/useChildEnrollments';
 import { useProgramStore } from '@/stores/programStore';
 import { useEffect } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import type { WeeklyActivityDay } from '@/types/program';
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function getDayLabel(dateStr: string): string {
+  try {
+    return DAY_LABELS[new Date(dateStr).getDay()] ?? dateStr.slice(5);
+  } catch {
+    return dateStr.slice(5);
+  }
+}
+
+function isToday(dateStr: string): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  return dateStr === today;
+}
+
+// ─── sub-components ─────────────────────────────────────────────────────────
+
+function WeeklyActivityChart({ days }: { days: WeeklyActivityDay[] }) {
+  const maxUnits = Math.max(...days.map((d) => d.unitsCompleted), 1);
+
+  return (
+    <div className="flex items-end gap-1.5 h-16" aria-label="Weekly activity chart">
+      {days.map((day) => {
+        const heightPct = day.unitsCompleted === 0 ? 8 : Math.max(20, (day.unitsCompleted / maxUnits) * 100);
+        const today = isToday(day.date);
+        return (
+          <div key={day.date} className="flex flex-col items-center gap-1 flex-1" title={`${day.date}: ${day.unitsCompleted} unit${day.unitsCompleted !== 1 ? 's' : ''}`}>
+            <div
+              className={`w-full rounded-t-lg transition-all duration-500 ${
+                day.unitsCompleted === 0
+                  ? 'bg-gray-100'
+                  : today
+                  ? 'bg-orange-400 ring-2 ring-orange-300'
+                  : 'bg-[#1a5632]/70'
+              }`}
+              style={{ height: `${heightPct}%` }}
+              aria-hidden="true"
+            />
+            <span className={`text-[10px] ${today ? 'font-bold text-orange-500' : 'text-gray-400'}`}>
+              {getDayLabel(day.date)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── main component ──────────────────────────────────────────────────────────
 
 export default function ChildDashboardHome() {
   const { member } = useChildAuthStore();
   const { enrollments, isLoading } = useChildEnrollments();
-  const { enrollments: programEnrollments, fetchMemberEnrollments } = useProgramStore();
+  const {
+    enrollments: programEnrollments,
+    stageSummary,
+    fetchMemberEnrollments,
+    fetchMemberStageSummary,
+  } = useProgramStore();
   const activeEnrollments = enrollments.filter((enrollment) => enrollment.status !== 'COMPLETED');
   const recentEnrollments = activeEnrollments.slice(0, 3);
 
   useEffect(() => {
-    if (member?.id) void fetchMemberEnrollments(member.id);
-  }, [member?.id, fetchMemberEnrollments]);
+    if (member?.id) {
+      void fetchMemberEnrollments(member.id);
+      void fetchMemberStageSummary(member.id);
+    }
+  }, [member?.id, fetchMemberEnrollments, fetchMemberStageSummary]);
 
   const activeProgramEnrollment = programEnrollments.find((e) => e.status === 'ACTIVE');
 
+  // New Phase 2 fields — all optional; degrade gracefully when absent
+  const nextUp = stageSummary?.nextUp ?? null;
+  const streak = stageSummary?.streak ?? null;
+  const weeklyActivity = stageSummary?.weeklyActivity ?? null;
+
+  // Navigate path for a nextUnit
+  function nextUnitPath(courseId: string, unitId: string): string {
+    return `/child/courses/${courseId}/learn?unit=${unitId}`;
+  }
+
   return (
     <div className="space-y-8 animate-in">
+      {/* Greeting */}
       <div>
         <h1 className="text-3xl font-heading font-bold text-gray-800">
           Assalamu Alaikum, {member?.name}! 🌟
@@ -27,6 +100,90 @@ export default function ChildDashboardHome() {
         <p className="text-gray-600 mt-1">Keep up the great work on your learning journey!</p>
       </div>
 
+      {/* ── Continue / All-caught-up hero ───────────────────────────────── */}
+      {activeProgramEnrollment && (
+        nextUp ? (
+          <div className="bg-gradient-to-br from-[#1a5632] to-[#0d3320] rounded-2xl p-6 text-white shadow-md">
+            <p className="text-green-200 text-xs font-semibold uppercase tracking-wide mb-1">
+              Continue where you left off
+            </p>
+            <h2 className="text-xl font-heading font-bold mb-0.5">{nextUp.unit.title}</h2>
+            {/* subject name from subjectProgress if available */}
+            {(() => {
+              const sp = stageSummary?.subjectProgress?.find((s) => s.courseId === nextUp.courseId);
+              return sp ? (
+                <p className="text-green-200 text-sm mb-4">{sp.courseTitle}</p>
+              ) : null;
+            })()}
+            <Link
+              to={nextUnitPath(nextUp.courseId, nextUp.unit.id)}
+              className="inline-flex items-center gap-2 px-5 py-3 bg-white text-[#1a5632] font-bold rounded-xl hover:bg-green-50 transition min-h-[44px]"
+              aria-label={`Continue lesson: ${nextUp.unit.title}`}
+            >
+              Continue →
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 text-center">
+            <div className="text-4xl mb-2">🎉</div>
+            <h2 className="text-xl font-heading font-bold text-amber-800 mb-1">You're all caught up!</h2>
+            <p className="text-amber-700 text-sm mb-4">Amazing work — every lesson is done for now.</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                to="/child/games"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600 transition min-h-[44px]"
+              >
+                🎮 Play Games
+              </Link>
+              <Link
+                to="/child/flashcards"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-amber-700 border border-amber-300 font-semibold rounded-xl hover:bg-amber-50 transition min-h-[44px]"
+              >
+                🃏 Review Flashcards
+              </Link>
+            </div>
+          </div>
+        )
+      )}
+
+      {/* ── Streak + weekly activity ─────────────────────────────────────── */}
+      {(streak || weeklyActivity) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Streak card */}
+          {streak && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
+                <Flame className="w-6 h-6 text-orange-500" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-800 leading-none">
+                  {streak.current}
+                  <span className="text-lg font-medium text-gray-500 ml-1">day{streak.current !== 1 ? 's' : ''}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">Current streak</p>
+                {streak.longest > 0 && (
+                  <p className="text-xs text-gray-400 mt-1">Longest: {streak.longest} day{streak.longest !== 1 ? 's' : ''}</p>
+                )}
+                {streak.lastActivityAt && (
+                  <p className="text-xs text-gray-400">
+                    Last active {formatDistanceToNow(new Date(streak.lastActivityAt), { addSuffix: true })}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Weekly activity chart */}
+          {weeklyActivity && weeklyActivity.length > 0 && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">This Week</p>
+              <WeeklyActivityChart days={weeklyActivity} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Quick stats grid ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link
           to="/child/courses"
@@ -63,15 +220,16 @@ export default function ChildDashboardHome() {
 
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-            <Flame className="w-5 h-5 text-orange-600" />
+            <Flame className="w-5 h-5 text-orange-600" aria-hidden="true" />
           </div>
           <p className="text-sm text-gray-500">My Streak</p>
           <p className="text-xl font-bold text-gray-800 mt-1 flex items-center">
-            0 <Flame className="w-4 h-4 text-orange-500 ml-1" />
+            {streak?.current ?? 0} <Flame className="w-4 h-4 text-orange-500 ml-1" aria-hidden="true" />
           </p>
         </div>
       </div>
 
+      {/* ── Continue Learning (individual courses) ───────────────────────── */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between gap-4 mb-4">
           <h2 className="text-xl font-heading font-semibold text-gray-800">Continue Learning</h2>
@@ -127,7 +285,8 @@ export default function ChildDashboardHome() {
           </div>
         )}
       </div>
-      {/* My Maktab Section */}
+
+      {/* ── My Maktab section ────────────────────────────────────────────── */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between gap-4 mb-4">
           <h2 className="text-xl font-heading font-semibold text-gray-800">🕌 My Maktab</h2>          {activeProgramEnrollment && (
@@ -192,7 +351,7 @@ export default function ChildDashboardHome() {
         )}
       </div>
 
-      {/* Du'ā & 99 Names quick-access */}
+      {/* ── Du'ā & 99 Names quick-access ─────────────────────────────────── */}
       <div>
         <h2 className="text-xl font-heading font-semibold text-gray-800 mb-3">📿 Islamic Practice</h2>
         <div className="grid grid-cols-2 gap-4">

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { useProgramStore } from '@/stores/programStore';
 import { useChildAuthStore } from '@/stores/childAuthStore';
 import type { SubjectProgress } from '@/types/program';
@@ -62,20 +64,38 @@ function ProgressRing({ percent, size = 120 }: { percent: number; size?: number 
 function SubjectCard({ subject, onClick }: { subject: SubjectProgress; onClick?: () => void }) {
   const emoji = getSubjectEmoji(subject.category);
   const pct = Math.round(subject.progress);
+  const weekCount = subject.unitsCompletedLast7Days ?? 0;
+  const allDone = pct === 100;
+
+  let lastPracticed: string | null = null;
+  if (subject.lastActivityAt) {
+    try {
+      lastPracticed = formatDistanceToNow(new Date(subject.lastActivityAt), { addSuffix: true });
+    } catch {
+      lastPracticed = null;
+    }
+  }
 
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition text-left w-full min-h-[44px] group"
-      aria-label={`${subject.courseTitle}: ${pct}% complete`}
+      className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition text-left w-full min-h-[44px] group focus-visible:ring-2 focus-visible:ring-[#1a5632] focus-visible:outline-none"
+      aria-label={`${subject.courseTitle}: ${pct}% complete${subject.nextUnit ? `. Next: ${subject.nextUnit.title}` : ''}`}
     >
-      <div className="text-3xl mb-3">{emoji}</div>
+      <div className="flex items-start justify-between gap-1 mb-1">
+        <div className="text-3xl">{emoji}</div>
+        {weekCount > 0 && (
+          <span className="shrink-0 inline-flex items-center gap-0.5 text-xs font-semibold bg-orange-100 text-orange-700 rounded-full px-2 py-0.5">
+            🔥 {weekCount} this week
+          </span>
+        )}
+      </div>
       <h3 className="font-bold text-gray-800 group-hover:text-[#1a5632] transition text-sm leading-snug mb-3">
         {subject.courseTitle}
       </h3>
 
       {/* Progress bar */}
-      <div className="space-y-1">
+      <div className="space-y-1 mb-3">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>{subject.completedUnits} of {subject.totalUnits} units</span>
           <span className="font-semibold text-[#1a5632]">{pct}%</span>
@@ -88,10 +108,19 @@ function SubjectCard({ subject, onClick }: { subject: SubjectProgress; onClick?:
         </div>
       </div>
 
-      {pct === 100 && (
-        <div className="mt-2 text-xs font-semibold text-green-700 flex items-center gap-1">
-          ✅ Complete!
-        </div>
+      {/* Next unit / all caught up */}
+      {allDone ? (
+        <p className="text-xs font-medium text-green-700">All caught up ✨</p>
+      ) : subject.nextUnit ? (
+        <p className="text-xs text-gray-500 flex items-center gap-0.5 truncate">
+          <ChevronRight className="w-3 h-3 shrink-0 text-[#1a5632]" aria-hidden="true" />
+          <span className="truncate">Next: {subject.nextUnit.title}</span>
+        </p>
+      ) : null}
+
+      {/* Last practiced */}
+      {lastPracticed && (
+        <p className="text-xs text-gray-400 mt-1 truncate">Last practiced {lastPracticed}</p>
       )}
     </button>
   );
@@ -163,6 +192,7 @@ export default function GradeDashboard() {
   const summary = stageSummary ?? activeEnrollment.stageProgress;
   const overallPct = Math.round(summary?.overallProgress ?? 0);
   const isStageComplete = overallPct === 100;
+  const streakCurrent = summary?.streak?.current ?? 0;
 
   return (
     <div className="space-y-8 animate-in">
@@ -185,6 +215,11 @@ export default function GradeDashboard() {
               <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
                 {PATH_LABELS[path] ?? path}
               </span>
+              {streakCurrent > 0 && (
+                <span className="px-3 py-1 bg-orange-500/80 rounded-full text-xs font-semibold" aria-label={`${streakCurrent}-day streak`}>
+                  🔥 {streakCurrent}-day streak
+                </span>
+              )}
             </div>
             <h1 className="text-2xl md:text-3xl font-heading font-bold mb-1">
               {currentStage.name}
@@ -263,11 +298,12 @@ export default function GradeDashboard() {
                 } else if (cat === 'NAMES' || cat === '99NAMES') {
                   window.location.href = '/child/99-names';
                 } else {
-                  window.location.href = `/child/courses/${subject.courseId}/learn`;
-                }
-              }}
-            />
-            ))}
+                const unitParam = subject.nextUnit?.id ? `?unit=${subject.nextUnit.id}` : '';
+                window.location.href = `/child/courses/${subject.courseId}/learn${unitParam}`;
+              }
+            }}
+          />
+          ))}
           </div>
         ) : (currentStage?.courses ?? []).length > 0 ? (
           // Placeholder cards when progress data isn't loaded yet but stage has course list
