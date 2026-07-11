@@ -47,6 +47,21 @@ Key prior work:
 - Uses `endsWith` pattern matching to avoid false positives; wired after `seedGames()` at end of content seeding
 - Supports standalone `npx ts-node` execution
 
+**Stage-Summary Bug Fix (2026-07-10):** ✅ COMPLETE
+- Root cause: `getStageSummary` combined `select` AND `include` on the same `program` relation → Prisma throws; manifested as HTTP 500 on `/enrollment/:memberId/stage-summary`
+- Fix: Rewrote `getStageSummary` to use ONLY `include` chains; also aligned response shape with frontend `StageProgressSummary` interface
+- New shape: `{ stageId, stageName, totalCourses, completedCourses, overallProgress (0-100), subjectProgress[] }` — `subjectProgress` populated from `CourseEnrollment.progress` + `UnitProgress.completedAt` count
+- Returns `null` (not array) when member has no active enrollment; matches `StageProgressSummary | null` on frontend
+- Build: `tsc` clean; verified HTTP 200 with correct shape in prod (`stageId`, `stageName`, `subjectProgress[]` all populated)
+- Commit: `cbacd5b` — pushed to main; container redeployed ~7 min after push
+
+**ageMin/ageMax on currentStage (2026-07-10):** ✅ COMPLETE
+- Root cause: `getMemberEnrollments` `currentStage` select omitted `ageMin`/`ageMax` → frontend `GradeDashboard.tsx` showed "Ages –"
+- Fix: Added `ageMin: true, ageMax: true` to `currentStage` select in both `getMemberEnrollments` and `enrollMember` (consistency); additive-only, no API surface rename
+- Build: `tsc` clean; commit `3019bc3` pushed to main
+- Verified: API returns `"ageMin": 4, "ageMax": 5` on `currentStage`; E2E shows "Ages 4–5" correctly; 1 test passed in 14.2s
+
+- `ProgramStage` select fields must be enumerated explicitly — omitting a field from `select: {}` silently drops it from the response; always cross-check select against what the frontend reads
 ## Learnings
 
 - Idempotent seed pattern: upsert-based with explicit slug/composite keys for safe re-runs and student data preservation
@@ -54,3 +69,22 @@ Key prior work:
 - Open-ended age bands modeled with explicit integer caps (e.g., `ageMax: 99`)
 - Program seeding is final step — depends on all course slugs existing first
 - Backend ready for Sprint 1: schema generated, services complete, routes wired
+- Prisma forbids mixing `select` and `include` on the same relation in a single query — always use one or the other; prefer `include` for nested relations, `select` when you need column-level control at a leaf
+- `CourseEnrollment.progress` (Int 0-100) + `UnitProgress.completedAt` (nullable DateTime) are the canonical progress signals; unit completion = `completedAt IS NOT NULL`
+- Manually-created Prisma migration directories work with `migrate deploy`, BUT if you push a migration and then change its SQL in a subsequent commit, Prisma's `_prisma_migrations` checksum will diverge. Fix: restore the original SQL and create a new migration for the corrected change.
+- `User.selfMemberId` is not set during registration in this codebase — do NOT rely on it to find the parent's FamilyMember. Use `familyId + isAccountOwner=true` to find the account-owner member, or store parent-level data on the `User` model directly.
+- Some families may have NO account-owner FamilyMember (e.g., accounts created before that pattern was established). Prefer User model for parent-scoped data (PIN, settings) rather than FamilyMember.
+- For backfill scripts: the local `.env` points to `localhost:5432` (dev DB). To run against prod, set `DATABASE_URL` from the Azure Container App secret: `az containerapp secret show --secret-name database-url`.
+
+**Program→Course Enrollment Bridge (2026-07-10):** ✅ COMPLETE
+- `program.service.ts` `enrollMember()` now wraps creation in `$transaction`, fetches starting stage's published courses, `createMany` `CourseEnrollment` rows with `skipDuplicates: true`. Debug log shows count.
+- Backfill script `backend/scripts/backfill-program-course-enrollments.ts`: idempotent, iterates active `ProgramEnrollment` rows, creates missing `CourseEnrollment` rows.
+- Backfill ran against prod: 5 rows created across 2 enrollments (Ibn Sharif Foundation 1: 3/3, second member CB2: 2/3 already existed).
+- Verified: `/courses/enrollments/member/b32bf819-1662-47c5-b80f-2e2ca6bd26ab` returns 3 Maktab Foundation 1 courses.
+
+**Parent PIN Gate (2026-07-10):** ✅ COMPLETE
+- Schema: added `parentPinHash`, `pinSetAt`, `pinAttempts`, `pinLockedUntil` to `User` model (not FamilyMember — see learnings).
+- Migration: `20260710201500_add_parent_pin` (to family_members, already applied) + `20260710210000_move_parent_pin_to_user` (moves to users, cleans up family_members).
+- `parent-pin.service.ts`: `setPin`/`getPinStatus`/`verifyPin` — bcrypt cost 10, weak-PIN set rejection, 3-attempt/30s lockout stored on User row.
+- Routes added to `auth.routes.ts`: `POST /auth/parent-pin`, `POST /auth/parent-pin/verify`, `GET /auth/parent-pin/status`.
+- Verified in prod: `GET /status` → `{hasPin:false}`, `POST` (pin 5823) → `{success:true}`, `GET /status` → `{hasPin:true}`, verify correct → `{verified:true}`, verify wrong → `{verified:false,remainingAttempts:2}`.
