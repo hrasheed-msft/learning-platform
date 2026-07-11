@@ -121,17 +121,50 @@ export class ProgramService {
       throw new ConflictError('Member is already enrolled in this program');
     }
 
-    const enrollment = await prisma.programEnrollment.create({
-      data: {
-        familyMemberId,
-        programId,
-        path,
-        currentStageId: startingStage.id,
-      },
+    // Fetch published courses on the starting stage so we can bridge to CourseEnrollment.
+    const stageWithCourses = await prisma.programStage.findUnique({
+      where: { id: startingStage.id },
       include: {
-        program: { select: { id: true, slug: true, name: true } },
-        currentStage: { select: { id: true, stageNumber: true, name: true, ageMin: true, ageMax: true } },
+        courses: {
+          where: { isPublished: true },
+          select: { id: true },
+        },
       },
+    });
+
+    const enrollment = await prisma.$transaction(async (tx) => {
+      const pe = await tx.programEnrollment.create({
+        data: {
+          familyMemberId,
+          programId,
+          path,
+          currentStageId: startingStage.id,
+        },
+        include: {
+          program: { select: { id: true, slug: true, name: true } },
+          currentStage: { select: { id: true, stageNumber: true, name: true, ageMin: true, ageMax: true } },
+        },
+      });
+
+      // Bridge: create CourseEnrollment rows for every published course in the
+      // starting stage. skipDuplicates guards against re-enrollment edge cases.
+      const courseData = (stageWithCourses?.courses ?? []).map(c => ({
+        memberId: familyMemberId,
+        courseId: c.id,
+        status: 'ACTIVE' as const,
+        progress: 0,
+      }));
+
+      const { count } = await tx.courseEnrollment.createMany({
+        data: courseData,
+        skipDuplicates: true,
+      });
+
+      console.debug(
+        `[ProgramService.enrollMember] member=${familyMemberId} stage=${startingStage.id} → created ${count} CourseEnrollment rows`
+      );
+
+      return pe;
     });
 
     return enrollment;

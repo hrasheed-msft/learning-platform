@@ -68,6 +68,13 @@ model FamilyMember {
   username       String?  @unique
   passwordHash   String?
   loginEnabled   Boolean  @default(false)
+
+  // Parent PIN gate (account-owner only) — used to re-authenticate when
+  // switching from a child learner profile back to the parent view.
+  parentPinHash  String?
+  pinSetAt       DateTime?
+  pinAttempts    Int       @default(0)
+  pinLockedUntil DateTime?
   avatarUrl      String?
   currentStreak  Int      @default(0)
   longestStreak  Int      @default(0)
