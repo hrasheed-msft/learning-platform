@@ -52,6 +52,7 @@ const LeaderboardPage = lazy(() => import('@/pages/games/LeaderboardPage'));
 
 // Settings Pages (lazy)
 const FamilySettings = lazy(() => import('@/pages/settings/FamilySettings'));
+const ParentPinSetup = lazy(() => import('@/pages/settings/ParentPinSetup'));
 
 // Child Pages (lazy)
 const ChildDashboardHome = lazy(() => import('@/pages/child/ChildDashboardHome'));
@@ -121,12 +122,18 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Child Protected Route (requires child session)
+// Child Protected Route (requires child session OR parent viewing a child member)
 function ChildProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isChildSession } = useChildAuthStore();
+  const { isAuthenticated: isChildAuth, isChildSession } = useChildAuthStore();
+  const { isAuthenticated: isParentAuth } = useAuthStore();
+  const { selectedMember } = useFamilyStore();
 
-  if (!isAuthenticated || !isChildSession) {
-    return <Navigate to="/child-login" replace />;
+  // Option (a): allow if child has their own session OR parent selected a child member
+  const parentViewingChild =
+    isParentAuth && selectedMember !== null && selectedMember.isAccountOwner === false;
+
+  if (!((isChildAuth && isChildSession) || parentViewingChild)) {
+    return <Navigate to="/select-learner" replace />;
   }
 
   return <>{children}</>;
@@ -256,6 +263,7 @@ function App() {
 
         {/* Settings */}
         <Route path="settings" element={<FamilySettings />} />
+        <Route path="settings/pin" element={<ParentPinSetup />} />
 
         {/* Programs */}
         <Route path="programs" element={<ProgramCatalog />} />

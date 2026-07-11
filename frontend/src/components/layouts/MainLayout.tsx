@@ -20,12 +20,12 @@ import clsx from 'clsx';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Parent Dashboard', href: '/dashboard/parent', icon: BarChart3 },
+  { name: 'Parent Dashboard', href: '/dashboard/parent', icon: BarChart3, parentOnly: true },
   { name: 'Courses', href: '/courses', icon: BookOpen },
   { name: 'Maktab 🕌', href: '/programs', icon: GraduationCap },
   { name: 'Reviews', href: '/reviews', icon: Brain },
   { name: 'Games 🎮', href: '/games', icon: Gamepad2 },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Settings', href: '/settings', icon: Settings, parentOnly: true },
 ];
 
 export default function MainLayout() {
@@ -90,7 +90,13 @@ export default function MainLayout() {
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">
-          {navigation.map((item) => {
+          {navigation
+            .filter((item) => {
+              // Hide parent-only items when a child member is selected
+              if (item.parentOnly && selectedMember?.isAccountOwner === false) return false;
+              return true;
+            })
+            .map((item) => {
             const isActive = location.pathname.startsWith(item.href);
             return (
               <Link

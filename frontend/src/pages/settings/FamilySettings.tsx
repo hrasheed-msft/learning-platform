@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Loader2, Users, CheckCircle, AlertCircle, Crown, Trash2, Plus, Key } from 'lucide-react';
+import { Loader2, Users, CheckCircle, AlertCircle, Crown, Trash2, Plus, Key, Lock, ShieldCheck } from 'lucide-react';
 import { familyService } from '@/services/familyService';
+import { authService } from '@/services/authService';
 import { useAuthStore, useFamilyStore } from '@/stores';
 import SetCredentialsModal from '@/components/SetCredentialsModal';
 import type { Family, CreateMemberRequest } from '@/types/user';
@@ -27,6 +28,7 @@ export default function FamilySettings() {
   const [addingMember, setAddingMember] = useState(false);
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
   const [credentialsMember, setCredentialsMember] = useState<{ id: string; name: string } | null>(null);
+  const [pinStatus, setPinStatus] = useState<boolean | null>(null);
 
   useEffect(() => {
     const fetchFamily = async () => {
@@ -40,6 +42,9 @@ export default function FamilySettings() {
         setFamilyName(familyData.name);
         
         await fetchMembers(familyData.id);
+        
+        // Fetch PIN status in parallel (non-blocking)
+        authService.getParentPinStatus().then(({ hasPin }) => setPinStatus(hasPin)).catch(() => {});
       } catch (err) {
         console.error('Failed to fetch family:', err);
         setError('Failed to load family settings');
@@ -190,6 +195,36 @@ export default function FamilySettings() {
             <p className="text-sm text-gray-500">Upgrade to unlock more features</p>
           </div>
           <Button variant="outline">Upgrade Plan</Button>
+        </div>
+      </Card>
+
+      <Card className="p-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center mt-0.5 flex-shrink-0">
+              <Lock className="w-5 h-5 text-primary-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Parent PIN</h2>
+              {pinStatus === false ? (
+                <p className="text-sm text-amber-700 mt-0.5">
+                  ⚠️ No PIN set — anyone can switch to the parent account from a child profile.
+                </p>
+              ) : pinStatus === true ? (
+                <p className="text-sm text-green-700 mt-0.5 flex items-center gap-1">
+                  <ShieldCheck className="w-4 h-4" /> PIN active — account switching is protected.
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 mt-0.5">Protect account switching with a 4-digit PIN.</p>
+              )}
+            </div>
+          </div>
+          <Link to="/settings/pin">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              {pinStatus ? 'Update PIN' : 'Set PIN'}
+            </Button>
+          </Link>
         </div>
       </Card>
 

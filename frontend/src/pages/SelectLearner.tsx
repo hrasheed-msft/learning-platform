@@ -5,7 +5,9 @@ import clsx from 'clsx';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores/authStore';
 import { familyService } from '@/services/familyService';
-import type { CreateMemberRequest } from '@/types';
+import { authService } from '@/services/authService';
+import ParentPinModal from '@/components/auth/ParentPinModal';
+import type { CreateMemberRequest, FamilyMember } from '@/types';
 
 const TILE_COLORS = [
   'border-emerald-400 bg-emerald-50',
@@ -52,21 +54,61 @@ export default function SelectLearner() {
   const [addingMember, setAddingMember] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
+  // PIN gate state
+  const [hasPinCache, setHasPinCache] = useState<boolean | null>(null);
+  const [pendingMember, setPendingMember] = useState<FamilyMember | null>(null);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinToast, setPinToast] = useState<string | null>(null);
+
   useEffect(() => {
     fetchLearners();
   }, [fetchLearners]);
 
-  const handleSelectMember = (member: typeof members[0]) => {
+  // Pre-fetch PIN status so the modal opens instantly on tile click
+  useEffect(() => {
+    authService
+      .getParentPinStatus()
+      .then(({ hasPin }) => setHasPinCache(hasPin))
+      .catch(() => setHasPinCache(false));
+  }, []);
+
+  const completeSelect = (member: FamilyMember) => {
     selectMember(member);
-    navigate('/dashboard');
+    if (member.isAccountOwner === false) {
+      navigate('/child/dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const showNoPinToast = (msg: string) => {
+    setPinToast(msg);
+    setTimeout(() => setPinToast(null), 5000);
+  };
+
+  const handleSelectMember = (member: FamilyMember) => {
+    const switchingToParent = member.isAccountOwner !== false;
+    const currentIsChild = selectedMember?.isAccountOwner === false;
+
+    if (switchingToParent && currentIsChild) {
+      // child → parent: require PIN if one is configured
+      if (hasPinCache === true) {
+        setPendingMember(member);
+        setShowPinModal(true);
+      } else {
+        showNoPinToast('Set a parent PIN in Settings to secure account switching.');
+        completeSelect(member);
+      }
+    } else {
+      completeSelect(member);
+    }
   };
 
   const handleSelfEnroll = async () => {
     setEnrolling(true);
     try {
       const member = await selfEnroll();
-      selectMember(member);
-      navigate('/dashboard');
+      completeSelect(member);
     } catch {
       // error is set in the store
     } finally {
@@ -287,6 +329,28 @@ export default function SelectLearner() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {/* PIN Modal — child→parent transition */}
+      {showPinModal && pendingMember && (
+        <ParentPinModal
+          targetMember={pendingMember}
+          onVerified={() => {
+            setShowPinModal(false);
+            completeSelect(pendingMember);
+            setPendingMember(null);
+          }}
+          onCancel={() => {
+            setShowPinModal(false);
+            setPendingMember(null);
+          }}
+        />
+      )}
+
+      {/* No-PIN toast */}
+      {pinToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-gray-800 text-white text-sm rounded-xl shadow-lg max-w-sm text-center">
+          {pinToast}
         </div>
       )}
     </div>

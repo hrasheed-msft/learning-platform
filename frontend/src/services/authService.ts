@@ -71,4 +71,24 @@ export const authService = {
     const response = await api.post<ApiResponse<{ message: string }>>('/auth/resend-verification');
     return { message: response.data.message || 'Verification email sent' };
   },
+
+  async getParentPinStatus(): Promise<{ hasPin: boolean }> {
+    const response = await api.get<ApiResponse<{ hasPin: boolean }>>('/auth/parent-pin/status');
+    return response.data.data;
+  },
+
+  async setParentPin(pin: string): Promise<void> {
+    await api.post('/auth/parent-pin', { pin });
+  },
+
+  async verifyParentPin(
+    memberId: string,
+    pin: string
+  ): Promise<{ verified: boolean; remainingAttempts?: number }> {
+    const response = await api.post<ApiResponse<{ verified: boolean; remainingAttempts?: number }>>(
+      '/auth/parent-pin/verify',
+      { memberId, pin }
+    );
+    return response.data.data;
+  },
 };
