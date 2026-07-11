@@ -201,3 +201,25 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 **Fix Owners:**
 - **Khwarizmi (Backend):** Fix Prisma query — replace `select + include` with just `include` on the `program` relation. Also align response shape to the `StageProgressSummary` interface expected by frontend.
 - **Ibn Sina (Frontend):** Add null-safety guard: `currentStage.courses?.map(...)` and guard `currentStage.ageMin`/`ageMax` rendering against undefined.
+
+---
+
+### 2026-07-10T18:59:40-05:00 — /child/maktab Fix Verified in Production
+
+**Status:** VERIFIED PASSING
+
+**Commits verified:** backend `cbacd5b`, frontend `b0d3fcf`
+
+**Test:** `frontend/e2e/authenticated-child-learning.spec.ts` — 1 passed (9.1s)
+**Screenshot:** `frontend/test-results/child-maktab-verified.png`
+
+**Confirmed production results:**
+- `GET /programs/enrollment/:memberId/stage-summary` → **HTTP 200** (was 500)
+- Response shape matches `StageProgressSummary`: `{ stageId, stageName, totalCourses: 3, completedCourses: 0, overallProgress: 0, subjectProgress: [...] }`
+- Page renders: stage header "Foundation 1" (Stage 1 After-School), "Your Subjects" heading, **3 course cards** visible:
+  1. Maktab Foundation 1: 0% complete
+  2. Quran Memorization — Short Surahs (Juz Amma): 0% complete
+  3. Quran Memorization — Longer Surahs: 0% complete
+- Parent enrollment E2E (`authenticated-enrollment.spec.ts`) still passes — no regression
+
+**Residual cosmetic issue (non-blocking):** Page shows "Ages –" because `currentStage.ageMin`/`ageMax` are absent from the enrollment list endpoint response. Page is fully functional. Ibn Sina should address in a follow-up.

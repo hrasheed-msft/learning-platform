@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+﻿import { expect, test } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,18 +9,17 @@ const apiUrl =
 const childUsername = process.env.E2E_CHILD_USERNAME;
 const childPassword = process.env.E2E_CHILD_PASSWORD;
 
-test.describe('Child /child/maktab page — reproduction & diagnosis', () => {
-  test('child can view /child/maktab and content is not empty', async ({ page, request }) => {
+test.describe('Child /child/maktab page — verification after backend+frontend fix', () => {
+  test('child sees enrolled maktab content (stage name + courses visible)', async ({ page, request }) => {
     test.skip(
       !childUsername || !childPassword,
       'Set E2E_CHILD_USERNAME and E2E_CHILD_PASSWORD before running authenticated child tests.'
     );
 
-    // ── Step 1: Login via API ──────────────────────────────────────────────
+    // ── Step 1: Child login via API ────────────────────────────────────────
     const loginResponse = await request.post(`${apiUrl}/auth/child-login`, {
       data: { username: childUsername, password: childPassword },
     });
-
     console.log('Child login status:', loginResponse.status());
     const loginBody = await loginResponse.json() as {
       success?: boolean;
@@ -33,32 +32,38 @@ test.describe('Child /child/maktab page — reproduction & diagnosis', () => {
       message?: string;
       error?: string;
     };
-    console.log('Child login response body:', JSON.stringify(loginBody, null, 2));
-
     expect(loginResponse.ok(), `Child login failed: ${JSON.stringify(loginBody)}`).toBeTruthy();
-    expect(loginBody.data?.accessToken, 'No accessToken in child login response').toBeTruthy();
-
     const { accessToken, member } = loginBody.data!;
     console.log('Logged in as member:', member.id, member.name);
 
-    // ── Step 2: Probe enrollment API directly ─────────────────────────────
-    const enrollmentsApiResponse = await request.get(
-      `${apiUrl}/programs/enrollment/${member.id}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-    const enrollmentsApiBody = await enrollmentsApiResponse.json() as unknown;
-    console.log('Enrollment API status:', enrollmentsApiResponse.status());
-    console.log('Enrollment API body:', JSON.stringify(enrollmentsApiBody, null, 2));
-
+    // ── Step 2: Assert stage-summary returns HTTP 200 (was 500 before fix) ─
     const stageSummaryApiResponse = await request.get(
       `${apiUrl}/programs/enrollment/${member.id}/stage-summary`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
-    const stageSummaryApiBody = await stageSummaryApiResponse.json() as unknown;
+    const stageSummaryApiBody = await stageSummaryApiResponse.json() as {
+      success?: boolean;
+      data?: {
+        stageId?: string;
+        stageName?: string;
+        totalCourses?: number;
+        completedCourses?: number;
+        overallProgress?: number;
+        subjectProgress?: Array<{ courseId: string; courseTitle: string; category: string }>;
+      };
+      error?: unknown;
+    };
     console.log('Stage summary API status:', stageSummaryApiResponse.status());
     console.log('Stage summary API body:', JSON.stringify(stageSummaryApiBody, null, 2));
 
-    // ── Step 3: Inject child auth into localStorage ───────────────────────
+    // KEY ASSERTION: stage-summary must now return 200, not 500
+    expect(
+      stageSummaryApiResponse.status(),
+      `stage-summary still returning non-200: ${JSON.stringify(stageSummaryApiBody)}`
+    ).toBe(200);
+    expect(stageSummaryApiBody.success).toBe(true);
+
+    // ── Step 3: Inject child auth into localStorage ────────────────────────
     await page.addInitScript(({ authData }) => {
       localStorage.setItem(
         'child-auth-storage',
@@ -81,22 +86,11 @@ test.describe('Child /child/maktab page — reproduction & diagnosis', () => {
       },
     });
 
-    // ── Step 4: Capture network responses on /child/maktab ───────────────
-    const capturedNetworkCalls: Array<{
-      url: string;
-      status: number;
-      body: string;
-    }> = [];
-
+    // ── Step 4: Capture relevant network calls on page load ────────────────
+    const capturedNetworkCalls: Array<{ url: string; status: number; body: string }> = [];
     page.on('response', async (response) => {
       const url = response.url();
-      if (
-        url.includes('/programs') ||
-        url.includes('/enrollment') ||
-        url.includes('/maktab') ||
-        url.includes('/lessons') ||
-        url.includes('/content')
-      ) {
+      if (url.includes('/programs') || url.includes('/enrollment')) {
         try {
           const body = await response.text();
           capturedNetworkCalls.push({ url, status: response.status(), body });
@@ -108,75 +102,76 @@ test.describe('Child /child/maktab page — reproduction & diagnosis', () => {
 
     // ── Step 5: Navigate to /child/maktab ─────────────────────────────────
     await page.goto('/child/maktab', { waitUntil: 'networkidle', timeout: 30000 });
-
-    // Wait briefly for any deferred rendering
     await page.waitForTimeout(2000);
 
-    // ── Step 6: Screenshot ────────────────────────────────────────────────
+    // ── Step 6: Screenshot ─────────────────────────────────────────────────
     const resultsDir = path.join(process.cwd(), 'test-results');
-    if (!fs.existsSync(resultsDir)) {
-      fs.mkdirSync(resultsDir, { recursive: true });
-    }
-    const screenshotPath = path.join(resultsDir, 'child-maktab-page.png');
+    if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });
+    const screenshotPath = path.join(resultsDir, 'child-maktab-verified.png');
     await page.screenshot({ path: screenshotPath, fullPage: true });
     console.log('Screenshot saved to:', screenshotPath);
 
-    // ── Step 7: Capture rendered HTML text ───────────────────────────────
+    // ── Step 7: Capture rendered text + network log ────────────────────────
     const bodyText = await page.locator('body').innerText();
     console.log('=== PAGE TEXT CONTENT ===');
     console.log(bodyText.slice(0, 3000));
     console.log('=========================');
-
-    // ── Step 8: Log all captured network calls ────────────────────────────
-    console.log('=== CAPTURED NETWORK CALLS ===');
-    for (const call of capturedNetworkCalls) {
-      console.log(`[${call.status}] ${call.url}`);
-      console.log(call.body.slice(0, 1000));
+    console.log('=== NETWORK CALLS ===');
+    for (const c of capturedNetworkCalls) {
+      console.log(`[${c.status}] ${c.url}`);
+      console.log(c.body.slice(0, 800));
     }
-    console.log('==============================');
+    console.log('=====================');
 
-    // ── Step 9: Diagnose — find key elements ─────────────────────────────
     const currentUrl = page.url();
-    console.log('Final URL after navigation:', currentUrl);
+    console.log('Final URL:', currentUrl);
 
-    // Did we get redirected away from /child/maktab?
-    const wasRedirected = !currentUrl.includes('/child/maktab');
-    console.log('Was redirected away from /child/maktab?', wasRedirected);
-
-    // Check for "not enrolled" empty state
-    const notEnrolledMsg = page.getByText("You haven't started yet!", { exact: false });
-    const isNotEnrolledVisible = await notEnrolledMsg.isVisible().catch(() => false);
-    console.log('Is "not enrolled" empty state visible?', isNotEnrolledVisible);
-
-    // Check for grade dashboard header (enrolled state)
-    const gradeDashboardHeader = page.locator('.bg-gradient-to-br').first();
-    const isGradeDashboardVisible = await gradeDashboardHeader.isVisible().catch(() => false);
-    console.log('Is grade dashboard (enrolled state) visible?', isGradeDashboardVisible);
-
-    // Check for loading spinner still active
-    const spinner = page.locator('.animate-pulse').first();
-    const isSpinnerVisible = await spinner.isVisible().catch(() => false);
-    console.log('Is loading spinner still visible (stuck loading)?', isSpinnerVisible);
-
-    // Check for child-login redirect
-    const isOnChildLogin = currentUrl.includes('/child-login');
-    console.log('Was redirected to /child-login (auth failure)?', isOnChildLogin);
-
-    // ── Assertions ────────────────────────────────────────────────────────
-    // Confirm we're on the maktab page (not redirected)
-    expect(wasRedirected, `Redirected away from /child/maktab to: ${currentUrl}`).toBe(false);
-
-    // The page should show SOME meaningful content (either enrolled or empty state)
-    const hasMeaningfulContent = isNotEnrolledVisible || isGradeDashboardVisible;
+    // ── Step 8: Verify the fix — no redirect, no blank page ───────────────
     expect(
-      hasMeaningfulContent,
-      [
-        'No meaningful content rendered on /child/maktab.',
-        `Enrollment API status: ${enrollmentsApiResponse.status()}`,
-        `Stage summary API status: ${stageSummaryApiResponse.status()}`,
-        `Network calls captured: ${capturedNetworkCalls.map((c) => `[${c.status}] ${c.url}`).join(', ')}`,
-        `Page text (truncated): ${bodyText.slice(0, 500)}`,
-      ].join('\n')
+      currentUrl.includes('/child/maktab'),
+      `Redirected away to: ${currentUrl}`
     ).toBe(true);
+
+    // Should NOT show "not enrolled" empty state (child IS enrolled)
+    const notEnrolledMsg = page.getByText("You haven't started yet!", { exact: false });
+    await expect(notEnrolledMsg, 'Unexpected "not enrolled" state — enrollment data not loaded').not.toBeVisible();
+
+    // Should NOT be a completely blank body
+    expect(bodyText.trim().length, 'Page body is empty — React crashed or nothing rendered').toBeGreaterThan(10);
+
+    // ── Step 9: Assert enrolled content is visible ─────────────────────────
+    // Expect the green gradient header card (only shown when enrollment is found)
+    const gradientHeader = page.locator('.bg-gradient-to-br').first();
+    await expect(
+      gradientHeader,
+      'Enrolled stage header card not visible — dashboard still not rendering'
+    ).toBeVisible();
+
+    // Expect "Foundation 1" stage name (the enrolled stage for this child)
+    const stageNameEl = page.getByRole('heading', { name: 'Foundation 1', exact: true });
+    await expect(
+      stageNameEl,
+      '"Foundation 1" stage name not found on page — stage data not rendered'
+    ).toBeVisible();
+
+    // Expect "Your Subjects" heading (shown when enrolled and content loaded)
+    const subjectsHeading = page.getByText('Your Subjects', { exact: false });
+    await expect(
+      subjectsHeading,
+      '"Your Subjects" section heading not visible — subject grid not rendered'
+    ).toBeVisible();
+
+    // Expect at least one subject/course card to be rendered
+    const subjectCards = page.locator('button[aria-label*="% complete"]');
+    const cardCount = await subjectCards.count();
+    console.log('Subject cards visible:', cardCount);
+    expect(cardCount, 'No subject cards rendered — subjectProgress array is empty or missing').toBeGreaterThan(0);
+
+    // Log the visible course titles for the record
+    const allTitles = await page.locator('button[aria-label*="% complete"]').evaluateAll(
+      (els) => els.map((el) => el.getAttribute('aria-label') ?? '')
+    );
+    console.log('Rendered subject cards:', allTitles);
   });
 });
+
