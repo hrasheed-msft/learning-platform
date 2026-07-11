@@ -147,9 +147,11 @@ api.interceptors.response.use(
       }
     }
 
-    // Handle other errors
+    // Handle other errors — preserve the original AxiosError so callers
+    // that need response.status (e.g. ParentPinModal 429 lockout check) still work.
     const message = getErrorMessage(error);
-    return Promise.reject(new Error(message));
+    error.message = message;
+    return Promise.reject(error);
   }
 );
 
