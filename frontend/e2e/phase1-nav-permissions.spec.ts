@@ -186,6 +186,11 @@ test.describe('Phase 1 — Nav permissions', () => {
       '"My Courses" link should be in ChildLayout nav'
     ).toBe(true);
 
+    expect(
+      navTexts.some((t) => t.includes('My Maktab')),
+      '"My Maktab 🕌" link should be in ChildLayout nav (added as direct nav entry)'
+    ).toBe(true);
+
     // Assert parent-only items NOT in ChildLayout nav
     expect(
       navTexts.some((t) => t.includes('Parent Dashboard')),
@@ -198,5 +203,12 @@ test.describe('Phase 1 — Nav permissions', () => {
     ).toBe(false);
 
     console.log('[PASS] Redirect to /child/dashboard confirmed; ChildLayout nav correct (no parent-only items).');
+
+    // ── Additional: verify "My Maktab" link goes to /child/maktab ────────────
+    const maktabNavLink = page.locator('aside nav a').filter({ hasText: /My Maktab/i });
+    await expect(maktabNavLink, '"My Maktab" nav link must be present in sidebar').toBeVisible();
+    const maktabHref = await maktabNavLink.getAttribute('href');
+    console.log('"My Maktab" nav href:', maktabHref);
+    expect(maktabHref, '"My Maktab" href must point to /child/maktab').toContain('/child/maktab');
   });
 });
