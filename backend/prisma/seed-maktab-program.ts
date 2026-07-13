@@ -31,10 +31,14 @@ const PROGRAM_NAME = 'Maktab An Nasihah';
 const PROGRAM_DESCRIPTION =
   'A structured 12-stage maktab program spanning foundation years, coursebooks, further studies, and Quran memorization across after-school and weekend learning paths.';
 
-const QURAN_COURSE_SLUGS = [
-  'quran-memorization-juz-amma',
-  'quran-memorization-longer-surahs',
-];
+// Juz Amma (short surahs) is appropriate for all stages (ages 4+).
+// Longer Surahs (Yasin, Mulk, etc.) targets CHILD/PRE_TEEN/TEEN (ages 10+)
+// and should only join from CB5 (stage 7) onwards.
+const QURAN_JUZ_AMMA_SLUG = 'quran-memorization-juz-amma';
+const QURAN_LONGER_SURAHS_SLUG = 'quran-memorization-longer-surahs';
+
+/** First stage number (CB5, ages 10-11) where Longer Surahs is age-appropriate. */
+const LONGER_SURAHS_MIN_STAGE = 7;
 
 const STAGES: StageDefinition[] = [
   {
@@ -143,17 +147,24 @@ const STAGES: StageDefinition[] = [
     ageMin: 4,
     ageMax: 99,
     orderIndex: 11,
-    courseSlugs: [...QURAN_COURSE_SLUGS],
+    courseSlugs: [QURAN_JUZ_AMMA_SLUG, QURAN_LONGER_SURAHS_SLUG],
   },
 ];
 
 function getStageCourseSlugs(stage: StageDefinition): string[] {
-  const combined = [
-    ...stage.courseSlugs,
-    ...(stage.stageNumber <= 11 ? QURAN_COURSE_SLUGS : []),
-  ];
+  // Stage 12 is the dedicated Quran Memorization stage — its courseSlugs
+  // already include both Quran courses; don't add extras.
+  if (stage.stageNumber === 12) return stage.courseSlugs;
 
-  return [...new Set(combined)];
+  const quranCourses: string[] = [];
+  // Juz Amma runs alongside every coursebook stage (1-11).
+  if (stage.stageNumber <= 11) quranCourses.push(QURAN_JUZ_AMMA_SLUG);
+  // Longer Surahs is only age-appropriate from CB5 (stage 7, ages 10-11) onward.
+  if (stage.stageNumber >= LONGER_SURAHS_MIN_STAGE && stage.stageNumber <= 11) {
+    quranCourses.push(QURAN_LONGER_SURAHS_SLUG);
+  }
+
+  return [...new Set([...stage.courseSlugs, ...quranCourses])];
 }
 
 export async function seedMaktabProgram() {
