@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useChildAuthStore } from '@/stores/childAuthStore';
+import { useAuthStore } from '@/stores/authStore';
 import {
   Home,
   BookOpen,
@@ -28,6 +29,10 @@ export default function ChildLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { member, logout } = useChildAuthStore();
+  const { isAuthenticated: isParentAuth } = useAuthStore();
+  const { isChildSession } = useChildAuthStore();
+  // Parent is previewing when they arrived via SelectLearner (not child direct login)
+  const isParentViewing = isParentAuth && !isChildSession;
 
   const handleLogout = () => {
     logout();
@@ -150,6 +155,22 @@ export default function ChildLayout() {
 
         {/* Page content */}
         <main className="p-4 lg:p-8">
+          {isParentViewing && (
+            <div className="mb-4 flex items-center justify-between gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm">
+              <div className="flex items-center gap-2 text-amber-800">
+                <span>👁️</span>
+                <span className="font-medium">
+                  Parent preview — you're viewing {member?.name}'s dashboard
+                </span>
+              </div>
+              <Link
+                to="/dashboard"
+                className="shrink-0 px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg hover:bg-amber-50 transition text-xs"
+              >
+                ← Parent View
+              </Link>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>

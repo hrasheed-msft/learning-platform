@@ -3,8 +3,52 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramStore } from '@/stores/programStore';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores';
-import type { LearningPath, Program } from '@/types/program';
+import type { LearningPath, Program, ProgramStage } from '@/types/program';
 import type { FamilyMember } from '@/types';
+
+// ageCategory → representative midpoint age used when member.age is null at runtime
+const AGE_CATEGORY_MIDPOINT: Record<string, number | null> = {
+  young_children: 5,
+  children: 9,
+  teens: 13,
+  adults: null, // cannot auto-detect adults
+};
+
+function resolveStages(program: Program): ProgramStage[] {
+  return Array.isArray(program.stages) && program.stages.length > 0
+    ? program.stages
+    : DEFAULT_STAGES;
+}
+
+function detectStageNumber(member: FamilyMember | undefined, stages: ProgramStage[]): number | undefined {
+  if (!member) return undefined;
+  const age = member.age as number | null | undefined;
+  if (age != null && age > 0) {
+    const match = stages.find((s) => age >= s.ageMin && age <= s.ageMax);
+    if (match) return match.stageNumber;
+  }
+  // Fall back to ageCategory midpoint when exact age is unavailable
+  const midpoint = AGE_CATEGORY_MIDPOINT[member.ageCategory] ?? null;
+  if (midpoint != null) {
+    const match = stages.find((s) => midpoint >= s.ageMin && midpoint <= s.ageMax);
+    if (match) return match.stageNumber;
+  }
+  return undefined;
+}
+
+function getDetectionSource(member: FamilyMember | undefined): 'age' | 'age-category' | null {
+  if (!member) return null;
+  const age = member.age as number | null | undefined;
+  if (age != null && age > 0) return 'age';
+  const midpoint = AGE_CATEGORY_MIDPOINT[member.ageCategory] ?? null;
+  return midpoint != null ? 'age-category' : null;
+}
+
+function getStageDisplay(stageNumber: number, stages: ProgramStage[]): string {
+  const stage = stages.find((s) => s.stageNumber === stageNumber);
+  if (!stage) return `Stage ${stageNumber}`;
+  return `${stage.name} — Ages ${stage.ageMin}–${stage.ageMax}`;
+}
 
 const PATH_INFO: Record<LearningPath, { emoji: string; label: string; schedule: string; description: string; color: string }> = {
   AFTER_SCHOOL: {
@@ -39,6 +83,10 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
   const [enrolled, setEnrolled] = useState(false);
 
   const selectedMember = learners.find((m) => m.id === selectedMemberId);
+  const stages = resolveStages(program);
+  const [selectedStageNumber, setSelectedStageNumber] = useState<number | undefined>(
+    () => detectStageNumber(learners[0], stages)
+  );
 
   useEffect(() => {
     if (!selectedMemberId && learners.length > 0) {
@@ -52,22 +100,16 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
     void fetchLearners();
   }, [fetchLearners]);
 
-  // Detect starting stage based on age
-  function detectStageNumber(member: FamilyMember | undefined): number | undefined {
-    if (!member) return undefined;
-    const age = member.age;
-    const stages = Array.isArray(program.stages) && program.stages.length > 0
-      ? program.stages
-      : DEFAULT_STAGES;
-    const match = stages.find((s) => age >= s.ageMin && age <= s.ageMax);
-    return match?.stageNumber;
-  }
+  // Sync detected stage whenever the selected member changes
+  useEffect(() => {
+    setSelectedStageNumber(detectStageNumber(selectedMember, stages));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMemberId]);
 
   async function handleEnroll() {
     if (!selectedMemberId) return;
     clearError();
-    const stageNumber = detectStageNumber(selectedMember);
-    await enrollInProgram(program.id, selectedMemberId, selectedPath, stageNumber);
+    await enrollInProgram(program.id, selectedMemberId, selectedPath, selectedStageNumber);
     setEnrolled(true);
   }
 
@@ -137,12 +179,16 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
-              {learners.map((m) => (
+              {learners.map((m) => {
+                const memberAge = m.age as number | null | undefined;
+                const ageIsNull = memberAge == null || memberAge === 0;
+                return (
                 <button
                   key={m.id}
                   onClick={() => {
                     setSelectedMemberId(m.id);
                     selectMember(m);
+                    setSelectedStageNumber(detectStageNumber(m, stages));
                   }}
                   className={`p-3 rounded-xl border-2 text-left transition min-h-[44px] ${
                     selectedMemberId === m.id
@@ -151,17 +197,84 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
                   }`}
                 >
                   <p className="font-semibold text-gray-800">{m.name}</p>
-                  <p className="text-xs text-gray-500">Age {m.age}</p>
-                  {detectStageNumber(m) && (
+                  <p className="text-xs text-gray-500">
+                    {!ageIsNull ? `Age ${m.age}` : 'Age not set'}
+                  </p>
+                  {ageIsNull && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      ⚠️ Age not set — stage estimated from age category
+                    </p>
+                  )}
+                  {detectStageNumber(m, stages) != null && (
                     <p className="text-xs text-green-700 font-medium mt-1">
-                      → Stage {detectStageNumber(m)}
+                      → Stage {detectStageNumber(m, stages)}
                     </p>
                   )}
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
+
+        {/* Starting Stage — confirm or override auto-detected stage */}
+        {selectedMember && (
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              📚 Starting Stage
+            </label>
+            {selectedStageNumber != null ? (
+              <div className="space-y-2">
+                <div className="p-3 rounded-xl border-2 border-[#1a5632] bg-green-50">
+                  <p className="font-semibold text-gray-800 text-sm">
+                    {getStageDisplay(selectedStageNumber, stages)}
+                  </p>
+                  <p className="text-xs text-green-700 mt-0.5">
+                    {getDetectionSource(selectedMember) === 'age'
+                      ? 'Detected from age'
+                      : 'Detected from age category'}
+                  </p>
+                </div>
+                <details className="group">
+                  <summary className="cursor-pointer text-xs text-[#1a5632] font-medium list-none">
+                    ▸ Change starting stage
+                  </summary>
+                  <select
+                    className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    value={selectedStageNumber}
+                    onChange={(e) => setSelectedStageNumber(Number(e.target.value))}
+                  >
+                    {stages.map((s) => (
+                      <option key={s.stageNumber} value={s.stageNumber}>
+                        Stage {s.stageNumber}: {s.name} (Ages {s.ageMin}–{s.ageMax})
+                      </option>
+                    ))}
+                  </select>
+                </details>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  ⚠️ Stage cannot be auto-detected. Please select a starting stage:
+                </p>
+                <select
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm"
+                  value={selectedStageNumber ?? ''}
+                  onChange={(e) =>
+                    setSelectedStageNumber(e.target.value ? Number(e.target.value) : undefined)
+                  }
+                >
+                  <option value="">— Select a stage —</option>
+                  {stages.map((s) => (
+                    <option key={s.stageNumber} value={s.stageNumber}>
+                      Stage {s.stageNumber}: {s.name} (Ages {s.ageMin}–{s.ageMax})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Step 2: Choose path */}
         <div className="mb-6">
@@ -202,7 +315,7 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
 
         <button
           onClick={() => void handleEnroll()}
-          disabled={!selectedMemberId || isEnrolling}
+          disabled={!selectedMemberId || isEnrolling || selectedStageNumber === undefined}
           className="w-full py-3 bg-[#1a5632] text-white font-bold text-lg rounded-xl hover:bg-[#154526] disabled:opacity-50 disabled:cursor-not-allowed transition min-h-[44px]"
         >
           {isEnrolling ? 'Enrolling…' : '✨ Start the Journey!'}

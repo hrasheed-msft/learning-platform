@@ -88,6 +88,22 @@ export default function MainLayout() {
           </div>
         </div>
 
+        {/* Student View entry — shown when a child member is selected */}
+        {selectedMember?.isAccountOwner === false && (
+          <div className="px-4 pb-3 border-b">
+            <Link
+              to="/child/dashboard"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[#1a5632] text-white font-semibold rounded-xl hover:bg-[#154526] transition text-sm"
+            >
+              🎓 Switch to Student View
+            </Link>
+            <p className="text-xs text-gray-400 text-center mt-1">
+              Viewing as {selectedMember.name}
+            </p>
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className="p-4 space-y-1">
           {navigation
