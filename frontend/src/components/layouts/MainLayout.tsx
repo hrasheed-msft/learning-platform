@@ -33,7 +33,7 @@ export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, family, logout } = useAuthStore();
-  const { selectedMember } = useFamilyStore();
+  const { selectedMember, members } = useFamilyStore();
 
   const handleLogout = () => {
     logout();
@@ -88,8 +88,8 @@ export default function MainLayout() {
           </div>
         </div>
 
-        {/* Student View entry — shown when a child member is selected */}
-        {selectedMember?.isAccountOwner === false && (
+        {/* Learner switcher — always visible */}
+        {selectedMember?.isAccountOwner === false ? (
           <div className="px-4 pb-3 border-b">
             <Link
               to="/child/dashboard"
@@ -102,7 +102,29 @@ export default function MainLayout() {
               Viewing as {selectedMember.name}
             </p>
           </div>
-        )}
+        ) : members.length === 0 ? (
+          <div className="px-4 pb-3 border-b">
+            <Link
+              to="/settings"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-2 w-full px-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-800 font-semibold rounded-xl hover:bg-amber-100 transition text-sm min-h-[44px]"
+            >
+              <span>➕</span>
+              <span>Add a learner</span>
+            </Link>
+          </div>
+        ) : !selectedMember ? (
+          <div className="px-4 pb-3 border-b">
+            <Link
+              to="/select-learner"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-2 w-full px-4 py-2.5 bg-green-50 border border-green-200 text-[#1a5632] font-semibold rounded-xl hover:bg-green-100 transition text-sm min-h-[44px]"
+            >
+              <span>👨‍👩‍👧</span>
+              <span>Student view</span>
+            </Link>
+          </div>
+        ) : null}
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">

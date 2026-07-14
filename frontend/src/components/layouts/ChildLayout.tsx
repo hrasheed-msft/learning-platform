@@ -34,9 +34,16 @@ export default function ChildLayout() {
   // Parent is previewing when they arrived via SelectLearner (not child direct login)
   const isParentViewing = isParentAuth && !isChildSession;
 
+  const formatAgeCategory = (cat: string) =>
+    cat.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+
   const handleLogout = () => {
-    logout();
-    navigate('/child-login');
+    if (isParentViewing) {
+      navigate('/dashboard');
+    } else {
+      logout();
+      navigate('/child-login');
+    }
   };
 
   return (
@@ -85,7 +92,7 @@ export default function ChildLayout() {
             <div>
               <p className="font-medium text-gray-800">{member?.name || 'Student'}</p>
               <p className="text-sm text-gray-500 capitalize">
-                {member?.ageCategory?.replace('_', ' ') || 'Student'}
+                {member?.ageCategory ? formatAgeCategory(member.ageCategory) : 'Student'}
               </p>
             </div>
           </div>
@@ -163,12 +170,20 @@ export default function ChildLayout() {
                   Parent preview — you're viewing {member?.name}'s dashboard
                 </span>
               </div>
-              <Link
-                to="/dashboard"
-                className="shrink-0 px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg hover:bg-amber-50 transition text-xs"
-              >
-                ← Parent View
-              </Link>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  to="/select-learner"
+                  className="px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg hover:bg-amber-50 transition text-xs"
+                >
+                  Switch child
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg hover:bg-amber-50 transition text-xs"
+                >
+                  ← Parent View
+                </Link>
+              </div>
             </div>
           )}
           <Outlet />

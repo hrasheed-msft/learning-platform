@@ -75,12 +75,14 @@ interface EnrollModalProps {
 }
 
 function EnrollModal({ program, onClose }: EnrollModalProps) {
-  const { members, fetchLearners, isLoading: isLoadingLearners, selectMember } = useFamilyStore();
+  const { members, fetchLearners, isLoading: isLoadingLearners, selectMember, selectedMember: preselectedMember } = useFamilyStore();
   const { enrollInProgram, isEnrolling, error, clearError } = useProgramStore();
   const navigate = useNavigate();
 
   const learners = members.filter((m) => (m.isActive ?? true) && !m.isAccountOwner);
-  const [selectedMemberId, setSelectedMemberId] = useState(learners[0]?.id ?? '');
+  const [selectedMemberId, setSelectedMemberId] = useState<string>(
+    preselectedMember?.isAccountOwner === false ? preselectedMember.id : ''
+  );
   const [selectedPath, setSelectedPath] = useState<LearningPath>('AFTER_SCHOOL');
   const [enrolled, setEnrolled] = useState(false);
 
@@ -89,6 +91,14 @@ function EnrollModal({ program, onClose }: EnrollModalProps) {
   const [selectedStageNumber, setSelectedStageNumber] = useState<number | undefined>(
     () => detectStageNumber(learners[0], stages)
   );
+
+  // Sync stage for the pre-selected member once stages are available
+  useEffect(() => {
+    if (preselectedMember?.isAccountOwner === false && stages.length > 0) {
+      setSelectedStageNumber(detectStageNumber(preselectedMember, stages));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectedMember, stages.length]);
 
   useEffect(() => {
     if (!selectedMemberId && learners.length > 0) {

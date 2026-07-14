@@ -100,6 +100,18 @@ export default function ChildDashboardHome() {
         <p className="text-gray-600 mt-1">Keep up the great work on your learning journey!</p>
       </div>
 
+      {/* Enrollment CTA — shown when not yet enrolled in any Maktab program */}
+      {!isLoading && !activeProgramEnrollment && (
+        <div className="bg-gradient-to-br from-[#1a5632]/10 to-[#0d3320]/5 border border-[#1a5632]/20 rounded-2xl p-6 text-center">
+          <div className="text-4xl mb-2">🕌</div>
+          <h2 className="text-lg font-bold text-gray-800 mb-1">Start your Maktab journey!</h2>
+          <p className="text-gray-500 text-sm mb-4">Your Islamic curriculum is waiting — ask your parent to enroll you.</p>
+          <Link to="/programs" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a5632] text-white font-bold rounded-xl hover:bg-[#154526] transition text-sm">
+            ✨ Enroll in Maktab
+          </Link>
+        </div>
+      )}
+
       {/* ── Continue / All-caught-up hero ───────────────────────────────── */}
       {activeProgramEnrollment && (
         nextUp ? (
@@ -181,6 +193,28 @@ export default function ChildDashboardHome() {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── My Maktab mini-card (enrolled) ───────────────────────────────── */}
+      {activeProgramEnrollment && (
+        <Link
+          to="/child/maktab"
+          className="flex items-center gap-4 bg-gradient-to-r from-[#1a5632]/10 to-[#0d3320]/5 border border-[#1a5632]/20 rounded-xl px-5 py-4 hover:shadow-sm transition"
+        >
+          <div className="text-3xl shrink-0">🕌</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-[#1a5632] uppercase tracking-wide">My Maktab</p>
+            <p className="font-semibold text-gray-800 truncate">
+              {activeProgramEnrollment.currentStage.name}
+            </p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="text-xl font-bold text-[#1a5632]">
+              {Math.round(activeProgramEnrollment.stageProgress?.overallProgress ?? 0)}%
+            </p>
+            <p className="text-xs text-gray-500">complete</p>
+          </div>
+        </Link>
       )}
 
       {/* ── Quick stats grid ─────────────────────────────────────────────── */}

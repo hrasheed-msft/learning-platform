@@ -215,6 +215,18 @@ export default function SelectLearner() {
                     Current
                   </span>
                 )}
+
+                {/* Parent / Student role badge */}
+                {!isCurrent && member.isAccountOwner && (
+                  <span className="absolute top-2 right-2 text-xs bg-amber-100 text-amber-700 font-semibold px-1.5 py-0.5 rounded-full">
+                    Parent
+                  </span>
+                )}
+                {!isCurrent && !member.isAccountOwner && (
+                  <span className="absolute top-2 right-2 text-xs bg-green-100 text-green-700 font-semibold px-1.5 py-0.5 rounded-full">
+                    Student
+                  </span>
+                )}
               </button>
             );
           })}

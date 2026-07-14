@@ -132,7 +132,7 @@ const PATH_LABELS: Record<string, string> = {
 };
 
 export default function GradeDashboard() {
-  const { member } = useChildAuthStore();
+  const { member, isChildSession } = useChildAuthStore();
   const {
     enrollments,
     stageSummary,
@@ -177,12 +177,14 @@ export default function GradeDashboard() {
           <p className="text-gray-500 mb-6 max-w-sm mx-auto">
             Ask your parent to enroll you in the Maktab curriculum so you can begin your journey.
           </p>
-          <Link
-            to="/programs"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a5632] text-white font-bold rounded-xl hover:bg-[#154526] transition min-h-[44px]"
-          >
-            ✨ Start Your Maktab Journey
-          </Link>
+          {!isChildSession && (
+            <Link
+              to="/programs"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a5632] text-white font-bold rounded-xl hover:bg-[#154526] transition min-h-[44px]"
+            >
+              ✨ Start Your Maktab Journey
+            </Link>
+          )}
         </div>
       </div>
     );
