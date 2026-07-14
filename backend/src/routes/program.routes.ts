@@ -33,7 +33,17 @@ const enrollValidation = [
     .withMessage('stageNumber must be a positive integer'),
 ];
 
-// ─── Public routes ────────────────────────────────────────────────────────────
+const enrollmentIdParam = [
+  param('enrollmentId').isUUID().withMessage('Valid enrollment ID is required'),
+];
+
+const moveStageValidation = [
+  body('stageNumber')
+    .isInt({ min: 1 })
+    .withMessage('stageNumber must be a positive integer'),
+];
+
+
 
 // GET /api/v1/programs — list published programs
 router.get('/', async (_req, res, next) => {
@@ -107,6 +117,25 @@ router.get(
     try {
       const summary = await ProgramService.getStageSummary(req.params.memberId);
       res.json({ success: true, data: summary });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// PATCH /api/v1/programs/enrollment/:enrollmentId/stage — move enrollment to a different stage
+router.patch(
+  '/enrollment/:enrollmentId/stage',
+  requireActiveMember,
+  requireParentRole,
+  validate([...enrollmentIdParam, ...moveStageValidation]),
+  async (req, res, next) => {
+    try {
+      const updated = await ProgramService.moveEnrollmentStage(
+        req.params.enrollmentId,
+        Number(req.body.stageNumber)
+      );
+      res.json({ success: true, data: updated });
     } catch (err) {
       next(err);
     }

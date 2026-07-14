@@ -478,6 +478,136 @@ export class ProgramService {
       weeklyActivity,
     };
   }
+
+  // ─── Move Enrollment Stage ────────────────────────────────────────────────
+  // Moves a ProgramEnrollment to a different stage within the same program and
+  // bridges CourseEnrollment rows accordingly.
+  //
+  // Steps:
+  //   1. Load enrollment + currentStage (with courses) + program.stages
+  //   2. Resolve target stage by stageNumber within the program
+  //   3. Transaction:
+  //      a. Update currentStageId on the enrollment
+  //      b. Fetch published courses on new stage
+  //      c. Delete CourseEnrollment rows for OLD-stage courses NOT on new stage
+  //      d. Create missing CourseEnrollment rows for new stage (skipDuplicates)
+  //   4. Return updated enrollment (currentStage included)
+
+  static async moveEnrollmentStage(enrollmentId: string, stageNumber: number) {
+    // ── Load enrollment with old stage courses + all sibling stages ───────
+    const enrollment = await prisma.programEnrollment.findUnique({
+      where: { id: enrollmentId },
+      include: {
+        currentStage: {
+          include: {
+            courses: {
+              where: { isPublished: true },
+              select: { id: true },
+            },
+          },
+        },
+        program: {
+          include: {
+            stages: { orderBy: { orderIndex: 'asc' } },
+          },
+        },
+      },
+    });
+
+    if (!enrollment) {
+      throw new NotFoundError('Program enrollment not found');
+    }
+
+    // ── Resolve target stage ──────────────────────────────────────────────
+    const targetStage = enrollment.program.stages.find(
+      s => s.stageNumber === stageNumber
+    );
+    if (!targetStage) {
+      throw new NotFoundError(
+        `Stage number ${stageNumber} not found in program '${enrollment.program.name}'`
+      );
+    }
+
+    if (targetStage.id === enrollment.currentStageId) {
+      throw new BadRequestError('Enrollment is already on the requested stage');
+    }
+
+    const memberId = enrollment.familyMemberId;
+    const oldStageCourseIds = new Set(enrollment.currentStage.courses.map(c => c.id));
+
+    // ── Fetch published courses on the target stage ───────────────────────
+    const newStageWithCourses = await prisma.programStage.findUnique({
+      where: { id: targetStage.id },
+      include: {
+        courses: {
+          where: { isPublished: true },
+          select: { id: true },
+        },
+      },
+    });
+
+    const newStageCourseIds = new Set(
+      (newStageWithCourses?.courses ?? []).map(c => c.id)
+    );
+
+    // Courses exclusive to old stage (not on new stage) — safe to remove
+    const toDeleteCourseIds = [...oldStageCourseIds].filter(
+      id => !newStageCourseIds.has(id)
+    );
+
+    const updatedEnrollment = await prisma.$transaction(async (tx) => {
+      // a. Move enrollment to new stage
+      await tx.programEnrollment.update({
+        where: { id: enrollmentId },
+        data: { currentStageId: targetStage.id },
+      });
+
+      // c. Delete stale CourseEnrollment rows (old-stage only courses)
+      if (toDeleteCourseIds.length > 0) {
+        const deleted = await tx.courseEnrollment.deleteMany({
+          where: { memberId, courseId: { in: toDeleteCourseIds } },
+        });
+        console.debug(
+          `[ProgramService.moveEnrollmentStage] deleted ${deleted.count} old-stage CourseEnrollment rows`
+        );
+      }
+
+      // d. Create missing CourseEnrollment rows for new stage
+      const newCourseData = [...newStageCourseIds].map(courseId => ({
+        memberId,
+        courseId,
+        status: 'ACTIVE' as const,
+        progress: 0,
+      }));
+
+      const { count } = await tx.courseEnrollment.createMany({
+        data: newCourseData,
+        skipDuplicates: true,
+      });
+      console.debug(
+        `[ProgramService.moveEnrollmentStage] created ${count} new-stage CourseEnrollment rows`
+      );
+
+      // Return updated enrollment with new currentStage
+      return tx.programEnrollment.findUnique({
+        where: { id: enrollmentId },
+        include: {
+          program: { select: { id: true, slug: true, name: true } },
+          currentStage: {
+            select: {
+              id: true,
+              stageNumber: true,
+              name: true,
+              ageMin: true,
+              ageMax: true,
+            },
+          },
+        },
+      });
+    });
+
+    return updatedEnrollment;
+  }
 }
 
 // ─── UTC day helpers ──────────────────────────────────────────────────────────

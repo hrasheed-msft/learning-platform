@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramStore } from '@/stores/programStore';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores';
+import { programService } from '@/services/program.service';
 import type { LearningPath, Program, ProgramStage } from '@/types/program';
 import type { FamilyMember } from '@/types';
 
 // ageCategory → representative midpoint age used when member.age is null at runtime
 const AGE_CATEGORY_MIDPOINT: Record<string, number | null> = {
-  young_children: 5,
-  children: 9,
-  teens: 13,
-  adults: null, // cannot auto-detect adults
+  EARLY_CHILD: 5,
+  CHILD: 9,
+  PRE_TEEN: 12,
+  TEEN: 15,
+  ADULT: 25,
 };
 
 function resolveStages(program: Program): ProgramStage[] {
@@ -344,8 +346,18 @@ export default function ProgramCatalog() {
     void fetchLearners();
   }, [family?.id, fetchMembers, fetchLearners]);
 
-  function handleEnrollClick(program: Program) {
-    setActiveProgram(program);
+  async function handleEnrollClick(program: Program) {
+    // Fetch the full program with stages if not already loaded
+    if (!program.stages || program.stages.length === 0) {
+      try {
+        const full = await programService.getProgram(program.slug);
+        setActiveProgram(full);
+      } catch {
+        setActiveProgram(program); // fallback to what we have
+      }
+    } else {
+      setActiveProgram(program);
+    }
     setShowModal(true);
   }
 
@@ -489,7 +501,7 @@ export default function ProgramCatalog() {
             Start your child's Islamic learning journey today. Their stage is auto-detected — enrollment takes less than a minute.
           </p>
           <button
-            onClick={() => handleEnrollClick(program ?? PLACEHOLDER_PROGRAM)}
+            onClick={() => void handleEnrollClick(program ?? PLACEHOLDER_PROGRAM)}
             className="px-8 py-4 bg-white text-[#1a5632] font-bold text-lg rounded-xl hover:bg-green-50 transition shadow-lg min-h-[44px]"
           >
             ✨ Enroll Now
@@ -510,14 +522,20 @@ export default function ProgramCatalog() {
   );
 }
 
-// Static fallback stages for display before API responds
-const DEFAULT_STAGES = [
-  { stageNumber: 1, name: 'Seedling', ageMin: 4, ageMax: 5, description: 'First steps in faith — simple duas, ABC of Islam.', id: '1', orderIndex: 1, courses: [] },
-  { stageNumber: 2, name: 'Sprout', ageMin: 6, ageMax: 7, description: 'Growing foundations — short surahs, basic fiqh.', id: '2', orderIndex: 2, courses: [] },
-  { stageNumber: 3, name: 'Sapling', ageMin: 8, ageMax: 9, description: 'Building knowledge — seerah, akhlaq, expanding Quran.', id: '3', orderIndex: 3, courses: [] },
-  { stageNumber: 4, name: 'Tree', ageMin: 10, ageMax: 11, description: 'Deepening understanding — hadith, history, aqeedah.', id: '4', orderIndex: 4, courses: [] },
-  { stageNumber: 5, name: 'Orchard', ageMin: 12, ageMax: 13, description: 'Mature understanding — advanced fiqh, classical texts.', id: '5', orderIndex: 5, courses: [] },
-  { stageNumber: 6, name: 'Scholar', ageMin: 14, ageMax: 16, description: 'Completing the curriculum — ready for advanced study.', id: '6', orderIndex: 6, courses: [] },
+// Static fallback stages — mirrors the real 12-stage Maktab An Naṣīḥah program
+const DEFAULT_STAGES: ProgramStage[] = [
+  { stageNumber: 1, name: 'Foundation 1', ageMin: 4, ageMax: 5, description: 'First steps in faith.', id: 's1', orderIndex: 0, courses: [] },
+  { stageNumber: 2, name: 'Foundation 2', ageMin: 5, ageMax: 6, description: 'Growing foundations.', id: 's2', orderIndex: 1, courses: [] },
+  { stageNumber: 3, name: 'Coursebook 1', ageMin: 6, ageMax: 7, description: 'Building knowledge.', id: 's3', orderIndex: 2, courses: [] },
+  { stageNumber: 4, name: 'Coursebook 2', ageMin: 7, ageMax: 8, description: 'Expanding understanding.', id: 's4', orderIndex: 3, courses: [] },
+  { stageNumber: 5, name: 'Coursebook 3', ageMin: 8, ageMax: 9, description: 'Deeper roots.', id: 's5', orderIndex: 4, courses: [] },
+  { stageNumber: 6, name: 'Coursebook 4', ageMin: 9, ageMax: 10, description: 'Growing in knowledge.', id: 's6', orderIndex: 5, courses: [] },
+  { stageNumber: 7, name: 'Coursebook 5', ageMin: 10, ageMax: 11, description: 'Deepening understanding.', id: 's7', orderIndex: 6, courses: [] },
+  { stageNumber: 8, name: 'Coursebook 6', ageMin: 11, ageMax: 12, description: 'Advanced foundations.', id: 's8', orderIndex: 7, courses: [] },
+  { stageNumber: 9, name: 'Coursebook 7', ageMin: 12, ageMax: 13, description: 'Mature understanding.', id: 's9', orderIndex: 8, courses: [] },
+  { stageNumber: 10, name: 'Coursebook 8', ageMin: 13, ageMax: 14, description: 'Advanced fiqh and texts.', id: 's10', orderIndex: 9, courses: [] },
+  { stageNumber: 11, name: 'Further Studies', ageMin: 14, ageMax: 99, description: 'Completing the curriculum.', id: 's11', orderIndex: 10, courses: [] },
+  { stageNumber: 12, name: 'Quran Memorization', ageMin: 4, ageMax: 99, description: 'Hifz track for all ages.', id: 's12', orderIndex: 11, courses: [] },
 ];
 
 const PLACEHOLDER_PROGRAM = {
