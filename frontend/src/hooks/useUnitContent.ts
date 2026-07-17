@@ -7,6 +7,24 @@ interface UseUnitContentResult {
   error: string | null;
 }
 
+// Blob storage base URL for coursebook diagram images.
+// Defaults to the production blob account; override with VITE_COURSEBOOK_IMAGES_URL in .env.
+const COURSEBOOK_IMAGES_URL =
+  import.meta.env.VITE_COURSEBOOK_IMAGES_URL ||
+  'https://stislamiclearning.blob.core.windows.net/coursebook-images';
+
+/**
+ * Rewrite relative /coursebook-images/ paths to absolute blob URLs so that
+ * diagram images resolve correctly when HTML is rendered inside the SWA rather
+ * than being served via the API proxy.
+ */
+function rewriteImagePaths(html: string): string {
+  return html.replace(
+    /src="\/coursebook-images\//g,
+    `src="${COURSEBOOK_IMAGES_URL}/`
+  );
+}
+
 /**
  * Resolves the HTML content for a unit.
  * If contentUrl is set, fetches from Azure Blob Storage.
@@ -36,7 +54,7 @@ export function useUnitContent(content: UnitContent | null | undefined): UseUnit
           return res.text();
         })
         .then(text => {
-          setHtml(text);
+          setHtml(rewriteImagePaths(text));
           setLoading(false);
         })
         .catch(err => {
