@@ -126,7 +126,8 @@ export class CourseService {
     return {
       ...unit,
       content: {
-        text: unit.content,
+        text: unit.content,           // null after migration; kept for backward compat
+        contentUrl: unit.contentUrl ?? null,  // blob URL
         videos: unit.videoResources.map((v) => ({
           ...v,
           type: v.url.includes('youtube.com') || v.url.includes('youtu.be') ? 'youtube' as const : 'server' as const,

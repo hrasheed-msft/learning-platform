@@ -145,7 +145,8 @@ model Unit {
   id          String   @id @default(uuid())
   title       String
   description String?
-  content     String?  @db.Text // Rich text / HTML content
+  content     String?  @db.Text // Rich text / HTML content (deprecated; use contentUrl after blob migration)
+  contentUrl  String?           // URL to HTML content in Azure Blob Storage
   orderIndex  Int
   slug        String?  // e.g. "maktab-3-fiqh"; nullable until backfilled
   includedInPaths LearningPath[]  // Empty = all paths; [AFTER_SCHOOL] = after-school only

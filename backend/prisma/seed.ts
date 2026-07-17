@@ -48,6 +48,23 @@ const prisma = new PrismaClient();
 // NEVER run this against a production database.  If you need to add or update
 // content in production, write a targeted, idempotent content-only seed script
 // and run that instead.
+//
+// BLOB STORAGE PATTERN (see decisions/khwarizmi-blob-content-migration.md)
+// The top-5 seed files (by line count) now upload unit HTML content to Azure
+// Blob Storage when AZURE_STORAGE_CONNECTION_STRING is set, and fall back to
+// inline DB storage otherwise. The remaining seed files should follow the same
+// two-step pattern:
+//
+//   const unit = await prisma.unit.upsert({
+//     create: { ..., content: htmlContent },   // inline on first create
+//     update: { title, description, orderIndex }, // do NOT set content here
+//   });
+//   if (isBlobStorageAvailable() && unit.content && !unit.contentUrl) {
+//     const blobUrl = await uploadUnitContent(unit.id, unit.content!);
+//     await prisma.unit.update({ where: { id: unit.id }, data: { contentUrl: blobUrl, content: null } });
+//   }
+//
+// Import: import { uploadUnitContent, isBlobStorageAvailable } from './helpers/blob-upload';
 // =============================================================================
 
 async function main() {

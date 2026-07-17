@@ -29,7 +29,8 @@ export interface Unit {
 }
 
 export interface UnitContent {
-  text?: string;
+  text?: string | null;
+  contentUrl?: string | null;
   videos?: VideoResource[];
   audio?: AudioResource[];
   arabicTerms?: ArabicTerm[];

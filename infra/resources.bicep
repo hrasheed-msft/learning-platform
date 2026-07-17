@@ -211,6 +211,60 @@ resource secretJwtRefresh 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 }
 
 // ============================================================================
+// Azure Blob Storage — Course Content
+// ============================================================================
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: 'st${take(resourceToken, 18)}'
+  location: location
+  tags: tags
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: true
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+  properties: {
+    cors: {
+      corsRules: [
+        {
+          allowedOrigins: ['*']
+          allowedMethods: ['GET']
+          allowedHeaders: ['*']
+          exposedHeaders: ['*']
+          maxAgeInSeconds: 3600
+        }
+      ]
+    }
+  }
+}
+
+resource courseContentContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: 'course-content'
+  properties: {
+    publicAccess: 'Blob'
+  }
+}
+
+resource secretStorageConnStr 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'storage-connection-string'
+  properties: {
+    value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+  }
+}
+
+// ============================================================================
 // Container App (Backend API)
 // ============================================================================
 
@@ -260,6 +314,10 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           name: 'jwt-refresh-secret'
           value: 'ilp-${uniqueString(subscription().id, 'jwt-refresh', resourceToken)}-${resourceToken}'
         }
+        {
+          name: 'storage-connection-string'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+        }
       ]
     }
     template: {
@@ -281,6 +339,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             { name: 'JWT_ACCESS_EXPIRES_IN', value: '24h' }
             { name: 'JWT_REFRESH_EXPIRES_IN', value: '30d' }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
+            { name: 'AZURE_STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
           ]
         }
       ]
@@ -334,3 +393,5 @@ output postgresFqdn string = postgres.properties.fullyQualifiedDomainName
 output keyVaultName string = keyVault.name
 output containerAppName string = containerApp.name
 output staticWebAppName string = staticWebApp.name
+output storageAccountName string = storageAccount.name
+output storageEndpoint string = storageAccount.properties.primaryEndpoints.blob

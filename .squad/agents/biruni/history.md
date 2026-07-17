@@ -284,3 +284,49 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 - `2834bf7` � fix(frontend): preserve AxiosError response in api.ts so ParentPinModal 429 lockout check works
 - `8e83249` � test(e2e): verify phase 1 maktab child UX + PIN gate in production
 
+
+
+---
+
+### 2026-07-11T12:35:00-05:00 — Phase 2 Production Verification: Next-Lesson CTA, Streak, Weekly Activity
+
+**Requested by:** Hassan | **Date:** 2026-07-11T12:35:00-05:00
+
+**Mission:** Verify Phase 2 features in production — `getStageSummary()` Phase 2 fields, hero Continue CTA, streak card, 7-bar weekly activity chart, SubjectCard deep-links, CourseLearner `?unit=` param.
+
+#### Test Results: 13/13 PASS
+
+| # | Suite | Test | Result |
+|---|-------|------|--------|
+| 1 | `phase2-child-dashboard.spec.ts` | API: stage-summary returns Phase 2 shape | ✅ PASS |
+| 2 | `phase2-child-dashboard.spec.ts` | UI: hero Continue card, streak, 7-bar weekly chart on /child/dashboard | ✅ PASS |
+| 3 | `phase2-child-dashboard.spec.ts` | GradeDashboard: SubjectCards show "Next:…", click → deep-link with ?unit= | ✅ PASS |
+| 4 | `phase2-child-dashboard.spec.ts` | Continue CTA href matches nextUp from API; CourseLearner loads | ✅ PASS |
+| 5–13 | Non-regression (phase1 + enrollment + child-learning) | All 9 prior tests | ✅ PASS |
+
+#### Evidence
+
+**API Shape (HTTP 200):**
+- `nextUp`: `{ courseId: "0fc70813...", unit: { id: "ffc33fb7...", title: "Qur'ān — Sūrah Al-Fātiḥah" } }`
+- `streak`: `{ current: 0, longest: 0, lastActivityAt: null }` — correct for fresh enrollment
+- `weeklyActivity`: 7 entries, dates 2026-07-05 through 2026-07-11
+- All 3 `subjectProgress[]` entries have `nextUnit`, `lastActivityAt: null`, `unitsCompletedLast7Days: 0`
+
+**Dashboard UI (ibnsharif, /child/dashboard):**
+- Hero card: "CONTINUE WHERE YOU LEFT OFF" + "Qur'ān — Sūrah Al-Fātiḥah" + "Continue →" button
+- Streak card: "0 days / Current streak" visible
+- Weekly chart: 7 bars, 7 day-label spans rendered
+- Screenshot: `frontend/test-results/phase2-child-dashboard.png`
+
+**GradeDashboard SubjectCards (/child/maktab):**
+- 3 cards, all show "Next: …" text
+- No activity chips (fresh enrollment, unitsCompletedLast7Days=0 — correct)
+- Click → `/child/courses/0fc70813.../learn?unit=ffc33fb7...`
+
+**Continue CTA deep-link:**
+- `href` exactly matches API `nextUp.courseId` and `nextUp.unit.id`
+- CourseLearner loaded: course header + unit list visible; "Continue where you left off" label on target unit
+- Screenshot: `frontend/test-results/phase2-course-learner.png`
+
+#### Commit
+- `6975d44` — test(e2e): verify phase 2 next-lesson CTA, streak, and weekly activity in production

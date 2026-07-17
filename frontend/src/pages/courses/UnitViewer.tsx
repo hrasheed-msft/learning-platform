@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
 import { courseService } from '@/services/courseService';
+import { useUnitContent } from '@/hooks/useUnitContent';
 import { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
 import QuranAudioPlayer from '@/components/QuranAudioPlayer';
@@ -38,6 +39,8 @@ export default function UnitViewer() {
   const [updatingProgress, setUpdatingProgress] = useState(false);
   const [audioSyncState, setAudioSyncState] = useState<UnitAudioSyncState | null>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
+
+  const { html: resolvedHtml, loading: contentLoading, error: contentError } = useUnitContent(unit?.content);
 
   // Reset ALL local state when navigating to a different unit
   useEffect(() => {
@@ -79,7 +82,7 @@ export default function UnitViewer() {
 
   // Enhance .quran-verse audio elements with custom player (loop, speed, progress)
   useEffect(() => {
-    if (loading || !unit) return;
+    if (loading || contentLoading || !unit) return;
 
     const container = contentContainerRef.current;
     if (!container) return;
@@ -114,7 +117,7 @@ export default function UnitViewer() {
         el.setAttribute('controls', '');
       });
     };
-  }, [loading, unit]);
+  }, [loading, contentLoading, unit]);
 
   const handleMarkComplete = async (type: 'video' | 'reading') => {
     if (!unitId) return;
@@ -187,8 +190,7 @@ export default function UnitViewer() {
   const videos: VideoResource[] = unit.content?.videos || [];
   const audioResources: AudioResource[] = unit.content?.audio || [];
   const arabicTerms: ArabicTerm[] = unit.content?.arabicTerms || [];
-  const textContent = unit.content?.text || '<p>No content available for this unit yet.</p>';
-  const hasInteractiveLessonLink = MASAAR_LESSON_PATH_PATTERN.test(textContent);
+  const hasInteractiveLessonLink = MASAAR_LESSON_PATH_PATTERN.test(resolvedHtml ?? '');
   const interactiveLessonUrl = hasInteractiveLessonLink
     ? `/lessons/masaar-irab-sarf/week-${unit.orderIndex + 1}.html`
     : null;
@@ -472,13 +474,33 @@ export default function UnitViewer() {
               }
             `}</style>
             <div ref={contentContainerRef}>
-              <SyncedTextContent
-                html={textContent}
-                currentWordIndex={audioSyncState?.currentWordIndex ?? -1}
-                language={audioSyncState?.language ?? null}
-                isPlaying={audioSyncState?.isPlaying ?? false}
-                className="unit-content prose-lg max-w-none text-gray-700 leading-relaxed"
-              />
+              {contentLoading && (
+                <div className="animate-pulse space-y-3 py-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 rounded w-full" />
+                  <div className="h-4 bg-gray-200 rounded w-5/6" />
+                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  <div className="h-4 bg-gray-200 rounded w-full" />
+                  <div className="h-4 bg-gray-200 rounded w-4/5" />
+                </div>
+              )}
+              {contentError && !resolvedHtml && (
+                <div className="text-red-600 bg-red-50 rounded-lg p-4 text-sm">
+                  ⚠️ {contentError}
+                </div>
+              )}
+              {resolvedHtml && !contentLoading && (
+                <SyncedTextContent
+                  html={resolvedHtml}
+                  currentWordIndex={audioSyncState?.currentWordIndex ?? -1}
+                  language={audioSyncState?.language ?? null}
+                  isPlaying={audioSyncState?.isPlaying ?? false}
+                  className="unit-content prose-lg max-w-none text-gray-700 leading-relaxed"
+                />
+              )}
+              {!contentLoading && !resolvedHtml && !contentError && (
+                <p className="text-gray-500 italic text-sm">No content available for this unit yet.</p>
+              )}
             </div>
             
             {/* Mark as Read — prominent bottom CTA */}

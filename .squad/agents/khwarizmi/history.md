@@ -75,6 +75,9 @@ Key prior work:
 - `User.selfMemberId` is not set during registration in this codebase — do NOT rely on it to find the parent's FamilyMember. Use `familyId + isAccountOwner=true` to find the account-owner member, or store parent-level data on the `User` model directly.
 - Some families may have NO account-owner FamilyMember (e.g., accounts created before that pattern was established). Prefer User model for parent-scoped data (PIN, settings) rather than FamilyMember.
 - For backfill scripts: the local `.env` points to `localhost:5432` (dev DB). To run against prod, set `DATABASE_URL` from the Azure Container App secret: `az containerapp secret show --secret-name database-url`.
+- Blob upload pattern for seeds: do a TWO-STEP upsert — (1) keep `content:` in the `create:` block, do NOT set `content:` in the `update:` block, (2) after the upsert, check `isBlobStorageAvailable() && unit.content && !unit.contentUrl` and call `uploadUnitContent` + `prisma.unit.update`. This keeps seeds idempotent and prevents re-populating the DB column after migration.
+- `@azure/storage-blob` was already in `backend/package.json` at `^12.31.0` — no install needed.
+- The `content` column is kept (not dropped) after adding `contentUrl` to allow rollback and gradual migration. A future cleanup migration will drop it once all content is confirmed in blob storage.
 
 **Program→Course Enrollment Bridge (2026-07-10):** ✅ COMPLETE
 - `program.service.ts` `enrollMember()` now wraps creation in `$transaction`, fetches starting stage's published courses, `createMany` `CourseEnrollment` rows with `skipDuplicates: true`. Debug log shows count.
@@ -88,3 +91,42 @@ Key prior work:
 - `parent-pin.service.ts`: `setPin`/`getPinStatus`/`verifyPin` — bcrypt cost 10, weak-PIN set rejection, 3-attempt/30s lockout stored on User row.
 - Routes added to `auth.routes.ts`: `POST /auth/parent-pin`, `POST /auth/parent-pin/verify`, `GET /auth/parent-pin/status`.
 - Verified in prod: `GET /status` → `{hasPin:false}`, `POST` (pin 5823) → `{success:true}`, `GET /status` → `{hasPin:true}`, verify correct → `{verified:true}`, verify wrong → `{verified:false,remainingAttempts:2}`.
+
+**Phase 2 Stage Summary — Next-Unit + Activity/Streak (2026-07-11):** ✅ COMPLETE
+- Items #5 (next-unit surfacing) and #6 (activity data) from Khaldun's proposal — additive-only.
+- `getStageSummary()` rewritten to 4 batched queries (zero N+1): enrollment+stage, courseEnrollments, unitProgress IN enrollmentIds, units IN courseIds. All aggregation in JS.
+- New per-course fields: `nextUnit: { id, title, orderIndex, courseId, courseSlug } | null` (respects `includedInPaths` + `enrollment.path`), `lastActivityAt: ISO | null`, `unitsCompletedLast7Days: number`.
+- New top-level fields: `nextUp: { subjectSlug, courseId, unit } | null` (primary Continue CTA pointer), `streak: { current, longest, lastActivityAt }` (UTC calendar days), `weeklyActivity: [{ date, unitsCompleted }] × 7 days`.
+- Schema: added `@@index([enrollmentId, completedAt])` to `unit_progress` table; migration `20260711120000_add_unit_progress_activity_index`.
+- TypeScript types `StageProgressSummary`, `SubjectProgressEntry`, `NextUnitShape` exported from `program.service.ts` for Ibn Sina.
+- Fresh-enrollment path verified: nextUnit = first unit of first course, streak = 0, weeklyActivity = 7 zeros.
+- Commit: `a60c291` — pushed to main; verified in prod after container redeploy (~4 min).
+
+**Enrollment Stage-Move Endpoint + Live Data Fix (2026-07-13):** ✅ COMPLETE
+- Added `ProgramService.moveEnrollmentStage(enrollmentId, stageNumber)` to `program.service.ts`:
+  1. Loads enrollment with currentStage courses + program.stages
+  2. Resolves target stage by stageNumber; errors if same stage or not found
+  3. Transaction: updates `currentStageId`, deletes old-stage-only CourseEnrollments (shared courses like Quran preserved), creates missing new-stage CourseEnrollments (`skipDuplicates: true`)
+  4. Returns updated enrollment with `currentStage` select
+- Added `PATCH /api/v1/programs/enrollment/:enrollmentId/stage` to `program.routes.ts`:
+  - Protected: `authenticate + requireActiveMember + requireParentRole`
+  - Validation: `enrollmentId` UUID, `stageNumber` positive integer
+- CI/CD pipeline failing (3/3 most recent runs) → endpoint not yet deployed
+- Created one-shot migration script `backend/prisma/migrate-fix-enrollment-stages.ts`:
+  - Fixes Ibn Sharif (b32bf819) + Ibn Sharif 2 (c73a8265): both moved Foundation 1 / CB2 → CB5 (stageNum=7)
+  - Idempotent (skips if already on target stage); logs all changes
+  - Run: `DATABASE_URL="<prod_url>" npx ts-node backend/prisma/migrate-fix-enrollment-stages.ts`
+- `tsc --noEmit` passes with zero errors
+- Learnings: insert new class methods BEFORE the class closing brace, not after it
+
+**Unit Content → Azure Blob Storage Migration (2026-07-17):** ✅ COMPLETE
+- Root cause: `units.content @db.Text` stores full HTML/Arabic content inline in PostgreSQL — primary cost driver
+- Schema: added `contentUrl String?` to `Unit` model; `content` retained as deprecated nullable fallback
+- Migration: `20260717_add_unit_content_url/migration.sql` — `ALTER TABLE "units" ADD COLUMN "contentUrl" TEXT`
+- New helper: `backend/prisma/helpers/blob-upload.ts` — `uploadUnitContent()`, `isBlobStorageAvailable()`
+- New script: `backend/prisma/migrate-content-to-blob.ts` — idempotent, `--dry-run` / `--no-clear` flags
+- Infra: Added `Standard_LRS StorageV2` storage account + `course-content` blob container (public Blob access, CORS GET *) to `infra/resources.bicep`; KV secret + Container App env var wired
+- API: `getUnit()` now returns `content.contentUrl` alongside `content.text` (backward compatible)
+- Seeds: Applied two-step upsert+blob pattern to top 5 files (further-studies-nw, CB3, CB1, CB2, CB4); documented pattern in seed.ts comment block for remaining 32 files
+- `@azure/storage-blob ^12.31.0` already in package.json
+
