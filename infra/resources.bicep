@@ -237,11 +237,11 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01'
     cors: {
       corsRules: [
         {
-          allowedOrigins: ['*']
+          allowedOrigins: ['https://learn.hrasheed.net', '*']
           allowedMethods: ['GET', 'HEAD', 'OPTIONS']
           allowedHeaders: ['*']
           exposedHeaders: ['Content-Type', 'Content-Length', 'Cache-Control']
-          maxAgeInSeconds: 3600
+          maxAgeInSeconds: 86400
         }
       ]
     }
