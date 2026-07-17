@@ -238,9 +238,9 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01'
       corsRules: [
         {
           allowedOrigins: ['*']
-          allowedMethods: ['GET']
+          allowedMethods: ['GET', 'HEAD', 'OPTIONS']
           allowedHeaders: ['*']
-          exposedHeaders: ['*']
+          exposedHeaders: ['Content-Type', 'Content-Length', 'Cache-Control']
           maxAgeInSeconds: 3600
         }
       ]
