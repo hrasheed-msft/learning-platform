@@ -310,7 +310,7 @@ describe('CourseService', () => {
   });
 
   describe('updateCourseProgress', () => {
-    it('should only count units complete when video, reading, and quiz are all complete', async () => {
+    it('should count a unit as complete when readingCompleted is true (video/quiz not required)', async () => {
       vi.mocked(prisma.courseEnrollment.findUnique).mockResolvedValue({
         id: 'enrollment-1',
         status: 'ACTIVE',
@@ -324,14 +324,14 @@ describe('CourseService', () => {
         unitProgress: [
           {
             unitId: 'unit-1',
-            videoCompleted: true,
+            videoCompleted: false,
             readingCompleted: true,
-            quizCompleted: true,
+            quizCompleted: false,
           },
           {
             unitId: 'unit-2',
             videoCompleted: false,
-            readingCompleted: true,
+            readingCompleted: false,
             quizCompleted: false,
           },
         ],
@@ -358,7 +358,7 @@ describe('CourseService', () => {
   });
 
   describe('getMemberProgress', () => {
-    it('should report completed units using full unit completion criteria', async () => {
+    it('should report completed units based on readingCompleted only', async () => {
       vi.mocked(prisma.courseEnrollment.findMany).mockResolvedValue([
         {
           courseId: 'course-1',
@@ -371,14 +371,14 @@ describe('CourseService', () => {
           unitProgress: [
             {
               unitId: 'unit-1',
-              videoCompleted: true,
+              videoCompleted: false,
               readingCompleted: true,
-              quizCompleted: true,
+              quizCompleted: false,
             },
             {
               unitId: 'unit-2',
               videoCompleted: false,
-              readingCompleted: true,
+              readingCompleted: false,
               quizCompleted: false,
             },
           ],
