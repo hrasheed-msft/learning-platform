@@ -6,6 +6,7 @@ import {
   BookOpen,
   Clock,
   Flame,
+  Gauge,
   ChevronRight,
   Bell,
   Loader2,
@@ -72,7 +73,27 @@ export default function ParentDashboard() {
 
       {/* Family Summary Stats */}
       {familySummary && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 sm:col-span-2 xl:col-span-1">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-gray-500">Overall Progress</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">
+                  {Math.round(familySummary.overallProgress)}%
+                </p>
+                <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary-500 transition-all duration-700"
+                    style={{ width: `${Math.max(0, Math.min(100, Math.round(familySummary.overallProgress)))}%` }}
+                  />
+                </div>
+              </div>
+              <div className="w-11 h-11 bg-primary-100 rounded-lg flex items-center justify-center">
+                <Gauge className="w-5 h-5 text-primary-600" />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -152,66 +173,89 @@ export default function ParentDashboard() {
           </div>
         ) : (
           <div className="divide-y">
-            {children.map((child) => (
-              <Link
-                key={child.memberId}
-                to={`/dashboard/parent/child/${child.memberId}`}
-                className="flex items-center justify-between p-5 hover:bg-gray-50 transition"
-              >
-                <div className="flex items-center space-x-4">
-                  {/* Avatar */}
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                    {child.avatarUrl ? (
-                      <img
-                        src={child.avatarUrl}
-                        alt={child.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-xl font-semibold text-primary-600">
-                        {child.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-800">{child.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      Age {child.age} • {child.ageCategory.replace('_', ' ')}
-                    </p>
-                  </div>
-                </div>
+            {children.map((child) => {
+              const progressPct = Math.max(0, Math.min(100, Math.round(child.overallProgress ?? 0)));
 
-                {/* Quick Stats */}
-                <div className="flex items-center space-x-6">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-sm text-gray-500">Courses</p>
-                    <p className="font-semibold text-gray-800">{child.coursesEnrolled}</p>
+              return (
+                <Link
+                  key={child.memberId}
+                  to={`/dashboard/parent/child/${child.memberId}`}
+                  className="block p-5 hover:bg-gray-50 transition"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-start space-x-4 min-w-0">
+                      {/* Avatar */}
+                      <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
+                        {child.avatarUrl ? (
+                          <img
+                            src={child.avatarUrl}
+                            alt={child.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xl font-semibold text-primary-600">
+                            {child.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-gray-800">{child.name}</h3>
+                        <p className="text-sm text-gray-500">
+                          Age {child.age} • {child.ageCategory.replace('_', ' ')}
+                        </p>
+                        <div className="mt-3 max-w-md">
+                          <div className="flex items-center justify-between text-sm mb-1 gap-3">
+                            <span className="text-gray-500">Overall Progress</span>
+                            <span className="font-semibold text-primary-600">{progressPct}%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary-500 transition-all duration-700"
+                              style={{ width: `${progressPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div className="flex items-center justify-between gap-4 lg:justify-end lg:space-x-6">
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Courses</p>
+                        <p className="font-semibold text-gray-800">
+                          {child.coursesEnrolled} active
+                          {child.coursesCompleted > 0 && (
+                            <span className="text-xs text-green-600 ml-1">({child.coursesCompleted} done)</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-sm text-gray-500">Avg Score</p>
+                        <p className="font-semibold text-gray-800">
+                          {child.avgQuizScore > 0 ? `${child.avgQuizScore}%` : '—'}
+                        </p>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-sm text-gray-500">Streak</p>
+                        <p className="font-semibold text-gray-800 flex items-center justify-end">
+                          {child.currentStreak}
+                          <Flame className="w-4 h-4 text-orange-500 ml-1" />
+                        </p>
+                      </div>
+                      <div className="text-right hidden xl:block">
+                        <p className="text-sm text-gray-500">Last Active</p>
+                        <p className="text-sm text-gray-700">
+                          {child.lastActiveAt
+                            ? new Date(child.lastActiveAt).toLocaleDateString()
+                            : 'Never'}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+                    </div>
                   </div>
-                  <div className="text-right hidden md:block">
-                    <p className="text-sm text-gray-500">Avg Score</p>
-                    <p className="font-semibold text-gray-800">
-                      {child.avgQuizScore > 0 ? `${child.avgQuizScore}%` : '—'}
-                    </p>
-                  </div>
-                  <div className="text-right hidden md:block">
-                    <p className="text-sm text-gray-500">Streak</p>
-                    <p className="font-semibold text-gray-800 flex items-center justify-end">
-                      {child.currentStreak}
-                      <Flame className="w-4 h-4 text-orange-500 ml-1" />
-                    </p>
-                  </div>
-                  <div className="text-right hidden lg:block">
-                    <p className="text-sm text-gray-500">Last Active</p>
-                    <p className="text-sm text-gray-700">
-                      {child.lastActiveAt
-                        ? new Date(child.lastActiveAt).toLocaleDateString()
-                        : 'Never'}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

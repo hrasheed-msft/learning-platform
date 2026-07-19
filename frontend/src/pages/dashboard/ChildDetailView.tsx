@@ -143,7 +143,12 @@ export default function ChildDetailView() {
             {stats.courseProgress.map((course) => (
               <div key={course.courseId}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700">{course.courseTitle}</span>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">{course.courseTitle}</span>
+                    <p className="text-xs text-gray-400">
+                      {course.completedUnits}/{course.totalUnits} units completed
+                    </p>
+                  </div>
                   <div className="flex items-center space-x-2">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       course.status === 'COMPLETED'

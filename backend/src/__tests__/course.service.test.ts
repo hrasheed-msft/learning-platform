@@ -308,4 +308,91 @@ describe('CourseService', () => {
       ).rejects.toThrow('Unit not found');
     });
   });
+
+  describe('updateCourseProgress', () => {
+    it('should only count units complete when video, reading, and quiz are all complete', async () => {
+      vi.mocked(prisma.courseEnrollment.findUnique).mockResolvedValue({
+        id: 'enrollment-1',
+        status: 'ACTIVE',
+        progress: 0,
+        completedAt: null,
+        course: {
+          id: 'course-1',
+          title: 'Arabic Basics',
+          units: [{ id: 'unit-1' }, { id: 'unit-2' }],
+        },
+        unitProgress: [
+          {
+            unitId: 'unit-1',
+            videoCompleted: true,
+            readingCompleted: true,
+            quizCompleted: true,
+          },
+          {
+            unitId: 'unit-2',
+            videoCompleted: false,
+            readingCompleted: true,
+            quizCompleted: false,
+          },
+        ],
+      } as any);
+      vi.mocked(prisma.courseEnrollment.update).mockResolvedValue({} as any);
+
+      const result = await CourseService.updateCourseProgress('enrollment-1');
+
+      expect(prisma.courseEnrollment.update).toHaveBeenCalledWith({
+        where: { id: 'enrollment-1' },
+        data: expect.objectContaining({
+          progress: 50,
+          status: 'ACTIVE',
+          completedAt: null,
+        }),
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          progress: 50,
+          status: 'ACTIVE',
+        })
+      );
+    });
+  });
+
+  describe('getMemberProgress', () => {
+    it('should report completed units using full unit completion criteria', async () => {
+      vi.mocked(prisma.courseEnrollment.findMany).mockResolvedValue([
+        {
+          courseId: 'course-1',
+          status: 'ACTIVE',
+          progress: 50,
+          course: {
+            title: 'Arabic Basics',
+            _count: { units: 2 },
+          },
+          unitProgress: [
+            {
+              unitId: 'unit-1',
+              videoCompleted: true,
+              readingCompleted: true,
+              quizCompleted: true,
+            },
+            {
+              unitId: 'unit-2',
+              videoCompleted: false,
+              readingCompleted: true,
+              quizCompleted: false,
+            },
+          ],
+        },
+      ] as any);
+
+      const result = await CourseService.getMemberProgress('family-1', 'member-1');
+
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          completedUnits: 1,
+          totalUnits: 2,
+        })
+      );
+    });
+  });
 });

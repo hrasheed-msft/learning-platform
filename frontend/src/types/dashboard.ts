@@ -9,6 +9,8 @@ export interface ChildSummary {
   ageCategory: AgeCategory;
   avatarUrl?: string;
   coursesEnrolled: number;
+  coursesCompleted: number;
+  overallProgress: number;
   avgQuizScore: number;
   currentStreak: number;
   lastActiveAt: string | null;
@@ -35,6 +37,16 @@ export interface CourseProgressItem {
   courseTitle: string;
   progress: number;
   status: 'ACTIVE' | 'COMPLETED' | 'PAUSED';
+  totalUnits: number;
+  completedUnits: number;
+  units: CourseUnitProgressItem[];
+}
+
+export interface CourseUnitProgressItem {
+  unitId: string;
+  completed: boolean;
+  status: 'not_started' | 'in_progress' | 'completed';
+  completedAt: string | null;
 }
 
 export interface QuizScorePoint {
@@ -57,6 +69,7 @@ export interface FamilySummary {
   activeCoursesCount: number;
   totalChildren: number;
   averageFamilyStreak: number;
+  overallProgress: number;
 }
 
 export interface Notification {

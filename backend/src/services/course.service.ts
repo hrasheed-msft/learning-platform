@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { NotFoundError, BadRequestError, ConflictError, ForbiddenError } from '../middleware/error.middleware';
 import { recordActivity } from './activity.service';
+import { isUnitComplete } from '../utils/unit-progress';
 
 interface GetCoursesInput {
   category?: string;
@@ -404,9 +405,7 @@ export class CourseService {
       status: e.status,
       progress: e.progress,
       totalUnits: e.course._count.units,
-      completedUnits: e.unitProgress.filter(
-        up => up.videoCompleted && up.readingCompleted && up.quizCompleted
-      ).length,
+      completedUnits: e.unitProgress.filter(isUnitComplete).length,
       unitProgress: e.unitProgress,
     }));
   }
@@ -466,12 +465,4 @@ export class CourseService {
       courseTitle: enrollment.course.title,
     };
   }
-}
-
-function isUnitComplete(progress?: {
-  videoCompleted?: boolean;
-  readingCompleted?: boolean;
-  quizCompleted?: boolean;
-} | null): boolean {
-  return Boolean(progress?.videoCompleted && progress?.readingCompleted && progress?.quizCompleted);
 }

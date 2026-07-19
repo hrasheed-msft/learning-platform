@@ -1,5 +1,6 @@
 import prisma from '../config/database';
 import { NotFoundError } from '../middleware/error.middleware';
+import { getUnitProgressStatus, isUnitComplete } from '../utils/unit-progress';
 
 export class DashboardService {
   static async getChildrenWithStats(familyId: string) {
@@ -8,7 +9,7 @@ export class DashboardService {
       orderBy: { createdAt: 'asc' },
       include: {
         enrollments: {
-          include: { course: { select: { id: true, title: true } } },
+          select: { id: true, progress: true, status: true, course: { select: { id: true, title: true } } },
         },
         quizResults: {
           orderBy: { createdAt: 'desc' },
@@ -33,13 +34,23 @@ export class DashboardService {
             )
           : 0;
 
+      const activeEnrollments = member.enrollments.filter(e => e.status !== 'COMPLETED');
+      const completedEnrollments = member.enrollments.filter(e => e.status === 'COMPLETED');
+      const activeOnly = member.enrollments.filter(e => e.status === 'ACTIVE');
+      const averageProgress =
+        activeOnly.length > 0
+          ? Math.round(activeOnly.reduce((sum, e) => sum + e.progress, 0) / activeOnly.length)
+          : 0;
+
       return {
         memberId: member.id,
         name: member.name,
         age: member.age,
         ageCategory: member.ageCategory,
         avatarUrl: member.avatarUrl,
-        coursesEnrolled: member.enrollments.length,
+        coursesEnrolled: activeEnrollments.length,
+        coursesCompleted: completedEnrollments.length,
+        overallProgress: averageProgress,
         avgQuizScore,
         currentStreak: member.currentStreak,
         lastActiveAt: member.lastActiveAt,
@@ -72,7 +83,14 @@ export class DashboardService {
     const enrollments = await prisma.courseEnrollment.findMany({
       where: { memberId },
       include: {
-        course: { select: { id: true, title: true, category: true } },
+        course: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            _count: { select: { units: true } },
+          },
+        },
         unitProgress: true,
       },
     });
@@ -117,24 +135,45 @@ export class DashboardService {
     // Estimate study time from activity events (count × 5 min average)
     const totalStudyTimeMinutes = recentActivity.length * 5;
 
+    const courseProgress = enrollments.map((enrollment) => {
+      const totalUnits = enrollment.course._count.units;
+      const completedUnits = enrollment.unitProgress.filter(isUnitComplete).length;
+      const calculatedProgress = totalUnits > 0
+        ? Math.round((completedUnits / totalUnits) * 100)
+        : enrollment.progress;
+      const calculatedStatus = totalUnits > 0
+        ? (completedUnits === totalUnits ? 'COMPLETED' : enrollment.status === 'PAUSED' ? 'PAUSED' : 'ACTIVE')
+        : enrollment.status;
+
+      return {
+        courseId: enrollment.course.id,
+        courseTitle: enrollment.course.title,
+        progress: calculatedProgress,
+        status: calculatedStatus,
+        totalUnits,
+        completedUnits,
+        units: enrollment.unitProgress.map((unitProgress) => ({
+          unitId: unitProgress.unitId,
+          completed: isUnitComplete(unitProgress),
+          status: getUnitProgressStatus(unitProgress),
+          completedAt: unitProgress.completedAt?.toISOString() ?? null,
+        })),
+      };
+    });
+
     return {
       memberId: member.id,
       name: member.name,
       ageCategory: member.ageCategory,
       coursesEnrolled: enrollments.length,
-      coursesCompleted: enrollments.filter((e) => e.status === 'COMPLETED').length,
+      coursesCompleted: courseProgress.filter((course) => course.status === 'COMPLETED').length,
       avgQuizScore,
       currentStreak: member.currentStreak,
       longestStreak: member.longestStreak,
       totalStudyTimeMinutes,
       flashcardsReviewed,
       flashcardsMastered,
-      courseProgress: enrollments.map((e) => ({
-        courseId: e.course.id,
-        courseTitle: e.course.title,
-        progress: e.progress,
-        status: e.status,
-      })),
+      courseProgress,
       quizScoreTrend,
     };
   }
@@ -199,6 +238,10 @@ export class DashboardService {
         name: true,
         currentStreak: true,
         totalPoints: true,
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          select: { id: true, progress: true },
+        },
         _count: {
           select: {
             quizResults: true,
@@ -215,11 +258,14 @@ export class DashboardService {
       ? Math.round(members.reduce((sum, m) => sum + m.currentStreak, 0) / members.length)
       : 0;
 
-    // Count active enrollments across all members
-    const activeCoursesCount = members.reduce(
-      (sum, m) => sum + m._count.enrollments,
+    // Count only ACTIVE enrollments across all members
+    const activeCoursesCount = members.reduce((sum, m) => sum + m.enrollments.length, 0);
+    const totalCourseProgress = members.reduce(
+      (sum, member) => sum + member.enrollments.reduce((memberSum, enrollment) => memberSum + enrollment.progress, 0),
       0
     );
+    const overallProgress =
+      activeCoursesCount > 0 ? Math.round(totalCourseProgress / activeCoursesCount) : 0;
 
     // Recent family activity (last 7 days)
     const weekAgo = new Date();
@@ -240,6 +286,7 @@ export class DashboardService {
       activeCoursesCount,
       totalChildren: members.length,
       averageFamilyStreak: averageStreak,
+      overallProgress,
     };
   }
 }

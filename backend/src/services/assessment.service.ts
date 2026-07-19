@@ -2,6 +2,7 @@ import prisma from '../config/database';
 import { NotFoundError, ForbiddenError, BadRequestError, CooldownError } from '../middleware/error.middleware';
 import { recordActivity } from './activity.service';
 import { CourseService } from './course.service';
+import { isUnitComplete } from '../utils/unit-progress';
 
 interface QuizAnswer {
   questionId: string;
@@ -193,7 +194,10 @@ export class AssessmentService {
         const existingProgress = await prisma.unitProgress.findUnique({
           where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
         });
-        const nowCompleted = Boolean(existingProgress?.videoCompleted && existingProgress?.readingCompleted);
+        const nowCompleted = isUnitComplete({
+          ...existingProgress,
+          quizCompleted: true,
+        });
 
         await prisma.unitProgress.upsert({
           where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
@@ -329,4 +333,3 @@ export class AssessmentService {
     };
   }
 }
-
