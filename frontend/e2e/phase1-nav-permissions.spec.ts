@@ -147,8 +147,13 @@ test.describe('Phase 1 — Nav permissions', () => {
       );
     }, { auth: authData });
 
-    // Go to /select-learner
+    // Go to /select-learner; wait for learners API to load before interacting with tiles
+    const learnersResponsePromise = page.waitForResponse(
+      (r) => (r.url().includes('/family/learners') || r.url().includes('/family/members')) && r.status() === 200,
+      { timeout: 20_000 }
+    ).catch(() => null);
     await page.goto('/select-learner', { waitUntil: 'networkidle', timeout: 30_000 });
+    await learnersResponsePromise;
     await page.waitForTimeout(2000);
 
     const resultsDir = ensureResultsDir();
@@ -156,9 +161,9 @@ test.describe('Phase 1 — Nav permissions', () => {
     console.log('select-learner URL:', page.url());
     console.log('Page text:', (await page.locator('body').innerText()).slice(0, 800));
 
-    // Find and click Ibn Sharif's tile
-    const ibnSharifBtn = page.getByRole('button', { name: /Ibn Sharif/i });
-    await expect(ibnSharifBtn, 'Ibn Sharif tile not found on /select-learner').toBeVisible();
+    // Find and click Ibn Sharif's tile (use .first() since parent may have multiple children)
+    const ibnSharifBtn = page.getByRole('button', { name: /Ibn Sharif/i }).first();
+    await expect(ibnSharifBtn, 'Ibn Sharif tile not found on /select-learner').toBeVisible({ timeout: 15_000 });
     await ibnSharifBtn.click();
 
     // Wait for redirect to /child/dashboard

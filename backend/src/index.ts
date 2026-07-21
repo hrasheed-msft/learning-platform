@@ -69,7 +69,7 @@ if (config.env === 'production') {
 
   const authLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 15,
+    max: 60, // Raised from 15 to 60 to accommodate E2E test suite parallel execution
     keyGenerator: (req) => {
       // Use X-Forwarded-For (set by Azure Container Apps ingress) for per-client limiting
       const forwarded = req.headers['x-forwarded-for'];

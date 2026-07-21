@@ -7,7 +7,7 @@ const apiUrl =
   'https://ca-api-islamic-learning.victorioussand-c4494f56.centralus.azurecontainerapps.io/api/v1';
 
 const childUsername = process.env.E2E_CHILD_USERNAME || 'ibnsharif';
-const childPassword = process.env.E2E_CHILD_PASSWORD || 'Eagle1333';
+const childPassword = process.env.E2E_CHILD_PASSWORD || 'IbnSharif123!';
 const IBN_SHARIF_MEMBER_ID = 'b32bf819-1662-47c5-b80f-2e2ca6bd26ab';
 
 function ensureResultsDir() {
