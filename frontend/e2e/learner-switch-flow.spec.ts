@@ -227,6 +227,7 @@ test.describe('Learner Switch Flow', () => {
     page,
     request,
   }) => {
+    test.setTimeout(90_000); // Allow time for possible PIN lockout from concurrent tests
     test.skip(!parentEmail || !parentPassword, 'Set E2E_PARENT_EMAIL/PASSWORD before running.');
     test.skip(!parentPin, 'Set E2E_PARENT_PIN before running.');
 
@@ -295,19 +296,21 @@ test.describe('Learner Switch Flow', () => {
 
     await page.screenshot({ path: path.join(resultsDir, 'learner-switch-t3-pin-modal.png'), fullPage: true });
 
-    // Enter correct PIN (auto-submits on 4th digit)
+    // Enter correct PIN — wait for any lockout from concurrent test runs to expire first
     const firstInput = page.locator('input[inputmode="numeric"][maxlength="1"]').first();
+    // Inputs are disabled during lockout; wait up to 40s for them to become enabled
+    await page.waitForFunction(
+      () => {
+        const inputs = document.querySelectorAll('input[inputmode="numeric"][maxlength="1"]');
+        return inputs.length > 0 && !(inputs[0] as HTMLInputElement).disabled;
+      },
+      { timeout: 40_000 }
+    );
     await firstInput.click();
     await firstInput.pressSequentially(parentPin, { delay: 100 });
 
     // Assert: Navigates to /select-learner
-    await page.waitForURL(/\/select-learner/, { timeout: 15_000 });
-    const url = page.url();
-    console.log('Test 3 URL after correct PIN:', url);
-
-    expect(url, 'Expected navigation to /select-learner after correct PIN from ChildLayout').toContain(
-      '/select-learner'
-    );
+    await page.waitForURL(/\/select-learner/, { timeout: 20_000 });
 
     await page.screenshot({ path: path.join(resultsDir, 'learner-switch-t3-after-pin.png'), fullPage: true });
     console.log('[PASS] Test 3 — Switch Learner from ChildLayout: PIN modal shown, correct PIN navigates to /select-learner.');
@@ -318,6 +321,7 @@ test.describe('Learner Switch Flow', () => {
     page,
     request,
   }) => {
+    test.setTimeout(90_000); // Allow time for possible PIN lockout from concurrent tests
     test.skip(!parentEmail || !parentPassword, 'Set E2E_PARENT_EMAIL/PASSWORD before running.');
     test.skip(!parentPin, 'Set E2E_PARENT_PIN before running.');
 
@@ -386,13 +390,21 @@ test.describe('Learner Switch Flow', () => {
 
     await page.screenshot({ path: path.join(resultsDir, 'learner-switch-t4-pin-modal.png'), fullPage: true });
 
-    // Enter correct PIN (auto-submits on 4th digit)
+    // Enter correct PIN — wait for any lockout from concurrent test runs to expire first
     const firstInput = page.locator('input[inputmode="numeric"][maxlength="1"]').first();
+    // Inputs are disabled during lockout; wait up to 40s for them to become enabled
+    await page.waitForFunction(
+      () => {
+        const inputs = document.querySelectorAll('input[inputmode="numeric"][maxlength="1"]');
+        return inputs.length > 0 && !(inputs[0] as HTMLInputElement).disabled;
+      },
+      { timeout: 40_000 }
+    );
     await firstInput.click();
     await firstInput.pressSequentially(parentPin, { delay: 100 });
 
     // Assert: Navigates to /select-learner
-    await page.waitForURL(/\/select-learner/, { timeout: 15_000 });
+    await page.waitForURL(/\/select-learner/, { timeout: 20_000 });
     const url = page.url();
     console.log('Test 4 URL after correct PIN:', url);
 
