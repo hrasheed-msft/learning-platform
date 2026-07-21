@@ -229,9 +229,16 @@ test.describe('Learner Switch Flow', () => {
   }) => {
     test.setTimeout(90_000); // Allow time for possible PIN lockout from concurrent tests
     test.skip(!parentEmail || !parentPassword, 'Set E2E_PARENT_EMAIL/PASSWORD before running.');
-    test.skip(!parentPin, 'Set E2E_PARENT_PIN before running.');
 
     const authData = await doParentLogin(request);
+
+    // Set a known PIN via API (clears any existing lockout; avoids dependency on env PIN value)
+    const testPin = '7831';
+    const setPinResp = await request.post(`${apiUrl}/auth/parent-pin`, {
+      headers: { Authorization: `Bearer ${authData.accessToken}` },
+      data: { pin: testPin },
+    });
+    console.log('Test 3 — set PIN status:', setPinResp.status());
 
     await page.addInitScript(({ auth, member, isParentInStudentMode }) => {
       localStorage.setItem(
@@ -307,7 +314,7 @@ test.describe('Learner Switch Flow', () => {
       { timeout: 40_000 }
     );
     await firstInput.click();
-    await firstInput.pressSequentially(parentPin, { delay: 100 });
+    await firstInput.pressSequentially(testPin, { delay: 100 });
 
     // Assert: Navigates to /select-learner
     await page.waitForURL(/\/select-learner/, { timeout: 20_000 });
@@ -323,9 +330,16 @@ test.describe('Learner Switch Flow', () => {
   }) => {
     test.setTimeout(90_000); // Allow time for possible PIN lockout from concurrent tests
     test.skip(!parentEmail || !parentPassword, 'Set E2E_PARENT_EMAIL/PASSWORD before running.');
-    test.skip(!parentPin, 'Set E2E_PARENT_PIN before running.');
 
     const authData = await doParentLogin(request);
+
+    // Set a known PIN via API (clears any existing lockout; avoids dependency on env PIN value)
+    const testPin = '7831';
+    const setPinResp = await request.post(`${apiUrl}/auth/parent-pin`, {
+      headers: { Authorization: `Bearer ${authData.accessToken}` },
+      data: { pin: testPin },
+    });
+    console.log('Test 4 — set PIN status:', setPinResp.status());
 
     await page.addInitScript(({ auth, member, isParentInStudentMode }) => {
       localStorage.setItem(
@@ -401,7 +415,7 @@ test.describe('Learner Switch Flow', () => {
       { timeout: 40_000 }
     );
     await firstInput.click();
-    await firstInput.pressSequentially(parentPin, { delay: 100 });
+    await firstInput.pressSequentially(testPin, { delay: 100 });
 
     // Assert: Navigates to /select-learner
     await page.waitForURL(/\/select-learner/, { timeout: 20_000 });
