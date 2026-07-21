@@ -39,7 +39,7 @@ export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, family, logout } = useAuthStore();
-  const { selectedMember, members, setParentInStudentMode } = useFamilyStore();
+  const { selectedMember, members, setParentInStudentMode, selectMember } = useFamilyStore();
 
   // Pre-fetch PIN status
   useEffect(() => {
@@ -61,7 +61,8 @@ export default function MainLayout() {
 
   const doSwitchLearner = () => {
     setParentInStudentMode(false);
-    navigate('/select-learner');
+    // Clearing selectedMember lets ProtectedRoute redirect to /select-learner declaratively
+    selectMember(null);
   };
 
   const handleSwitchLearner = () => {

@@ -426,8 +426,13 @@ test.describe('Learner Switch Flow', () => {
       localStorage.removeItem('family-storage');
     }, { member: IBN_SHARIF });
 
-    await page.goto('/child/dashboard', { waitUntil: 'networkidle', timeout: 30_000 });
-    await page.waitForTimeout(2000);
+    // Intercept all API calls so the mock token doesn't trigger a 401 → redirect cycle
+    await page.route('**/api/v1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":{},"success":true}' })
+    );
+
+    await page.goto('/child/dashboard', { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    await page.waitForTimeout(1000);
 
     const resultsDir = ensureResultsDir();
     await page.screenshot({ path: path.join(resultsDir, 'learner-switch-t5-child-direct.png'), fullPage: true });
@@ -524,7 +529,7 @@ test.describe('Learner Switch Flow', () => {
     ).toBeVisible();
 
     // Assert: "Switch Learner" button visible in banner
-    const switchLearnerBtn = page.getByRole('button', { name: /switch learner/i });
+    const switchLearnerBtn = page.getByRole('button', { name: /switch learner/i }).first();
     await expect(
       switchLearnerBtn,
       '"Switch Learner" button must be visible in the preview banner'

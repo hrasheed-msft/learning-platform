@@ -39,7 +39,7 @@ export default function ChildLayout() {
   const { member, logout } = useChildAuthStore();
   const { isAuthenticated: isParentAuth } = useAuthStore();
   const { isChildSession } = useChildAuthStore();
-  const { isParentInStudentMode, setParentInStudentMode, selectedMember } = useFamilyStore();
+  const { isParentInStudentMode, setParentInStudentMode, selectedMember, selectMember } = useFamilyStore();
 
   // Parent is previewing when they arrived via parent dashboard (not SelectLearner student-mode pick)
   const isParentViewing = isParentAuth && !isChildSession && !isParentInStudentMode;
@@ -61,7 +61,8 @@ export default function ChildLayout() {
 
   const doSwitchLearner = () => {
     setParentInStudentMode(false);
-    navigate('/select-learner');
+    // Clearing selectedMember lets ChildProtectedRoute redirect to /select-learner declaratively
+    selectMember(null);
   };
 
   const handleSwitchLearner = () => {
