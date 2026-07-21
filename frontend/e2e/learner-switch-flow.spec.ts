@@ -303,18 +303,32 @@ test.describe('Learner Switch Flow', () => {
 
     await page.screenshot({ path: path.join(resultsDir, 'learner-switch-t3-pin-modal.png'), fullPage: true });
 
-    // Enter correct PIN — wait for any lockout from concurrent test runs to expire first
+    // Enter PIN with full lockout handling (pre-entry AND mid-entry race conditions)
+    const waitForInputsEnabled = () =>
+      page.waitForFunction(
+        () => {
+          const inputs = document.querySelectorAll('input[inputmode="numeric"][maxlength="1"]');
+          return inputs.length > 0 && !(inputs[0] as HTMLInputElement).disabled;
+        },
+        { timeout: 40_000 }
+      );
+
+    // Wait for any pre-existing lockout to clear first
+    await waitForInputsEnabled();
+
     const firstInput = page.locator('input[inputmode="numeric"][maxlength="1"]').first();
-    // Inputs are disabled during lockout; wait up to 40s for them to become enabled
-    await page.waitForFunction(
-      () => {
-        const inputs = document.querySelectorAll('input[inputmode="numeric"][maxlength="1"]');
-        return inputs.length > 0 && !(inputs[0] as HTMLInputElement).disabled;
-      },
-      { timeout: 40_000 }
-    );
     await firstInput.click();
     await firstInput.pressSequentially(testPin, { delay: 100 });
+
+    // Allow time for API response; if lockout was triggered during entry, wait and retry once
+    await page.waitForTimeout(3_000);
+    const lockedAfterEntry = await page.getByText(/too many attempts/i).isVisible().catch(() => false);
+    if (lockedAfterEntry) {
+      console.log('[INFO] Test 3 — lockout triggered during entry; waiting to retry...');
+      await waitForInputsEnabled();
+      await firstInput.click();
+      await firstInput.pressSequentially(testPin, { delay: 100 });
+    }
 
     // Assert: Navigates to /select-learner
     await page.waitForURL(/\/select-learner/, { timeout: 20_000 });
@@ -404,18 +418,32 @@ test.describe('Learner Switch Flow', () => {
 
     await page.screenshot({ path: path.join(resultsDir, 'learner-switch-t4-pin-modal.png'), fullPage: true });
 
-    // Enter correct PIN — wait for any lockout from concurrent test runs to expire first
+    // Enter PIN with full lockout handling (pre-entry AND mid-entry race conditions)
+    const waitForInputsEnabled = () =>
+      page.waitForFunction(
+        () => {
+          const inputs = document.querySelectorAll('input[inputmode="numeric"][maxlength="1"]');
+          return inputs.length > 0 && !(inputs[0] as HTMLInputElement).disabled;
+        },
+        { timeout: 40_000 }
+      );
+
+    // Wait for any pre-existing lockout to clear first
+    await waitForInputsEnabled();
+
     const firstInput = page.locator('input[inputmode="numeric"][maxlength="1"]').first();
-    // Inputs are disabled during lockout; wait up to 40s for them to become enabled
-    await page.waitForFunction(
-      () => {
-        const inputs = document.querySelectorAll('input[inputmode="numeric"][maxlength="1"]');
-        return inputs.length > 0 && !(inputs[0] as HTMLInputElement).disabled;
-      },
-      { timeout: 40_000 }
-    );
     await firstInput.click();
     await firstInput.pressSequentially(testPin, { delay: 100 });
+
+    // Allow time for API response; if lockout was triggered during entry, wait and retry once
+    await page.waitForTimeout(3_000);
+    const lockedAfterEntry = await page.getByText(/too many attempts/i).isVisible().catch(() => false);
+    if (lockedAfterEntry) {
+      console.log('[INFO] Test 4 — lockout triggered during entry; waiting to retry...');
+      await waitForInputsEnabled();
+      await firstInput.click();
+      await firstInput.pressSequentially(testPin, { delay: 100 });
+    }
 
     // Assert: Navigates to /select-learner
     await page.waitForURL(/\/select-learner/, { timeout: 20_000 });
