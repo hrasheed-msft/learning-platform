@@ -265,9 +265,10 @@ test.describe('Phase 1 — Parent PIN gate', () => {
       headers: { Authorization: `Bearer ${authData.accessToken}` },
     });
 
-    // Send exactly 3 wrong attempts to trigger the PIN-specific lockout (MAX_ATTEMPTS = 3)
+    // The backend requires MAX_ATTEMPTS (3) wrong tries to SET the lock, then a 4th attempt
+    // returns 429. So the loop needs 4 iterations to observe the 429.
     let lockoutConfirmedViaApi = false;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       const r = await request.post(`${apiUrl}/auth/parent-pin/verify`, {
         data: { memberId: HASSAN_MEMBER_ID, pin: '2222' },
         headers: { Authorization: `Bearer ${authData.accessToken}` },
