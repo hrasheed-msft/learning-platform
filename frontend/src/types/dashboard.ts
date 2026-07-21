@@ -44,6 +44,8 @@ export interface CourseProgressItem {
 
 export interface CourseUnitProgressItem {
   unitId: string;
+  unitTitle: string;
+  orderIndex: number;
   completed: boolean;
   status: 'not_started' | 'in_progress' | 'completed';
   completedAt: string | null;

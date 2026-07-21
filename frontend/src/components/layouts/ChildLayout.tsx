@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useChildAuthStore } from '@/stores/childAuthStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useFamilyStore } from '@/stores/familyStore';
+import ParentPinModal from '@/components/auth/ParentPinModal';
+import { authService } from '@/services/authService';
 import {
   Home,
   BookOpen,
@@ -12,6 +15,7 @@ import {
   X,
   GraduationCap,
   Gamepad2,
+  Users,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -26,19 +30,55 @@ const childNavigation = [
 
 export default function ChildLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSwitchPin, setShowSwitchPin] = useState(false);
+  const [hasPinCache, setHasPinCache] = useState<boolean | null>(null);
+  const [pinToast, setPinToast] = useState<string | null>(null);
+
   const location = useLocation();
   const navigate = useNavigate();
   const { member, logout } = useChildAuthStore();
   const { isAuthenticated: isParentAuth } = useAuthStore();
   const { isChildSession } = useChildAuthStore();
-  // Parent is previewing when they arrived via SelectLearner (not child direct login)
-  const isParentViewing = isParentAuth && !isChildSession;
+  const { isParentInStudentMode, setParentInStudentMode, selectedMember } = useFamilyStore();
+
+  // Parent is previewing when they arrived via parent dashboard (not SelectLearner student-mode pick)
+  const isParentViewing = isParentAuth && !isChildSession && !isParentInStudentMode;
+
+  // Pre-fetch PIN status when parent is logged in
+  useEffect(() => {
+    if (isParentAuth) {
+      authService
+        .getParentPinStatus()
+        .then(({ hasPin }) => setHasPinCache(hasPin))
+        .catch(() => setHasPinCache(false));
+    }
+  }, [isParentAuth]);
+
+  const showNoPinToast = (msg: string) => {
+    setPinToast(msg);
+    setTimeout(() => setPinToast(null), 5000);
+  };
+
+  const doSwitchLearner = () => {
+    setParentInStudentMode(false);
+    navigate('/select-learner');
+  };
+
+  const handleSwitchLearner = () => {
+    setSidebarOpen(false);
+    if (hasPinCache === true) {
+      setShowSwitchPin(true);
+    } else {
+      showNoPinToast('Set a parent PIN in Settings to secure account switching.');
+      doSwitchLearner();
+    }
+  };
 
   const formatAgeCategory = (cat: string) =>
     cat.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
   const handleLogout = () => {
-    if (isParentViewing) {
+    if (isParentViewing || isParentAuth) {
       navigate('/dashboard');
     } else {
       logout();
@@ -97,6 +137,19 @@ export default function ChildLayout() {
             </div>
           </div>
         </div>
+
+        {/* Switch Learner — visible to parent only */}
+        {isParentAuth && (
+          <div className="px-4 py-3 border-b">
+            <button
+              onClick={handleSwitchLearner}
+              className="flex items-center gap-2 w-full px-4 py-2.5 bg-primary-50 border border-primary-200 text-primary-800 font-semibold rounded-xl hover:bg-primary-100 transition text-sm min-h-[44px]"
+            >
+              <Users className="w-4 h-4 flex-shrink-0" />
+              <span>Switch Learner</span>
+            </button>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">
@@ -162,6 +215,7 @@ export default function ChildLayout() {
 
         {/* Page content */}
         <main className="p-4 lg:p-8">
+          {/* Parent preview banner — only shown when parent is viewing (not in student mode) */}
           {isParentViewing && (
             <div className="mb-4 flex items-center justify-between gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm">
               <div className="flex items-center gap-2 text-amber-800">
@@ -171,12 +225,12 @@ export default function ChildLayout() {
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <Link
-                  to="/select-learner"
+                <button
+                  onClick={handleSwitchLearner}
                   className="px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg hover:bg-amber-50 transition text-xs"
                 >
-                  Switch child
-                </Link>
+                  Switch Learner
+                </button>
                 <Link
                   to="/dashboard"
                   className="px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg hover:bg-amber-50 transition text-xs"
@@ -189,6 +243,27 @@ export default function ChildLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Parent PIN modal for Switch Learner */}
+      {showSwitchPin && selectedMember && (
+        <ParentPinModal
+          memberId={selectedMember.id}
+          title="Parent PIN Required"
+          description="Enter your PIN to switch learner"
+          onVerified={() => {
+            setShowSwitchPin(false);
+            doSwitchLearner();
+          }}
+          onCancel={() => setShowSwitchPin(false)}
+        />
+      )}
+
+      {/* No-PIN toast */}
+      {pinToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-gray-800 text-white text-sm rounded-xl shadow-lg max-w-sm text-center">
+          {pinToast}
+        </div>
+      )}
     </div>
   );
 }

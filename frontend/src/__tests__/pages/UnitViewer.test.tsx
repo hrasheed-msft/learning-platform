@@ -16,6 +16,14 @@ vi.mock('@/components/UnitAudioButton', () => ({
   default: () => <div>Audio controls</div>,
 }));
 
+vi.mock('@/hooks/useUnitContent', () => ({
+  useUnitContent: (content: { text?: string } | undefined) => ({
+    html: content?.text ?? '',
+    loading: false,
+    error: null,
+  }),
+}));
+
 const baseUnit = {
   id: 'unit-2',
   courseId: 'course-1',

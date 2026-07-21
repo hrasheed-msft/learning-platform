@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Lock, AlertCircle } from 'lucide-react';
 import { authService } from '@/services/authService';
@@ -7,10 +7,13 @@ import type { FamilyMember } from '@/types';
 interface Props {
   onVerified: () => void;
   onCancel: () => void;
-  targetMember: FamilyMember;
+  targetMember?: FamilyMember;
+  memberId?: string;
+  title?: string;
+  description?: string | React.ReactNode;
 }
 
-export default function ParentPinModal({ onVerified, onCancel, targetMember }: Props) {
+export default function ParentPinModal({ onVerified, onCancel, targetMember, memberId, title, description }: Props) {
   const navigate = useNavigate();
   const [digits, setDigits] = useState<string[]>(['', '', '', '']);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +46,8 @@ export default function ParentPinModal({ onVerified, onCancel, targetMember }: P
       setIsVerifying(true);
       setError(null);
       try {
-        const result = await authService.verifyParentPin(targetMember.id, pin);
+        const id = targetMember?.id ?? memberId ?? '';
+        const result = await authService.verifyParentPin(id, pin);
         if (result.verified) {
           onVerified();
         } else {
@@ -72,7 +76,7 @@ export default function ParentPinModal({ onVerified, onCancel, targetMember }: P
         setIsVerifying(false);
       }
     },
-    [targetMember.id, onVerified]
+    [targetMember?.id, memberId, onVerified]
   );
 
   const handleDigitChange = (idx: number, val: string) => {
@@ -114,10 +118,14 @@ export default function ParentPinModal({ onVerified, onCancel, targetMember }: P
           <div className="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center mb-3">
             <Lock className="w-7 h-7 text-primary-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Parent PIN Required</h2>
+          <h2 className="text-xl font-bold text-gray-900">{title ?? 'Parent PIN Required'}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Enter your PIN to switch to{' '}
-            <span className="font-medium text-gray-700">{targetMember.name}</span>
+            {description ?? (
+              <>
+                Enter your PIN to switch to{' '}
+                <span className="font-medium text-gray-700">{targetMember?.name}</span>
+              </>
+            )}
           </p>
         </div>
 

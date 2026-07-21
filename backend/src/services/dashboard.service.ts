@@ -89,6 +89,14 @@ export class DashboardService {
             title: true,
             category: true,
             _count: { select: { units: true } },
+            units: {
+              select: {
+                id: true,
+                title: true,
+                orderIndex: true,
+              },
+              orderBy: { orderIndex: 'asc' },
+            },
           },
         },
         unitProgress: true,
@@ -138,6 +146,9 @@ export class DashboardService {
     const courseProgress = enrollments.map((enrollment) => {
       const totalUnits = enrollment.course._count.units;
       const completedUnits = enrollment.unitProgress.filter(isUnitComplete).length;
+      const unitProgressByUnitId = new Map(
+        enrollment.unitProgress.map((unitProgress) => [unitProgress.unitId, unitProgress])
+      );
       const calculatedProgress = totalUnits > 0
         ? Math.round((completedUnits / totalUnits) * 100)
         : enrollment.progress;
@@ -152,12 +163,18 @@ export class DashboardService {
         status: calculatedStatus,
         totalUnits,
         completedUnits,
-        units: enrollment.unitProgress.map((unitProgress) => ({
-          unitId: unitProgress.unitId,
-          completed: isUnitComplete(unitProgress),
-          status: getUnitProgressStatus(unitProgress),
-          completedAt: unitProgress.completedAt?.toISOString() ?? null,
-        })),
+        units: enrollment.course.units.map((unit) => {
+          const unitProgress = unitProgressByUnitId.get(unit.id);
+
+          return {
+            unitId: unit.id,
+            unitTitle: unit.title,
+            orderIndex: unit.orderIndex,
+            completed: isUnitComplete(unitProgress),
+            status: getUnitProgressStatus(unitProgress),
+            completedAt: unitProgress?.completedAt?.toISOString() ?? null,
+          };
+        }),
       };
     });
 

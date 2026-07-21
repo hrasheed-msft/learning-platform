@@ -43,7 +43,7 @@ function getInitials(name: string): string {
 export default function SelectLearner() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { members, selectedMember, isLoading, error, fetchLearners, selectMember, selfEnroll } =
+  const { members, selectedMember, isLoading, error, fetchLearners, selectMember, selfEnroll, setParentInStudentMode } =
     useFamilyStore();
   const [enrolling, setEnrolling] = useState(false);
 
@@ -73,6 +73,7 @@ export default function SelectLearner() {
   }, []);
 
   const completeSelect = (member: FamilyMember) => {
+    setParentInStudentMode(member.isAccountOwner === false);
     selectMember(member);
     if (member.isAccountOwner === false) {
       navigate('/child/dashboard');

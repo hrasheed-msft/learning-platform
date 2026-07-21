@@ -15,10 +15,12 @@ interface FamilyState {
   addMember: (familyId: string, data: CreateMemberRequest) => Promise<FamilyMember>;
   updateMember: (familyId: string, memberId: string, data: Partial<CreateMemberRequest>) => Promise<void>;
   removeMember: (familyId: string, memberId: string) => Promise<void>;
+  isParentInStudentMode: boolean;
   selectMember: (member: FamilyMember | null) => void;
   selfEnroll: () => Promise<FamilyMember>;
   clearSelectedMember: () => void;
   clearError: () => void;
+  setParentInStudentMode: (value: boolean) => void;
 }
 
 export const useFamilyStore = create<FamilyState>()(
@@ -28,6 +30,7 @@ export const useFamilyStore = create<FamilyState>()(
       selectedMember: null,
       isLoading: false,
       error: null,
+      isParentInStudentMode: false,
 
       fetchMembers: async (familyId: string) => {
         set({ isLoading: true, error: null });
@@ -137,11 +140,14 @@ export const useFamilyStore = create<FamilyState>()(
       },
 
       clearError: () => set({ error: null }),
+
+      setParentInStudentMode: (value: boolean) => set({ isParentInStudentMode: value }),
     }),
     {
       name: 'family-storage',
       partialize: (state) => ({
         selectedMember: state.selectedMember,
+        isParentInStudentMode: state.isParentInStudentMode,
       }),
     }
   )

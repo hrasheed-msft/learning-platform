@@ -11,6 +11,25 @@
 
 ## Learnings
 
+### Learner-Switching UI Flow (2026-07-21T15:09:29-05:00)
+
+- **`isParentInStudentMode` added to `familyStore`**: New boolean flag (default `false`) tracks whether parent navigated to child view intentionally via SelectLearner (vs. parent-preview from parent dashboard). Persisted via `partialize`.
+- **`completeSelect` in SelectLearner**: Now calls `setParentInStudentMode(member.isAccountOwner === false)` before navigating, so the flag is set correctly at selection time.
+- **`ParentPinModal` now accepts optional `targetMember`**: Added `memberId?`, `title?`, and `description?` props. `handleVerify` resolves ID from `targetMember?.id ?? memberId ?? ''`. JSX uses `title ??` and `description ??` fallbacks. Allows the modal to be used without a full `FamilyMember` object (e.g., from ChildLayout or MainLayout where only an ID is needed).
+- **`ChildLayout` Switch Learner button**: Added PIN-gated "Switch Learner" button in sidebar, visible only when `isParentAuth`. Pre-fetches PIN status on mount. Shows no-PIN toast + proceeds directly if no PIN configured.
+- **`isParentViewing` logic refined**: `isParentAuth && !isChildSession && !isParentInStudentMode` — parent-mode child navigation (student mode) no longer shows the "Parent preview" banner.
+- **`MainLayout` Switch Learner**: Replaced the complex multi-branch learner-switcher section with a single always-visible "Switch Learner" button (PIN-gated). Top-bar learner avatar button now also goes through PIN gate.
+- **`npx tsc --noEmit` passed with zero errors.**
+
+
+
+- **`ChildSummary` type extended** (`frontend/src/types/dashboard.ts`): Added `overallProgress: number` (avg progress % across active enrollments, computed by backend) and `coursesCompleted: number`. Both are supplied by `getChildrenWithStats` on the backend (Khwarizmi's scope).
+- **ParentDashboard updated** (`frontend/src/pages/dashboard/ParentDashboard.tsx`): Children overview list now shows a "Progress" stat (`child.overallProgress%`, hidden sm:block), styled identically to the other stats. "Courses" stat now shows `{N} active` plus `({M} done)` suffix when `coursesCompleted > 0`.
+- **ChildDetailView verified** — progress bars already use `course.progress` from `selectedChildStats.courseProgress` (the backend-computed enrollment progress). No frontend re-computation. No changes needed.
+- **ChildDashboardHome verified** — progress bars in "Continue Learning" cards already read `enrollment.progress ?? 0` directly from the backend. No local re-computation. No changes needed.
+- **Consistency principle confirmed:** Both parent view (via `getChildrenWithStats` → `ChildSummary.overallProgress`) and child view (via `useChildEnrollments` → `enrollment.progress`) now source progress from the same backend field (`enrollment.progress` / `updateCourseProgress`). After Khwarizmi's `isUnitComplete` fix, both views will update correctly when reading is marked complete.
+- `npx tsc --noEmit` passed with zero errors.
+
 ### Blob Storage Content Migration — useUnitContent hook (2026-07-17T09:58:43-05:00)
 
 - **`useUnitContent` hook added** (`frontend/src/hooks/useUnitContent.ts`): Resolves unit HTML content from either `contentUrl` (Azure Blob fetch) or inline `content.text`. Returns `{ html, loading, error }`.

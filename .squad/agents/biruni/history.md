@@ -226,7 +226,7 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 
 ---
 
-### 2026-07-10 ó Phase 1 Maktab Child UX: Production Verification + Bug Fixes
+### 2026-07-10 ÔøΩ Phase 1 Maktab Child UX: Production Verification + Bug Fixes
 
 **Requested by:** Hassan | **Date:** 2026-07-10T20:30:00-05:00
 
@@ -248,24 +248,24 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 
 #### Bugs Found and Fixed
 
-**Bug 1 ó Backend: PIN endpoint response shape mismatch** (commit `28a3a32`)
+**Bug 1 ÔøΩ Backend: PIN endpoint response shape mismatch** (commit `28a3a32`)
 - `auth.routes.ts` used `res.json({ success: true, ...result })` (flat spread) for PIN status and verify endpoints
 - Frontend expected `response.data.data` (standard ApiResponse convention), received `undefined`
 - Result: Settings page PIN banner never showed; PIN modal never had hasPinCache=true; verify always falsy
 - Fix: `res.json({ success: true, data: result })`
 
-**Bug 2 ó Backend: Missing courses[] in getMemberEnrollments response** (commit `28a3a32`)
+**Bug 2 ÔøΩ Backend: Missing courses[] in getMemberEnrollments response** (commit `28a3a32`)
 - `program.service.ts` `getMemberEnrollments()` selected `currentStage` fields but omitted `courses` relation
-- `ChildCoursesPage.maktabCourseIds` computed from `pe.currentStage?.courses ?? []` ó always empty
+- `ChildCoursesPage.maktabCourseIds` computed from `pe.currentStage?.courses ?? []` ÔøΩ always empty
 - Result: "My Maktab Subjects" section never rendered on /child/courses
 - Fix: Added `courses: { select: { id, title, slug, category } }` to `currentStage` Prisma select
 
-**Bug 3 ó Frontend: AxiosError response stripped in api.ts interceptor** (commit `2834bf7`)
+**Bug 3 ÔøΩ Frontend: AxiosError response stripped in api.ts interceptor** (commit `2834bf7`)
 - `api.ts` response interceptor converted ALL non-401/403 errors to `new Error(message)`, stripping `.response.status`
-- `ParentPinModal` catch block checked `axiosErr?.response?.status === 429` ó always `undefined` after strip
-- Result: On backend 429, catch fell into `else { onVerified() }` ó locked-out users bypassed the PIN gate silently
-- Fix: `error.message = message; return Promise.reject(error);` ó preserves full AxiosError with response info
-- **Security impact: HIGH** ó This was a real PIN gate bypass in production, fixed as part of this session
+- `ParentPinModal` catch block checked `axiosErr?.response?.status === 429` ÔøΩ always `undefined` after strip
+- Result: On backend 429, catch fell into `else { onVerified() }` ÔøΩ locked-out users bypassed the PIN gate silently
+- Fix: `error.message = message; return Promise.reject(error);` ÔøΩ preserves full AxiosError with response info
+- **Security impact: HIGH** ÔøΩ This was a real PIN gate bypass in production, fixed as part of this session
 
 #### Files Created
 - `frontend/e2e/phase1-child-courses.spec.ts` (commits `8e83249`)
@@ -277,12 +277,12 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 - `pressSequentially()` on first PIN input is correct; `fill()` per-input fails because React focus management moves focus between digit boxes mid-sequence
 - `page.waitForResponse('/auth/parent-pin/status')` must complete before clicking parent tile to avoid hasPinCache race condition
 - `page.route()` 429 mocks cause CORS failures in Axios (browser rejects mock response without CORS headers) ? do NOT use route mocking for cross-origin requests, use real backend calls instead
-- Playwright `request` context bypasses CORS; browser Axios does not ó they behave differently for cross-origin error responses
+- Playwright `request` context bypasses CORS; browser Axios does not ÔøΩ they behave differently for cross-origin error responses
 
 #### Commits
-- `28a3a32` ó fix(backend): wrap PIN endpoint responses in data: {} and include currentStage.courses
-- `2834bf7` ó fix(frontend): preserve AxiosError response in api.ts so ParentPinModal 429 lockout check works
-- `8e83249` ó test(e2e): verify phase 1 maktab child UX + PIN gate in production
+- `28a3a32` ÔøΩ fix(backend): wrap PIN endpoint responses in data: {} and include currentStage.courses
+- `2834bf7` ÔøΩ fix(frontend): preserve AxiosError response in api.ts so ParentPinModal 429 lockout check works
+- `8e83249` ÔøΩ test(e2e): verify phase 1 maktab child UX + PIN gate in production
 
 
 
@@ -330,3 +330,39 @@ Full end-to-end code trace + test suite run for the audio generation flow after 
 
 #### Commit
 - `6975d44` ‚Äî test(e2e): verify phase 2 next-lesson CTA, streak, and weekly activity in production
+
+---
+
+### 2026-07-21T16:18:59-05:00 ‚Äî Learner-Switch Flow E2E Tests
+
+**Requested by:** hrasheed | **Date:** 2026-07-21
+
+**Mission:** Write comprehensive E2E Playwright tests for the new learner-switch flow introduced by Ibn Sina (see `.squad/decisions/inbox/ibn-sina-learner-switch-flow.md`).
+
+#### Tests Written: 6 tests in `frontend/e2e/learner-switch-flow.spec.ts`
+
+| # | Test | What it verifies |
+|---|------|-----------------|
+| 1 | Parent selects child ‚Üí Student View | `isParentInStudentMode=true` ‚Üí no "Parent preview" banner, Switch Learner visible in sidebar, student nav (My Dashboard, My Courses) present |
+| 2 | Parent selects themselves ‚Üí Parent View | `isParentInStudentMode=false`, `isAccountOwner=true` ‚Üí stays on /dashboard, Switch Learner visible, parent nav present, no preview banner |
+| 3 | Switch Learner from ChildLayout ‚Üí PIN modal | Click Switch Learner in sidebar ‚Üí ParentPinModal appears with "Enter your PIN to switch learner" description ‚Üí correct PIN navigates to /select-learner |
+| 4 | Switch Learner from MainLayout ‚Üí PIN modal | Same as Test 3 but from /dashboard (MainLayout) |
+| 5 | Child direct login bypasses SelectLearner | `child-auth-storage` with `isChildSession: true` ‚Üí stays on /child/dashboard, NOT redirected, Switch Learner absent |
+| 6 | Parent preview banner when `isParentInStudentMode=false` | Child member selected but NOT in student mode ‚Üí amber "Parent preview" banner, "‚Üê Parent View" link, Switch Learner button all visible |
+
+#### Key Technical Notes
+
+- **`isParentInStudentMode` in `family-storage`:** This flag must be injected alongside `selectedMember` in `addInitScript` ‚Äî persisted in Zustand `family-storage` key.
+- **Test 5 (child direct login):** Uses mock token (`'mock-token'`) since no real child JWT is needed for routing assertions. `ChildProtectedRoute` checks `isAuthenticated && isChildSession` from `child-auth-storage`.
+- **PIN modal tests (3 & 4):** Wait for `/auth/parent-pin/status` API response before clicking ‚Äî same race condition guard as `phase1-pin-gate.spec.ts`. `pressSequentially()` on first input (React focus management handles digit advances).
+- **Switch Learner locator:** `page.locator('aside').getByRole('button', { name: /switch learner/i })` ‚Äî scoped to sidebar to avoid matching banner button in Test 6.
+- **Test 6 banner assertions:** `getByRole('link', { name: /parent view/i })` for the "‚Üê Parent View" link; `getByRole('button', { name: /switch learner/i })` for the banner button (not sidebar-scoped in preview context).
+- All tests use `test.skip(!parentEmail || !parentPassword, ...)` guard where real credentials are needed. Test 5 has no guard (uses mock).
+
+#### Pattern Consistency
+
+- Follows exact same patterns as `phase1-pin-gate.spec.ts` and `phase1-nav-permissions.spec.ts`:
+  - `doParentLogin()` helper ‚Üí real API login
+  - `page.addInitScript()` for localStorage injection
+  - `ensureResultsDir()` + screenshots at each stage
+  - `page.waitForResponse('/auth/parent-pin/status')` before modal interactions

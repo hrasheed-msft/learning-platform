@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useFamilyStore } from '@/stores/familyStore';
+import ParentPinModal from '@/components/auth/ParentPinModal';
+import { authService } from '@/services/authService';
 import {
   Home,
   BookOpen,
@@ -30,14 +32,46 @@ const navigation = [
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSwitchPin, setShowSwitchPin] = useState(false);
+  const [hasPinCache, setHasPinCache] = useState<boolean | null>(null);
+  const [pinToast, setPinToast] = useState<string | null>(null);
+
   const location = useLocation();
   const navigate = useNavigate();
   const { user, family, logout } = useAuthStore();
-  const { selectedMember, members } = useFamilyStore();
+  const { selectedMember, members, setParentInStudentMode } = useFamilyStore();
+
+  // Pre-fetch PIN status
+  useEffect(() => {
+    authService
+      .getParentPinStatus()
+      .then(({ hasPin }) => setHasPinCache(hasPin))
+      .catch(() => setHasPinCache(false));
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const showNoPinToast = (msg: string) => {
+    setPinToast(msg);
+    setTimeout(() => setPinToast(null), 5000);
+  };
+
+  const doSwitchLearner = () => {
+    setParentInStudentMode(false);
+    navigate('/select-learner');
+  };
+
+  const handleSwitchLearner = () => {
+    setSidebarOpen(false);
+    if (hasPinCache === true) {
+      setShowSwitchPin(true);
+    } else {
+      showNoPinToast('Set a parent PIN in Settings to secure account switching.');
+      doSwitchLearner();
+    }
   };
 
   return (
@@ -88,49 +122,34 @@ export default function MainLayout() {
           </div>
         </div>
 
-        {/* Learner switcher — always visible */}
-        {selectedMember?.isAccountOwner === false ? (
-          <div className="px-4 pb-3 border-b">
-            <Link
-              to="/child/dashboard"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[#1a5632] text-white font-semibold rounded-xl hover:bg-[#154526] transition text-sm"
-            >
-              🎓 Switch to Student View
-            </Link>
+        {/* Switch Learner button — always visible for parent */}
+        <div className="px-4 py-3 border-b">
+          <button
+            onClick={handleSwitchLearner}
+            className="flex items-center gap-2 w-full px-4 py-2.5 bg-primary-50 border border-primary-200 text-primary-800 font-semibold rounded-xl hover:bg-primary-100 transition text-sm min-h-[44px]"
+          >
+            <Users className="w-4 h-4 flex-shrink-0" />
+            <span>Switch Learner</span>
+          </button>
+          {selectedMember && (
             <p className="text-xs text-gray-400 text-center mt-1">
-              Viewing as {selectedMember.name}
+              Learning as {selectedMember.name}
             </p>
-          </div>
-        ) : members.length === 0 ? (
-          <div className="px-4 pb-3 border-b">
-            <Link
-              to="/settings"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-2 w-full px-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-800 font-semibold rounded-xl hover:bg-amber-100 transition text-sm min-h-[44px]"
-            >
-              <span>➕</span>
-              <span>Add a learner</span>
-            </Link>
-          </div>
-        ) : !selectedMember ? (
-          <div className="px-4 pb-3 border-b">
-            <Link
-              to="/select-learner"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-2 w-full px-4 py-2.5 bg-green-50 border border-green-200 text-[#1a5632] font-semibold rounded-xl hover:bg-green-100 transition text-sm min-h-[44px]"
-            >
-              <span>👨‍👩‍👧</span>
-              <span>Student view</span>
-            </Link>
-          </div>
-        ) : null}
+          )}
+          {!selectedMember && members.length === 0 && (
+            <p className="text-xs text-gray-400 text-center mt-1">
+              No learners yet —{' '}
+              <Link to="/settings" className="underline text-primary-600" onClick={() => setSidebarOpen(false)}>
+                add one
+              </Link>
+            </p>
+          )}
+        </div>
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">
           {navigation
             .filter((item) => {
-              // Hide parent-only items when a child member is selected
               if (item.parentOnly && selectedMember?.isAccountOwner === false) return false;
               return true;
             })
@@ -180,10 +199,10 @@ export default function MainLayout() {
 
           <div className="flex-1 lg:flex-none" />
 
-          {/* Active Learner Switcher */}
+          {/* Active Learner Switcher (top bar) */}
           {selectedMember && (
             <button
-              onClick={() => navigate('/select-learner')}
+              onClick={handleSwitchLearner}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors mr-2"
               title="Switch learner"
             >
@@ -218,6 +237,27 @@ export default function MainLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Parent PIN modal for Switch Learner */}
+      {showSwitchPin && selectedMember && (
+        <ParentPinModal
+          memberId={selectedMember.id}
+          title="Parent PIN Required"
+          description="Enter your PIN to switch learner"
+          onVerified={() => {
+            setShowSwitchPin(false);
+            doSwitchLearner();
+          }}
+          onCancel={() => setShowSwitchPin(false)}
+        />
+      )}
+
+      {/* No-PIN toast */}
+      {pinToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-gray-800 text-white text-sm rounded-xl shadow-lg max-w-sm text-center">
+          {pinToast}
+        </div>
+      )}
     </div>
   );
 }
