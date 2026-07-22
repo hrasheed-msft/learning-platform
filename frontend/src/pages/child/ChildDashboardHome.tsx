@@ -1,6 +1,5 @@
 import { BookOpen, Brain, Trophy, Flame, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useChildAuthStore } from '@/stores/childAuthStore';
 import { useChildEnrollments } from '@/hooks/useChildEnrollments';
 import { useProgramStore } from '@/stores/programStore';
 import { useEffect } from 'react';
@@ -60,8 +59,9 @@ function WeeklyActivityChart({ days }: { days: WeeklyActivityDay[] }) {
 // ─── main component ──────────────────────────────────────────────────────────
 
 export default function ChildDashboardHome() {
-  const { member } = useChildAuthStore();
-  const { enrollments, isLoading } = useChildEnrollments();
+  // useChildEnrollments already resolves the effective member for both child
+  // sessions and parent-viewing-as-child sessions (falls back to selectedMember).
+  const { member, enrollments, isLoading } = useChildEnrollments();
   const {
     enrollments: programEnrollments,
     stageSummary,

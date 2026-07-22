@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useProgramStore } from '@/stores/programStore';
 import { useChildAuthStore } from '@/stores/childAuthStore';
+import { useFamilyStore } from '@/stores/familyStore';
 import type { SubjectProgress } from '@/types/program';
 
 const SUBJECT_EMOJI: Record<string, string> = {
@@ -132,7 +133,11 @@ const PATH_LABELS: Record<string, string> = {
 };
 
 export default function GradeDashboard() {
-  const { member, isChildSession } = useChildAuthStore();
+  const { member: childMember, isChildSession } = useChildAuthStore();
+  const { selectedMember } = useFamilyStore();
+  // Support both direct child sessions and parent-viewing-as-child sessions
+  const effectiveMemberId = childMember?.id ?? selectedMember?.id;
+
   const {
     enrollments,
     stageSummary,
@@ -143,10 +148,10 @@ export default function GradeDashboard() {
   } = useProgramStore();
 
   useEffect(() => {
-    if (!member?.id) return;
-    void fetchMemberEnrollments(member.id);
-    void fetchMemberStageSummary(member.id);
-  }, [member?.id, fetchMemberEnrollments, fetchMemberStageSummary]);
+    if (!effectiveMemberId) return;
+    void fetchMemberEnrollments(effectiveMemberId);
+    void fetchMemberStageSummary(effectiveMemberId);
+  }, [effectiveMemberId, fetchMemberEnrollments, fetchMemberStageSummary]);
 
   const activeEnrollment = enrollments.find((e) => e.status === 'ACTIVE');
 
