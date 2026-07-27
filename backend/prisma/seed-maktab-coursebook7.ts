@@ -54,8 +54,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit1 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-fiqh-salah-advanced' } },
-    update: { title: 'Fiqh \u2014 Advanced \u1e62al\u0101h Topics', description: 'Makruhat of salah, sutrah, sajdah tilawah, qasr salah, and prayer for the sick.', content: unit1Content, orderIndex: 1, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-fiqh-salah-advanced', title: 'Fiqh \u2014 Advanced \u1e62al\u0101h Topics', description: 'Makruhat of salah, sutrah, sajdah tilawah, qasr salah, and prayer for the sick.', content: unit1Content, orderIndex: 1, isActive: true },
+    update: { title: 'Fiqh \u2014 Advanced \u1e62al\u0101h Topics', description: 'Makruhat of salah, sutrah, sajdah tilawah, qasr salah, and prayer for the sick.', content: unit1Content, orderIndex: 1 },
+    create: { courseId: course.id, slug: 'maktab-7-fiqh-salah-advanced', title: 'Fiqh \u2014 Advanced \u1e62al\u0101h Topics', description: 'Makruhat of salah, sutrah, sajdah tilawah, qasr salah, and prayer for the sick.', content: unit1Content, orderIndex: 1 },
   });
 
   // ─── UNIT 2 ─────────────────────────────────────────────────────────────────
@@ -86,8 +86,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit2 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-fiqh-zakah-inheritance' } },
-    update: { title: 'Fiqh \u2014 Zak\u0101h & Inheritance', description: 'Conditions of zakah, nisab, eight recipients, and basics of Islamic inheritance.', content: unit2Content, orderIndex: 2, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-fiqh-zakah-inheritance', title: 'Fiqh \u2014 Zak\u0101h & Inheritance', description: 'Conditions of zakah, nisab, eight recipients, and basics of Islamic inheritance.', content: unit2Content, orderIndex: 2, isActive: true },
+    update: { title: 'Fiqh \u2014 Zak\u0101h & Inheritance', description: 'Conditions of zakah, nisab, eight recipients, and basics of Islamic inheritance.', content: unit2Content, orderIndex: 2 },
+    create: { courseId: course.id, slug: 'maktab-7-fiqh-zakah-inheritance', title: 'Fiqh \u2014 Zak\u0101h & Inheritance', description: 'Conditions of zakah, nisab, eight recipients, and basics of Islamic inheritance.', content: unit2Content, orderIndex: 2 },
   });
 
   // ─── UNIT 3 ─────────────────────────────────────────────────────────────────
@@ -113,8 +113,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit3 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-fiqh-itikat-laylah-udh' } },
-    update: { title: 'Fiqh \u2014 I\'tik\u0101f, Laylatul Qadr, Hal\u0101l Food & U\u1e0dhiyah', description: 'I\'tikaf, Laylatul Qadr, halal and haram food, and the rules of udhiyah.', content: unit3Content, orderIndex: 3, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-fiqh-itikat-laylah-udh', title: 'Fiqh \u2014 I\'tik\u0101f, Laylatul Qadr, Hal\u0101l Food & U\u1e0dhiyah', description: 'I\'tikaf, Laylatul Qadr, halal and haram food, and the rules of udhiyah.', content: unit3Content, orderIndex: 3, isActive: true },
+    update: { title: 'Fiqh \u2014 I\'tik\u0101f, Laylatul Qadr, Hal\u0101l Food & U\u1e0dhiyah', description: 'I\'tikaf, Laylatul Qadr, halal and haram food, and the rules of udhiyah.', content: unit3Content, orderIndex: 3 },
+    create: { courseId: course.id, slug: 'maktab-7-fiqh-itikat-laylah-udh', title: 'Fiqh \u2014 I\'tik\u0101f, Laylatul Qadr, Hal\u0101l Food & U\u1e0dhiyah', description: 'I\'tikaf, Laylatul Qadr, halal and haram food, and the rules of udhiyah.', content: unit3Content, orderIndex: 3 },
   });
 
   // ─── UNIT 4 ─────────────────────────────────────────────────────────────────
@@ -138,8 +138,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit4 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-ahadith-time-knowledge' } },
-    update: { title: 'A\u1e25\u0101d\u012bth \u2014 Time, Knowledge & \u1e62alaw\u0101t', description: 'Ahadith on using time wisely, seeking knowledge, and the reward of sending salawat.', content: unit4Content, orderIndex: 4, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-ahadith-time-knowledge', title: 'A\u1e25\u0101d\u012bth \u2014 Time, Knowledge & \u1e62alaw\u0101t', description: 'Ahadith on using time wisely, seeking knowledge, and the reward of sending salawat.', content: unit4Content, orderIndex: 4, isActive: true },
+    update: { title: 'A\u1e25\u0101d\u012bth \u2014 Time, Knowledge & \u1e62alaw\u0101t', description: 'Ahadith on using time wisely, seeking knowledge, and the reward of sending salawat.', content: unit4Content, orderIndex: 4 },
+    create: { courseId: course.id, slug: 'maktab-7-ahadith-time-knowledge', title: 'A\u1e25\u0101d\u012bth \u2014 Time, Knowledge & \u1e62alaw\u0101t', description: 'Ahadith on using time wisely, seeking knowledge, and the reward of sending salawat.', content: unit4Content, orderIndex: 4 },
   });
 
   // ─── UNIT 5 ─────────────────────────────────────────────────────────────────
@@ -162,8 +162,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit5 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-ahadith-rumours' } },
-    update: { title: 'A\u1e25\u0101d\u012bth \u2014 Avoiding Rumours & Social Ethics', description: 'Ahadith on namimah, ghibah, suspicion, and guarding the tongue.', content: unit5Content, orderIndex: 5, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-ahadith-rumours', title: 'A\u1e25\u0101d\u012bth \u2014 Avoiding Rumours & Social Ethics', description: 'Ahadith on namimah, ghibah, suspicion, and guarding the tongue.', content: unit5Content, orderIndex: 5, isActive: true },
+    update: { title: 'A\u1e25\u0101d\u012bth \u2014 Avoiding Rumours & Social Ethics', description: 'Ahadith on namimah, ghibah, suspicion, and guarding the tongue.', content: unit5Content, orderIndex: 5 },
+    create: { courseId: course.id, slug: 'maktab-7-ahadith-rumours', title: 'A\u1e25\u0101d\u012bth \u2014 Avoiding Rumours & Social Ethics', description: 'Ahadith on namimah, ghibah, suspicion, and guarding the tongue.', content: unit5Content, orderIndex: 5 },
   });
 
   // ─── UNIT 6 ─────────────────────────────────────────────────────────────────
@@ -186,8 +186,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit6 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-sirah-shamail' } },
-    update: { title: 'S\u012brah \u2014 Sham\u0101\'il of Ras\u016blull\u0101h \ufdfa', description: 'Advanced study of the Prophet\'s personal habits, character, and treatment of others.', content: unit6Content, orderIndex: 6, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-sirah-shamail', title: 'S\u012brah \u2014 Sham\u0101\'il of Ras\u016blull\u0101h \ufdfa', description: 'Advanced study of the Prophet\'s personal habits, character, and treatment of others.', content: unit6Content, orderIndex: 6, isActive: true },
+    update: { title: 'S\u012brah \u2014 Sham\u0101\'il of Ras\u016blull\u0101h \ufdfa', description: 'Advanced study of the Prophet\'s personal habits, character, and treatment of others.', content: unit6Content, orderIndex: 6 },
+    create: { courseId: course.id, slug: 'maktab-7-sirah-shamail', title: 'S\u012brah \u2014 Sham\u0101\'il of Ras\u016blull\u0101h \ufdfa', description: 'Advanced study of the Prophet\'s personal habits, character, and treatment of others.', content: unit6Content, orderIndex: 6 },
   });
 
   // ─── UNIT 7 ─────────────────────────────────────────────────────────────────
@@ -208,8 +208,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit7 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-sirah-umar' } },
-    update: { title: 'S\u012brah \u2014 \u02bfUmar ibn al-Kha\u1e6d\u1e6d\u0101b \u0631\u0636\u064a \u0627\u0644\u0644\u0647 \u0639\u0646\u0647', description: '\'Umar\'s conversion, character, and the achievements of his caliphate.', content: unit7Content, orderIndex: 7, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-sirah-umar', title: 'S\u012brah \u2014 \u02bfUmar ibn al-Kha\u1e6d\u1e6d\u0101b \u0631\u0636\u064a \u0627\u0644\u0644\u0647 \u0639\u0646\u0647', description: '\'Umar\'s conversion, character, and the achievements of his caliphate.', content: unit7Content, orderIndex: 7, isActive: true },
+    update: { title: 'S\u012brah \u2014 \u02bfUmar ibn al-Kha\u1e6d\u1e6d\u0101b \u0631\u0636\u064a \u0627\u0644\u0644\u0647 \u0639\u0646\u0647', description: '\'Umar\'s conversion, character, and the achievements of his caliphate.', content: unit7Content, orderIndex: 7 },
+    create: { courseId: course.id, slug: 'maktab-7-sirah-umar', title: 'S\u012brah \u2014 \u02bfUmar ibn al-Kha\u1e6d\u1e6d\u0101b \u0631\u0636\u064a \u0627\u0644\u0644\u0647 \u0639\u0646\u0647', description: '\'Umar\'s conversion, character, and the achievements of his caliphate.', content: unit7Content, orderIndex: 7 },
   });
 
   // ─── UNIT 8 ─────────────────────────────────────────────────────────────────
@@ -235,8 +235,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit8 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-tarikh-zakariyya-yahya' } },
-    update: { title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-tarikh-zakariyya-yahya', title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8, isActive: true },
+    update: { title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8 },
+    create: { courseId: course.id, slug: 'maktab-7-tarikh-zakariyya-yahya', title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8 },
   });
 
   // ─── UNIT 9 ─────────────────────────────────────────────────────────────────
@@ -261,8 +261,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit9 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-tarikh-abbasids' } },
-    update: { title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-tarikh-abbasids', title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9, isActive: true },
+    update: { title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9 },
+    create: { courseId: course.id, slug: 'maktab-7-tarikh-abbasids', title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9 },
   });
 
   // ─── UNIT 10 ────────────────────────────────────────────────────────────────
@@ -287,8 +287,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit10 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-aqaid-qadar' } },
-    update: { title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-aqaid-qadar', title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10, isActive: true },
+    update: { title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10 },
+    create: { courseId: course.id, slug: 'maktab-7-aqaid-qadar', title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10 },
   });
 
   // ─── UNIT 11 ────────────────────────────────────────────────────────────────
@@ -311,8 +311,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit11 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-aqaid-akhirah-barzakh' } },
-    update: { title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-aqaid-akhirah-barzakh', title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11, isActive: true },
+    update: { title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11 },
+    create: { courseId: course.id, slug: 'maktab-7-aqaid-akhirah-barzakh', title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11 },
   });
 
   // ─── UNIT 12 ────────────────────────────────────────────────────────────────
@@ -338,8 +338,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit12 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-akhlaq-time-knowledge' } },
-    update: { title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-akhlaq-time-knowledge', title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12, isActive: true },
+    update: { title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12 },
+    create: { courseId: course.id, slug: 'maktab-7-akhlaq-time-knowledge', title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12 },
   });
 
   // ─── UNIT 13 ────────────────────────────────────────────────────────────────
@@ -366,8 +366,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit13 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-akhlaq-rumours-salawat' } },
-    update: { title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-akhlaq-rumours-salawat', title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13, isActive: true },
+    update: { title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13 },
+    create: { courseId: course.id, slug: 'maktab-7-akhlaq-rumours-salawat', title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13 },
   });
 
   // ─── UNIT 14 ────────────────────────────────────────────────────────────────
@@ -403,8 +403,8 @@ export async function seedMaktabCoursebook7() {
 
   const unit14 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-adab-social-conduct' } },
-    update: { title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14, isActive: true },
-    create: { courseId: course.id, slug: 'maktab-7-adab-social-conduct', title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14, isActive: true },
+    update: { title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14 },
+    create: { courseId: course.id, slug: 'maktab-7-adab-social-conduct', title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14 },
   });
 
   // ─── QUIZ DATA ───────────────────────────────────────────────────────────────

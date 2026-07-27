@@ -1268,14 +1268,12 @@ export async function seedMaktabCoursebook2() {
       create: {
         externalId: q.externalId,
         unitId: q.unitId,
-        courseId: course.id,
         questionText: q.questionText,
         type: q.type,
         options: q.options,
         correctAnswer: q.correctAnswer,
         explanation: q.explanation,
         difficulty: 'MEDIUM',
-        orderIndex: quizData.filter(x => x.unitId === q.unitId).indexOf(q),
       },
     });
   }
@@ -1288,37 +1286,39 @@ export async function seedMaktabCoursebook2() {
   await prisma.flashCard.deleteMany({ where: { courseId: course.id } });
 
   const flashCardData = [
-    { front: "Fara'id of Wudu'", back: "The 4 obligatory acts: washing the face, washing both arms to the elbows, wiping a quarter of the head, washing both feet to the ankles." },
-    { front: "Nawaqid of Wudu'", back: "Acts that break wudu': passing wind, urine or stool, deep sleep, bleeding, losing consciousness." },
-    { front: "Tayammum", back: "Dry ablution using clean earth/dust/stone when water is unavailable or harmful — strikes twice: once for face, once for arms to elbows." },
-    { front: "Five Daily Prayers", back: "Fajr (2), Zuhr (4), Asr (4), Maghrib (3), Isha' (4) rak'at — obligatory for every Muslim." },
-    { front: "Conditions of Salah", back: "Taharah (purity), covering awrah, facing the Qiblah, making intention (niyyah), and praying at the correct time." },
-    { front: "Al-Amin", back: "'The Trustworthy One' — title given to Rasulullah (s.a.w.) by the people of Makkah before prophethood for his complete honesty." },
-    { front: "Al-Sadiq", back: "'The Truthful One' — another title of Rasulullah (s.a.w.) because he never told a lie throughout his life." },
-    { front: "Hilf al-Fudul", back: "A noble pre-Islamic alliance in Makkah in which tribal leaders, including Rasulullah (s.a.w.), pledged to defend the rights of the oppressed." },
-    { front: "Wahy", back: "Divine revelation sent by Allah to His prophets through the angel Jibra'il (a.s.). The Quran is the final wahy." },
-    { front: "Cave Hira'", back: "The cave on Mount Nur near Makkah where Rasulullah (s.a.w.) used to retreat for worship; site of the first revelation." },
-    { front: "People of 'Ad", back: "The tall, powerful nation in southern Arabia sent Prophet Hud (a.s.). They were destroyed by a fierce wind for 7 nights and 8 days." },
-    { front: "People of Thamud", back: "The nation who carved homes in mountains, sent Prophet Salih (a.s.). Destroyed by a thunderbolt after killing the miraculous she-camel." },
-    { front: "Mala'ikah (Angels)", back: "Created from light (nur), they never disobey Allah, do not eat or sleep, and carry out Allah's commands at all times." },
-    { front: "Jibra'il (a.s.)", back: "The archangel responsible for delivering Allah's revelation (wahy) to the prophets. Also called Ruh al-Amin." },
-    { front: "Kiraman Katibin", back: "'Noble Recorders' — two angels assigned to every person to record all their good and bad deeds." },
-    { front: "Al-Kutub al-Arba'ah", back: "The four main divine books: Tawrah (Musa), Zabur (Dawud), Injil (Isa), and the Quran (Muhammad s.a.w.)." },
-    { front: "Shukr", back: "Gratitude to Allah — shown in three ways: by heart (recognising His favour), by tongue (Alhamdulillah), and by action (using His gifts obediently)." },
-    { front: "Ta'awun", back: "Cooperation and mutual help — in Islam, only permitted in righteousness and piety, not in sin (Surah al-Ma'idah 5:2)." },
-    { front: "Assalamu Alaykum", back: "'Peace be upon you' — the full greeting is 'Assalamu Alaykum wa Rahmatullahi wa Barakatuh.' A sunnah to spread to all Muslims." },
-    { front: "Yarhamukallah", back: "'May Allah have mercy on you' — said in response when someone sneezes and says Alhamdulillah." },
-    { front: "Yahdikumullahu wa Yuslihu Balakum", back: "'May Allah guide you and set your affairs right' — the reply after someone says Yarhamukallah to you after sneezing." },
+    { unitId: unit1.id, front: "Fara'id of Wudu'", back: "The 4 obligatory acts: washing the face, washing both arms to the elbows, wiping a quarter of the head, washing both feet to the ankles." },
+    { unitId: unit1.id, front: "Nawaqid of Wudu'", back: "Acts that break wudu': passing wind, urine or stool, deep sleep, bleeding, losing consciousness." },
+    { unitId: unit2.id, front: "Tayammum", back: "Dry ablution using clean earth/dust/stone when water is unavailable or harmful — strikes twice: once for face, once for arms to elbows." },
+    { unitId: unit3.id, front: "Five Daily Prayers", back: "Fajr (2), Zuhr (4), Asr (4), Maghrib (3), Isha' (4) rak'at — obligatory for every Muslim." },
+    { unitId: unit3.id, front: "Conditions of Salah", back: "Taharah (purity), covering awrah, facing the Qiblah, making intention (niyyah), and praying at the correct time." },
+    { unitId: unit6.id, front: "Al-Amin", back: "'The Trustworthy One' — title given to Rasulullah (s.a.w.) by the people of Makkah before prophethood for his complete honesty." },
+    { unitId: unit6.id, front: "Al-Sadiq", back: "'The Truthful One' — another title of Rasulullah (s.a.w.) because he never told a lie throughout his life." },
+    { unitId: unit6.id, front: "Hilf al-Fudul", back: "A noble pre-Islamic alliance in Makkah in which tribal leaders, including Rasulullah (s.a.w.), pledged to defend the rights of the oppressed." },
+    { unitId: unit7.id, front: "Wahy", back: "Divine revelation sent by Allah to His prophets through the angel Jibra'il (a.s.). The Quran is the final wahy." },
+    { unitId: unit7.id, front: "Cave Hira'", back: "The cave on Mount Nur near Makkah where Rasulullah (s.a.w.) used to retreat for worship; site of the first revelation." },
+    { unitId: unit8.id, front: "People of 'Ad", back: "The tall, powerful nation in southern Arabia sent Prophet Hud (a.s.). They were destroyed by a fierce wind for 7 nights and 8 days." },
+    { unitId: unit9.id, front: "People of Thamud", back: "The nation who carved homes in mountains, sent Prophet Salih (a.s.). Destroyed by a thunderbolt after killing the miraculous she-camel." },
+    { unitId: unit10.id, front: "Mala'ikah (Angels)", back: "Created from light (nur), they never disobey Allah, do not eat or sleep, and carry out Allah's commands at all times." },
+    { unitId: unit10.id, front: "Jibra'il (a.s.)", back: "The archangel responsible for delivering Allah's revelation (wahy) to the prophets. Also called Ruh al-Amin." },
+    { unitId: unit10.id, front: "Kiraman Katibin", back: "'Noble Recorders' — two angels assigned to every person to record all their good and bad deeds." },
+    { unitId: unit11.id, front: "Al-Kutub al-Arba'ah", back: "The four main divine books: Tawrah (Musa), Zabur (Dawud), Injil (Isa), and the Quran (Muhammad s.a.w.)." },
+    { unitId: unit12.id, front: "Shukr", back: "Gratitude to Allah — shown in three ways: by heart (recognising His favour), by tongue (Alhamdulillah), and by action (using His gifts obediently)." },
+    { unitId: unit13.id, front: "Ta'awun", back: "Cooperation and mutual help — in Islam, only permitted in righteousness and piety, not in sin (Surah al-Ma'idah 5:2)." },
+    { unitId: unit14.id, front: "Assalamu Alaykum", back: "'Peace be upon you' — the full greeting is 'Assalamu Alaykum wa Rahmatullahi wa Barakatuh.' A sunnah to spread to all Muslims." },
+    { unitId: unit14.id, front: "Yarhamukallah", back: "'May Allah have mercy on you' — said in response when someone sneezes and says Alhamdulillah." },
+    { unitId: unit14.id, front: "Yahdikumullahu wa Yuslihu Balakum", back: "'May Allah guide you and set your affairs right' — the reply after someone says Yarhamukallah to you after sneezing." },
   ];
 
   for (const fc of flashCardData) {
     await prisma.flashCard.create({
       data: {
         courseId: course.id,
+        unitId: fc.unitId,
         front: fc.front,
         back: fc.back,
         category: 'Vocabulary',
         tags: ['maktab-2'],
+        orderIndex: flashCardData.indexOf(fc),
       },
     });
   }
