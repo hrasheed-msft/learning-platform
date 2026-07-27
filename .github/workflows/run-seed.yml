@@ -1,0 +1,89 @@
+name: Run Production Seed
+
+# Manually triggered — select which seed to run from the GitHub Actions UI
+# or via: gh workflow run run-seed.yml -f seed=maktab-coursebook-5
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Seed script to run (without path/extension, e.g. seed-maktab-coursebook-5)'
+        required: true
+        default: 'seed-maktab-coursebook5'
+        type: choice
+        options:
+          - seed-maktab-coursebook5
+          - seed-maktab-coursebook1
+          - seed-maktab-coursebook2
+          - seed-maktab-coursebook3
+          - seed-maktab-coursebook4
+          - seed-maktab-coursebook6boys
+          - seed-maktab-coursebook6girls
+          - seed-maktab-coursebook7
+          - seed-maktab-coursebook8
+          - seed-maktab-foundation1
+          - seed-maktab-foundation2
+          - seed-maktab-further-studies-nw
+          - seed-maktab-program
+          - seed-production
+
+jobs:
+  run-seed:
+    name: Run ${{ github.event.inputs.seed }}
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: cd backend && npm ci
+
+      - name: Generate Prisma client
+        run: cd backend && npx prisma generate
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get DATABASE_URL from Container App
+        id: get-db-url
+        run: |
+          DB_URL=$(az containerapp env var list \
+            --name ${{ secrets.CONTAINER_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --query "[?name=='DATABASE_URL'].value" \
+            --output tsv 2>/dev/null || true)
+
+          # Fallback: read from container app revision's secret refs
+          if [ -z "$DB_URL" ]; then
+            DB_URL=$(az containerapp show \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.RESOURCE_GROUP }} \
+              --query "properties.template.containers[0].env[?name=='DATABASE_URL'].value" \
+              --output tsv)
+          fi
+
+          if [ -z "$DB_URL" ]; then
+            echo "❌ Could not retrieve DATABASE_URL from Container App"
+            exit 1
+          fi
+
+          echo "::add-mask::$DB_URL"
+          echo "db_url=$DB_URL" >> $GITHUB_OUTPUT
+
+      - name: Run seed
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ steps.get-db-url.outputs.db_url }}
+        run: |
+          echo "🌱 Running ${{ github.event.inputs.seed }}..."
+          npx ts-node --transpile-only prisma/${{ github.event.inputs.seed }}.ts
+          echo "✅ Seed complete"
