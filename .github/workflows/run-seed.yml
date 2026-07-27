@@ -56,23 +56,35 @@ jobs:
       - name: Get DATABASE_URL from Container App
         id: get-db-url
         run: |
-          DB_URL=$(az containerapp env var list \
-            --name ${{ secrets.CONTAINER_APP_NAME }} \
-            --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            --query "[?name=='DATABASE_URL'].value" \
+          APP="${{ secrets.CONTAINER_APP_NAME }}"
+          RG="${{ secrets.RESOURCE_GROUP }}"
+
+          # Try 1: plain env var (value stored directly)
+          DB_URL=$(az containerapp show \
+            --name "$APP" --resource-group "$RG" \
+            --query "properties.template.containers[0].env[?name=='DATABASE_URL'].value | [0]" \
             --output tsv 2>/dev/null || true)
 
-          # Fallback: read from container app revision's secret refs
-          if [ -z "$DB_URL" ]; then
-            DB_URL=$(az containerapp show \
-              --name ${{ secrets.CONTAINER_APP_NAME }} \
-              --resource-group ${{ secrets.RESOURCE_GROUP }} \
-              --query "properties.template.containers[0].env[?name=='DATABASE_URL'].value" \
-              --output tsv)
+          # Try 2: env var is a secretRef — look up the secret value
+          if [ -z "$DB_URL" ] || [ "$DB_URL" = "None" ] || [ "$DB_URL" = "null" ]; then
+            SECRET_NAME=$(az containerapp show \
+              --name "$APP" --resource-group "$RG" \
+              --query "properties.template.containers[0].env[?name=='DATABASE_URL'].secretRef | [0]" \
+              --output tsv 2>/dev/null || true)
+            if [ -n "$SECRET_NAME" ] && [ "$SECRET_NAME" != "None" ] && [ "$SECRET_NAME" != "null" ]; then
+              DB_URL=$(az containerapp secret show \
+                --name "$APP" --resource-group "$RG" \
+                --secret-name "$SECRET_NAME" \
+                --query "value" --output tsv 2>/dev/null || true)
+            fi
           fi
 
-          if [ -z "$DB_URL" ]; then
+          if [ -z "$DB_URL" ] || [ "$DB_URL" = "None" ] || [ "$DB_URL" = "null" ]; then
             echo "❌ Could not retrieve DATABASE_URL from Container App"
+            echo "   App: $APP  RG: $RG"
+            echo "   Env vars present:"
+            az containerapp show --name "$APP" --resource-group "$RG" \
+              --query "properties.template.containers[0].env[].name" --output tsv || true
             exit 1
           fi
 
