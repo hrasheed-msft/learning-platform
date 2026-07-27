@@ -203,7 +203,7 @@ export async function seedMaktabCoursebook5() {
 
   const salahContent = `
 <h2>Learning Objectives</h2>
-<p>By the end of this unit, pupils will be able to describe the sunan and mustaḥabbāt of ṣalāh, explain the rules for a masbūq (latecomer), understand qaḍā' prayers, and describe the method of 'Īd ṣalāh.</p>
+<p>By the end of this unit, pupils will be able to describe the sunan and mustaḥabbāt of ṣalāh, explain the rules for a masbūq (latecomer), understand qaḍā' prayers, and describe the method of \'Īd ṣalāh.</p>
 
 <h2>Ṣalāh — Sunan and Mustaḥabbāt</h2>
 <p>Beyond the farā'iḍ and wājibāt, there are many sunan and mustaḥabbāt (recommended acts) that beautify the prayer:</p>
@@ -240,10 +240,10 @@ export async function seedMaktabCoursebook5() {
 </ul>
 
 <h2>'Īd Ṣalāh</h2>
-<p>'Īd ṣalāh is wājib upon every adult Muslim male who is required to pray Jumu'ah. It is performed on the mornings of 'Īd al-Fiṭr (1st Shawwāl) and 'Īd al-Aḍḥā (10th Dhul Ḥijjah).</p>
-<h3>Method of 'Īd Ṣalāh:</h3>
+<p>'Īd ṣalāh is wājib upon every adult Muslim male who is required to pray Jumu'ah. It is performed on the mornings of \'Īd al-Fiṭr (1st Shawwāl) and \'Īd al-Aḍḥā (10th Dhul Ḥijjah).</p>
+<h3>Method of \'Īd Ṣalāh:</h3>
 <ol>
-  <li>Make the intention for 'Īd ṣalāh with the imām.</li>
+  <li>Make the intention for \'Īd ṣalāh with the imām.</li>
   <li>Say takbīr al-taḥrīmah and fold the hands.</li>
   <li>The imām says three extra takbīrāt — raise the hands each time and drop them to the sides. After the third, fold the hands.</li>
   <li>The imām recites al-Fātiḥah and a sūrah, then perform rukū' and sajdah as normal.</li>
@@ -271,7 +271,7 @@ export async function seedMaktabCoursebook5() {
   console.log('✅ Unit 3:', unitSalah.title);
 
   // ──────────────────────────────────────────────
-  // UNIT 4: FIQH — 'Umrah, Ḥajj & Ziyārah
+  // UNIT 4: FIQH — \'Umrah, Ḥajj & Ziyārah
   // ──────────────────────────────────────────────
 
   const hajjContent = `
@@ -297,14 +297,14 @@ export async function seedMaktabCoursebook5() {
 <h4>8th Dhul Ḥijjah — Yawm al-Tarwiyah</h4>
 <p>The pilgrim enters iḥrām for ḥajj and proceeds to Minā, where they spend the night praying and making du'ā'.</p>
 
-<h4>9th Dhul Ḥijjah — Yawm 'Arafah</h4>
-<p>The most important day of Ḥajj. The pilgrim stands at the plain of 'Arafah from after ẓuhr until sunset, making du'ā' and seeking forgiveness. Without the wuqūf at 'Arafah, the Ḥajj is invalid.</p>
+<h4>9th Dhul Ḥijjah — Yawm \'Arafah</h4>
+<p>The most important day of Ḥajj. The pilgrim stands at the plain of \'Arafah from after ẓuhr until sunset, making du'ā' and seeking forgiveness. Without the wuqūf at \'Arafah, the Ḥajj is invalid.</p>
 <p>After sunset, the pilgrim proceeds to Muzdalifah, where they pray Maghrib and 'Ishā' combined, collect pebbles, and spend the night under the open sky.</p>
 
 <h4>10th Dhul Ḥijjah — Yawm al-Naḥr ('Īd al-Aḍḥā)</h4>
 <p>The pilgrim performs the following in order:</p>
 <ol>
-  <li><strong>Ramī:</strong> Pelting the large jamarah (Jamarah al-'Aqabah) with seven pebbles.</li>
+  <li><strong>Ramī:</strong> Pelting the large jamarah (Jamarah al-\'Aqabah) with seven pebbles.</li>
   <li><strong>Qurbānī (animal sacrifice):</strong> A sheep, goat, or share of a cow/camel.</li>
   <li><strong>Ḥalq or Qaṣr:</strong> Shaving or trimming the hair.</li>
   <li><strong>Ṭawāf al-Ziyārah:</strong> The obligatory ṭawāf of the Ka'bah, also called Ṭawāf al-Ifāḍah.</li>
@@ -562,7 +562,7 @@ export async function seedMaktabCoursebook5() {
 <p>In the 6th year after Hijrah, the Prophet ﷺ set out from Madīnah with approximately 1,400 Companions with the intention of performing 'umrah. They were in the state of iḥrām and carried no weapons of war — only travel swords.</p>
 <p>When the Quraysh learned of their approach, they sent forces to prevent the Muslims from entering Makkah. The Muslims camped at a place called Ḥudaybiyah, on the outskirts of Makkah.</p>
 
-<h3>Bay'ah al-Riḍwān — The Pledge Under the Tree</h3>
+<h3>Bay\'ah al-Riḍwān — The Pledge Under the Tree</h3>
 <p>When a rumour spread that the Muslim envoy 'Uthmān ibn 'Affān رضي الله عنه had been killed by the Quraysh, the Prophet ﷺ called the Companions to pledge their loyalty. They pledged under a tree, ready to defend Islam with their lives. Allāh expressed His pleasure with them in the Qur'ān:</p>
 <p class="arabic" dir="rtl" lang="ar">لَقَدْ رَضِيَ اللَّهُ عَنِ الْمُؤْمِنِينَ إِذْ يُبَايِعُونَكَ تَحْتَ الشَّجَرَةِ</p>
 <p><em>"Indeed, Allāh was pleased with the believers when they gave you the pledge under the tree."</em> (Qur'ān 48:18)</p>
@@ -665,7 +665,7 @@ export async function seedMaktabCoursebook5() {
 <p>In the 10th year after Hijrah, the Prophet ﷺ performed his only ḥajj, known as Ḥajjat al-Wadā' (the Farewell Ḥajj). Over 100,000 Companions accompanied him.</p>
 
 <h3>Key Messages of the Farewell Sermon</h3>
-<p>On the 9th of Dhul Ḥijjah, standing on the plain of 'Arafah, the Prophet ﷺ delivered his farewell sermon. Its key messages included:</p>
+<p>On the 9th of Dhul Ḥijjah, standing on the plain of \'Arafah, the Prophet ﷺ delivered his farewell sermon. Its key messages included:</p>
 <ul>
   <li><strong>Sanctity of life, wealth, and honour:</strong> "Your blood, your wealth, and your honour are sacred, like the sanctity of this day, this month, and this city."</li>
   <li><strong>Equality of all people:</strong> "No Arab has superiority over a non-Arab, and no non-Arab has superiority over an Arab, except by taqwā (God-consciousness)."</li>
@@ -1121,8 +1121,8 @@ export async function seedMaktabCoursebook5() {
 <h3>Sunnah Times for Ghusl</h3>
 <ul>
   <li>Before Jumu'ah (Friday) prayer.</li>
-  <li>Before the two 'Īd prayers.</li>
-  <li>Before putting on iḥrām for Ḥajj or 'Umrah.</li>
+  <li>Before the two \'Īd prayers.</li>
+  <li>Before putting on iḥrām for Ḥajj or \'Umrah.</li>
 </ul>
 
 <h3>How to Perform Ghusl (Sunnah Method)</h3>
@@ -1427,15 +1427,15 @@ export async function seedMaktabCoursebook5() {
       explanation: 'The masbūq waits for the imām to complete both salāms, then stands to complete his remaining rak\'ahs.',
     },
 
-    // ── Unit 4: Ḥajj / 'Umrah ──
+    // ── Unit 4: Ḥajj / \'Umrah ──
     {
       unitId: unitHajj.id,
       externalId: 'maktab-5-hajj-q1',
       type: 'MULTIPLE_CHOICE',
-      questionText: 'What is the first act performed upon entering Makkah for 'Umrah?',
-      options: ['Sa\'y between Ṣafā and Marwah', 'Wuqūf at 'Arafāt', 'Ṭawāf of the Ka\'bah', 'Shaving the head'],
+      questionText: 'What is the first act performed upon entering Makkah for \'Umrah?',
+      options: ['Sa\'y between Ṣafā and Marwah', 'Wuqūf at \'Arafāt', 'Ṭawāf of the Ka\'bah', 'Shaving the head'],
       correctAnswer: 'Ṭawāf of the Ka\'bah',
-      explanation: 'For 'Umrah, the pilgrim first performs ṭawāf (seven circuits) around the Ka\'bah, followed by sa\'y between Ṣafā and Marwah, then ḥalq or taqṣīr.',
+      explanation: 'For \'Umrah, the pilgrim first performs ṭawāf (seven circuits) around the Ka\'bah, followed by sa\'y between Ṣafā and Marwah, then ḥalq or taqṣīr.',
     },
     {
       unitId: unitHajj.id,
@@ -1444,16 +1444,16 @@ export async function seedMaktabCoursebook5() {
       questionText: 'What is the talbiyah?',
       options: ['The du\'ā\' said during ṭawāf', 'The supplication said at wuqūf', 'The statement recited from iḥrām until the 10th of Dhul Ḥijjah', 'The ghusl before entering Makkah'],
       correctAnswer: 'The statement recited from iḥrām until the 10th of Dhul Ḥijjah',
-      explanation: 'The talbiyah is "Labbayk Allāhumma labbayk..." recited continuously from putting on iḥrām until the day of 'Īd (10th Dhul Ḥijjah). It stops after stoning the Jamrāt al-'Aqabah.',
+      explanation: 'The talbiyah is "Labbayk Allāhumma labbayk..." recited continuously from putting on iḥrām until the day of \'Īd (10th Dhul Ḥijjah). It stops after stoning the Jamrāt al-\'Aqabah.',
     },
     {
       unitId: unitHajj.id,
       externalId: 'maktab-5-hajj-q3',
       type: 'TRUE_FALSE',
-      questionText: 'Wuqūf at 'Arafāt is the most essential pillar of Ḥajj — without it, Ḥajj is not valid.',
+      questionText: 'Wuqūf at \'Arafāt is the most essential pillar of Ḥajj — without it, Ḥajj is not valid.',
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: 'The Prophet ﷺ said: "Al-Ḥajj 'Arafah" — Ḥajj is 'Arafah. Wuqūf at 'Arafāt (staying there on 9th Dhul Ḥijjah) is the central pillar (rukn) of Ḥajj.',
+      explanation: 'The Prophet ﷺ said: "Al-Ḥajj \'Arafah" — Ḥajj is \'Arafah. Wuqūf at \'Arafāt (staying there on 9th Dhul Ḥijjah) is the central pillar (rukn) of Ḥajj.',
     },
     {
       unitId: unitHajj.id,
@@ -1469,7 +1469,7 @@ export async function seedMaktabCoursebook5() {
       externalId: 'maktab-5-hajj-q5',
       type: 'MULTIPLE_CHOICE',
       questionText: 'What is Ziyārah in the context of ḥajj?',
-      options: ['Visiting 'Arafāt', 'Visiting the Prophet\'s Masjid in Madinah', 'Circling the Ka\'bah', 'Performing sa\'y'],
+      options: ['Visiting \'Arafāt', 'Visiting the Prophet\'s Masjid in Madinah', 'Circling the Ka\'bah', 'Performing sa\'y'],
       correctAnswer: 'Visiting the Prophet\'s Masjid in Madinah',
       explanation: 'Ziyārah refers to visiting Madinah — specifically the Masjid al-Nabawī and the blessed grave of the Prophet ﷺ — which is a highly recommended act for Ḥajj pilgrims.',
     },
@@ -1679,7 +1679,7 @@ export async function seedMaktabCoursebook5() {
       questionText: 'In which year (AH) did the Treaty of Ḥudaybiyah take place?',
       options: ['4 AH', '6 AH', '8 AH', '10 AH'],
       correctAnswer: '6 AH',
-      explanation: 'The Treaty of Ḥudaybiyah was concluded in 6 AH (628 CE) when the Prophet ﷺ and approximately 1,400 companions travelled to Makkah for 'Umrah.',
+      explanation: 'The Treaty of Ḥudaybiyah was concluded in 6 AH (628 CE) when the Prophet ﷺ and approximately 1,400 companions travelled to Makkah for \'Umrah.',
     },
     {
       unitId: unitHudaybiyah.id,
@@ -1694,10 +1694,10 @@ export async function seedMaktabCoursebook5() {
       unitId: unitHudaybiyah.id,
       externalId: 'maktab-5-hudaybiyah-q3',
       type: 'MULTIPLE_CHOICE',
-      questionText: 'What was the Bay'ah al-Riḍwān?',
-      options: ['The pledge the Makkans took to fight', 'The oath of allegiance the companions gave to the Prophet ﷺ under a tree at Ḥudaybiyah', 'A peace agreement signed at Ḥudaybiyah', 'The pledge of the Anṣār at 'Aqabah'],
+      questionText: 'What was the Bay\'ah al-Riḍwān?',
+      options: ['The pledge the Makkans took to fight', 'The oath of allegiance the companions gave to the Prophet ﷺ under a tree at Ḥudaybiyah', 'A peace agreement signed at Ḥudaybiyah', 'The pledge of the Anṣār at \'Aqabah'],
       correctAnswer: 'The oath of allegiance the companions gave to the Prophet ﷺ under a tree at Ḥudaybiyah',
-      explanation: 'Bay'ah al-Riḍwān (the Pledge of Allāh\'s Pleasure) was the oath companions gave under a tree at Ḥudaybiyah, pledging to stand by the Prophet ﷺ. Allāh praised them in the Qur\'ān (48:18).',
+      explanation: 'Bay\'ah al-Riḍwān (the Pledge of Allāh\'s Pleasure) was the oath companions gave under a tree at Ḥudaybiyah, pledging to stand by the Prophet ﷺ. Allāh praised them in the Qur\'ān (48:18).',
     },
     {
       unitId: unitHudaybiyah.id,
@@ -1712,10 +1712,10 @@ export async function seedMaktabCoursebook5() {
       unitId: unitHudaybiyah.id,
       externalId: 'maktab-5-hudaybiyah-q5',
       type: 'TRUE_FALSE',
-      questionText: 'Under the Treaty of Ḥudaybiyah, the Muslims agreed to return to Madinah without performing 'Umrah that year.',
+      questionText: 'Under the Treaty of Ḥudaybiyah, the Muslims agreed to return to Madinah without performing \'Umrah that year.',
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: 'One of the terms was that Muslims would return to Madinah that year and come back for 'Umrah the following year. This was difficult for the Ṣaḥābah, but they obeyed the Prophet ﷺ.',
+      explanation: 'One of the terms was that Muslims would return to Madinah that year and come back for \'Umrah the following year. This was difficult for the Ṣaḥābah, but they obeyed the Prophet ﷺ.',
     },
 
     // ── Unit 10: Fatḥ Makkah ──
@@ -1773,7 +1773,7 @@ export async function seedMaktabCoursebook5() {
       questionText: 'In which year of the Hijrah did the Prophet ﷺ deliver his Farewell Sermon?',
       options: ['8 AH', '9 AH', '10 AH', '11 AH'],
       correctAnswer: '10 AH',
-      explanation: 'The Prophet ﷺ delivered the Farewell Sermon (Khuṭbat al-Wadā\') during his Farewell Ḥajj in 10 AH (632 CE), on the 9th of Dhul Ḥijjah at the plain of 'Arafāt.',
+      explanation: 'The Prophet ﷺ delivered the Farewell Sermon (Khuṭbat al-Wadā\') during his Farewell Ḥajj in 10 AH (632 CE), on the 9th of Dhul Ḥijjah at the plain of \'Arafāt.',
     },
     {
       unitId: unitFarewell.id,
@@ -1838,7 +1838,7 @@ export async function seedMaktabCoursebook5() {
       questionText: 'What two miracles did Allāh give Mūsā عليه السلام to show to Fir\'awn?',
       options: ['Splitting the sea and feeding people', 'His staff turning into a snake and his hand glowing brilliantly white', 'Healing the sick and speaking at the cradle', 'Controlling the wind and rain'],
       correctAnswer: 'His staff turning into a snake and his hand glowing brilliantly white',
-      explanation: 'Allāh gave Mūsā عليه السلام two initial miracles: his staff ('aṣā) turning into a large serpent, and his hand (yad al-bayḍā) glowing brilliantly white without harm. These were his signs to Fir\'awn.',
+      explanation: 'Allāh gave Mūsā عليه السلام two initial miracles: his staff (\'aṣā) turning into a large serpent, and his hand (yad al-bayḍā) glowing brilliantly white without harm. These were his signs to Fir\'awn.',
     },
     {
       unitId: unitMusa.id,
@@ -1938,10 +1938,10 @@ export async function seedMaktabCoursebook5() {
       unitId: unitDeathGrave.id,
       externalId: 'maktab-5-death-q4',
       type: 'TRUE_FALSE',
-      questionText: 'The angel of death is named 'Izrā\'īl عليه السلام.',
+      questionText: 'The angel of death is named \'Izrā\'īl عليه السلام.',
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: 'The angel of death is 'Izrā\'īl عليه السلام (Malak al-Mawt). He comes to every soul at the appointed time of death.',
+      explanation: 'The angel of death is \'Izrā\'īl عليه السلام (Malak al-Mawt). He comes to every soul at the appointed time of death.',
     },
     {
       unitId: unitDeathGrave.id,
@@ -2370,7 +2370,7 @@ export async function seedMaktabCoursebook5() {
       },
     });
   }
-  console.log(\`✅ Upserted \${quizData.length} quiz questions\`);
+  console.log(`✅ Upserted ${quizData.length} quiz questions`);
 
   // ══════════════════════════════════════════════
   // FLASHCARDS — redistributed across 22 units
@@ -2494,7 +2494,7 @@ export async function seedMaktabCoursebook5() {
       },
     });
   }
-  console.log(\`✅ Created \${flashcardData.length} flashcards\`);
+  console.log(`✅ Created ${flashcardData.length} flashcards`);
 
   // ══════════════════════════════════════════════
   // ARABIC TERMS — distributed across units
@@ -2603,12 +2603,12 @@ export async function seedMaktabCoursebook5() {
       },
     });
   }
-  console.log(\`✅ Created \${arabicTermsData.length} Arabic terms\`);
+  console.log(`✅ Created ${arabicTermsData.length} Arabic terms`);
 
   console.log('\\n🎉 Maktab Coursebook 5 seed complete!');
   console.log('   Course: Maktab Coursebook 5');
   console.log('   Units: 22 focused units (was 7 broad units)');
-  console.log('   Subjects: Fiqh (4), Aḥādīth (4), Sīrah (3), Tārīkh (2), Aqā\\'id (3), Akhlāq (3), Ādāb (3)');
+  console.log('   Subjects: Fiqh (4), Aḥādīth (4), Sīrah (3), Tārīkh (2), Aqā\'id (3), Akhlāq (3), Ādāb (3)');
 }
 
 // ──────────────────────────────────────────────
