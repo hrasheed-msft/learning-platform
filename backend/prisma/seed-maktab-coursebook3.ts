@@ -1,24 +1,20 @@
-import { PrismaClient } from '@prisma/client';
-import { uploadUnitContent, isBlobStorageAvailable } from './helpers/blob-upload';
+﻿import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 /**
- * Maktab Coursebook 3 — Islamic Curriculum Seed
+ * Maktab Coursebook 3 — Islamic Curriculum Seed (Restructured)
  * Source: An Nasihah Publications, Age Range: 8–9 years
  *
- * Covers seven subjects: Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā'id, Akhlāq, Ādāb
- * Each subject becomes a Unit; lessons are embedded as rich HTML content.
- * Includes quiz questions, flashcards, and Arabic terms per unit.
- *
- * Can be run independently: npx ts-node prisma/seed-maktab-coursebook3.ts
+ * 16 focused units — each covering exactly ONE main topic.
+ * Subjects: Fiqh (3), Ahadith (2), Sirah (2), Tarikh (2),
+ *           Aqaid (2), Akhlaq (2), Adab (3)
  */
 
 export async function seedMaktabCoursebook3() {
   console.log('📚 Starting Maktab Coursebook 3 seed...');
   console.log('');
 
-  // Require demo family from main seed
   const demoFamily = await prisma.family.findFirst({
     where: { name: 'Ahmad Family' },
   });
@@ -34,2543 +30,1642 @@ export async function seedMaktabCoursebook3() {
   // COURSE
   // ──────────────────────────────────────────────
 
-    const course = await prisma.course.upsert({
+  const course = await prisma.course.upsert({
     where: { slug: 'maktab-coursebook-3' },
     create: {
       slug: 'maktab-coursebook-3',
       title: 'Maktab Coursebook 3',
-      description: 'A comprehensive Islamic curriculum for young learners aged 8–9 years. Covers fiqh key terms, ṭahārah, najāsah, ghusl, ṣalāh method and types, ten key aḥādīth, the Sīrah from hijrah to Abyssinia through al-Isrā\' wal-Mi\'rāj, the story of Ibrāhīm and Ismā\'īl عليهم السلام, prophets, messengers and signs of the Last Day, good character including thinking well of others, sharing, kindness to parents, truthfulness and avoiding ghībah, and Islamic etiquette of travelling, studying, Qur\'ān, walking and the masjid. Based on the An Nasihah Publications coursebook series.',
+      description: 'An Islamic curriculum for learners aged 8-9 years. Covers fiqh of taharah, najasah, ghusl, and salah, key ahadith on love, mercy, modesty, and this world, sirah of the migration to Abyssinia and al-Isra wal-Miraj, tarikh of Prophets Ibrahim and Ismail alayhima al-salam, aqaid on prophets and signs of the Last Day, akhlaq of honoring parents and truthfulness, and adab of the Quran, masjid, travelling, studying, and walking. Based on the An Nasihah Publications coursebook series.',
       category: 'FIQH',
-      ageLevels: ['CHILD', 'PRE_TEEN'],
+      ageLevels: ['CHILD'],
       isPublished: true,
     },
     update: {
       title: 'Maktab Coursebook 3',
-      description: 'A comprehensive Islamic curriculum for young learners aged 8–9 years. Covers fiqh key terms, ṭahārah, najāsah, ghusl, ṣalāh method and types, ten key aḥādīth, the Sīrah from hijrah to Abyssinia through al-Isrā\' wal-Mi\'rāj, the story of Ibrāhīm and Ismā\'īl عليهم السلام, prophets, messengers and signs of the Last Day, good character including thinking well of others, sharing, kindness to parents, truthfulness and avoiding ghībah, and Islamic etiquette of travelling, studying, Qur\'ān, walking and the masjid. Based on the An Nasihah Publications coursebook series.',
+      description: 'An Islamic curriculum for learners aged 8-9 years. Covers fiqh of taharah, najasah, ghusl, and salah, key ahadith on love, mercy, modesty, and this world, sirah of the migration to Abyssinia and al-Isra wal-Miraj, tarikh of Prophets Ibrahim and Ismail alayhima al-salam, aqaid on prophets and signs of the Last Day, akhlaq of honoring parents and truthfulness, and adab of the Quran, masjid, travelling, studying, and walking. Based on the An Nasihah Publications coursebook series.',
       category: 'FIQH',
-      ageLevels: ['CHILD', 'PRE_TEEN'],
+      ageLevels: ['CHILD'],
       isPublished: true,
     },
   });
 
   console.log('✅ Created course:', course.title);
-  // ──────────────────────────────────────────────
-  // UNIT 0: FIQH
-  // ──────────────────────────────────────────────
 
-    const unitFiqh = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-fiqh' } },
-    create: {
-      slug: 'maktab-3-fiqh',
-      courseId: course.id,
-      title: 'Fiqh — Ṭahārah, Najāsah, Ghusl & Ṣalāh',
-      description: 'Learn the key terms of fiqh, types of najāsah (impurity), the farā\'iḍ and sunan of ghusl, the conditions and method of ṣalāh, and special prayers including Witr, Qaṣr and Ṣalātul Marīḍ.',
-      orderIndex: 0,
-      content: `
+  // ──────────────────────────────────────────────
+  // CLEANUP: Remove deprecated broad-subject units
+  // ──────────────────────────────────────────────
+  const oldSlugs = ['maktab-3-fiqh','maktab-3-ahadith','maktab-3-sirah','maktab-3-tarikh','maktab-3-aqaid','maktab-3-akhlaq','maktab-3-adab'];
+  for (const slug of oldSlugs) {
+    const old = await prisma.unit.findFirst({ where: { courseId: course.id, slug } });
+    if (old) {
+      await prisma.question.deleteMany({ where: { unitId: old.id } });
+      await prisma.unitProgress.deleteMany({ where: { unitId: old.id } });
+      await prisma.unit.delete({ where: { id: old.id } });
+    }
+  }
+
+  // ══════════════════════════════════════════════
+  // UNIT 1: FIQH — Taharah, Impurities & Najasah
+  // ══════════════════════════════════════════════
+
+  const unit1Content = `
 <h2>Learning Objectives</h2>
-<p>In this unit, you will learn:</p>
+<p>By the end of this unit, pupils will be able to explain the two types of taharah, identify the categories of najasah, and describe how to purify impurities from clothes and body.</p>
+
+<h2>Taharah — Purity in Islam</h2>
+<p>Taharah means cleanliness and purity. It is of two types:</p>
 <ul>
-  <li>The key terminology used in fiqh (Islamic jurisprudence)</li>
-  <li>The meaning of ṭahārah (purity) and its importance in Islam</li>
-  <li>The different types of najāsah (impurity)</li>
-  <li>The farā'iḍ (obligatory acts) and sunan of ghusl</li>
-  <li>The conditions, farḍ acts, and method of ṣalāh</li>
-  <li>Special prayers: Ṣalātul Witr, Ṣalātul Qaṣr, and Ṣalātul Marīḍ</li>
+  <li><strong>Taharah Haqiqi (Physical Purity):</strong> Removing dirt and impurities from the body, clothes, and place of prayer.</li>
+  <li><strong>Taharah Ma'nawi (Spiritual Purity):</strong> Purifying the heart from evil such as pride, jealousy, and hatred.</li>
+</ul>
+<p>Allah loves those who are pure. The Prophet said: "Purity is half of faith."</p>
+
+<h2>Najasah — Impurities</h2>
+<p>Najasah refers to filth that must be removed before salah. There are two categories:</p>
+
+<h3>Najasah Ghalizah (Heavy Impurity)</h3>
+<p>These are serious impurities. Examples include:</p>
+<ul>
+  <li>Human urine and stool</li>
+  <li>Animal dung of animals whose meat is not permissible to eat (e.g., donkey, pig)</li>
+  <li>Blood that flows</li>
+  <li>Alcohol (wine)</li>
+</ul>
+<p>If heavy impurity falls on clothes or body:</p>
+<ul>
+  <li>If it is <strong>less than a dirham</strong> (roughly the size of the hollow of the palm), salah is <em>makruh</em> but valid.</li>
+  <li>If it is <strong>more than a dirham</strong>, salah is <em>not valid</em> — it must be washed off first.</li>
 </ul>
 
-<h3>Key Fiqh Terminology</h3>
-<p>In Islamic law, actions are classified into different categories. Understanding these terms is essential for learning fiqh:</p>
+<h3>Najasah Khafifah (Light Impurity)</h3>
+<p>These are lighter impurities. Examples include:</p>
 <ul>
-  <li><strong>Farḍ (فَرْض)</strong> — Compulsory. Something a Muslim <em>must</em> do. Leaving out a farḍ act is sinful, and denying it takes a person out of the fold of Islam.</li>
-  <li><strong>Wājib (وَاجِب)</strong> — Necessary. Next in importance to farḍ. Leaving it out without a valid reason is sinful, but denying it does not take a person out of Islam.</li>
-  <li><strong>Sunnah Mu'akkadah (سُنَّة مُؤَكَّدَة)</strong> — An action which Rasūlullāh ﷺ did regularly. Leaving it occasionally is not sinful, but leaving it habitually is.</li>
-  <li><strong>Sunnah Ghayr Mu'akkadah (سُنَّة غَيْر مُؤَكَّدَة)</strong> — An action which Rasūlullāh ﷺ did sometimes but not always. There is reward for doing it, but no sin for leaving it.</li>
-  <li><strong>Mustaḥabb (مُسْتَحَبّ)</strong> — Desirable and recommended. There is reward for doing it but no sin for leaving it out.</li>
-  <li><strong>Mubāḥ (مُبَاح)</strong> — Permissible. An action that is neither rewarded nor punished.</li>
-  <li><strong>Makrūh (مَكْرُوه)</strong> — Disliked. It is better to avoid such actions.</li>
-  <li><strong>Makrūh Taḥrīmī (مَكْرُوه تَحْرِيمِي)</strong> — Highly disliked and close to ḥarām. Doing it is sinful.</li>
-  <li><strong>Ḥarām (حَرَام)</strong> — Absolutely forbidden. Doing a ḥarām act is a major sin.</li>
-  <li><strong>Nawāqiḍ (نَوَاقِض)</strong> — Acts that break or cancel something, such as things that break ṣalāh or wuḍū'.</li>
+  <li>Urine of animals whose meat is permissible (e.g., camel, goat)</li>
+  <li>Droppings of birds not permissible to eat</li>
+</ul>
+<p>Light impurity only affects salah if it covers <strong>more than a quarter</strong> of the garment or body part.</p>
+
+<h2>How to Purify Impurities</h2>
+<ul>
+  <li>If the impurity is liquid (e.g., urine): wash until the smell, colour, and taste are removed — at least three washes is recommended.</li>
+  <li>If the impurity is solid or dry (e.g., dry dung): it can be scraped off first, then washed.</li>
+  <li>If impurity falls on the ground: pouring water on it purifies it.</li>
+</ul>
+`.trim();
+
+  const unit1 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-fiqh-tahara-najasa' } },
+    create: {
+      slug: 'maktab-3-fiqh-tahara-najasa',
+      courseId: course.id,
+      orderIndex: 1,
+      title: 'Fiqh — Taharah, Impurities & Najasah',
+      description: 'The two types of taharah, categories of najasah (heavy and light), amounts that affect the validity of salah, and how to purify impurities.',
+      content: unit1Content,
+    },
+    update: {
+      title: 'Fiqh — Taharah, Impurities & Najasah',
+      description: 'The two types of taharah, categories of najasah (heavy and light), amounts that affect the validity of salah, and how to purify impurities.',
+      content: unit1Content,
+    },
+  });
+  console.log('✅ Unit 1:', unit1.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 2: FIQH — Ghusl (Full Bath)
+  // ══════════════════════════════════════════════
+
+  const unit2Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to list the occasions when ghusl is obligatory, state the three fara'id of ghusl, and describe the sunnah method of performing ghusl.</p>
+
+<h2>Ghusl — The Full Bath</h2>
+<p>Ghusl is a complete purification of the whole body with water. It is obligatory on certain occasions and highly recommended on others.</p>
+
+<h2>When Is Ghusl Obligatory?</h2>
+<p>Ghusl becomes <strong>fard (obligatory)</strong> on these occasions:</p>
+<ul>
+  <li><strong>Janabah:</strong> After conjugal relations or a wet dream (for adults).</li>
+  <li><strong>After Hayd:</strong> When a woman's monthly period ends.</li>
+  <li><strong>After Nifas:</strong> When a woman's post-childbirth bleeding ends.</li>
+  <li><strong>At Death:</strong> Giving ghusl to a deceased Muslim is fard al-kifayah (communal obligation).</li>
 </ul>
 
-<h3>Ṭahārah (Purity)</h3>
-<p>Ṭahārah means cleanliness and purity. In Islam, ṭahārah is essential — we cannot perform ṣalāh, touch the Qur'ān, or do ṭawāf of the Ka'bah without being in a state of purity. Allāh says in the Qur'ān:</p>
-<blockquote>"Indeed Allāh loves those who repent and He loves those who keep themselves clean." (Qur'ān 2:222)</blockquote>
-<p>There are two main types of impurity that prevent us from worship:</p>
-
-<h3>Types of Najāsah (Impurity)</h3>
-<p><strong>1. Najāsah Ḥaqīqī (Physical Impurity)</strong> — An impurity that can be seen, such as blood, urine, stool, wine, and the droppings of ḥarām animals. It is removed by washing with water until the impurity is gone.</p>
-<p><strong>2. Najāsah Ḥukmī (Ritual Impurity)</strong> — An impurity that cannot be seen. It is a state of ritual impurity that is removed by performing wuḍū' or ghusl.</p>
-
-<p>Najāsah Ḥaqīqī is further divided into two categories:</p>
-<ul>
-  <li><strong>Najāsah Ghalīẓah (Heavy Impurity)</strong> — Examples include human blood, urine, stool, flowing blood of animals, wine, and the excrement of ḥarām animals. If this impurity is on your clothes or body, it must be washed off before ṣalāh.</li>
-  <li><strong>Najāsah Khafīfah (Light Impurity)</strong> — Examples include the urine of ḥalāl animals and the droppings of ḥarām birds. The ruling is slightly more lenient — ṣalāh is valid if the impurity covers less than a quarter of the garment.</li>
-</ul>
-
-<p>Najāsah Ḥukmī is divided into two types:</p>
-<ul>
-  <li><strong>Ḥadath Akbar (Major Ritual Impurity)</strong> — Requires ghusl (a full body bath) to remove. Examples include the state of janābah (after marital relations).</li>
-  <li><strong>Ḥadath Aṣghar (Minor Ritual Impurity)</strong> — Requires wuḍū' to remove. This is the state we enter after passing wind, using the toilet, or sleeping.</li>
-</ul>
-
-<h3>Ghusl (Full Body Bath)</h3>
-<p>Ghusl is a full-body bath that must be taken when a person is in a state of major impurity (ḥadath akbar).</p>
-<p><strong>The 3 Farā'iḍ of Ghusl:</strong></p>
+<h2>Three Fara'id (Obligatory Acts) of Ghusl</h2>
+<p>For ghusl to be valid, these three acts <strong>must</strong> be performed:</p>
 <ol>
-  <li>Washing the entire body from head to toe, ensuring water reaches every part.</li>
-  <li>Gargling the mouth (allowing water to reach the entire mouth).</li>
-  <li>Rinsing the nose (sniffing water into the nostrils).</li>
+  <li><strong>Rinsing the mouth</strong> (madmadah) — water must reach all parts of the mouth.</li>
+  <li><strong>Rinsing the nose</strong> (istinshaq) — sniffing water up into both nostrils.</li>
+  <li><strong>Washing the entire body</strong> — every part of the outer body, including the hair and skin, must be wetted thoroughly.</li>
 </ol>
-<p><strong>The 5 Sunan of Ghusl:</strong></p>
+
+<h2>Sunnah Method of Ghusl</h2>
 <ol>
-  <li>Washing both hands up to the wrists.</li>
-  <li>Washing the private parts.</li>
-  <li>Removing any physical impurity from the body.</li>
-  <li>Performing wuḍū' before the ghusl.</li>
-  <li>Pouring water over the entire body three times.</li>
+  <li>Make niyyah (intention) for ghusl.</li>
+  <li>Begin with Bismillah.</li>
+  <li>Wash both hands up to the wrists three times.</li>
+  <li>Wash private parts.</li>
+  <li>Perform full wudu' (except washing the feet — leave until the end).</li>
+  <li>Pour water over the head three times, rubbing through the hair.</li>
+  <li>Pour water over the right shoulder three times, then the left three times.</li>
+  <li>Wash the entire body, making sure water reaches everywhere.</li>
+  <li>Move away from that spot and wash the feet.</li>
 </ol>
 
-<h3>Ṣalāh — The Five Daily Prayers</h3>
-<p>Ṣalāh is the most important act of worship after the shahādah. It is farḍ upon every sane, mature Muslim, five times a day. Allāh says:</p>
-<blockquote>"Indeed ṣalāh has been made obligatory upon the believers at fixed times." (Qur'ān 4:103)</blockquote>
+<h2>Recommended Ghusl: Ghusl of Jumu'ah</h2>
+<p>It is a confirmed sunnah (sunnah mu'akkadah) to perform ghusl on <strong>Friday</strong> before going to Jumu'ah salah. The Prophet strongly encouraged it.</p>
+`.trim();
 
-<h3>Daily Ṣalāh Chart</h3>
-<table border="1" cellpadding="8" cellspacing="0">
-  <thead>
-    <tr><th>Prayer</th><th>Sunnah Before</th><th>Farḍ</th><th>Sunnah After</th><th>Nafl</th><th>Witr/Other</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>Fajr</td><td>2</td><td>2</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><td>Ḍhuhr</td><td>4</td><td>4</td><td>2</td><td>2</td><td>—</td></tr>
-    <tr><td>'Aṣr</td><td>4</td><td>4</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><td>Maghrib</td><td>—</td><td>3</td><td>2</td><td>2</td><td>—</td></tr>
-    <tr><td>'Ishā'</td><td>4</td><td>4</td><td>2</td><td>2</td><td>3 Witr + 2 Nafl</td></tr>
-  </tbody>
+  const unit2 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-fiqh-ghusl' } },
+    create: {
+      slug: 'maktab-3-fiqh-ghusl',
+      courseId: course.id,
+      orderIndex: 2,
+      title: "Fiqh — Ghusl: The Full Bath",
+      description: "Occasions that make ghusl obligatory, the three fara'id of ghusl, the sunnah method, and the recommended ghusl of Friday.",
+      content: unit2Content,
+    },
+    update: {
+      title: "Fiqh — Ghusl: The Full Bath",
+      description: "Occasions that make ghusl obligatory, the three fara'id of ghusl, the sunnah method, and the recommended ghusl of Friday.",
+      content: unit2Content,
+    },
+  });
+  console.log('✅ Unit 2:', unit2.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 3: FIQH — Salah (Structure & Requirements)
+  // ══════════════════════════════════════════════
+
+  const unit3Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to list the prerequisites of salah, name the seven fara'id within salah, and state how many raka'at each prayer has.</p>
+
+<h2>Prerequisites of Salah</h2>
+<p>Before beginning salah, the following conditions <strong>must</strong> be met:</p>
+<ul>
+  <li><strong>Taharah:</strong> Being in a state of purity (wudu' or ghusl if required).</li>
+  <li><strong>Covering the 'Awrah:</strong> Men must cover navel to knee; women must cover the entire body except face, hands, and feet.</li>
+  <li><strong>Facing the Qiblah:</strong> Turning towards the Ka'bah in Makkah.</li>
+  <li><strong>Niyyah (Intention):</strong> Having the intention in the heart for which prayer you are performing.</li>
+  <li><strong>Time:</strong> Performing the salah within its designated time.</li>
+</ul>
+
+<h2>Seven Fara'id (Obligatory Acts) Within Salah</h2>
+<p>These seven acts <strong>must</strong> be performed for salah to be valid:</p>
+<ol>
+  <li><strong>Takbir al-Tahrimah:</strong> Saying "Allahu Akbar" to begin the prayer.</li>
+  <li><strong>Qiyam (Standing):</strong> Standing upright in fard prayers (if physically able).</li>
+  <li><strong>Qira'ah (Recitation):</strong> Reciting at least one verse (ayah) of the Quran.</li>
+  <li><strong>Ruku' (Bowing):</strong> Bowing until hands reach the knees.</li>
+  <li><strong>Sajdah (Prostration):</strong> Prostrating with forehead, nose, both palms, both knees, and toes touching the ground — performed twice per rak'ah.</li>
+  <li><strong>Qa'dah al-Akhirah (Final Sitting):</strong> Sitting after the last rak'ah long enough to recite at-Tashahhud.</li>
+  <li><strong>Ending with Salam:</strong> Concluding the prayer by saying "al-Salamu 'alaykum wa rahmatullah" to the right and left.</li>
+</ol>
+
+<h2>Number of Raka'at per Prayer</h2>
+<table>
+  <tr><th>Prayer</th><th>Fard Raka'at</th></tr>
+  <tr><td>Fajr</td><td>2</td></tr>
+  <tr><td>Zuhr</td><td>4</td></tr>
+  <tr><td>'Asr</td><td>4</td></tr>
+  <tr><td>Maghrib</td><td>3</td></tr>
+  <tr><td>'Isha'</td><td>4</td></tr>
 </table>
 
-<h3>Conditions Before Ṣalāh</h3>
-<p>The following conditions must be met before performing ṣalāh:</p>
-<ol>
-  <li>The body must be clean from najāsah.</li>
-  <li>The clothes must be clean from najāsah.</li>
-  <li>The place of prayer must be clean.</li>
-  <li>Satr (covering the body) — for boys: from the navel to below the knees; for girls: the entire body except the face, hands and feet.</li>
-  <li>Facing the Qiblah (direction of the Ka'bah).</li>
-  <li>Performing ṣalāh in its correct time.</li>
-  <li>Making the niyyah (intention) for the specific ṣalāh.</li>
-  <li>Having wuḍū' (or ghusl if required).</li>
-</ol>
+<h2>Reminder</h2>
+<p>Salah is the second pillar of Islam. Allah commands the believers to guard their prayers: "Indeed, salah is an obligation on the believers at prescribed times." (Quran 4:103)</p>
+`.trim();
 
-<h3>The Six Farḍ Acts in Ṣalāh</h3>
-<p>There are <strong>6 farḍ acts</strong> that must be performed during ṣalāh. Missing any of them invalidates the prayer:</p>
-<ol>
-  <li><strong>Takbīr Taḥrīmah</strong> — Saying "Allāhu Akbar" at the beginning to enter ṣalāh.</li>
-  <li><strong>Qiyām</strong> — Standing upright during ṣalāh.</li>
-  <li><strong>Qirā'ah</strong> — Reciting a portion of the Qur'ān.</li>
-  <li><strong>Rukū'</strong> — Bowing down.</li>
-  <li><strong>Sujūd</strong> — Prostrating (placing the forehead on the ground).</li>
-  <li><strong>Qa'dah Akhīrah</strong> — The last sitting for the duration of tashahhud before salām.</li>
-</ol>
-
-<h3>Nawāqiḍ of Ṣalāh (Things That Break the Prayer)</h3>
-<ul>
-  <li>Talking intentionally during ṣalāh.</li>
-  <li>Eating or drinking during ṣalāh.</li>
-  <li>Doing excessive movement (such that an onlooker would think you are not praying).</li>
-  <li>Turning the chest away from the Qiblah.</li>
-  <li>Laughing out loud.</li>
-  <li>Losing wuḍū' during ṣalāh.</li>
-  <li>Making a mistake in qirā'ah that changes the meaning.</li>
-  <li>Crying out loud for worldly reasons.</li>
-</ul>
-
-<h3>Method of Ṣalāh for Boys</h3>
-<ol>
-  <li>Stand facing the Qiblah. Make the niyyah (intention) in your heart for the specific ṣalāh.</li>
-  <li>Raise both hands to the earlobes and say <strong>"Allāhu Akbar"</strong> (Takbīr Taḥrīmah). The thumbs should touch the earlobes.</li>
-  <li>Place the right hand over the left hand below the navel. Fold the small finger and thumb around the wrist of the left hand.</li>
-  <li>Recite <strong>Thanā'</strong> — "SubḥānakAllāhumma wa biḥamdika wa tabārakasmuka wa ta'ālā jadduka wa lā ilāha ghayruk."</li>
-  <li>Recite <strong>Ta'awwudh</strong> — "A'ūdhu billāhi minash-shayṭānir-rajīm."</li>
-  <li>Recite <strong>Tasmiyah</strong> — "Bismillāhir-Raḥmānir-Raḥīm."</li>
-  <li>Recite <strong>Sūrah al-Fātiḥah</strong>, then say "Āmīn" softly, then recite at least three short verses or one long verse of the Qur'ān.</li>
-  <li>Say <strong>"Allāhu Akbar"</strong> and go into <strong>rukū'</strong> (bowing). Grasp the knees with the fingers spread apart. Keep the back flat and the head level. Say "Subḥāna Rabbiyal 'Aẓīm" at least three times.</li>
-  <li>Stand up straight saying <strong>"Sami'Allāhu liman ḥamidah"</strong>, then say "Rabbanā lakal ḥamd."</li>
-  <li>Say <strong>"Allāhu Akbar"</strong> and go into <strong>sajdah</strong>. Place the knees down first, then the hands, then the nose and forehead. Keep the arms away from the body and the fingers facing the Qiblah. Say "Subḥāna Rabbiyal A'lā" at least three times. Sit up briefly (jalsah), then perform a second sajdah.</li>
-  <li>This completes one rak'ah. Stand up for the second rak'ah.</li>
-  <li>After two rak'āt, sit for <strong>tashahhud</strong> (at-Taḥiyyāt). When saying "Ash-hadu an lā ilāha," raise the index finger of the right hand, and lower it when saying "illAllāh."</li>
-  <li>In the final sitting, after tashahhud, recite <strong>Durūd Ibrāhīm</strong> and then a du'ā'. Turn the face to the right saying <strong>"Assalāmu 'alaykum wa raḥmatullāh"</strong>, then to the left with the same words. This completes the ṣalāh.</li>
-</ol>
-
-<h3>Method of Ṣalāh for Girls</h3>
-<p>The method for girls is the same as for boys, with the following differences:</p>
-<ul>
-  <li>Raise hands to shoulder level (not ear level) for takbīr.</li>
-  <li>Place hands on the chest (not below the navel).</li>
-  <li>In rukū', bend slightly (not fully flat) and do not spread the fingers on the knees.</li>
-  <li>In sajdah, keep the arms close to the body, the stomach resting on the thighs, and the forearms flat on the ground.</li>
-  <li>In the sitting position (qa'dah), sit with both legs to the right side.</li>
-</ul>
-
-<h3>Ṣalātul Witr</h3>
-<p>Ṣalātul Witr is <strong>wājib</strong> and is performed after the farḍ and sunnah of 'Ishā'. It consists of <strong>3 rak'āt</strong>.</p>
-<ul>
-  <li>Perform the first 2 rak'āt like a normal prayer.</li>
-  <li>Stand for the 3rd rak'ah, recite Sūrah al-Fātiḥah and another sūrah.</li>
-  <li>After the qirā'ah, say "Allāhu Akbar" and raise your hands to the ears, then fold them again.</li>
-  <li>Recite <strong>Du'ā' al-Qunūt</strong> — "Allāhumma innā nasta'īnuka wa nastaghfiruka..."</li>
-  <li>Then go into rukū' and complete the ṣalāh as normal.</li>
-</ul>
-
-<h3>Ṣalātul Qaṣr (Shortened Prayer for Travellers)</h3>
-<p>A person who plans to travel more than <strong>54 miles (87 km)</strong> from the boundary of their city is considered a musāfir (traveller). The ruling for a musāfir is:</p>
-<ul>
-  <li>The <strong>4-rak'ah farḍ prayers</strong> (Ḍhuhr, 'Aṣr, 'Ishā') are <strong>shortened to 2 rak'āt</strong>.</li>
-  <li>Fajr (2 rak'āt) and Maghrib (3 rak'āt) remain unchanged.</li>
-  <li>Sunnah prayers may be omitted when travelling, but the sunnah of Fajr and the Witr of 'Ishā' should still be prayed.</li>
-  <li>If the traveller intends to stay at a place for <strong>15 days or more</strong>, they are no longer a musāfir and must pray full ṣalāh.</li>
-</ul>
-
-<h3>Ṣalātul Marīḍ (Prayer of the Sick)</h3>
-<p>Ṣalāh is never excused, even for a sick person. If a person is unable to stand, they may:</p>
-<ul>
-  <li>Pray sitting down, performing rukū' and sujūd as normal.</li>
-  <li>If unable to do rukū' and sujūd, pray sitting and indicate by nodding the head (tilting more for sujūd than for rukū').</li>
-  <li>If unable to sit, pray lying on the back or on the right side, facing the Qiblah, and indicate by nodding.</li>
-  <li>If unable to nod, delay the prayer — but it is <strong>never</strong> excused entirely while a person is conscious.</li>
-</ul>
-      `.trim(),
-    },
-    update: {
-      title: 'Fiqh — Ṭahārah, Najāsah, Ghusl & Ṣalāh',
-      description: 'Learn the key terms of fiqh, types of najāsah (impurity), the farā\'iḍ and sunan of ghusl, the conditions and method of ṣalāh, and special prayers including Witr, Qaṣr and Ṣalātul Marīḍ.',
-      orderIndex: 0,
-    },
-  });
-    if (isBlobStorageAvailable() && unitFiqh.content && !unitFiqh.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitFiqh.id, unitFiqh.content!);
-      await prisma.unit.update({
-        where: { id: unitFiqh.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
-
-  console.log('✅ Created Unit 0: Fiqh');
-  // ──────────────────────────────────────────────
-  // UNIT 1: AḤĀDĪTH
-  // ──────────────────────────────────────────────
-
-    const unitAhadith = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-ahadith' } },
+  const unit3 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-fiqh-salah' } },
     create: {
-      slug: 'maktab-3-ahadith',
+      slug: 'maktab-3-fiqh-salah',
       courseId: course.id,
-      title: 'Aḥādīth — Sayings of Rasūlullāh ﷺ',
-      description: 'Ten key aḥādīth covering ṣalāh, love for others, steadfastness, life as a journey, this world, du\'ā\', honouring guests, mercy, modesty, and shukr (gratitude).',
-      orderIndex: 1,
-      content: `
-<h2>Learning Objectives</h2>
-<p>In this unit, you will study ten aḥādīth of Rasūlullāh ﷺ on important topics including ṣalāh, character, the nature of this world, du'ā', hospitality, mercy, modesty, and gratitude.</p>
-
-<h3>Ḥadīth 1: Ṣalāh</h3>
-<p class="arabic" dir="rtl" lang="ar">الصَّلَاةُ عِمَادُ الدِّينِ</p>
-<blockquote>"Ṣalāh is a pillar of dīn."</blockquote>
-<p><strong>Source:</strong> Bayhaqī</p>
-<p>Just as a building cannot stand without pillars, a person's dīn (religion) cannot stand without ṣalāh. Ṣalāh will be the first thing we are asked about on the Day of Judgement. If our ṣalāh is in order, everything else will be easy. We must never miss our five daily prayers.</p>
-
-<h3>Ḥadīth 2: Love for Others</h3>
-<p class="arabic" dir="rtl" lang="ar">أَحِبَّ لِلنَّاسِ مَا تُحِبُّ لِنَفْسِكَ تَكُنْ مُسْلِمًا</p>
-<blockquote>"Love for people what you love for yourself, and you will become a true Muslim."</blockquote>
-<p><strong>Source:</strong> Tirmidhī</p>
-<p>A true Muslim is not selfish. If you love something for yourself — such as good food, nice clothes, or happiness — then wish the same for others. Selfishness and jealousy have no place in a Muslim's heart.</p>
-
-<h3>Ḥadīth 3: Steadfastness</h3>
-<p class="arabic" dir="rtl" lang="ar">قُلْ آمَنْتُ بِاللَّهِ ثُمَّ اسْتَقِمْ</p>
-<blockquote>"Say: 'I believe in Allāh,' then stay firm."</blockquote>
-<p><strong>Source:</strong> Ṣaḥīḥ Muslim</p>
-<p>It is not enough to simply say we believe — we must remain steadfast upon that belief. When difficulties come, when people mock us, or when we are tempted to do wrong, we must stay firm on the path of Islam.</p>
-
-<h3>Ḥadīth 4: Life</h3>
-<p class="arabic" dir="rtl" lang="ar">كُنْ فِي الدُّنْيَا كَأَنَّكَ غَرِيبٌ أَوْ عَابِرُ سَبِيلٍ</p>
-<blockquote>"Stay in this world as though you are a stranger, rather a traveller."</blockquote>
-<p><strong>Source:</strong> Ṣaḥīḥ al-Bukhārī</p>
-<p>This world is temporary — like a waiting room before the real life of the Ākhirah (Hereafter). A traveller does not become attached to the places they pass through. Similarly, we should not become too attached to the things of this world. Our real home is Jannah.</p>
-
-<h3>Ḥadīth 5: This World</h3>
-<p class="arabic" dir="rtl" lang="ar">الدُّنْيَا سِجْنُ الْمُؤْمِنِ وَجَنَّةُ الْكَافِرِ</p>
-<blockquote>"The world is a prison for a believer and a paradise for a disbeliever."</blockquote>
-<p><strong>Source:</strong> Ṣaḥīḥ Muslim</p>
-<p>A Muslim cannot do whatever they please in this world — there are rules and limits set by Allāh. This makes the world feel like a "prison" compared to the freedom of Jannah. But for those who deny Allāh, this world is the best they will ever have.</p>
-
-<h3>Ḥadīth 6: Du'ā'</h3>
-<p class="arabic" dir="rtl" lang="ar">الدُّعَاءُ سِلَاحُ الْمُؤْمِنِ</p>
-<blockquote>"Du'ā' is the weapon of a believer."</blockquote>
-<p><strong>Source:</strong> Ḥākim</p>
-<p>Just as a weapon protects a person from enemies, du'ā' protects the believer from harm, difficulty, and evil. We should make du'ā' at all times — especially after ṣalāh, in the last third of the night, and when it is raining. Allāh loves it when we ask Him.</p>
-
-<h3>Ḥadīth 7: Guests</h3>
-<p class="arabic" dir="rtl" lang="ar">مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيُكْرِمْ ضَيْفَهُ</p>
-<blockquote>"Whoever believes in Allāh and the Last Day should honour his guest!"</blockquote>
-<p><strong>Source:</strong> Ṣaḥīḥ al-Bukhārī</p>
-<p>Honouring guests is a sign of true īmān. When guests come to our home, we should welcome them warmly, offer them food and drink, and make them feel comfortable. The Prophet Ibrāhīm عليه السلام was famous for his generosity to guests.</p>
-
-<h3>Ḥadīth 8: Mercy</h3>
-<p class="arabic" dir="rtl" lang="ar">لَا يَرْحَمُ اللَّهُ مَنْ لَا يَرْحَمُ النَّاسَ</p>
-<blockquote>"Allāh does not show mercy to the one who does not show mercy to people!"</blockquote>
-<p><strong>Source:</strong> Ṣaḥīḥ al-Bukhārī</p>
-<p>If we want the mercy of Allāh, we must show mercy to His creation — not just to humans, but to animals and all living things. Being harsh, cruel, or unkind drives away the mercy of Allāh.</p>
-
-<h3>Ḥadīth 9: Modesty</h3>
-<p class="arabic" dir="rtl" lang="ar">الْحَيَاءُ مِنَ الْإِيمَانِ</p>
-<blockquote>"Modesty is part of īmān."</blockquote>
-<p><strong>Source:</strong> Ṣaḥīḥ al-Bukhārī</p>
-<p>Modesty (ḥayā') stops a person from doing evil. A modest person is careful about their clothing, their behaviour, and their speech. Modesty brings nothing but good. It is one of the special qualities of our Prophet ﷺ, who was more modest than a young girl behind her veil.</p>
-
-<h3>Ḥadīth 10: Shukr (Gratitude)</h3>
-<p class="arabic" dir="rtl" lang="ar">أَفْضَلُ الدُّعَاءِ الْحَمْدُ لِلَّهِ</p>
-<blockquote>"The best du'ā' is Alḥamdulillāh."</blockquote>
-<p><strong>Source:</strong> Tirmidhī</p>
-<p>Allāh has given us so many blessings — our health, our family, our food, our sight, our hearing. If we keep thanking Allāh by saying "Alḥamdulillāh," He will give us even more. Gratitude (shukr) is one of the greatest forms of worship.</p>
-      `.trim(),
-    },
-    update: {
-      title: 'Aḥādīth — Sayings of Rasūlullāh ﷺ',
-      description: 'Ten key aḥādīth covering ṣalāh, love for others, steadfastness, life as a journey, this world, du\'ā\', honouring guests, mercy, modesty, and shukr (gratitude).',
-      orderIndex: 1,
-    },
-  });
-    if (isBlobStorageAvailable() && unitAhadith.content && !unitAhadith.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitAhadith.id, unitAhadith.content!);
-      await prisma.unit.update({
-        where: { id: unitAhadith.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
-
-  console.log('✅ Created Unit 1: Aḥādīth');
-  // ──────────────────────────────────────────────
-  // UNIT 2: SĪRAH
-  // ──────────────────────────────────────────────
-
-    const unitSirah = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-sirah' } },
-    create: {
-      slug: 'maktab-3-sirah',
-      courseId: course.id,
-      title: 'Sīrah — From Abyssinia to al-Isrā\' wal-Mi\'rāj',
-      description: 'The hijrah to Abyssinia, Ḥamzah and \'Umar\'s acceptance of Islam, the boycott of Banū Hāshim, the Year of Sadness, the journey to Ṭā\'if, and the miraculous Night Journey and Ascension.',
-      orderIndex: 2,
-      content: `
-<h2>Learning Objectives</h2>
-<p>In this unit, you will learn about:</p>
-<ul>
-  <li>The migration of Muslims to Abyssinia</li>
-  <li>The conversion of Ḥamzah and 'Umar to Islam</li>
-  <li>The boycott of Banū Hāshim</li>
-  <li>The Year of Sadness</li>
-  <li>The journey to Ṭā'if</li>
-  <li>The miraculous Night Journey (al-Isrā' wal Mi'rāj)</li>
-</ul>
-
-<h3>Recap</h3>
-<p>In Coursebook 2, we learned about the first revelation in Cave Ḥirā', the first believers (Khadījah, Abū Bakr, 'Alī, Zayd), and the terrible persecution of early Muslims in Makkah. The Quraysh tortured Bilāl, the family of Yāsir, and many other Companions. The situation became so difficult that the Prophet ﷺ gave permission for some Companions to leave Makkah.</p>
-
-<h3>The First Migration to Abyssinia</h3>
-<p>In the 5th year of Prophethood, a small group of about <strong>11 men and 4 women</strong> migrated to <strong>Abyssinia</strong> (modern-day Ethiopia/Eritrea). The king of Abyssinia, <strong>Najāshī</strong> (Negus), was known to be a fair and just Christian ruler. The Muslims hoped to find safety and freedom to practise their religion there.</p>
-
-<h3>The Second Migration to Abyssinia</h3>
-<p>When the persecution worsened, a larger group of about <strong>83 men and 18 women</strong> migrated to Abyssinia. The Quraysh were furious. They sent <strong>'Amr ibn al-'Āṣ</strong> and <strong>'Abdullāh ibn Abī Rabī'ah</strong> with expensive gifts to bribe King Najāshī and demand the return of the Muslims.</p>
-
-<h3>Ja'far's Speech Before Najāshī</h3>
-<p><strong>Ja'far ibn Abī Ṭālib</strong> spoke on behalf of the Muslims. He said:</p>
-<blockquote>"O King, we were a people of ignorance. We worshipped idols, ate dead animals, committed shameful acts, broke family ties, and mistreated our neighbours. The strong among us would oppress the weak. Then Allāh sent us a Messenger from amongst ourselves — we know his truthfulness, his trustworthiness, and his noble lineage. He called us to worship Allāh alone, to speak the truth, to honour our relatives, and to be kind to our neighbours."</blockquote>
-<p>He then recited verses from <strong>Sūrah Maryam</strong> about the birth of 'Īsā عليه السلام. Najāshī and his bishops wept. Najāshī refused to hand the Muslims over to the Quraysh and allowed them to remain safely in his kingdom.</p>
-
-<h3>The Conversion of Ḥamzah</h3>
-<p><strong>Ḥamzah ibn 'Abdul Muṭṭalib</strong> was the Prophet's uncle — a brave and strong warrior. One day, Abū Jahl insulted and abused the Prophet ﷺ near the Ka'bah. When Ḥamzah heard about this, he was so furious that he went straight to Abū Jahl and struck him with his bow, declaring: <em>"I too follow the religion of Muḥammad!"</em> His acceptance of Islam was a great boost for the Muslim community.</p>
-
-<h3>The Conversion of 'Umar</h3>
-<p><strong>'Umar ibn al-Khaṭṭāb</strong> was initially a fierce enemy of Islam. One day, he set out with his sword intending to harm the Prophet ﷺ. On the way, someone told him that his own sister Fāṭimah and her husband had accepted Islam. Enraged, he went to their house instead. He heard them reciting the Qur'ān and demanded to see it. They told him he must first make wuḍū'. After reading the verses of <strong>Sūrah Ṭā Hā</strong>, his heart softened and he went to the Prophet ﷺ and declared his Islam. The Muslims were so overjoyed that they shouted "Allāhu Akbar" and the sound echoed through Makkah.</p>
-
-<h3>'Utbah ibn Rabī'ah's Bribery</h3>
-<p>The Quraysh sent 'Utbah ibn Rabī'ah to offer the Prophet ﷺ wealth, kingship, and the most beautiful woman in Makkah if he would stop preaching. The Prophet ﷺ simply recited verses of the Qur'ān in response. 'Utbah returned to the Quraysh saying: <em>"Leave this man alone. His words are not poetry, sorcery, or soothsaying. Something great will come from him."</em> But the Quraysh refused to listen.</p>
-
-<h3>The Boycott of Banū Hāshim</h3>
-<p>When bribes and threats failed, the Quraysh agreed on a total boycott. They wrote a document declaring that <strong>no one would trade with, marry into, or even speak to Banū Hāshim and Banū Muṭṭalib</strong>. The document was hung inside the Ka'bah.</p>
-<p>The Muslims were forced into <strong>Shi'b Abī Ṭālib</strong> — a narrow valley outside Makkah. For <strong>three terrible years</strong>, they suffered hunger and hardship. The cries of hungry children could be heard from outside the valley. Eventually, Allāh sent <strong>white ants</strong> that ate the document, leaving only the words "Bismikallāhumma" (In Your Name, O Allāh). When the Quraysh checked, they found the document destroyed and ended the boycott.</p>
-
-<h3>The Year of Sadness ('Āmul Ḥuzn)</h3>
-<p>Shortly after the boycott ended, two devastating losses struck the Prophet ﷺ. First, his beloved uncle <strong>Abū Ṭālib</strong> — who had protected him for years — passed away. Then, only a short time later, his beloved wife <strong>Khadījah</strong> رضي الله عنها — his greatest supporter and comfort — also passed away. This year became known as the <strong>Year of Sadness</strong>. Without Abū Ṭālib's protection, the persecution of the Prophet ﷺ intensified greatly.</p>
-
-<h3>The Journey to Ṭā'if</h3>
-<p>Hoping to find support elsewhere, the Prophet ﷺ travelled to <strong>Ṭā'if</strong> with Zayd ibn Ḥārithah. He invited the leaders of Ṭā'if to Islam, but they mocked him and rejected his message. Worse still, they sent the children and foolish people of the town to <strong>pelt him with stones</strong>. The Prophet ﷺ was injured and bleeding.</p>
-<p>The <strong>Angel of the Mountains</strong> appeared and offered to crush the people of Ṭā'if between two mountains. But the merciful Prophet ﷺ <strong>refused</strong>, saying: <em>"Perhaps Allāh will bring from their descendants people who will worship Allāh alone."</em> This shows the incredible mercy and patience of our beloved Prophet ﷺ.</p>
-
-<h3>A Group from Yathrib</h3>
-<p>During the Ḥajj season, the Prophet ﷺ met a group of people from <strong>Yathrib</strong> (later known as Madīnah). They listened to his message and accepted Islam. They returned home and spread the message, and the following year, more people came and pledged their allegiance to the Prophet ﷺ. This was the beginning of the road to Madīnah.</p>
-
-<h3>Al-Isrā' — The Night Journey</h3>
-<p>In one of the most difficult periods of his life, Allāh honoured the Prophet ﷺ with a miraculous journey. One night, the angel Jibrā'īl عليه السلام brought a creature called <strong>Burāq</strong> — a beautiful white creature, larger than a donkey but smaller than a horse, with wings. Each step of Burāq covered as far as the eye could see.</p>
-<p>The Prophet ﷺ rode Burāq from <strong>Masjid al-Ḥarām in Makkah</strong> to <strong>Masjid al-Aqṣā in Jerusalem</strong>. There, he led all the previous prophets in ṣalāh. This journey is called <strong>al-Isrā'</strong>.</p>
-
-<h3>Al-Mi'rāj — The Ascent Through the Heavens</h3>
-<p>From Jerusalem, the Prophet ﷺ ascended through the <strong>seven heavens</strong>:</p>
-<ol>
-  <li><strong>First Heaven:</strong> He met Ādam عليه السلام.</li>
-  <li><strong>Second Heaven:</strong> He met 'Īsā and Yaḥyā عليهما السلام.</li>
-  <li><strong>Third Heaven:</strong> He met Yūsuf عليه السلام.</li>
-  <li><strong>Fourth Heaven:</strong> He met Idrīs عليه السلام.</li>
-  <li><strong>Fifth Heaven:</strong> He met Hārūn عليه السلام.</li>
-  <li><strong>Sixth Heaven:</strong> He met Mūsā عليه السلام.</li>
-  <li><strong>Seventh Heaven:</strong> He met Ibrāhīm عليه السلام, leaning against al-Bayt al-Ma'mūr.</li>
-</ol>
-<p>The Prophet ﷺ then reached <strong>Sidrah al-Muntahā</strong> (the Lote Tree of the Furthest Limit). There, Allāh ordained <strong>50 daily prayers</strong> upon the Muslim Ummah. On the advice of Mūsā عليه السلام, the Prophet ﷺ kept returning to Allāh to ask for a reduction, until the prayers were reduced to <strong>5 daily prayers, with the reward of 50</strong>.</p>
-<p>The next morning, when the Prophet ﷺ told the Quraysh about this miraculous journey, Abū Bakr immediately believed him, earning the title <strong>Aṣ-Ṣiddīq</strong> (The Most Truthful).</p>
-      `.trim(),
-    },
-    update: {
-      title: 'Sīrah — From Abyssinia to al-Isrā\' wal-Mi\'rāj',
-      description: 'The hijrah to Abyssinia, Ḥamzah and \'Umar\'s acceptance of Islam, the boycott of Banū Hāshim, the Year of Sadness, the journey to Ṭā\'if, and the miraculous Night Journey and Ascension.',
-      orderIndex: 2,
-    },
-  });
-    if (isBlobStorageAvailable() && unitSirah.content && !unitSirah.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitSirah.id, unitSirah.content!);
-      await prisma.unit.update({
-        where: { id: unitSirah.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
-
-  console.log('✅ Created Unit 2: Sīrah');
-  // ──────────────────────────────────────────────
-  // UNIT 3: TĀRĪKH
-  // ──────────────────────────────────────────────
-
-    const unitTarikh = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-tarikh' } },
-    create: {
-      slug: 'maktab-3-tarikh',
-      courseId: course.id,
-      title: 'Tārīkh — The Story of Ibrāhīm & Ismā\'īl عليهم السلام',
-      description: 'The life of Prophet Ibrāhīm عليه السلام: his youth among idol worshippers, breaking the idols, the fire, the debate with Namrūd, the search for truth, and the stories of Zamzam, the sacrifice of Ismā\'īl, and building the Ka\'bah.',
       orderIndex: 3,
-      content: `
-<h2>Learning Objectives</h2>
-<p>In this unit, you will learn about:</p>
-<ul>
-  <li>The early life of Ibrāhīm عليه السلام in the city of Ūr</li>
-  <li>How he challenged the idol worship of his father and his people</li>
-  <li>The miracle of the fire</li>
-  <li>His debate with King Namrūd</li>
-  <li>His journey to Makkah and the miracle of Zamzam</li>
-  <li>The sacrifice of Ismā'īl and the building of the Ka'bah</li>
-</ul>
-
-<h3>Early Life in Ūr</h3>
-<p>Ibrāhīm عليه السلام was born in the city of <strong>Ūr</strong> in ancient Mesopotamia (modern-day Iraq). His father's name was <strong>Āzar</strong>, and he was an <strong>idol-maker</strong>. Āzar used to carve idols out of stone and sell them to the people, who would then worship them.</p>
-<p>Even as a young boy, Ibrāhīm found it strange that people worshipped stones that could not see, hear, speak, or help anyone. He knew in his heart that these idols had no power at all.</p>
-
-<h3>Searching for the True Lord</h3>
-<p>One night, Ibrāhīm عليه السلام looked at the sky and saw a bright star. He said: "This is my Lord." But when the star set, he said: "I do not love things that set." Then he saw the moon shining brightly and said: "This is my Lord." But when the moon set, he said: "If my Lord does not guide me, I will be among the astray people." Then he saw the sun rising in all its glory and said: "This is my Lord, this is greater!" But when the sun set, he declared:</p>
-<blockquote>"I have turned my face towards the One who created the heavens and the earth, and I am not of those who associate partners with Allāh." (Qur'ān 6:79)</blockquote>
-
-<h3>Breaking the Idols</h3>
-<p>One day, when the people left for a festival, Ibrāhīm عليه السلام stayed behind. He went to the temple and <strong>broke all the idols</strong> except the largest one, around whose neck he hung the axe. When the people returned and found their idols smashed, they demanded to know who did this. They suspected Ibrāhīm.</p>
-<p>When questioned, Ibrāhīm said: <em>"Ask the big one — perhaps he did it!"</em> The people said: "You know they cannot speak!" Ibrāhīm replied: <em>"Then why do you worship things that cannot help or harm you?"</em> The people were left speechless but were too arrogant to accept the truth.</p>
-
-<h3>Thrown into the Fire</h3>
-<p>The people decided to punish Ibrāhīm by <strong>throwing him into a great fire</strong>. They gathered wood for days and built a fire so huge that nobody could get near it. They used a catapult to throw Ibrāhīm into the fire. But Allāh commanded:</p>
-<p class="arabic" dir="rtl" lang="ar">قُلْنَا يَا نَارُ كُونِي بَرْدًا وَسَلَامًا عَلَىٰ إِبْرَاهِيمَ</p>
-<blockquote>"O fire, be cool and peaceful for Ibrāhīm." (Qur'ān 21:69)</blockquote>
-<p>The fire did not harm Ibrāhīm at all. He sat in the middle of it comfortably, and it became like a garden for him. This was a great miracle of Allāh.</p>
-
-<h3>Debating King Namrūd</h3>
-<p><strong>Namrūd</strong> was the evil and arrogant king of the land. He claimed to have power over life and death. Ibrāhīm عليه السلام challenged him:</p>
-<blockquote>"My Lord is the One who gives life and causes death."</blockquote>
-<p>Namrūd said: "I too give life and death" — and he freed one prisoner and executed another. Then Ibrāhīm said:</p>
-<blockquote>"Allāh brings the sun from the East — can you bring it from the West?"</blockquote>
-<p>Namrūd was left speechless. He had no answer. The truth of Allāh's power was clear for everyone to see.</p>
-
-<h3>The Journey to Makkah</h3>
-<p>Allāh commanded Ibrāhīm عليه السلام to take his wife <strong>Hājar</strong> and their baby son <strong>Ismā'īl</strong> to the barren desert valley of Makkah. There was no water, no food, and no people there. Ibrāhīm left them with some dates and water, trusting in Allāh's plan.</p>
-<p>When Hājar asked: "Has Allāh commanded you to do this?" and Ibrāhīm said yes, she replied with complete trust: <em>"Then Allāh will not let us go to waste."</em></p>
-
-<h3>The Miracle of Zamzam</h3>
-<p>When the water ran out, baby Ismā'īl began to cry from thirst. Hājar ran frantically between the two hills of <strong>Ṣafā</strong> and <strong>Marwah</strong> — <strong>seven times</strong> — looking for water or any sign of help. This act is commemorated during Ḥajj as <strong>Sa'ī</strong>.</p>
-<p>As she returned to her baby, she saw an angel (Jibrā'īl) striking the ground near Ismā'īl with his wing. Water gushed forth from the earth! Hājar contained it saying: <em>"Zam! Zam!"</em> (Stop! Stop!). This blessed water is <strong>Zamzam</strong>, and it still flows in Makkah today. Millions of people drink from it, and it has never dried up.</p>
-
-<h3>The Sacrifice of Ismā'īl</h3>
-<p>When Ismā'īl grew up, Allāh tested Ibrāhīm with the greatest test — he saw in a dream that he was <strong>sacrificing his son</strong>. The dreams of prophets are a form of revelation. Ibrāhīm told his son about the dream, and Ismā'īl replied with incredible obedience:</p>
-<blockquote>"O my father, do as you have been commanded. You will find me, if Allāh wills, among the patient." (Qur'ān 37:102)</blockquote>
-<p>As Ibrāhīm laid his son down and placed the knife, Allāh called out: <em>"O Ibrāhīm, you have fulfilled the dream!"</em> Allāh sent a <strong>ram from Jannah</strong> as a replacement sacrifice. This great event is commemorated every year during <strong>'Īd al-Aḍḥā</strong>, when Muslims around the world sacrifice an animal.</p>
-
-<h3>Building the Ka'bah</h3>
-<p>Allāh commanded Ibrāhīm and Ismā'īl عليهما السلام to build the <strong>Ka'bah</strong> — the house of Allāh in Makkah. They built it together with their own hands, stone by stone. When the walls became too high, Ibrāhīm stood on a rock called <strong>Maqām Ibrāhīm</strong> (the Station of Ibrāhīm), and his footprints were miraculously preserved in the stone.</p>
-<p>As they built, they made this beautiful du'ā':</p>
-<blockquote>"Our Lord, accept this from us. Indeed You are the All-Hearing, the All-Knowing." (Qur'ān 2:127)</blockquote>
-<p>The Ka'bah became the <strong>Qiblah</strong> — the direction all Muslims face in ṣalāh — and the destination of Ḥajj, the annual pilgrimage that Ibrāhīm himself was commanded to announce.</p>
-<p>Ibrāhīm عليه السلام is given the title <strong>Khalīlullāh</strong> — the Close Friend of Allāh. His story teaches us about complete trust in Allāh, unwavering obedience, and courage in standing for the truth.</p>
-      `.trim(),
+      title: "Fiqh — Salah: Structure & Requirements",
+      description: "Prerequisites of salah, the seven fara'id within salah, and the number of raka'at for each of the five daily prayers.",
+      content: unit3Content,
     },
     update: {
-      title: 'Tārīkh — The Story of Ibrāhīm & Ismā\'īl عليهم السلام',
-      description: 'The life of Prophet Ibrāhīm عليه السلام: his youth among idol worshippers, breaking the idols, the fire, the debate with Namrūd, the search for truth, and the stories of Zamzam, the sacrifice of Ismā\'īl, and building the Ka\'bah.',
-      orderIndex: 3,
+      title: "Fiqh — Salah: Structure & Requirements",
+      description: "Prerequisites of salah, the seven fara'id within salah, and the number of raka'at for each of the five daily prayers.",
+      content: unit3Content,
     },
   });
-    if (isBlobStorageAvailable() && unitTarikh.content && !unitTarikh.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitTarikh.id, unitTarikh.content!);
-      await prisma.unit.update({
-        where: { id: unitTarikh.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
+  console.log('✅ Unit 3:', unit3.title);
 
-  console.log('✅ Created Unit 3: Tārīkh');
-  // ──────────────────────────────────────────────
-  // UNIT 4: AQĀ'ID
-  // ──────────────────────────────────────────────
+  // ══════════════════════════════════════════════
+  // UNIT 4: AHADITH — Love, Mercy & Compassion
+  // ══════════════════════════════════════════════
 
-    const unitAqaid = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-aqaid' } },
-    create: {
-      slug: 'maktab-3-aqaid',
-      courseId: course.id,
-      title: 'Aqā\'id — Prophets, Messengers & Signs of the Last Day',
-      description: 'Learn about the prophets and messengers sent by Allāh, the difference between a rasūl and a nabī, the 25 prophets mentioned in the Qur\'ān, and the minor and major signs of the Day of Judgement.',
-      orderIndex: 4,
-      content: `
+  const unit4Content = `
 <h2>Learning Objectives</h2>
-<p>In this unit, you will learn about:</p>
+<p>By the end of this unit, pupils will be able to recite and understand three key ahadith about love, mercy, and treating guests well, and apply their lessons to daily life.</p>
+
+<h2>Hadith 1: Love for Others What You Love for Yourself</h2>
+<p>The Prophet said:</p>
+<blockquote>"None of you truly believes until he loves for his brother what he loves for himself." (Bukhari &amp; Muslim)</blockquote>
+<p>This hadith teaches us that true faith means caring about others as much as we care about ourselves. If we want food, shelter, happiness, and Allah's blessings — we should want the same for every Muslim.</p>
+
+<h2>Hadith 2: Show Mercy to Receive Mercy</h2>
+<p>The Prophet said:</p>
+<blockquote>"Show mercy to those on earth, and the One in the heavens will show mercy to you." (Tirmidhi)</blockquote>
+<p>This beautiful hadith shows the connection between how we treat people and how Allah treats us. Being kind to people, animals, and all of creation is a way to earn Allah's mercy.</p>
+
+<h2>Hadith 3: Honouring the Guest</h2>
+<p>The Prophet said:</p>
+<blockquote>"Whoever believes in Allah and the Last Day, let him honour his guest." (Bukhari &amp; Muslim)</blockquote>
+<p>Part of being a good Muslim is welcoming guests warmly. The Prophet always treated guests with the greatest respect and generosity.</p>
+
+<h2>Summary of Lessons</h2>
 <ul>
-  <li>Why Allāh sent prophets and messengers</li>
-  <li>The attributes of the prophets</li>
-  <li>The difference between a Rasūl and a Nabī</li>
-  <li>The names of the 25 prophets mentioned in the Qur'ān</li>
-  <li>The Day of Judgement and its signs</li>
+  <li>Love for your Muslim brothers and sisters what you love for yourself.</li>
+  <li>Be merciful and kind — Allah will be merciful to you.</li>
+  <li>Always honour and welcome guests generously.</li>
+</ul>
+`.trim();
+
+  const unit4 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-ahadith-love-mercy' } },
+    create: {
+      slug: 'maktab-3-ahadith-love-mercy',
+      courseId: course.id,
+      orderIndex: 4,
+      title: "Ahadith — Love, Mercy & Compassion",
+      description: "Three key ahadith: loving for others what we love for ourselves, showing mercy to earn Allah's mercy, and honouring guests as a sign of faith.",
+      content: unit4Content,
+    },
+    update: {
+      title: "Ahadith — Love, Mercy & Compassion",
+      description: "Three key ahadith: loving for others what we love for ourselves, showing mercy to earn Allah's mercy, and honouring guests as a sign of faith.",
+      content: unit4Content,
+    },
+  });
+  console.log('✅ Unit 4:', unit4.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 5: AHADITH — This World, Modesty & Steadfastness
+  // ══════════════════════════════════════════════
+
+  const unit5Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to explain three ahadith about the temporary nature of this world, the importance of modesty (haya'), and staying firm in din.</p>
+
+<h2>Hadith 1: This World Is Like Shade Under a Tree</h2>
+<p>The Prophet said:</p>
+<blockquote>"What do I have to do with this world? I am in this world like a rider who rests in the shade of a tree, then moves on and leaves it behind." (Tirmidhi, Ibn Majah)</blockquote>
+<p>This world is temporary — like shade that disappears. We should not become too attached to worldly things. Our real home is the Akhirah (Hereafter).</p>
+
+<h2>Hadith 2: Haya' (Modesty) Is Part of Faith</h2>
+<p>The Prophet said:</p>
+<blockquote>"Faith (Iman) has seventy-odd branches. The highest is saying La ilaha illallah, and the lowest is removing something harmful from the road. And haya' (modesty) is a branch of faith." (Bukhari &amp; Muslim)</blockquote>
+<p>Haya' means feeling shy about displeasing Allah, being modest in behaviour, dress, and speech. It is not weakness — the Prophet said: "Haya' brings nothing but good."</p>
+
+<h2>Hadith 3: Steadfastness When Fitnah Comes</h2>
+<p>The Prophet said:</p>
+<blockquote>"There will come a time when holding on to your din will be like holding a burning coal." (Tirmidhi)</blockquote>
+<p>As times become harder, staying firm in Islam becomes more important and more difficult. We must hold firmly to our prayers, our values, and our community.</p>
+
+<h2>Summary of Lessons</h2>
+<ul>
+  <li>This dunya is short — do not be deceived by it.</li>
+  <li>Haya' is a branch of Iman — protect your modesty.</li>
+  <li>Stay firm in din no matter how difficult times become.</li>
+</ul>
+`.trim();
+
+  const unit5 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-ahadith-world-modesty' } },
+    create: {
+      slug: 'maktab-3-ahadith-world-modesty',
+      courseId: course.id,
+      orderIndex: 5,
+      title: "Ahadith — This World, Modesty & Steadfastness",
+      description: "Three ahadith: the temporary nature of this dunya, haya' (modesty) as a branch of faith, and steadfastness when facing fitnah.",
+      content: unit5Content,
+    },
+    update: {
+      title: "Ahadith — This World, Modesty & Steadfastness",
+      description: "Three ahadith: the temporary nature of this dunya, haya' (modesty) as a branch of faith, and steadfastness when facing fitnah.",
+      content: unit5Content,
+    },
+  });
+  console.log('✅ Unit 5:', unit5.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 6: SIRAH — Persecution & Migration to Abyssinia
+  // ══════════════════════════════════════════════
+
+  const unit6Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to describe how early Muslims were persecuted in Makkah, explain why they migrated to Abyssinia, and describe the protection given by Najashi.</p>
+
+<h2>Persecution of Early Muslims</h2>
+<p>After the Prophet began preaching Islam, the leaders of Makkah became angry. They could not harm the Prophet directly because of his uncle Abu Talib's protection — so they attacked his followers:</p>
+<ul>
+  <li><strong>Bilal ibn Rabah</strong> (a freed slave): His master Umayyah ibn Khalaf would place a heavy boulder on his chest in the blazing sun, saying "Deny Muhammad." Bilal would only say: "Ahad! Ahad!" (One! One!). He was later freed by Sayyiduna Abu Bakr.</li>
+  <li><strong>'Ammar ibn Yasir and his parents Yasir and Sumayyah:</strong> They were tortured severely. Sumayyah became the first martyr in Islam when she was killed by Abu Jahl.</li>
+  <li>Many other poor and weak Muslims were beaten, starved, and humiliated.</li>
 </ul>
 
-<h3>Why Did Allāh Send Prophets?</h3>
-<p>Allāh created human beings to worship Him alone. However, over time, people forgot the message of Allāh and began to worship idols, the sun, the moon, and other false gods. So Allāh, out of His mercy, sent <strong>prophets and messengers</strong> to every nation to guide them back to the truth.</p>
-<blockquote>"And We certainly sent into every nation a messenger, saying: 'Worship Allāh and avoid false gods.'" (Qur'ān 16:36)</blockquote>
+<h2>Migration to Abyssinia (615 CE)</h2>
+<p>The Prophet saw the suffering of his companions and advised them to go to Abyssinia (modern-day Ethiopia), saying:</p>
+<blockquote>"In Abyssinia there is a king under whom no one is oppressed. Go there until Allah opens a way for you."</blockquote>
+<p>The <strong>first migration</strong> included about 12-15 companions. The <strong>second migration</strong> was larger — about 83 men and 18 women went, including 'Uthman ibn 'Affan and his wife Ruqayyah (the Prophet's daughter).</p>
 
-<h3>Attributes of the Prophets</h3>
-<p>All prophets share certain qualities:</p>
+<h2>Najashi — The Righteous King</h2>
+<p>The ruler of Abyssinia was <strong>al-Najashi</strong> (Ashamah). He was a Christian king known for his justice.</p>
 <ul>
-  <li><strong>Ṣidq</strong> — They are always truthful and never lie.</li>
-  <li><strong>Amānah</strong> — They are completely trustworthy.</li>
-  <li><strong>Tablīgh</strong> — They convey the message of Allāh without hiding anything.</li>
-  <li><strong>Faṭānah</strong> — They are intelligent and wise.</li>
-  <li><strong>'Iṣmah</strong> — They are protected from committing major sins.</li>
+  <li>The Quraysh sent a delegation ('Amr ibn al-'As and 'Abdullah ibn Abi Rabi'ah) with gifts to persuade Najashi to return the Muslims.</li>
+  <li>Najashi listened to Ja'far ibn Abi Talib recite from Surah Maryam about 'Isa alayhi al-salam.</li>
+  <li>Najashi was moved to tears and said: "By Allah, the difference between what you say and what we say is no more than this" — and drew a line on the ground.</li>
+  <li>He refused to hand over the Muslims and protected them throughout their stay.</li>
 </ul>
-<p>Prophets are human beings — they eat, drink, sleep, and feel pain. But they are the <strong>best of all human beings</strong>, chosen by Allāh for this great responsibility.</p>
 
-<h3>Rasūl vs Nabī</h3>
-<p>There is an important difference between a <strong>Rasūl</strong> (Messenger) and a <strong>Nabī</strong> (Prophet):</p>
+<h2>Why This Migration Matters</h2>
+<p>The migration to Abyssinia shows the courage of the early Muslims and the wisdom of the Prophet. It also shows that Islam teaches us to seek safety when persecuted — and that justice and truth can come from unexpected places.</p>
+`.trim();
+
+  const unit6 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-sirah-abyssinia' } },
+    create: {
+      slug: 'maktab-3-sirah-abyssinia',
+      courseId: course.id,
+      orderIndex: 6,
+      title: "Sirah — Persecution & Migration to Abyssinia",
+      description: "Persecution of early Muslims in Makkah, the first and second migrations to Abyssinia (615 CE), and the protection given by Najashi.",
+      content: unit6Content,
+    },
+    update: {
+      title: "Sirah — Persecution & Migration to Abyssinia",
+      description: "Persecution of early Muslims in Makkah, the first and second migrations to Abyssinia (615 CE), and the protection given by Najashi.",
+      content: unit6Content,
+    },
+  });
+  console.log('✅ Unit 6:', unit6.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 7: SIRAH — Year of Sorrow & al-Isra' wal-Mi'raj
+  // ══════════════════════════════════════════════
+
+  const unit7Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to explain why the 10th year of prophethood was called the "Year of Sorrow," describe al-Isra' and al-Mi'raj, and explain the gift of the five daily prayers.</p>
+
+<h2>The Year of Sorrow ('Am al-Huzn)</h2>
+<p>In the 10th year of prophethood, the Prophet suffered two great losses within a short time:</p>
 <ul>
-  <li>A <strong>Rasūl</strong> is given a new book or scripture and new laws by Allāh.</li>
-  <li>A <strong>Nabī</strong> follows the book and law of the previous Rasūl.</li>
+  <li><strong>Sayyidah Khadijah</strong> — the Prophet's beloved wife of 25 years, his greatest supporter and comforter, passed away. She was the first person to believe in him.</li>
+  <li><strong>Abu Talib</strong> — the Prophet's uncle and protector, passed away shortly after. Although he did not accept Islam, he had shielded the Prophet from the Quraysh for years.</li>
 </ul>
-<p><strong>Every Rasūl is a Nabī, but not every Nabī is a Rasūl.</strong></p>
-<p>For example, Mūsā عليه السلام was a Rasūl because he was given the Tawrāh. Hārūn عليه السلام was a Nabī who followed the law of Mūsā.</p>
+<p>With these two losses, the Prophet was deeply grieved. The Quraysh became bolder in their persecution. This year is called <em>'Am al-Huzn</em> — the Year of Sorrow.</p>
 
-<h3>The First and Last Prophet</h3>
-<p>The <strong>first prophet</strong> was <strong>Ādam عليه السلام</strong> — the first human being created by Allāh.</p>
-<p>The <strong>last and final prophet</strong> was <strong>Muḥammad ﷺ</strong> — the Seal of the Prophets (Khātamun Nabiyyīn). There will be no more prophets or messengers after him. Anyone who claims prophethood after Muḥammad ﷺ is a liar.</p>
+<h2>Al-Isra' — The Night Journey</h2>
+<p>As a consolation and honour, Allah took the Prophet on a miraculous night journey:</p>
+<ul>
+  <li>Jibril alayhi al-salam came and took the Prophet on <strong>Buraq</strong> — a white creature larger than a donkey but smaller than a mule, whose stride reached as far as the eye could see.</li>
+  <li>They travelled from <strong>Masjid al-Haram</strong> (Makkah) to <strong>Masjid al-Aqsa</strong> (Jerusalem) in one night.</li>
+  <li>At Masjid al-Aqsa, the Prophet led all the previous prophets in salah as their imam.</li>
+</ul>
 
-<h3>The 25 Prophets Mentioned in the Qur'ān</h3>
-<p>Although Allāh sent approximately 124,000 prophets throughout history, <strong>25 are mentioned by name in the Qur'ān</strong>:</p>
+<h2>Al-Mi'raj — The Ascent Through the Heavens</h2>
+<p>From Masjid al-Aqsa, the Prophet was taken up through the seven heavens:</p>
+<ul>
+  <li>In each heaven he met different prophets: Adam, Yahya &amp; 'Isa, Yusuf, Idris, Harun, Musa, and finally Ibrahim alayhim al-salam.</li>
+  <li>The Prophet reached <strong>Sidrat al-Muntaha</strong> (the Lote Tree of the Utmost Boundary) — a place no creation had reached before.</li>
+  <li>Allah spoke to the Prophet directly.</li>
+</ul>
+
+<h2>The Gift: Five Daily Prayers</h2>
+<p>On this night, Allah gifted the Muslim ummah the <strong>five daily salah</strong>. Originally 50 prayers were commanded. After Musa alayhi al-salam advised the Prophet to request reductions, it was reduced to 5 — but with the reward of 50. The Prophet returned to Makkah before dawn.</p>
+
+<h2>The Miracle</h2>
+<p>When the Prophet told the Quraysh about his journey, many mocked him. But Abu Bakr immediately believed him, earning the title al-Siddiq (the Truthful Confirmer).</p>
+`.trim();
+
+  const unit7 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-sirah-isra-miraj' } },
+    create: {
+      slug: 'maktab-3-sirah-isra-miraj',
+      courseId: course.id,
+      orderIndex: 7,
+      title: "Sirah — Year of Sorrow & al-Isra' wal-Mi'raj",
+      description: "The Year of Sorrow (deaths of Khadijah and Abu Talib), al-Isra' (night journey to Masjid al-Aqsa), al-Mi'raj (ascent through the heavens), and the gift of five daily prayers.",
+      content: unit7Content,
+    },
+    update: {
+      title: "Sirah — Year of Sorrow & al-Isra' wal-Mi'raj",
+      description: "The Year of Sorrow (deaths of Khadijah and Abu Talib), al-Isra' (night journey to Masjid al-Aqsa), al-Mi'raj (ascent through the heavens), and the gift of five daily prayers.",
+      content: unit7Content,
+    },
+  });
+  console.log('✅ Unit 7:', unit7.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 8: TARIKH — Prophet Ibrahim alayhi al-salam
+  // ══════════════════════════════════════════════
+
+  const unit8Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to describe Ibrahim's challenge to idol-worship, explain the miracle of the fire, and identify the greatest test Allah gave him.</p>
+
+<h2>Early Life of Ibrahim alayhi al-salam</h2>
+<p>Prophet Ibrahim alayhi al-salam was born in <strong>Ur</strong>, in what is now Iraq. He lived among a people who worshipped idols — statues they themselves carved. His own father, Azar, was a maker and seller of idols.</p>
+<p>From a young age, Ibrahim used his intellect to seek the truth. He looked at the stars, moon, and sun, and when they set or disappeared, he concluded: "I do not love things that set." He came to know that Allah alone — the Creator — is worthy of worship.</p>
+
+<h2>Challenging Idol-Worship</h2>
+<p>Ibrahim tried to reason with his father and people, telling them that idols cannot see, hear, speak, or benefit anyone. When they refused to listen, he went into the temple and smashed all the idols — except the biggest one. He placed the axe on it so people would blame it.</p>
+<p>When confronted, Ibrahim cleverly asked: "Why don't you ask the biggest idol?" When they replied "You know it cannot speak," he said: "Then how can you worship things that cannot speak, see, or help you?"</p>
+
+<h2>Thrown Into the Fire — The Miracle</h2>
+<p>The people were furious. They decided to throw Ibrahim into an enormous fire as punishment. But Allah commanded:</p>
+<blockquote>"O fire! Be coolness and safety for Ibrahim." (Quran 21:69)</blockquote>
+<p>The fire did not harm Ibrahim at all — it became cool and peaceful for him. This was one of the greatest miracles in history.</p>
+
+<h2>Leaving for the Holy Land</h2>
+<p>After his people still refused to believe, Ibrahim left with his wife Sarah and nephew Lut for the land of <strong>Canaan</strong> (present-day Palestine/Syria). This land was blessed by Allah.</p>
+
+<h2>The Greatest Test</h2>
+<p>Later in life, Allah tested Ibrahim alayhi al-salam with the command to sacrifice his son Ismail. Both father and son submitted completely to Allah's will. Just as Ibrahim raised the knife, Allah replaced Ismail with a ram, and declared that Ibrahim had passed the test. This act of sacrifice is remembered every year on 'Id al-Adha.</p>
+`.trim();
+
+  const unit8 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-tarikh-ibrahim' } },
+    create: {
+      slug: 'maktab-3-tarikh-ibrahim',
+      courseId: course.id,
+      orderIndex: 8,
+      title: "Tarikh — Prophet Ibrahim alayhi al-salam",
+      description: "Ibrahim's challenge to idol-worship, the miracle of the fire, his migration to Canaan, and the great test of sacrificing his son.",
+      content: unit8Content,
+    },
+    update: {
+      title: "Tarikh — Prophet Ibrahim alayhi al-salam",
+      description: "Ibrahim's challenge to idol-worship, the miracle of the fire, his migration to Canaan, and the great test of sacrificing his son.",
+      content: unit8Content,
+    },
+  });
+  console.log('✅ Unit 8:', unit8.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 9: TARIKH — Prophet Ismail & the Ka'bah
+  // ══════════════════════════════════════════════
+
+  const unit9Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to describe the story of Hajar and the appearance of ZamZam, explain the building of the Ka'bah, and state what Ibrahim prayed for when calling people to Hajj.</p>
+
+<h2>Hajar and Ismail in the Desert</h2>
+<p>On Allah's command, Prophet Ibrahim alayhi al-salam took his wife Hajar and their infant son Ismail to the barren valley of <strong>Makkah</strong> — a place with no water, no food, and no people.</p>
+<p>Ibrahim left them there with a small supply of dates and a waterskin of water. When Hajar asked: "Has Allah commanded you to do this?" and Ibrahim replied "Yes," she said: "Then Allah will not abandon us."</p>
+
+<h2>Sa'y — Running Between Safa and Marwah</h2>
+<p>When the water ran out and baby Ismail cried from thirst, Hajar ran desperately between the two hills of <strong>Safa</strong> and <strong>Marwah</strong>, seven times, searching for water or anyone who could help.</p>
+<p>This courageous act of a mother is commemorated by millions of pilgrims every year during Hajj and 'Umrah. It is called <strong>Sa'y</strong>.</p>
+
+<h2>The Miracle of ZamZam</h2>
+<p>After Hajar's seventh run, Allah caused a spring to burst from the ground near baby Ismail's feet. Some narrations say the angel Jibril struck the ground. This was the <strong>ZamZam</strong> spring.</p>
+<p>Birds circled above, and the tribe of <strong>Jurhum</strong> — a tribe of travellers — came seeking water. They asked Hajar's permission to settle near the spring, and she agreed. Ismail grew up among them and learned to speak Arabic.</p>
+
+<h2>Building the Ka'bah</h2>
+<p>When Ismail grew up, Allah commanded Ibrahim alayhi al-salam to build the <strong>Ka'bah</strong> — the House of Allah. Father and son worked together:</p>
+<ul>
+  <li>Ibrahim laid the foundation and built the walls.</li>
+  <li>Ismail passed the stones to his father.</li>
+  <li>As they built, they prayed: "Our Lord, accept this from us. You are the All-Hearing, All-Knowing." (Quran 2:127)</li>
+  <li>Ibrahim placed the <strong>Hajar al-Aswad</strong> (the Black Stone) in the corner — a stone from Jannah that Jibril brought.</li>
+</ul>
+
+<h2>The Call of Ibrahim for Hajj</h2>
+<p>After the Ka'bah was built, Allah commanded Ibrahim to call all people to Hajj. Ibrahim asked: "O Allah, how will my voice reach distant lands?" Allah replied: "You call — We will deliver it." Ibrahim stood and called out, and Allah carried that call to every human soul. This is why people come to Makkah in Hajj to this day.</p>
+`.trim();
+
+  const unit9 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-tarikh-ismail-kabah' } },
+    create: {
+      slug: 'maktab-3-tarikh-ismail-kabah',
+      courseId: course.id,
+      orderIndex: 9,
+      title: "Tarikh — Prophet Ismail & the Ka'bah",
+      description: "Hajar and Ismail in the desert of Makkah, the miracle of ZamZam, the building of the Ka'bah by Ibrahim and Ismail, and the call to Hajj.",
+      content: unit9Content,
+    },
+    update: {
+      title: "Tarikh — Prophet Ismail & the Ka'bah",
+      description: "Hajar and Ismail in the desert of Makkah, the miracle of ZamZam, the building of the Ka'bah by Ibrahim and Ismail, and the call to Hajj.",
+      content: unit9Content,
+    },
+  });
+  console.log('✅ Unit 9:', unit9.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 10: AQAID — Prophets & Messengers
+  // ══════════════════════════════════════════════
+
+  const unit10Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to explain the difference between a nabi and a rasul, name the five Ulu al-'Azm prophets, and list the five qualities all prophets must have.</p>
+
+<h2>Difference Between Nabi and Rasul</h2>
+<p>Allah sent many prophets to guide humanity:</p>
+<ul>
+  <li>A <strong>Nabi</strong> is a prophet who received revelation (wahy) from Allah to follow and convey the message of the prophet before him.</li>
+  <li>A <strong>Rasul</strong> (Messenger) is a prophet who was given a new divine book or a new set of laws to deliver to his people.</li>
+  <li>All rusul (pl. of rasul) are anbiya' (pl. of nabi), but not all anbiya' are rusul.</li>
+</ul>
+<p>Scholars mention that there were approximately <strong>124,000 prophets</strong> (anbiya') and <strong>315 messengers</strong> (rusul). It is obligatory to believe in all of them, though we only know the names of a few.</p>
+
+<h2>The Five Ulu al-'Azm — Prophets of Great Resolve</h2>
+<p>The five most determined and highest-ranking messengers are:</p>
 <ol>
-  <li>Ādam</li>
-  <li>Idrīs</li>
-  <li>Nūḥ</li>
-  <li>Hūd</li>
-  <li>Ṣāliḥ</li>
-  <li>Ibrāhīm</li>
-  <li>Lūṭ</li>
-  <li>Ismā'īl</li>
-  <li>Isḥāq</li>
-  <li>Ya'qūb</li>
-  <li>Yūsuf</li>
-  <li>Shu'ayb</li>
-  <li>Ayyūb</li>
-  <li>Dhul Kifl</li>
-  <li>Mūsā</li>
-  <li>Hārūn</li>
-  <li>Dāwūd</li>
-  <li>Sulaymān</li>
-  <li>Ilyās</li>
-  <li>Al-Yasa'</li>
-  <li>Yūnus</li>
-  <li>Zakariyyā</li>
-  <li>Yaḥyā</li>
-  <li>'Īsā</li>
-  <li>Muḥammad ﷺ</li>
+  <li>Muhammad</li>
+  <li>Ibrahim alayhi al-salam</li>
+  <li>Musa alayhi al-salam</li>
+  <li>'Isa alayhi al-salam</li>
+  <li>Nuh alayhi al-salam</li>
 </ol>
 
-<h3>The Day of Judgement (Yawmul Qiyāmah)</h3>
-<p>One of the core beliefs of Islam is that this world will come to an end and everyone will be brought back to life to answer for their deeds. This day is known as <strong>Yawmul Qiyāmah</strong> — the Day of Judgement, the Day of Standing, the Last Day.</p>
-<p>Before that Day comes, there will be certain <strong>signs</strong> that will appear. These are divided into <strong>minor signs</strong> and <strong>major signs</strong>.</p>
-
-<h3>Minor Signs of the Day of Judgement</h3>
-<p>These are signs that gradually appear over time. Many of them have already appeared:</p>
-<ul>
-  <li>Knowledge of dīn will decrease and ignorance will spread.</li>
-  <li>There will be a decrease in modesty (ḥayā').</li>
-  <li>Cheating and dishonesty in trade will be common.</li>
-  <li>People will disobey their parents.</li>
-  <li>Voices will be raised in the masājid (mosques).</li>
-  <li>Leaders will be the worst of people.</li>
-  <li>People will consume alcohol openly.</li>
-  <li>Truthful people will be called liars, and liars will be trusted.</li>
-  <li>Time will pass very quickly.</li>
-  <li>Music and musical instruments will be widespread.</li>
-  <li>Killing will increase.</li>
-  <li>People will compete in building tall buildings.</li>
-  <li>There will be great earthquakes.</li>
-  <li>Men will imitate women and women will imitate men.</li>
-  <li>Children will be disrespectful to their elders.</li>
-</ul>
-
-<h3>Major Signs of the Day of Judgement</h3>
-<p>These are extraordinary events that will occur close to the end of the world:</p>
+<h2>Five Essential Qualities of All Prophets</h2>
+<p>Every prophet of Allah must possess these five qualities:</p>
 <ol>
-  <li><strong>The Mahdī</strong> — A righteous leader from the family of the Prophet ﷺ who will fill the earth with justice.</li>
-  <li><strong>The Dajjāl</strong> — A great deceiver who will appear and claim to be God. He will have one eye and the word "Kāfir" will be written on his forehead.</li>
-  <li><strong>The Return of 'Īsā عليه السلام</strong> — Prophet 'Īsā will descend from the heavens, defeat the Dajjāl, and establish justice on earth.</li>
-  <li><strong>Ya'jūj and Ma'jūj (Gog and Magog)</strong> — Destructive nations that will be released and cause great havoc.</li>
-  <li><strong>Three Major Landslides</strong> — One in the East, one in the West, and one in the Arabian Peninsula.</li>
-  <li><strong>A Great Smoke (Dukhān)</strong> — A smoke that will cover the entire earth.</li>
-  <li><strong>The Beast (Dābbah)</strong> — A creature that will emerge from the earth and speak to people.</li>
-  <li><strong>The Sun Rising from the West</strong> — After this, repentance will no longer be accepted.</li>
-  <li><strong>A Great Fire</strong> — A fire that will drive people to the place of gathering.</li>
-  <li><strong>A Pleasant Wind</strong> — A gentle wind will take the souls of all believers before the final Hour arrives.</li>
+  <li><strong>Sidq (Truthfulness):</strong> They always speak the truth. They never lie.</li>
+  <li><strong>Amanah (Trustworthiness):</strong> They are perfectly honest and reliable.</li>
+  <li><strong>Tabligh (Conveying the Message):</strong> They conveyed Allah's message completely without hiding anything.</li>
+  <li><strong>Fatanah (Intelligence):</strong> They are wise and intelligent — able to answer any question and guide their people.</li>
+  <li><strong>'Ismah (Protection from Sin):</strong> Allah protected prophets from committing major sins, especially after prophethood.</li>
 </ol>
-      `.trim(),
-    },
-    update: {
-      title: 'Aqā\'id — Prophets, Messengers & Signs of the Last Day',
-      description: 'Learn about the prophets and messengers sent by Allāh, the difference between a rasūl and a nabī, the 25 prophets mentioned in the Qur\'ān, and the minor and major signs of the Day of Judgement.',
-      orderIndex: 4,
-    },
-  });
-    if (isBlobStorageAvailable() && unitAqaid.content && !unitAqaid.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitAqaid.id, unitAqaid.content!);
-      await prisma.unit.update({
-        where: { id: unitAqaid.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
 
-  console.log('✅ Created Unit 4: Aqā\'id');
-  // ──────────────────────────────────────────────
-  // UNIT 5: AKHLĀQ
-  // ──────────────────────────────────────────────
+<h2>Why We Believe in All Prophets</h2>
+<p>As Muslims, it is a pillar of Iman to believe in all prophets. The Quran says: "The Messenger believes in what has been revealed to him from his Lord, and so do the believers. Each one believes in Allah, His angels, His books, and His messengers. We make no distinction between any of His messengers." (Quran 2:285)</p>
+`.trim();
 
-    const unitAkhlaq = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-akhlaq' } },
+  const unit10 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-aqaid-prophets' } },
     create: {
-      slug: 'maktab-3-akhlaq',
+      slug: 'maktab-3-aqaid-prophets',
       courseId: course.id,
-      title: 'Akhlāq — Good Character & Avoiding Sin',
-      description: 'Learn about thinking good of others, sharing, kindness to parents, speaking the truth, saying a good word or keeping silent, and the dangers of ghībah (backbiting).',
-      orderIndex: 5,
-      content: `
-<h2>Learning Objectives</h2>
-<p>In this unit, you will learn about:</p>
-<ul>
-  <li>Ḥusn al-Ẓann — thinking good of others</li>
-  <li>Thinking good of Allāh</li>
-  <li>The importance of sharing with others</li>
-  <li>Kindness and obedience to parents</li>
-  <li>Speaking the truth</li>
-  <li>Saying a good word or remaining silent</li>
-  <li>The evil of ghībah (backbiting)</li>
-</ul>
-
-<h3>Ḥusn al-Ẓann — Thinking Good of Others</h3>
-<p>Allāh says in the Qur'ān:</p>
-<p class="arabic" dir="rtl" lang="ar">يَا أَيُّهَا الَّذِينَ آمَنُوا اجْتَنِبُوا كَثِيرًا مِّنَ الظَّنِّ إِنَّ بَعْضَ الظَّنِّ إِثْمٌ</p>
-<blockquote>"O you who believe, abstain from much suspicion. Indeed, some suspicions are sins." (Qur'ān 49:12)</blockquote>
-<p>We should always think the best of others. If we see someone doing something, we should not jump to conclusions or assume the worst. Bad suspicion (sū' al-ẓann) leads to <strong>spying (tajassus)</strong> and <strong>backbiting (ghībah)</strong> — both of which are serious sins in Islam.</p>
-
-<h3>Thinking Good of Allāh</h3>
-<p>We should also have good thoughts about Allāh at all times. If something bad happens, we should not blame Allāh or question His wisdom. Everything that happens is part of Allāh's perfect plan. Rasūlullāh ﷺ said that Allāh says: <em>"I am as My servant thinks of Me."</em> If we think well of Allāh, we will find goodness.</p>
-
-<h3>Sharing with Others</h3>
-<p>Allāh says:</p>
-<blockquote>"You shall never attain righteousness unless you spend from what you love." (Qur'ān 3:92)</blockquote>
-<p>And Allāh praises the Anṣār of Madīnah:</p>
-<blockquote>"They give preference to others over themselves, even though they themselves are in need." (Qur'ān 59:9)</blockquote>
-<p>Sharing is not just about giving away things we don't need — it means giving from what we love, whether it is our favourite food, our time, or our help. The Companions used to share everything they had.</p>
-<p><strong>Story:</strong> During a famine, a man came to the Prophet ﷺ asking for food. The Prophet ﷺ asked his wives, but they had nothing except water. He asked: "Who will host this man tonight?" One of the Anṣār took the man home. His wife whispered that they only had enough food for the children. The man said: "Put the children to sleep and dim the lamp. We will pretend to eat." In the morning, Rasūlullāh ﷺ said: "Allāh was amazed by your action last night."</p>
-
-<h3>Kindness to Parents</h3>
-<p>Allāh says:</p>
-<p class="arabic" dir="rtl" lang="ar">وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا</p>
-<blockquote>"Your Lord has decreed that you worship none but Him, and that you be kind to your parents." (Qur'ān 17:23)</blockquote>
-<p>Notice that Allāh placed <strong>kindness to parents immediately after His own rights</strong>. This shows how important parents are in Islam. Allāh continues:</p>
-<blockquote>"If one or both of them reach old age with you, do not say to them 'uff' (a word of annoyance), and do not repel them, but speak to them a noble word." (Qur'ān 17:23)</blockquote>
-<p>Even saying <strong>"uff"</strong> to your parents is forbidden! We must speak to them with respect, serve them with love, and make du'ā' for them.</p>
-<p>When a man asked Rasūlullāh ﷺ who deserves the finest treatment, he said: <em>"Your mother."</em> The man asked: "Then who?" He said: <em>"Your mother."</em> The man asked again: "Then who?" He said: <em>"Your mother."</em> The man asked a fourth time: "Then who?" He said: <em>"Your father."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>Speaking the Truth</h3>
-<p>Allāh says:</p>
-<blockquote>"O you who believe, fear Allāh and be with those who are truthful." (Qur'ān 9:119)</blockquote>
-<p>Rasūlullāh ﷺ said:</p>
-<blockquote>"Truthfulness leads to good and good leads to Jannah. A person continues to be truthful until he is registered as truthful (ṣiddīq) in the sight of Allāh. And lying leads to evil and evil leads to Jahannam. A person continues to lie until he is registered as a liar in the sight of Allāh." (Ṣaḥīḥ al-Bukhārī)</blockquote>
-
-<p><strong>Story of the Emperor and the Seeds:</strong> An old Emperor needed to choose a successor. He gave every child a seed and said: "Whoever grows the best plant in six months will be the next Emperor." A boy named Ling tried everything, but his seed never grew. After six months, all the other children brought beautiful plants, but Ling came with his empty pot, close to tears. The Emperor smiled and said: "I boiled all the seeds — none of them could grow. Everyone else replaced their seeds, but Ling was the only honest one." Ling was chosen as the next Emperor because of his <strong>honesty</strong>.</p>
-
-<h3>Saying a Good Word</h3>
-<p>Allāh says:</p>
-<blockquote>"Not a word does a person utter except that there is an observer (angel) ready to record it." (Qur'ān 50:18)</blockquote>
-<p>Rasūlullāh ﷺ said:</p>
-<blockquote>"Whoever believes in Allāh and the Last Day should speak a good word or remain silent." (Ṣaḥīḥ al-Bukhārī)</blockquote>
-<p>Every word we say is recorded by the angels. A single bad word can lead a person to Jahannam. A single good word can lead a person to Jannah. Before speaking, we should think: Is it true? Is it kind? Is it necessary? If not, it is better to remain silent.</p>
-
-<h3>Ghībah (Backbiting)</h3>
-<p>Allāh says:</p>
-<blockquote>"Do not backbite one another. Does one of you like that he eats the flesh of his dead brother? You would hate it!" (Qur'ān 49:12)</blockquote>
-<p>Ghībah means speaking about a Muslim behind their back in a way they would dislike — even if what you say is true. If it is not true, it is even worse — that is called <strong>buhtān</strong> (slander).</p>
-<p>Rasūlullāh ﷺ asked the Companions: <em>"Do you know who the bankrupt person is?"</em> They said: "The one who has no money." He said: <em>"The bankrupt person from my Ummah is the one who comes on the Day of Qiyāmah with ṣalāh, fasting, and zakāh, but he insulted this person, slandered that person, stole the wealth of another, shed the blood of another, and struck yet another. So his good deeds will be given to each of them. And if his good deeds run out before the score is settled, their sins will be thrown onto him, and he will be thrown into the Fire."</em> (Ṣaḥīḥ Muslim)</p>
-      `.trim(),
+      orderIndex: 10,
+      title: "Aqa'id — Prophets & Messengers",
+      description: "The difference between a nabi and a rasul, the five Ulu al-'Azm prophets, and the five essential qualities all prophets must possess.",
+      content: unit10Content,
     },
     update: {
-      title: 'Akhlāq — Good Character & Avoiding Sin',
-      description: 'Learn about thinking good of others, sharing, kindness to parents, speaking the truth, saying a good word or keeping silent, and the dangers of ghībah (backbiting).',
-      orderIndex: 5,
+      title: "Aqa'id — Prophets & Messengers",
+      description: "The difference between a nabi and a rasul, the five Ulu al-'Azm prophets, and the five essential qualities all prophets must possess.",
+      content: unit10Content,
     },
   });
-    if (isBlobStorageAvailable() && unitAkhlaq.content && !unitAkhlaq.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitAkhlaq.id, unitAkhlaq.content!);
-      await prisma.unit.update({
-        where: { id: unitAkhlaq.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
+  console.log('✅ Unit 10:', unit10.title);
 
-  console.log('✅ Created Unit 5: Akhlāq');
-  // ──────────────────────────────────────────────
-  // UNIT 6: ĀDĀB
-  // ──────────────────────────────────────────────
+  // ══════════════════════════════════════════════
+  // UNIT 11: AQAID — Signs of the Last Day
+  // ══════════════════════════════════════════════
 
-    const unitAdab = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-adab' } },
+  const unit11Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to explain the difference between minor and major signs of the Last Day, name the main major signs, and understand why Allah has told us about them.</p>
+
+<h2>Belief in the Last Day (Yawm al-Qiyamah)</h2>
+<p>One of the six pillars of Iman is to believe in the Last Day — the Day when everything will come to an end and all people will be resurrected and judged by Allah. Before this Day comes, there will be signs (amarat).</p>
+
+<h2>Minor Signs (Ashrat al-Sa'ah al-Sughra)</h2>
+<p>Many minor signs have already occurred or are occurring now:</p>
+<ul>
+  <li>The spread of ignorance and loss of Islamic knowledge.</li>
+  <li>The increase in immorality, lying, and injustice.</li>
+  <li>An increase in the frequency of earthquakes.</li>
+  <li>Tall buildings competing with each other.</li>
+  <li>Singing and music becoming widespread.</li>
+  <li>People stopping to greet each other unless they know one another.</li>
+</ul>
+
+<h2>Major Signs (Ashrat al-Sa'ah al-Kubra)</h2>
+<p>The major signs have not yet occurred. They will happen close to the Day of Judgement:</p>
+<ul>
+  <li><strong>Al-Dajjal:</strong> The False Messiah — a great liar who will claim to be a god and misguide many people.</li>
+  <li><strong>Ya'juj and Ma'juj:</strong> Two fierce nations that will be released to cause destruction on earth.</li>
+  <li><strong>Descent of 'Isa alayhi al-salam:</strong> Prophet 'Isa will descend from the heavens and kill al-Dajjal.</li>
+  <li><strong>The Sun Rising from the West:</strong> The sun will rise from the west as a sign that the time for repentance has ended.</li>
+  <li><strong>The Beast (Dabbah):</strong> A creature that will emerge and speak to people.</li>
+  <li><strong>A Great Smoke (Dukhan):</strong> A thick smoke that will cover the earth.</li>
+</ul>
+
+<h2>Why Allah Tells Us About These Signs</h2>
+<p>Allah informs us about the signs of the Last Day so that:</p>
+<ul>
+  <li>We are not deceived by false claims, especially those of al-Dajjal.</li>
+  <li>We are motivated to prepare for the Akhirah through good deeds.</li>
+  <li>We recognize the truth of Islam and the Prophet's prophecies when they come true.</li>
+</ul>
+`.trim();
+
+  const unit11 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-aqaid-last-day' } },
     create: {
-      slug: 'maktab-3-adab',
+      slug: 'maktab-3-aqaid-last-day',
       courseId: course.id,
-      title: 'Ādāb — Etiquette of Travelling, Studying, Qur\'ān, Walking & the Masjid',
-      description: 'Learn the Islamic etiquette of travelling, studying, reciting the Qur\'ān, walking, and visiting the masjid.',
-      orderIndex: 6,
-      content: `
-<h2>Learning Objectives</h2>
-<p>In this unit, you will learn the Islamic etiquettes (ādāb) of:</p>
-<ul>
-  <li>Travelling</li>
-  <li>Studying and seeking knowledge</li>
-  <li>Reciting the Qur'ān</li>
-  <li>Walking</li>
-  <li>Visiting the masjid</li>
-</ul>
-
-<h3>Ādāb of Travelling</h3>
-<p>Islam teaches us the proper etiquettes for every aspect of life, including travelling:</p>
-<ul>
-  <li><strong>Pray 2 rak'āt</strong> before departing on your journey.</li>
-  <li><strong>Travel in a group</strong> and not alone (unless absolutely necessary).</li>
-  <li><strong>Appoint an amīr</strong> (leader) when travelling in a group.</li>
-  <li><strong>Recite the du'ā' of travel</strong> when setting off.</li>
-  <li><strong>Share provisions</strong> with your travel companions.</li>
-  <li>Be patient and do not complain during the journey.</li>
-  <li><strong>Make du'ā'</strong> during travel, as the du'ā' of a traveller is accepted.</li>
-  <li>Return home promptly after completing your purpose of travel.</li>
-</ul>
-
-<h3>Ādāb of Studying</h3>
-<p>Seeking knowledge is one of the greatest acts of worship in Islam. Allāh warns in the Qur'ān about those who have knowledge but do not practise it:</p>
-<p class="arabic" dir="rtl" lang="ar">مَثَلُ الَّذِينَ حُمِّلُوا التَّوْرَاةَ ثُمَّ لَمْ يَحْمِلُوهَا كَمَثَلِ الْحِمَارِ يَحْمِلُ أَسْفَارًا</p>
-<blockquote>"The example of those who were given the Torah and then did not practise it is like a donkey that carries a load of books." (Qur'ān 62:5)</blockquote>
-<p>The ādāb of studying include:</p>
-<ul>
-  <li><strong>Make the correct intention</strong> — study to please Allāh, not for fame or wealth.</li>
-  <li><strong>Respect your teacher</strong> — sit properly, listen attentively, and do not interrupt.</li>
-  <li><strong>Respect your books</strong> — do not place them on the floor, do not write in them unnecessarily, and do not damage them.</li>
-  <li><strong>Listen attentively</strong> during lessons and take notes.</li>
-  <li><strong>Revise</strong> what you have learned after each lesson.</li>
-  <li><strong>Ask questions</strong> when you do not understand something.</li>
-  <li>Most importantly — <strong>practise what you learn</strong>. Knowledge without practice is like a tree without fruit.</li>
-</ul>
-
-<h3>Ādāb of Reciting the Qur'ān</h3>
-<p>The Qur'ān is the word of Allāh, and it deserves the utmost respect:</p>
-<ul>
-  <li><strong>Perform wuḍū'</strong> before touching the Qur'ān.</li>
-  <li><strong>Use miswāk</strong> to clean your mouth before reciting.</li>
-  <li><strong>Sit respectfully</strong> — preferably facing the Qiblah.</li>
-  <li>Recite <strong>Ta'awwudh</strong> ("A'ūdhu billāhi minash-shayṭānir-rajīm") and <strong>Tasmiyah</strong> ("Bismillāhir-Raḥmānir-Raḥīm") before beginning.</li>
-  <li>Recite with <strong>tajwīd</strong> (proper pronunciation and rules).</li>
-  <li>Recite with focus, concentration, and humility.</li>
-  <li><strong>Never place other books on top</strong> of the Qur'ān.</li>
-  <li>Place the Qur'ān on a pillow or Qur'ān stand (riḥl) when not holding it.</li>
-  <li>Do not talk about worldly matters while the Qur'ān is open.</li>
-</ul>
-
-<h3>Ādāb of Walking</h3>
-<p>Allāh says in the Qur'ān:</p>
-<blockquote>"And do not turn your face away from people with pride, and do not walk on the earth arrogantly. Indeed, Allāh does not like anyone who is arrogant and boastful. Be moderate in your walking and lower your voice." (Qur'ān 31:18-19)</blockquote>
-<blockquote>"And do not walk on the earth with pride. Indeed, you can neither tear apart the earth nor can you reach the mountains in height." (Qur'ān 17:37)</blockquote>
-<p>The ādāb of walking include:</p>
-<ul>
-  <li><strong>Walk humbly</strong> — do not walk with arrogance or pride.</li>
-  <li>Walk at a <strong>brisk, moderate pace</strong> — not too fast, not too slow.</li>
-  <li><strong>Lower your gaze</strong> and avoid staring at others.</li>
-  <li><strong>Spread salām</strong> to those you meet.</li>
-  <li><strong>Remove harmful objects</strong> from the road — this is a form of charity.</li>
-  <li>Walk on the <strong>right side</strong> of the road.</li>
-</ul>
-<p>According to the <strong>Shamā'il of Tirmidhī</strong>, the Prophet ﷺ walked with determination, lifting his legs with strength, leaning slightly forward, placing his feet softly, at a quick pace without small steps.</p>
-
-<h3>Ādāb of the Masjid</h3>
-<p>Allāh says:</p>
-<blockquote>"And the masājid (mosques) are for Allāh alone, so do not call upon anyone along with Allāh." (Qur'ān 72:18)</blockquote>
-<p>The masjid is the house of Allāh and deserves the utmost respect:</p>
-<ul>
-  <li><strong>Dress well and cleanly</strong> before going to the masjid.</li>
-  <li>Apply <strong>iṭr (perfume)</strong> if possible.</li>
-  <li><strong>Enter with the right foot</strong> and recite the du'ā': <em>"Allāhummaf-taḥ lī abwāba raḥmatik"</em> (O Allāh, open for me doors of Your mercy).</li>
-  <li>Pray <strong>Taḥiyyatul Masjid</strong> — two rak'āt upon entering.</li>
-  <li><strong>Remain silent</strong> and spend your time in dhikr, Qur'ān recitation, and du'ā'.</li>
-  <li><strong>Do not talk about worldly matters</strong> inside the masjid.</li>
-  <li>Do not buy or sell inside the masjid.</li>
-  <li><strong>Leave with the left foot</strong> and recite the du'ā': <em>"Allāhumma innī as'aluka min faḍlik"</em> (O Allāh, I ask You from Your bounty).</li>
-  <li>Answer the <strong>adhān</strong> by repeating the words quietly.</li>
-</ul>
-      `.trim(),
+      orderIndex: 11,
+      title: "Aqa'id — Signs of the Last Day",
+      description: "Minor and major signs of the Day of Judgement, including al-Dajjal, Ya'juj and Ma'juj, the descent of 'Isa, and why Allah informs us of these signs.",
+      content: unit11Content,
     },
     update: {
-      title: 'Ādāb — Etiquette of Travelling, Studying, Qur\'ān, Walking & the Masjid',
-      description: 'Learn the Islamic etiquette of travelling, studying, reciting the Qur\'ān, walking, and visiting the masjid.',
-      orderIndex: 6,
+      title: "Aqa'id — Signs of the Last Day",
+      description: "Minor and major signs of the Day of Judgement, including al-Dajjal, Ya'juj and Ma'juj, the descent of 'Isa, and why Allah informs us of these signs.",
+      content: unit11Content,
     },
   });
-    if (isBlobStorageAvailable() && unitAdab.content && !unitAdab.contentUrl) {
-      const blobUrl = await uploadUnitContent(unitAdab.id, unitAdab.content!);
-      await prisma.unit.update({
-        where: { id: unitAdab.id },
-        data: { contentUrl: blobUrl, content: null },
-      });
-    }
+  console.log('✅ Unit 11:', unit11.title);
 
-  console.log('✅ Created Unit 6: Ādāb');
   // ══════════════════════════════════════════════
-  // QUIZ QUESTIONS
+  // UNIT 12: AKHLAQ — Kindness to Parents
   // ══════════════════════════════════════════════
 
-  console.log('');
-  console.log('📝 Creating quiz questions...');
+  const unit12Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to explain the Quranic commands to honour parents, understand why the mother's right is greater, and learn the du'a' for parents.</p>
 
-  // --- Fiqh Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q1' },
-      create: {
-        externalId: 'maktab-3-fiqh-q1',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What does the term "farḍ" mean in Islamic law?',
-        options: JSON.stringify(['Recommended', 'Compulsory', 'Disliked', 'Forbidden']),
-        correctAnswer: 'Compulsory',
-        explanation: 'Farḍ means compulsory — it is something that a Muslim must do. Leaving out a farḍ act is sinful.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What does the term "farḍ" mean in Islamic law?',
-        options: JSON.stringify(['Recommended', 'Compulsory', 'Disliked', 'Forbidden']),
-        correctAnswer: 'Compulsory',
-        explanation: 'Farḍ means compulsory — it is something that a Muslim must do. Leaving out a farḍ act is sinful.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q2' },
-      create: {
-        externalId: 'maktab-3-fiqh-q2',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Which of the following is an example of Najāsah Ghalīẓah (heavy impurity)?',
-        options: JSON.stringify(['Urine of ḥalāl animals', 'Dust', 'Human blood', 'Sweat']),
-        correctAnswer: 'Human blood',
-        explanation: 'Najāsah Ghalīẓah (heavy impurity) includes substances like human blood, urine, and stool.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Which of the following is an example of Najāsah Ghalīẓah (heavy impurity)?',
-        options: JSON.stringify(['Urine of ḥalāl animals', 'Dust', 'Human blood', 'Sweat']),
-        correctAnswer: 'Human blood',
-        explanation: 'Najāsah Ghalīẓah (heavy impurity) includes substances like human blood, urine, and stool.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q3' },
-      create: {
-        externalId: 'maktab-3-fiqh-q3',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How many farā\'iḍ (obligatory acts) are there in ghusl?',
-        options: JSON.stringify(['Two', 'Three', 'Four', 'Five']),
-        correctAnswer: 'Three',
-        explanation: 'The three farā\'iḍ of ghusl are: washing the entire body, gargling the mouth, and rinsing the nose.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'How many farā\'iḍ (obligatory acts) are there in ghusl?',
-        options: JSON.stringify(['Two', 'Three', 'Four', 'Five']),
-        correctAnswer: 'Three',
-        explanation: 'The three farā\'iḍ of ghusl are: washing the entire body, gargling the mouth, and rinsing the nose.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q4' },
-      create: {
-        externalId: 'maktab-3-fiqh-q4',
-        unitId: unitFiqh.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Ṣalātul Witr is farḍ and must be prayed every night.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Ṣalātul Witr is wājib (necessary), not farḍ. It consists of three rak\'āt prayed after the farḍ of \'Ishā\'.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Ṣalātul Witr is farḍ and must be prayed every night.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Ṣalātul Witr is wājib (necessary), not farḍ. It consists of three rak\'āt prayed after the farḍ of \'Ishā\'.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q5' },
-      create: {
-        externalId: 'maktab-3-fiqh-q5',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What is the minimum travel distance for Ṣalātul Qaṣr to apply?',
-        options: JSON.stringify(['27 miles', '42 miles', '54 miles', '100 miles']),
-        correctAnswer: '54 miles',
-        explanation: 'A person who plans to travel more than 54 miles (87 km) from the boundary of their city performs qaṣr ṣalāh, shortening 4-rak\'ah farḍ prayers to 2.',
-        difficulty: 'MEDIUM',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What is the minimum travel distance for Ṣalātul Qaṣr to apply?',
-        options: JSON.stringify(['27 miles', '42 miles', '54 miles', '100 miles']),
-        correctAnswer: '54 miles',
-        explanation: 'A person who plans to travel more than 54 miles (87 km) from the boundary of their city performs qaṣr ṣalāh, shortening 4-rak\'ah farḍ prayers to 2.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q6' },
-      create: {
-        externalId: 'maktab-3-fiqh-q6',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Which of the following is NOT a condition before ṣalāh?',
-        options: JSON.stringify(['Facing the Qiblah', 'Having wuḍū\'', 'Wearing white clothes', 'Praying in the correct time']),
-        correctAnswer: 'Wearing white clothes',
-        explanation: 'The conditions before ṣalāh include facing the Qiblah, having wuḍū\', praying in the correct time, and ensuring cleanliness — but wearing white is not a requirement.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Which of the following is NOT a condition before ṣalāh?',
-        options: JSON.stringify(['Facing the Qiblah', 'Having wuḍū\'', 'Wearing white clothes', 'Praying in the correct time']),
-        correctAnswer: 'Wearing white clothes',
-        explanation: 'The conditions before ṣalāh include facing the Qiblah, having wuḍū\', praying in the correct time, and ensuring cleanliness — but wearing white is not a requirement.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-fiqh-q7' },
-      create: {
-        externalId: 'maktab-3-fiqh-q7',
-        unitId: unitFiqh.id,
-        type: 'FILL_BLANK',
-        questionText: 'The six farḍ acts during ṣalāh are: Takbīr Taḥrīmah, Qiyām, Qirā\'ah, Rukū\', Sujūd, and ___.',
-        options: undefined,
-        correctAnswer: 'Qa\'dah Akhīrah',
-        explanation: 'The sixth farḍ act in ṣalāh is Qa\'dah Akhīrah — the last sitting before salām for the duration of tashahhud.',
-        difficulty: 'MEDIUM',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'The six farḍ acts during ṣalāh are: Takbīr Taḥrīmah, Qiyām, Qirā\'ah, Rukū\', Sujūd, and ___.',
-        options: undefined,
-        correctAnswer: 'Qa\'dah Akhīrah',
-        explanation: 'The sixth farḍ act in ṣalāh is Qa\'dah Akhīrah — the last sitting before salām for the duration of tashahhud.',
-        difficulty: 'MEDIUM',
-      },
-    })
-  ]);
+<h2>The Command to Honour Parents</h2>
+<p>Allah places the command to respect and obey parents immediately after the command to worship Him alone:</p>
+<blockquote>"Your Lord has commanded that you worship none but Him, and that you be kind to parents. If one or both of them reach old age with you, do not say even 'uff' to them, nor scold them, but speak to them in a respectful way." (Quran 17:23)</blockquote>
+<p>This shows how important it is to honour parents in Islam. Even the smallest expression of annoyance — just saying "uff" — is forbidden!</p>
 
-  // --- Aḥādīth Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-ahadith-q1' },
-      create: {
-        externalId: 'maktab-3-ahadith-q1',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'According to the ḥadīth, "Ṣalāh is a pillar of ___."',
-        options: JSON.stringify(['Islām', 'Dīn', 'Jannah', 'Du\'ā\'']),
-        correctAnswer: 'Dīn',
-        explanation: 'Rasūlullāh ﷺ said: "Ṣalāh is a pillar of dīn" (Bayhaqī). Just as a building cannot stand without pillars, a person cannot have dīn without ṣalāh.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'According to the ḥadīth, "Ṣalāh is a pillar of ___."',
-        options: JSON.stringify(['Islām', 'Dīn', 'Jannah', 'Du\'ā\'']),
-        correctAnswer: 'Dīn',
-        explanation: 'Rasūlullāh ﷺ said: "Ṣalāh is a pillar of dīn" (Bayhaqī). Just as a building cannot stand without pillars, a person cannot have dīn without ṣalāh.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-ahadith-q2' },
-      create: {
-        externalId: 'maktab-3-ahadith-q2',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What did Rasūlullāh ﷺ call du\'ā\'?',
-        options: JSON.stringify(['The light of a believer', 'The weapon of a believer', 'The shield of a believer', 'The treasure of a believer']),
-        correctAnswer: 'The weapon of a believer',
-        explanation: '"Du\'ā\' is the weapon of a believer" (Ḥākim). Just as a weapon protects from enemies, du\'ā\' protects the believer.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What did Rasūlullāh ﷺ call du\'ā\'?',
-        options: JSON.stringify(['The light of a believer', 'The weapon of a believer', 'The shield of a believer', 'The treasure of a believer']),
-        correctAnswer: 'The weapon of a believer',
-        explanation: '"Du\'ā\' is the weapon of a believer" (Ḥākim). Just as a weapon protects from enemies, du\'ā\' protects the believer.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-ahadith-q3' },
-      create: {
-        externalId: 'maktab-3-ahadith-q3',
-        unitId: unitAhadith.id,
-        type: 'TRUE_FALSE',
-        questionText: 'According to the ḥadīth, this world is described as a paradise for the believer.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Rasūlullāh ﷺ said: "The world is a prison for a believer and a paradise for a disbeliever" (Ṣaḥīḥ Muslim). A Muslim cannot have everything they want in this world.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'According to the ḥadīth, this world is described as a paradise for the believer.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Rasūlullāh ﷺ said: "The world is a prison for a believer and a paradise for a disbeliever" (Ṣaḥīḥ Muslim). A Muslim cannot have everything they want in this world.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-ahadith-q4' },
-      create: {
-        externalId: 'maktab-3-ahadith-q4',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What is the "best du\'ā\'" according to the ḥadīth reported in Tirmidhī?',
-        options: JSON.stringify(['Subḥānallāh', 'Astaghfirullāh', 'Alḥamdulillāh', 'Allāhu Akbar']),
-        correctAnswer: 'Alḥamdulillāh',
-        explanation: 'Rasūlullāh ﷺ said: "The best du\'ā\' is Alḥamdulillāh" (Tirmidhī). If we keep thanking Allāh, He will give us more.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What is the "best du\'ā\'" according to the ḥadīth reported in Tirmidhī?',
-        options: JSON.stringify(['Subḥānallāh', 'Astaghfirullāh', 'Alḥamdulillāh', 'Allāhu Akbar']),
-        correctAnswer: 'Alḥamdulillāh',
-        explanation: 'Rasūlullāh ﷺ said: "The best du\'ā\' is Alḥamdulillāh" (Tirmidhī). If we keep thanking Allāh, He will give us more.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-ahadith-q5' },
-      create: {
-        externalId: 'maktab-3-ahadith-q5',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Complete the ḥadīth: "Love for people what you love for yourself, and you will become ___."',
-        options: JSON.stringify(['A true Muslim', 'A scholar', 'A leader', 'A friend of Allāh']),
-        correctAnswer: 'A true Muslim',
-        explanation: 'Rasūlullāh ﷺ said: "Love for people what you love for yourself, and you will become a true Muslim" (Tirmidhī). A true believer is selfless and thinks of others.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Complete the ḥadīth: "Love for people what you love for yourself, and you will become ___."',
-        options: JSON.stringify(['A true Muslim', 'A scholar', 'A leader', 'A friend of Allāh']),
-        correctAnswer: 'A true Muslim',
-        explanation: 'Rasūlullāh ﷺ said: "Love for people what you love for yourself, and you will become a true Muslim" (Tirmidhī). A true believer is selfless and thinks of others.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-ahadith-q6' },
-      create: {
-        externalId: 'maktab-3-ahadith-q6',
-        unitId: unitAhadith.id,
-        type: 'FILL_BLANK',
-        questionText: 'Rasūlullāh ﷺ said: "Say: \'I believe in Allāh,\' then stay ___."',
-        options: undefined,
-        correctAnswer: 'firm',
-        explanation: 'The ḥadīth in Ṣaḥīḥ Muslim teaches us to remain steadfast (firm) upon our belief in Allāh, even when we face difficulties.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Rasūlullāh ﷺ said: "Say: \'I believe in Allāh,\' then stay ___."',
-        options: undefined,
-        correctAnswer: 'firm',
-        explanation: 'The ḥadīth in Ṣaḥīḥ Muslim teaches us to remain steadfast (firm) upon our belief in Allāh, even when we face difficulties.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
-  // --- Sīrah Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-sirah-q1' },
-      create: {
-        externalId: 'maktab-3-sirah-q1',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Where did the Muslims migrate to escape persecution in Makkah?',
-        options: JSON.stringify(['Madīnah', 'Ṭā\'if', 'Abyssinia', 'Jerusalem']),
-        correctAnswer: 'Abyssinia',
-        explanation: 'The Companions migrated to Abyssinia where the Christian king, Najāshī, was known to be a fair and compassionate ruler.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Where did the Muslims migrate to escape persecution in Makkah?',
-        options: JSON.stringify(['Madīnah', 'Ṭā\'if', 'Abyssinia', 'Jerusalem']),
-        correctAnswer: 'Abyssinia',
-        explanation: 'The Companions migrated to Abyssinia where the Christian king, Najāshī, was known to be a fair and compassionate ruler.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-sirah-q2' },
-      create: {
-        externalId: 'maktab-3-sirah-q2',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Who spoke on behalf of the Muslims before King Najāshī?',
-        options: JSON.stringify(['Abū Bakr', 'Ja\'far ibn Abī Ṭālib', '\'Uthmān ibn \'Affān', '\'Umar ibn al-Khaṭṭāb']),
-        correctAnswer: 'Ja\'far ibn Abī Ṭālib',
-        explanation: 'Ja\'far ibn Abī Ṭālib delivered a moving speech before King Najāshī, reciting verses from Sūrah Maryam that caused everyone to cry.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Who spoke on behalf of the Muslims before King Najāshī?',
-        options: JSON.stringify(['Abū Bakr', 'Ja\'far ibn Abī Ṭālib', '\'Uthmān ibn \'Affān', '\'Umar ibn al-Khaṭṭāb']),
-        correctAnswer: 'Ja\'far ibn Abī Ṭālib',
-        explanation: 'Ja\'far ibn Abī Ṭālib delivered a moving speech before King Najāshī, reciting verses from Sūrah Maryam that caused everyone to cry.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-sirah-q3' },
-      create: {
-        externalId: 'maktab-3-sirah-q3',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How long did the boycott of Banū Hāshim last in Shi\'b Abī Ṭālib?',
-        options: JSON.stringify(['One year', 'Two years', 'Three years', 'Five years']),
-        correctAnswer: 'Three years',
-        explanation: 'The terrible boycott of Banū Hāshim and Banū Muṭṭalib in Shi\'b Abī Ṭālib lasted for three years, until Allāh sent white ants to eat the document.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'How long did the boycott of Banū Hāshim last in Shi\'b Abī Ṭālib?',
-        options: JSON.stringify(['One year', 'Two years', 'Three years', 'Five years']),
-        correctAnswer: 'Three years',
-        explanation: 'The terrible boycott of Banū Hāshim and Banū Muṭṭalib in Shi\'b Abī Ṭālib lasted for three years, until Allāh sent white ants to eat the document.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-sirah-q4' },
-      create: {
-        externalId: 'maktab-3-sirah-q4',
-        unitId: unitSirah.id,
-        type: 'TRUE_FALSE',
-        questionText: 'When the Angel of the Mountains offered to crush the people of Ṭā\'if, Rasūlullāh ﷺ agreed.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Despite being pelted with stones, Rasūlullāh ﷺ refused the offer and instead hoped that Allāh would bless them with children who would worship Him alone.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'When the Angel of the Mountains offered to crush the people of Ṭā\'if, Rasūlullāh ﷺ agreed.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Despite being pelted with stones, Rasūlullāh ﷺ refused the offer and instead hoped that Allāh would bless them with children who would worship Him alone.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-sirah-q5' },
-      create: {
-        externalId: 'maktab-3-sirah-q5',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What was the name of the miraculous creature that carried the Prophet ﷺ on the Night Journey?',
-        options: JSON.stringify(['Burāq', 'Dābbah', 'Qāṣwā\'', 'Duldul']),
-        correctAnswer: 'Burāq',
-        explanation: 'Burāq was a beautiful white creature, larger than a donkey but smaller than a horse, with wings. Each step covered as far as the eye could see.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What was the name of the miraculous creature that carried the Prophet ﷺ on the Night Journey?',
-        options: JSON.stringify(['Burāq', 'Dābbah', 'Qāṣwā\'', 'Duldul']),
-        correctAnswer: 'Burāq',
-        explanation: 'Burāq was a beautiful white creature, larger than a donkey but smaller than a horse, with wings. Each step covered as far as the eye could see.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-sirah-q6' },
-      create: {
-        externalId: 'maktab-3-sirah-q6',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How many daily prayers were originally ordained, and to how many were they reduced?',
-        options: JSON.stringify(['100 to 5', '50 to 5', '70 to 7', '40 to 5']),
-        correctAnswer: '50 to 5',
-        explanation: 'Allāh originally ordained 50 prayers a day. On the advice of Mūsā عليه السلام, the Prophet ﷺ kept returning until they were reduced to 5, with the reward of 50.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'How many daily prayers were originally ordained, and to how many were they reduced?',
-        options: JSON.stringify(['100 to 5', '50 to 5', '70 to 7', '40 to 5']),
-        correctAnswer: '50 to 5',
-        explanation: 'Allāh originally ordained 50 prayers a day. On the advice of Mūsā عليه السلام, the Prophet ﷺ kept returning until they were reduced to 5, with the reward of 50.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
+<h2>The Special Right of the Mother</h2>
+<p>A man came to the Prophet and asked: "O Messenger of Allah, who deserves my kindness the most?" The Prophet replied: "Your mother." The man asked again: "Then who?" He replied: "Your mother." The man asked again: "Then who?" He replied: "Your mother." The man asked a fourth time: "Then who?" He replied: "Your father." (Bukhari &amp; Muslim)</p>
+<p>The mother deserves three times more kindness because she carried the child, gave birth, and nursed him/her.</p>
 
-  // --- Tārīkh Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-tarikh-q1' },
-      create: {
-        externalId: 'maktab-3-tarikh-q1',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What was the occupation of Āzar, the father of Ibrāhīm عليه السلام?',
-        options: JSON.stringify(['Farmer', 'Idol-maker', 'Merchant', 'Blacksmith']),
-        correctAnswer: 'Idol-maker',
-        explanation: 'Āzar used to carve idols out of stone and sell them to the people who would worship them.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What was the occupation of Āzar, the father of Ibrāhīm عليه السلام?',
-        options: JSON.stringify(['Farmer', 'Idol-maker', 'Merchant', 'Blacksmith']),
-        correctAnswer: 'Idol-maker',
-        explanation: 'Āzar used to carve idols out of stone and sell them to the people who would worship them.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-tarikh-q2' },
-      create: {
-        externalId: 'maktab-3-tarikh-q2',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What did Allāh command the fire to be when Ibrāhīm عليه السلام was thrown in?',
-        options: JSON.stringify(['Extinguished', 'Cool and peaceful', 'A garden', 'Invisible']),
-        correctAnswer: 'Cool and peaceful',
-        explanation: 'Allāh commanded: "O fire, be cool and peaceful for Ibrāhīm" (Qur\'ān 21:69). Ibrāhīm was not harmed at all.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What did Allāh command the fire to be when Ibrāhīm عليه السلام was thrown in?',
-        options: JSON.stringify(['Extinguished', 'Cool and peaceful', 'A garden', 'Invisible']),
-        correctAnswer: 'Cool and peaceful',
-        explanation: 'Allāh commanded: "O fire, be cool and peaceful for Ibrāhīm" (Qur\'ān 21:69). Ibrāhīm was not harmed at all.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-tarikh-q3' },
-      create: {
-        externalId: 'maktab-3-tarikh-q3',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Between which two mountains did Hājar run seven times searching for water?',
-        options: JSON.stringify(['Uḥud and Ḥirā\'', 'Ṣafā and Marwah', 'Sinai and Ṭūr', 'Arafah and Minā']),
-        correctAnswer: 'Ṣafā and Marwah',
-        explanation: 'Hājar ran between Ṣafā and Marwah seven times searching for water. This act is commemorated during Ḥajj as Sa\'ī.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Between which two mountains did Hājar run seven times searching for water?',
-        options: JSON.stringify(['Uḥud and Ḥirā\'', 'Ṣafā and Marwah', 'Sinai and Ṭūr', 'Arafah and Minā']),
-        correctAnswer: 'Ṣafā and Marwah',
-        explanation: 'Hājar ran between Ṣafā and Marwah seven times searching for water. This act is commemorated during Ḥajj as Sa\'ī.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-tarikh-q4' },
-      create: {
-        externalId: 'maktab-3-tarikh-q4',
-        unitId: unitTarikh.id,
-        type: 'TRUE_FALSE',
-        questionText: 'The water of Zamzam dried up shortly after it first appeared.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Zamzam is still flowing in Makkah today. Millions of people drink from it and it has never finished — it is a miracle of Allāh.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'The water of Zamzam dried up shortly after it first appeared.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Zamzam is still flowing in Makkah today. Millions of people drink from it and it has never finished — it is a miracle of Allāh.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-tarikh-q5' },
-      create: {
-        externalId: 'maktab-3-tarikh-q5',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What did Allāh send from Jannah as a replacement when Ibrāhīm عليه السلام was about to sacrifice Ismā\'īl?',
-        options: JSON.stringify(['A camel', 'A ram', 'A cow', 'A goat']),
-        correctAnswer: 'A ram',
-        explanation: 'Allāh sent a ram from Jannah for Ibrāhīm to sacrifice instead of Ismā\'īl. This event is commemorated during \'Īd al-Aḍḥā.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What did Allāh send from Jannah as a replacement when Ibrāhīm عليه السلام was about to sacrifice Ismā\'īl?',
-        options: JSON.stringify(['A camel', 'A ram', 'A cow', 'A goat']),
-        correctAnswer: 'A ram',
-        explanation: 'Allāh sent a ram from Jannah for Ibrāhīm to sacrifice instead of Ismā\'īl. This event is commemorated during \'Īd al-Aḍḥā.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-tarikh-q6' },
-      create: {
-        externalId: 'maktab-3-tarikh-q6',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What did Ibrāhīm عليه السلام and Ismā\'īl عليه السلام build together in Makkah?',
-        options: JSON.stringify(['A palace', 'The Ka\'bah', 'A well', 'A garden']),
-        correctAnswer: 'The Ka\'bah',
-        explanation: 'Allāh commanded Ibrāhīm and Ismā\'īl to build the Ka\'bah, which became the direction (qiblah) all Muslims face in ṣalāh.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What did Ibrāhīm عليه السلام and Ismā\'īl عليه السلام build together in Makkah?',
-        options: JSON.stringify(['A palace', 'The Ka\'bah', 'A well', 'A garden']),
-        correctAnswer: 'The Ka\'bah',
-        explanation: 'Allāh commanded Ibrāhīm and Ismā\'īl to build the Ka\'bah, which became the direction (qiblah) all Muslims face in ṣalāh.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
-  // --- Aqā'id Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-aqaid-q1' },
-      create: {
-        externalId: 'maktab-3-aqaid-q1',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What is the difference between a Rasūl and a Nabī?',
-        options: JSON.stringify(['A Rasūl is older than a Nabī', 'A Rasūl receives a new scripture and laws; a Nabī follows the previous one', 'There is no difference', 'A Nabī is higher in rank']),
-        correctAnswer: 'A Rasūl receives a new scripture and laws; a Nabī follows the previous one',
-        explanation: 'A Rasūl (messenger) is given a book or scripture and new laws, while a Nabī (prophet) follows the book and law of the previous messenger. Every Rasūl is a Nabī, but not every Nabī is a Rasūl.',
-        difficulty: 'MEDIUM',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What is the difference between a Rasūl and a Nabī?',
-        options: JSON.stringify(['A Rasūl is older than a Nabī', 'A Rasūl receives a new scripture and laws; a Nabī follows the previous one', 'There is no difference', 'A Nabī is higher in rank']),
-        correctAnswer: 'A Rasūl receives a new scripture and laws; a Nabī follows the previous one',
-        explanation: 'A Rasūl (messenger) is given a book or scripture and new laws, while a Nabī (prophet) follows the book and law of the previous messenger. Every Rasūl is a Nabī, but not every Nabī is a Rasūl.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-aqaid-q2' },
-      create: {
-        externalId: 'maktab-3-aqaid-q2',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How many prophets are mentioned by name in the Qur\'ān?',
-        options: JSON.stringify(['12', '20', '25', '124,000']),
-        correctAnswer: '25',
-        explanation: 'The Qur\'ān mentions 25 prophets by name, from Ādam عليه السلام to Muḥammad ﷺ.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'How many prophets are mentioned by name in the Qur\'ān?',
-        options: JSON.stringify(['12', '20', '25', '124,000']),
-        correctAnswer: '25',
-        explanation: 'The Qur\'ān mentions 25 prophets by name, from Ādam عليه السلام to Muḥammad ﷺ.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-aqaid-q3' },
-      create: {
-        externalId: 'maktab-3-aqaid-q3',
-        unitId: unitAqaid.id,
-        type: 'TRUE_FALSE',
-        questionText: 'After Muḥammad ﷺ, more prophets may still be sent by Allāh.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Muḥammad ﷺ was the final and last messenger. There will be no more prophets or messengers after him. Anyone who claims prophethood after him is a liar.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'After Muḥammad ﷺ, more prophets may still be sent by Allāh.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Muḥammad ﷺ was the final and last messenger. There will be no more prophets or messengers after him. Anyone who claims prophethood after him is a liar.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-aqaid-q4' },
-      create: {
-        externalId: 'maktab-3-aqaid-q4',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Which of the following is a MAJOR sign of the Day of Judgement?',
-        options: JSON.stringify(['People raising voices in the masjid', 'The appearance of the Dajjāl', 'Disunity among Muslims', 'Men wearing silk']),
-        correctAnswer: 'The appearance of the Dajjāl',
-        explanation: 'The Dajjāl is one of the major signs. The others listed are minor signs that occur before the major signs.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'Which of the following is a MAJOR sign of the Day of Judgement?',
-        options: JSON.stringify(['People raising voices in the masjid', 'The appearance of the Dajjāl', 'Disunity among Muslims', 'Men wearing silk']),
-        correctAnswer: 'The appearance of the Dajjāl',
-        explanation: 'The Dajjāl is one of the major signs. The others listed are minor signs that occur before the major signs.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-aqaid-q5' },
-      create: {
-        externalId: 'maktab-3-aqaid-q5',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What is another name for the Day of Judgement?',
-        options: JSON.stringify(['Yawmul Jumu\'ah', 'Yawmul Qiyāmah', 'Laylatul Qadr', 'Yawmul \'Āshūrā\'']),
-        correctAnswer: 'Yawmul Qiyāmah',
-        explanation: 'The Day of Judgement is also called Yawmul Qiyāmah (the Day of Standing). It is the Last Day when all creation will be held accountable.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What is another name for the Day of Judgement?',
-        options: JSON.stringify(['Yawmul Jumu\'ah', 'Yawmul Qiyāmah', 'Laylatul Qadr', 'Yawmul \'Āshūrā\'']),
-        correctAnswer: 'Yawmul Qiyāmah',
-        explanation: 'The Day of Judgement is also called Yawmul Qiyāmah (the Day of Standing). It is the Last Day when all creation will be held accountable.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
+<h2>Du'a' for Parents</h2>
+<p>Allah teaches us to make this du'a' for our parents:</p>
+<blockquote>"My Lord, have mercy on them both as they raised me when I was small." (Quran 17:24) — <em>Rabbir hamhuma kama rabbayani saghira</em></blockquote>
+<p>Recite this du'a' for your parents every day — especially after every salah.</p>
 
-  // --- Akhlāq Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-akhlaq-q1' },
-      create: {
-        externalId: 'maktab-3-akhlaq-q1',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'According to the Qur\'ān (49:12), what should Muslims abstain from?',
-        options: JSON.stringify(['Eating too much', 'Much suspicion', 'Sleeping late', 'Travelling alone']),
-        correctAnswer: 'Much suspicion',
-        explanation: '"O you who believe, abstain from much suspicion. Some suspicions are sins." (Qur\'ān 49:12). Thinking badly of others can lead to backbiting and spying.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'According to the Qur\'ān (49:12), what should Muslims abstain from?',
-        options: JSON.stringify(['Eating too much', 'Much suspicion', 'Sleeping late', 'Travelling alone']),
-        correctAnswer: 'Much suspicion',
-        explanation: '"O you who believe, abstain from much suspicion. Some suspicions are sins." (Qur\'ān 49:12). Thinking badly of others can lead to backbiting and spying.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-akhlaq-q2' },
-      create: {
-        externalId: 'maktab-3-akhlaq-q2',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'In the famous ḥadīth, who deserves the finest treatment three times before the father is mentioned?',
-        options: JSON.stringify(['The teacher', 'The mother', 'The neighbour', 'The friend']),
-        correctAnswer: 'The mother',
-        explanation: 'When asked who deserves the finest treatment, Rasūlullāh ﷺ said "Your mother" three times, and then "Your father" (Ṣaḥīḥ Muslim).',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'In the famous ḥadīth, who deserves the finest treatment three times before the father is mentioned?',
-        options: JSON.stringify(['The teacher', 'The mother', 'The neighbour', 'The friend']),
-        correctAnswer: 'The mother',
-        explanation: 'When asked who deserves the finest treatment, Rasūlullāh ﷺ said "Your mother" three times, and then "Your father" (Ṣaḥīḥ Muslim).',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-akhlaq-q3' },
-      create: {
-        externalId: 'maktab-3-akhlaq-q3',
-        unitId: unitAkhlaq.id,
-        type: 'TRUE_FALSE',
-        questionText: 'According to the ḥadīth, truthfulness leads to good and good leads to Jannah.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'Rasūlullāh ﷺ said: "Truthfulness leads to good and good leads to Jannah. A person continues to be truthful until he is registered as truthful in the sight of Allāh." (Ṣaḥīḥ al-Bukhārī)',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'According to the ḥadīth, truthfulness leads to good and good leads to Jannah.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'Rasūlullāh ﷺ said: "Truthfulness leads to good and good leads to Jannah. A person continues to be truthful until he is registered as truthful in the sight of Allāh." (Ṣaḥīḥ al-Bukhārī)',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-akhlaq-q4' },
-      create: {
-        externalId: 'maktab-3-akhlaq-q4',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What sin does the Qur\'ān compare to eating the flesh of your dead brother?',
-        options: JSON.stringify(['Lying', 'Stealing', 'Ghībah (backbiting)', 'Jealousy']),
-        correctAnswer: 'Ghībah (backbiting)',
-        explanation: '"Do not backbite one another. Does one of you like that he eats the flesh of his dead brother?" (Qur\'ān 49:12).',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What sin does the Qur\'ān compare to eating the flesh of your dead brother?',
-        options: JSON.stringify(['Lying', 'Stealing', 'Ghībah (backbiting)', 'Jealousy']),
-        correctAnswer: 'Ghībah (backbiting)',
-        explanation: '"Do not backbite one another. Does one of you like that he eats the flesh of his dead brother?" (Qur\'ān 49:12).',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-akhlaq-q5' },
-      create: {
-        externalId: 'maktab-3-akhlaq-q5',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'According to the ḥadīth, what should a person who believes in Allāh and the Last Day do?',
-        options: JSON.stringify(['Fast every day', 'Speak a good word or remain silent', 'Give all their wealth away', 'Never leave their home']),
-        correctAnswer: 'Speak a good word or remain silent',
-        explanation: '"Whoever believes in Allāh and the Last Day should speak a good word or remain silent." (Ṣaḥīḥ al-Bukhārī).',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'According to the ḥadīth, what should a person who believes in Allāh and the Last Day do?',
-        options: JSON.stringify(['Fast every day', 'Speak a good word or remain silent', 'Give all their wealth away', 'Never leave their home']),
-        correctAnswer: 'Speak a good word or remain silent',
-        explanation: '"Whoever believes in Allāh and the Last Day should speak a good word or remain silent." (Ṣaḥīḥ al-Bukhārī).',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-akhlaq-q6' },
-      create: {
-        externalId: 'maktab-3-akhlaq-q6',
-        unitId: unitAkhlaq.id,
-        type: 'FILL_BLANK',
-        questionText: 'The story of the Emperor and the seeds teaches us the importance of ___.',
-        options: undefined,
-        correctAnswer: 'honesty',
-        explanation: 'Ling was the only one honest enough to bring his empty pot, while everyone else cheated by substituting different seeds. His honesty was rewarded with the throne.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'The story of the Emperor and the seeds teaches us the importance of ___.',
-        options: undefined,
-        correctAnswer: 'honesty',
-        explanation: 'Ling was the only one honest enough to bring his empty pot, while everyone else cheated by substituting different seeds. His honesty was rewarded with the throne.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
+<h2>What Pleases and Upsets Allah</h2>
+<p>The Prophet said: "The pleasure of Allah lies in the pleasure of the parents, and the anger of Allah lies in the anger of the parents." (Tirmidhi)</p>
 
-  // --- Ādāb Quizzes ---
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-adab-q1' },
-      create: {
-        externalId: 'maktab-3-adab-q1',
-        unitId: unitAdab.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What should you do before touching the Qur\'ān?',
-        options: JSON.stringify(['Eat something', 'Perform wuḍū\'', 'Say Bismillāh only', 'Nothing special']),
-        correctAnswer: 'Perform wuḍū\'',
-        explanation: 'One of the ādāb of the Qur\'ān is to perform wuḍū\' before touching it, as these are the pure words of Allāh.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What should you do before touching the Qur\'ān?',
-        options: JSON.stringify(['Eat something', 'Perform wuḍū\'', 'Say Bismillāh only', 'Nothing special']),
-        correctAnswer: 'Perform wuḍū\'',
-        explanation: 'One of the ādāb of the Qur\'ān is to perform wuḍū\' before touching it, as these are the pure words of Allāh.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-adab-q2' },
-      create: {
-        externalId: 'maktab-3-adab-q2',
-        unitId: unitAdab.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'According to the Qur\'ān, which foot should you enter the masjid with?',
-        options: JSON.stringify(['Left foot', 'Right foot', 'Both feet together', 'It does not matter']),
-        correctAnswer: 'Right foot',
-        explanation: 'It is sunnah to enter the masjid with the right foot and to recite the du\'ā\': "O Allāh, open for me doors of Your mercy."',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'According to the Qur\'ān, which foot should you enter the masjid with?',
-        options: JSON.stringify(['Left foot', 'Right foot', 'Both feet together', 'It does not matter']),
-        correctAnswer: 'Right foot',
-        explanation: 'It is sunnah to enter the masjid with the right foot and to recite the du\'ā\': "O Allāh, open for me doors of Your mercy."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-adab-q3' },
-      create: {
-        externalId: 'maktab-3-adab-q3',
-        unitId: unitAdab.id,
-        type: 'TRUE_FALSE',
-        questionText: 'When travelling, it is sunnah to travel alone rather than in a group.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'It is from the ādāb of travelling to travel in a group and not alone (unless absolutely necessary), and to appoint one person as the amīr (leader).',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'When travelling, it is sunnah to travel alone rather than in a group.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'It is from the ādāb of travelling to travel in a group and not alone (unless absolutely necessary), and to appoint one person as the amīr (leader).',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-adab-q4' },
-      create: {
-        externalId: 'maktab-3-adab-q4',
-        unitId: unitAdab.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What does the Qur\'ān (62:5) compare a person who has knowledge but does not practise it to?',
-        options: JSON.stringify(['A blind man', 'A donkey carrying books', 'An empty vessel', 'A broken pen']),
-        correctAnswer: 'A donkey carrying books',
-        explanation: 'Allāh says "like a donkey that carries a load of books" (62:5) — the books are of no benefit to the donkey. Similarly, knowledge without practice is useless.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'What does the Qur\'ān (62:5) compare a person who has knowledge but does not practise it to?',
-        options: JSON.stringify(['A blind man', 'A donkey carrying books', 'An empty vessel', 'A broken pen']),
-        correctAnswer: 'A donkey carrying books',
-        explanation: 'Allāh says "like a donkey that carries a load of books" (62:5) — the books are of no benefit to the donkey. Similarly, knowledge without practice is useless.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-3-adab-q5' },
-      create: {
-        externalId: 'maktab-3-adab-q5',
-        unitId: unitAdab.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How did the Prophet ﷺ walk according to the Shamā\'il of Tirmidhī?',
-        options: JSON.stringify(['Slowly and lazily', 'Humbly and briskly, leaning slightly forward', 'Running everywhere', 'Looking around at everything']),
-        correctAnswer: 'Humbly and briskly, leaning slightly forward',
-        explanation: 'The Prophet ﷺ walked with determination, lifting his legs with strength, leaning slightly forward, placing his feet softly, at a quick pace without small steps.',
-        difficulty: 'EASY',
-        aiGenerated: false,
-      },
-      update: {
-        questionText: 'How did the Prophet ﷺ walk according to the Shamā\'il of Tirmidhī?',
-        options: JSON.stringify(['Slowly and lazily', 'Humbly and briskly, leaning slightly forward', 'Running everywhere', 'Looking around at everything']),
-        correctAnswer: 'Humbly and briskly, leaning slightly forward',
-        explanation: 'The Prophet ﷺ walked with determination, lifting his legs with strength, leaning slightly forward, placing his feet softly, at a quick pace without small steps.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
+<h2>Practical Ways to Honour Parents</h2>
+<ul>
+  <li>Speak respectfully and never raise your voice at them.</li>
+  <li>Help at home without being asked.</li>
+  <li>Never disobey them in matters that are permissible in Islam.</li>
+  <li>Make du'a' for them regularly.</li>
+  <li>After their death: continue to make du'a', give sadaqah on their behalf, and keep their friends and ties of kinship.</li>
+</ul>
+`.trim();
 
-  console.log('✅ Created quiz questions for all 7 units');
-  // ══════════════════════════════════════════════
-  // FLASHCARDS
-  // ══════════════════════════════════════════════
-
-  console.log('');
-  console.log('🃏 Creating flashcards...');
-
-  let flashcardIndex = 0;
-
-  // --- Fiqh Flashcards ---
-  const fiqhFlashcards = [
-    {
-      front: 'Farḍ',
-      back: 'Compulsory — something you must do. Leaving out a farḍ act is sinful.',
-      frontArabic: 'فَرْض',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'terminology', 'farḍ'],
-      difficulty: 'EASY' as const,
+  const unit12 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-akhlaq-parents' } },
+    create: {
+      slug: 'maktab-3-akhlaq-parents',
+      courseId: course.id,
+      orderIndex: 12,
+      title: "Akhlaq — Kindness to Parents",
+      description: "Quranic commands to honour parents, the triple right of the mother, the du'a' for parents, and practical ways to show respect.",
+      content: unit12Content,
     },
-    {
-      front: 'Wājib',
-      back: 'Necessary — next in importance to farḍ.',
-      frontArabic: 'وَاجِب',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'terminology', 'wājib'],
-      difficulty: 'EASY' as const,
+    update: {
+      title: "Akhlaq — Kindness to Parents",
+      description: "Quranic commands to honour parents, the triple right of the mother, the du'a' for parents, and practical ways to show respect.",
+      content: unit12Content,
     },
-    {
-      front: 'Sunnah Mu\'akkadah',
-      back: 'An action which Rasūlullāh ﷺ did regularly.',
-      frontArabic: 'سُنَّة مُؤَكَّدَة',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'terminology', 'sunnah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Makrūh Taḥrīmī',
-      back: 'Highly disliked and close to ḥarām.',
-      frontArabic: 'مَكْرُوه تَحْرِيمِي',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'terminology', 'makrūh'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Najāsah Ḥaqīqī',
-      back: 'Physical impurity that can be seen — e.g. blood, urine, stool.',
-      frontArabic: 'نَجَاسَة حَقِيقِي',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'najāsah', 'ṭahārah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Najāsah Ḥukmī',
-      back: 'An impurity that cannot be seen — removed by wuḍū\' or ghusl.',
-      frontArabic: 'نَجَاسَة حُكْمِي',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'najāsah', 'ṭahārah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ghusl',
-      back: 'A full-body bath that must be taken when in a state of major impurity. It has 3 farā\'iḍ and 5 sunan.',
-      frontArabic: 'غُسْل',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'ghusl', 'ṭahārah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Takbīr Taḥrīmah',
-      back: 'The first takbīr (Allāhu Akbar) when starting ṣalāh — it is the first farḍ act in ṣalāh.',
-      frontArabic: 'تَكْبِيرُ التَّحْرِيمَة',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'ṣalāh', 'farḍ-acts'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ṣalātul Qaṣr',
-      back: 'Shortened prayer for travellers who plan to travel more than 54 miles. The 4-rak\'ah farḍ prayers are reduced to 2.',
-      frontArabic: 'صَلَاةُ الْقَصْر',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'ṣalāh', 'qaṣr'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Nawāqiḍ',
-      back: 'Acts that break or cancel something — such as things that break ṣalāh or wuḍū\'.',
-      frontArabic: 'نَوَاقِض',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['fiqh', 'terminology', 'nawāqiḍ'],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    fiqhFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitFiqh.id, orderIndex } },
-        create: { ...fc, unitId: unitFiqh.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += fiqhFlashcards.length;
-
-  // --- Aḥādīth Flashcards ---
-  const ahadithFlashcards = [
-    {
-      front: 'Ṣalāh is a pillar of dīn',
-      back: 'Just as a building cannot stand without pillars, our religion cannot stand without ṣalāh. It will be the first thing asked about on the Day of Judgement. (Bayhaqī)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'ṣalāh', 'importance'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Love for Others',
-      back: '"Love for people what you love for yourself, and you will become a true Muslim." (Tirmidhī)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'love', 'selflessness'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Steadfastness',
-      back: '"Say: \'I believe in Allāh,\' then stay firm." (Ṣaḥīḥ Muslim) — We must remain steadfast upon our belief.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'steadfastness', 'īmān'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Life as a Traveller',
-      back: '"Stay in this world as though you are a stranger, rather a traveller." (Ṣaḥīḥ al-Bukhārī) — This world is temporary like a waiting room.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'dunyā', 'perspective'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'This World',
-      back: '"The world is a prison for a believer and a paradise for a disbeliever." (Ṣaḥīḥ Muslim)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'dunyā', 'perspective'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Du\'ā\'',
-      back: '"Du\'ā\' is the weapon of a believer." (Ḥākim) — Just as a weapon protects from enemies, du\'ā\' protects the believer.',
-      frontArabic: 'دُعَاء',
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'du\'ā\'', 'worship'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Honouring Guests',
-      back: '"Whoever believes in Allāh and the Last Day should honour his guest!" (Ṣaḥīḥ al-Bukhārī)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'guests', 'hospitality'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Mercy',
-      back: '"Allāh does not show mercy to the one who does not show mercy to people!" (Ṣaḥīḥ al-Bukhārī)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'mercy', 'raḥmah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Modesty',
-      back: '"Modesty is part of īmān." (Ṣaḥīḥ al-Bukhārī) — Modesty stops us from doing evil in clothing, behaviour, and speech.',
-      frontArabic: 'حَيَاء',
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'modesty', 'ḥayā\''],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Shukr (Gratitude)',
-      back: '"The best du\'ā\' is Alḥamdulillāh." (Tirmidhī) — If we keep thanking Allāh, He will give us more.',
-      frontArabic: 'شُكْر',
-      backArabic: null,
-      category: 'hadith',
-      tags: ['aḥādīth', 'shukr', 'gratitude'],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    ahadithFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAhadith.id, orderIndex } },
-        create: { ...fc, unitId: unitAhadith.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += ahadithFlashcards.length;
-  // --- Sīrah Flashcards ---
-  const sirahFlashcards = [
-    {
-      front: 'Migration to Abyssinia',
-      back: 'The Companions migrated to Abyssinia to escape persecution. King Najāshī was a fair ruler who protected them.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'event',
-      tags: ['sīrah', 'abyssinia', 'migration'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ja\'far ibn Abī Ṭālib',
-      back: 'He spoke before King Najāshī on behalf of the Muslims, reciting Sūrah Maryam which caused everyone to cry.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'person',
-      tags: ['sīrah', 'companion', 'abyssinia'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ḥamzah ibn \'Abdul Muṭṭalib',
-      back: 'Uncle of the Prophet ﷺ who openly declared Islam after hearing of Abū Jahal\'s rude behaviour towards the Prophet.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'person',
-      tags: ['sīrah', 'companion', 'warrior'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: '\'Umar ibn al-Khaṭṭāb',
-      back: 'Initially against Islam, he set out to harm the Prophet but converted after reading Sūrah Ṭā Hā at his sister\'s house.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'person',
-      tags: ['sīrah', 'companion', 'conversion'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Boycott of Banū Hāshim',
-      back: 'The disbelievers boycotted Banū Hāshim and Banū Muṭṭalib in Shi\'b Abī Ṭālib for 3 years. Allāh ended it by sending ants to eat the document.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'event',
-      tags: ['sīrah', 'boycott', 'persecution'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Year of Sadness',
-      back: 'The year when both Abū Ṭālib (the Prophet\'s uncle) and Khadījah (his beloved wife) passed away.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'event',
-      tags: ['sīrah', 'grief', 'year-of-sadness'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Journey to Ṭā\'if',
-      back: 'The Prophet ﷺ went to Ṭā\'if to invite the people but was rejected and pelted with stones. He refused the Angel of Mountains\' offer to crush them.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'event',
-      tags: ['sīrah', 'ṭā\'if', 'mercy'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Al-Isrā\' wal Mi\'rāj',
-      back: 'The miraculous Night Journey from Makkah to Jerusalem (Isrā\') and then the Ascent through the heavens (Mi\'rāj), where 5 daily prayers were ordained.',
-      frontArabic: 'الإِسْرَاء وَالْمِعْرَاج',
-      backArabic: null,
-      category: 'event',
-      tags: ['sīrah', 'miracle', 'night-journey'],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    sirahFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitSirah.id, orderIndex } },
-        create: { ...fc, unitId: unitSirah.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += sirahFlashcards.length;
-
-  // --- Tārīkh Flashcards ---
-  const tarikhFlashcards = [
-    {
-      front: 'Ibrāhīm عليه السلام',
-      back: 'A great prophet of Allāh who challenged idol worship, survived being thrown in fire, and built the Ka\'bah with his son Ismā\'īl.',
-      frontArabic: 'إِبْرَاهِيم',
-      backArabic: null,
-      category: 'person',
-      tags: ['tārīkh', 'prophet', 'ibrāhīm'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Āzar',
-      back: 'The father of Ibrāhīm عليه السلام who used to carve and sell idols in the village of Ūr.',
-      frontArabic: 'آزَر',
-      backArabic: null,
-      category: 'person',
-      tags: ['tārīkh', 'ibrāhīm', 'idol-worship'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'The Fire of Ibrāhīm',
-      back: 'The disbelievers threw Ibrāhīm into a huge fire, but Allāh commanded: "O fire, be cool and peaceful for Ibrāhīm." (Qur\'ān 21:69)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'event',
-      tags: ['tārīkh', 'miracle', 'fire'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'King Namrūd',
-      back: 'An evil and arrogant king who debated with Ibrāhīm about the power of Allāh. He was left speechless when challenged about making the sun rise from the West.',
-      frontArabic: 'نَمْرُود',
-      backArabic: null,
-      category: 'person',
-      tags: ['tārīkh', 'ibrāhīm', 'tyrant'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Zamzam',
-      back: 'The blessed water that gushed from the ground near baby Ismā\'īl when an angel struck the earth. It still flows in Makkah today.',
-      frontArabic: 'زَمْزَم',
-      backArabic: null,
-      category: 'place',
-      tags: ['tārīkh', 'makkah', 'miracle'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ṣafā and Marwah',
-      back: 'Two mountains in Makkah between which Hājar ran seven times searching for water. This act is commemorated during Ḥajj as Sa\'ī.',
-      frontArabic: 'الصَّفَا وَالْمَرْوَة',
-      backArabic: null,
-      category: 'place',
-      tags: ['tārīkh', 'makkah', 'ḥajj'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'The Sacrifice of Ismā\'īl',
-      back: 'Allāh tested Ibrāhīm by commanding him in a dream to sacrifice his son Ismā\'īl. Both submitted to Allāh\'s will, and a ram was sent from Jannah.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'event',
-      tags: ['tārīkh', 'sacrifice', '\'īd-al-aḍḥā'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Building the Ka\'bah',
-      back: 'Allāh commanded Ibrāhīm and Ismā\'īl to build the Ka\'bah — the house of worship that all Muslims face in ṣalāh (the qiblah).',
-      frontArabic: 'الْكَعْبَة',
-      backArabic: null,
-      category: 'event',
-      tags: ['tārīkh', 'ka\'bah', 'ibrāhīm'],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    tarikhFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitTarikh.id, orderIndex } },
-        create: { ...fc, unitId: unitTarikh.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += tarikhFlashcards.length;
-  // --- Aqā'id Flashcards ---
-  const aqaidFlashcards = [
-    {
-      front: 'Rasūl',
-      back: 'A messenger of Allāh who is given a new book or scripture and new laws.',
-      frontArabic: 'رَسُول',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['aqā\'id', 'prophet', 'rasūl'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Nabī',
-      back: 'A prophet of Allāh who follows the book and law of the previous messenger.',
-      frontArabic: 'نَبِيّ',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['aqā\'id', 'prophet', 'nabī'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Yawmul Qiyāmah',
-      back: 'The Day of Judgement — the Last Day when everything will be destroyed and then all will be brought back to answer for their deeds.',
-      frontArabic: 'يَوْمُ الْقِيَامَة',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['aqā\'id', 'last-day', 'qiyāmah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'The 25 Prophets',
-      back: 'The Qur\'ān mentions 25 prophets by name: from Ādam عليه السلام (the first) to Muḥammad ﷺ (the last and final).',
-      frontArabic: null,
-      backArabic: null,
-      category: 'concept',
-      tags: ['aqā\'id', 'prophets', 'qur\'ān'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Minor Signs of Qiyāmah',
-      back: 'Include: decrease in modesty, cheating in trade, disobedience to parents, voices raised in masājid, leaders being the worst of people, and widespread alcohol.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'concept',
-      tags: ['aqā\'id', 'last-day', 'minor-signs'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'The Dajjāl',
-      back: 'A major sign of the Day of Judgement — a great deceiver who will appear before the end of times.',
-      frontArabic: 'الدَّجَّال',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['aqā\'id', 'last-day', 'major-signs'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'The Mahdī',
-      back: 'A righteous leader who will appear as a major sign of the Day of Judgement to fill the earth with justice.',
-      frontArabic: 'الْمَهْدِي',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['aqā\'id', 'last-day', 'major-signs'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Return of \'Īsā عليه السلام',
-      back: 'A major sign of the Day of Judgement — Prophet \'Īsā will return to earth, defeat the Dajjāl, and establish justice.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'concept',
-      tags: ['aqā\'id', 'last-day', 'major-signs'],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    aqaidFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAqaid.id, orderIndex } },
-        create: { ...fc, unitId: unitAqaid.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += aqaidFlashcards.length;
-
-  // --- Akhlāq Flashcards ---
-  const akhlaqFlashcards = [
-    {
-      front: 'Ḥusn al-Ẓann',
-      back: 'Thinking good of others. The Qur\'ān warns: "Abstain from much suspicion. Some suspicions are sins." (49:12)',
-      frontArabic: 'حُسْنُ الظَّنّ',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['akhlāq', 'good-thoughts', 'suspicion'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Sharing with Others',
-      back: '"You shall never attain righteousness unless you spend from what you love." (Qur\'ān 3:92)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'concept',
-      tags: ['akhlāq', 'sharing', 'generosity'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Kindness to Parents',
-      back: 'Allāh placed obedience to parents immediately after His own rights. Even saying "uff" to them is forbidden. (Qur\'ān 17:23-25)',
-      frontArabic: 'بِرُّ الْوَالِدَيْن',
-      backArabic: null,
-      category: 'concept',
-      tags: ['akhlāq', 'parents', 'obedience'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ṣidq (Truthfulness)',
-      back: '"Truthfulness leads to good and good leads to Jannah." Lying leads to evil and evil leads to Jahannam. (Ṣaḥīḥ al-Bukhārī)',
-      frontArabic: 'صِدْق',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['akhlāq', 'truthfulness', 'honesty'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Good Word or Silence',
-      back: '"Whoever believes in Allāh and the Last Day should speak a good word or remain silent." (Ṣaḥīḥ al-Bukhārī)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['akhlāq', 'speech', 'tongue'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ghībah (Backbiting)',
-      back: 'Speaking evil about a Muslim behind their back. The Qur\'ān compares it to eating the flesh of your dead brother. (49:12)',
-      frontArabic: 'غِيبَة',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['akhlāq', 'backbiting', 'sin'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'The Bankrupt Person',
-      back: 'The Prophet ﷺ said the truly bankrupt person is one who comes with good deeds on Qiyāmah but loses them all because of insulting, slandering, and harming others. (Ṣaḥīḥ Muslim)',
-      frontArabic: null,
-      backArabic: null,
-      category: 'hadith',
-      tags: ['akhlāq', 'deeds', 'judgement'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Tajassus (Spying)',
-      back: 'Investigating and spying into the private affairs of others — often a result of bad suspicion. It is forbidden in Islam.',
-      frontArabic: 'تَجَسُّس',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['akhlāq', 'spying', 'privacy'],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    akhlaqFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAkhlaq.id, orderIndex } },
-        create: { ...fc, unitId: unitAkhlaq.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += akhlaqFlashcards.length;
-
-  // --- Ādāb Flashcards ---
-  const adabFlashcards = [
-    {
-      front: 'Ādāb of Travelling',
-      back: 'Pray 2 rak\'āt before departure, travel in a group, appoint an amīr, share provisions, and recite the du\'ā\' of travel.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'etiquette',
-      tags: ['ādāb', 'travelling', 'sunnah'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ādāb of Studying',
-      back: 'Make correct intention, respect books and teacher, listen attentively, revise after lessons, and most importantly — practise what you learn.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'etiquette',
-      tags: ['ādāb', 'studying', 'knowledge'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ādāb of Qur\'ān',
-      back: 'Perform wuḍū\', use miswāk, sit respectfully, recite Ta\'awwudh and Tasmiyah, recite with tajwīd, and never place other books on top.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'etiquette',
-      tags: ['ādāb', 'qur\'ān', 'recitation'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ādāb of Walking',
-      back: 'Walk humbly and briskly, lower your gaze, spread salām, remove harmful objects from the road, and do not walk proudly.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'etiquette',
-      tags: ['ādāb', 'walking', 'humility'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Ādāb of the Masjid',
-      back: 'Dress well, enter with right foot, pray Taḥiyyatul Masjid, remain silent, spend time in dhikr and Qur\'ān, and do not talk about worldly matters.',
-      frontArabic: null,
-      backArabic: null,
-      category: 'etiquette',
-      tags: ['ādāb', 'masjid', 'worship'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Taḥiyyatul Masjid',
-      back: 'Two rak\'āt of prayer performed upon entering the masjid — a way of "greeting" the house of Allāh.',
-      frontArabic: 'تَحِيَّةُ الْمَسْجِد',
-      backArabic: null,
-      category: 'vocabulary',
-      tags: ['ādāb', 'masjid', 'ṣalāh'],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Du\'ā\' of Entering the Masjid',
-      back: '"O Allāh, open for me doors of Your mercy." Recited when entering the masjid with the right foot.',
-      frontArabic: 'اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ',
-      backArabic: null,
-      category: 'du\'ā\'',
-      tags: ['ādāb', 'masjid', 'du\'ā\''],
-      difficulty: 'EASY' as const,
-    },
-    {
-      front: 'Du\'ā\' of Leaving the Masjid',
-      back: '"O Allāh, I ask You from Your bounty." Recited when leaving the masjid.',
-      frontArabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ',
-      backArabic: null,
-      category: 'du\'ā\'',
-      tags: ['ādāb', 'masjid', 'du\'ā\''],
-      difficulty: 'EASY' as const,
-    },
-  ];
-
-    await Promise.all(
-    adabFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAdab.id, orderIndex } },
-        create: { ...fc, unitId: unitAdab.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += adabFlashcards.length;
-  // ══════════════════════════════════════════════
-  // ARABIC TERMS
-  // ══════════════════════════════════════════════
-
-  console.log('');
-  console.log('🔤 Creating Arabic terms...');
-
-    await prisma.arabicTerm.deleteMany({ where: { unitId: unitFiqh.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitSirah.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitTarikh.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAqaid.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAkhlaq.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAdab.id } });
-
-await prisma.arabicTerm.createMany({
-    data: [
-      // Fiqh terms (8)
-      { unitId: unitFiqh.id, arabicText: 'فَرْض', transliteration: 'Farḍ', translation: 'Compulsory — something you must do' },
-      { unitId: unitFiqh.id, arabicText: 'وَاجِب', transliteration: 'Wājib', translation: 'Necessary — next in importance to farḍ' },
-      { unitId: unitFiqh.id, arabicText: 'نَجَاسَة', transliteration: 'Najāsah', translation: 'Impurity — physical or ritual uncleanliness' },
-      { unitId: unitFiqh.id, arabicText: 'غُسْل', transliteration: 'Ghusl', translation: 'A full-body ritual bath' },
-      { unitId: unitFiqh.id, arabicText: 'نَوَاقِض', transliteration: 'Nawāqiḍ', translation: 'Acts that break or cancel something (e.g. wuḍū\' or ṣalāh)' },
-      { unitId: unitFiqh.id, arabicText: 'قِبْلَة', transliteration: 'Qiblah', translation: 'The direction of the Ka\'bah that Muslims face in ṣalāh' },
-      { unitId: unitFiqh.id, arabicText: 'سَتْر', transliteration: 'Satr', translation: 'Parts of the body that must be covered' },
-      { unitId: unitFiqh.id, arabicText: 'قُنُوت', transliteration: 'Qunūt', translation: 'The special du\'ā\' recited in Ṣalātul Witr' },
-      // Sīrah terms (5)
-      { unitId: unitSirah.id, arabicText: 'هِجْرَة', transliteration: 'Hijrah', translation: 'Migration — the Companions migrated to Abyssinia and later to Madīnah' },
-      { unitId: unitSirah.id, arabicText: 'بُرَاق', transliteration: 'Burāq', translation: 'The miraculous creature that carried the Prophet ﷺ on the Night Journey' },
-      { unitId: unitSirah.id, arabicText: 'إِسْرَاء', transliteration: 'Isrā\'', translation: 'The Night Journey from Makkah to Jerusalem' },
-      { unitId: unitSirah.id, arabicText: 'مِعْرَاج', transliteration: 'Mi\'rāj', translation: 'The Ascent through the heavens to the Divine Presence' },
-      { unitId: unitSirah.id, arabicText: 'سِدْرَةُ الْمُنْتَهَى', transliteration: 'Sidrah al-Muntahā', translation: 'The Lote Tree of the Furthest Limit — boundary of the heavens' },
-      // Tārīkh terms (4)
-      { unitId: unitTarikh.id, arabicText: 'خَلِيلُ اللَّه', transliteration: 'Khalīlullāh', translation: 'The Close Friend of Allāh — a title of Ibrāhīm عليه السلام' },
-      { unitId: unitTarikh.id, arabicText: 'زَمْزَم', transliteration: 'Zamzam', translation: 'The blessed water in Makkah that has flowed since the time of Ismā\'īl' },
-      { unitId: unitTarikh.id, arabicText: 'صَفَا وَمَرْوَة', transliteration: 'Ṣafā wa Marwah', translation: 'Two hills in Makkah between which Hājar ran searching for water' },
-      { unitId: unitTarikh.id, arabicText: 'أُضْحِيَة', transliteration: 'Uḍḥiyah', translation: 'The animal sacrifice at \'Īd al-Aḍḥā, commemorating Ibrāhīm\'s obedience' },
-      // Aqā'id terms (4)
-      { unitId: unitAqaid.id, arabicText: 'رَسُول', transliteration: 'Rasūl', translation: 'A messenger given a new scripture and laws by Allāh' },
-      { unitId: unitAqaid.id, arabicText: 'نَبِيّ', transliteration: 'Nabī', translation: 'A prophet who follows the previous messenger\'s scripture' },
-      { unitId: unitAqaid.id, arabicText: 'يَوْمُ الْقِيَامَة', transliteration: 'Yawmul Qiyāmah', translation: 'The Day of Judgement — the Last Day' },
-      { unitId: unitAqaid.id, arabicText: 'الدَّجَّال', transliteration: 'Dajjāl', translation: 'The great deceiver — a major sign of the Day of Judgement' },
-      // Akhlāq terms (4)
-      { unitId: unitAkhlaq.id, arabicText: 'حُسْنُ الظَّنّ', transliteration: 'Ḥusn al-Ẓann', translation: 'Thinking good of others — an important quality of a Muslim' },
-      { unitId: unitAkhlaq.id, arabicText: 'غِيبَة', transliteration: 'Ghībah', translation: 'Backbiting — speaking evil about a Muslim behind their back' },
-      { unitId: unitAkhlaq.id, arabicText: 'صِدْق', transliteration: 'Ṣidq', translation: 'Truthfulness — leads to good and ultimately to Jannah' },
-      { unitId: unitAkhlaq.id, arabicText: 'بِرُّ الْوَالِدَيْن', transliteration: 'Birrul Wālidayn', translation: 'Kindness and obedience to parents' },
-      // Ādāb terms (5)
-      { unitId: unitAdab.id, arabicText: 'تَحِيَّةُ الْمَسْجِد', transliteration: 'Taḥiyyatul Masjid', translation: 'Two rak\'āt prayer upon entering the masjid' },
-      { unitId: unitAdab.id, arabicText: 'أَمِير', transliteration: 'Amīr', translation: 'Leader — appointed when travelling in a group' },
-      { unitId: unitAdab.id, arabicText: 'تَجْوِيد', transliteration: 'Tajwīd', translation: 'The rules of correct Qur\'ān recitation' },
-      { unitId: unitAdab.id, arabicText: 'تَعَوُّذ', transliteration: 'Ta\'awwudh', translation: 'Saying "I seek refuge in Allāh from Shayṭān the accursed" before reciting Qur\'ān' },
-      { unitId: unitAdab.id, arabicText: 'أَذَان', transliteration: 'Adhān', translation: 'The call to prayer — answer it by repeating the words quietly' },
-    ],
   });
+  console.log('✅ Unit 12:', unit12.title);
 
-  console.log('✅ Created Arabic terms for all units');
+  // ══════════════════════════════════════════════
+  // UNIT 13: AKHLAQ — Sharing & Truthfulness
+  // ══════════════════════════════════════════════
+
+  const unit13Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to explain the hadith about the best person being one who benefits others, understand why lying is prohibited, and describe the principle "say good or stay silent."</p>
+
+<h2>Generosity — Sharing with Others</h2>
+<p>The Prophet said:</p>
+<blockquote>"The best of people is the one who benefits people the most." (al-Mu'jam al-Awsat)</blockquote>
+<p>Being the best person does not mean being the richest, most popular, or most talented. It means being the most <em>useful</em> to others. This includes:</p>
+<ul>
+  <li>Sharing food with someone who is hungry.</li>
+  <li>Giving time to help a friend or neighbour.</li>
+  <li>Spending wealth in the path of Allah (sadaqah, zakah).</li>
+  <li>Sharing knowledge you have with others.</li>
+  <li>Offering a smile, a kind word, or removing something harmful from the road.</li>
+</ul>
+
+<h2>Truthfulness (Sidq)</h2>
+<p>Allah says in the Quran: "O you who believe! Fear Allah and be with the truthful." (9:119)</p>
+<p>The Prophet was known as <em>al-Amin</em> (the Trustworthy) and <em>al-Sadiq</em> (the Truthful) even before prophethood. He said:</p>
+<blockquote>"Truthfulness leads to righteousness, and righteousness leads to Jannah. A person keeps speaking the truth until he is written with Allah as a siddiq (a great truthful person). And lying leads to wickedness, and wickedness leads to Hellfire." (Bukhari &amp; Muslim)</blockquote>
+
+<h2>Avoiding Lies</h2>
+<p>Lying is a major sin in Islam. Even small lies weaken trust and lead to bigger wrongs. Some common types of lies to avoid:</p>
+<ul>
+  <li>Lying to get out of trouble.</li>
+  <li>Exaggerating to impress others.</li>
+  <li>Making up excuses.</li>
+  <li>"White lies" — even small lies can become habits.</li>
+</ul>
+
+<h2>Say Good or Stay Silent</h2>
+<p>The Prophet said:</p>
+<blockquote>"Whoever believes in Allah and the Last Day, let him speak good or remain silent." (Bukhari &amp; Muslim)</blockquote>
+<p>Before speaking, ask yourself: Is this true? Is this kind? Is this necessary? If not — stay silent. This simple rule prevents most of the harms that come from speech.</p>
+`.trim();
+
+  const unit13 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-akhlaq-sharing-truth' } },
+    create: {
+      slug: 'maktab-3-akhlaq-sharing-truth',
+      courseId: course.id,
+      orderIndex: 13,
+      title: "Akhlaq — Sharing & Truthfulness",
+      description: "Generosity and sharing, the hadith on the best person being one who benefits others, the importance of truthfulness (sidq), and the principle of speaking good or staying silent.",
+      content: unit13Content,
+    },
+    update: {
+      title: "Akhlaq — Sharing & Truthfulness",
+      description: "Generosity and sharing, the hadith on the best person being one who benefits others, the importance of truthfulness (sidq), and the principle of speaking good or staying silent.",
+      content: unit13Content,
+    },
+  });
+  console.log('✅ Unit 13:', unit13.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 14: ADAB — Quran & Masjid
+  // ══════════════════════════════════════════════
+
+  const unit14Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to describe the proper etiquette for handling and reciting the Quran, and explain the correct manners for entering and leaving the masjid.</p>
+
+<h2>Adab of the Quran</h2>
+<h3>Handling the Quran</h3>
+<ul>
+  <li>Be in a state of <strong>wudu'</strong> when touching or holding the Quran — this is obligatory according to the majority of scholars.</li>
+  <li>Hold the Quran with <strong>both hands or the right hand</strong>, not carelessly under the arm.</li>
+  <li>Never place the Quran on the floor or point your feet towards it.</li>
+  <li>Keep the Quran in a high, clean, and respectful place.</li>
+  <li>Do not write in or deface the Quran.</li>
+</ul>
+
+<h3>Reciting the Quran</h3>
+<ul>
+  <li>Begin with <strong>Ta'awwudh:</strong> "A'udhu billahi min al-Shaytan al-rajim" (I seek refuge with Allah from the accursed Shaytan).</li>
+  <li>Then say <strong>Bismillah al-Rahman al-Rahim.</strong></li>
+  <li>Recite clearly, beautifully, and with understanding.</li>
+  <li>Do not recite in a rush or carelessly.</li>
+  <li>Make du'a' when you come across verses of mercy or punishment.</li>
+</ul>
+
+<h2>Adab of the Masjid</h2>
+<h3>Entering the Masjid</h3>
+<ul>
+  <li>Enter with the <strong>right foot first</strong>.</li>
+  <li>Say the du'a' for entering: <em>"Allahumma aftah li abwaba rahmatik"</em> (O Allah, open for me the doors of Your mercy).</li>
+  <li>Pray <strong>Tahiyyat al-Masjid</strong> (two raka'at of greeting the masjid) before sitting.</li>
+  <li>Be quiet and respectful — the masjid is Allah's house.</li>
+</ul>
+
+<h3>Inside the Masjid</h3>
+<ul>
+  <li>Do not speak about worldly affairs, play around, or raise your voice.</li>
+  <li>Keep the masjid clean — do not eat or drink except in designated areas.</li>
+  <li>Engage in dhikr, salah, Quran, or Islamic learning.</li>
+</ul>
+
+<h3>Leaving the Masjid</h3>
+<ul>
+  <li>Leave with the <strong>left foot first</strong>.</li>
+  <li>Say the du'a' for leaving: <em>"Allahumma inni as'aluka min fadlik"</em> (O Allah, I ask You of Your bounty).</li>
+</ul>
+`.trim();
+
+  const unit14 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-adab-quran-masjid' } },
+    create: {
+      slug: 'maktab-3-adab-quran-masjid',
+      courseId: course.id,
+      orderIndex: 14,
+      title: "Adab — Quran & Masjid",
+      description: "Etiquette of handling and reciting the Quran, and the correct manners for entering, behaving inside, and leaving the masjid.",
+      content: unit14Content,
+    },
+    update: {
+      title: "Adab — Quran & Masjid",
+      description: "Etiquette of handling and reciting the Quran, and the correct manners for entering, behaving inside, and leaving the masjid.",
+      content: unit14Content,
+    },
+  });
+  console.log('✅ Unit 14:', unit14.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 15: ADAB — Travelling
+  // ══════════════════════════════════════════════
+
+  const unit15Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to recite the du'a' for beginning a journey, explain the salah ruling for travellers, and describe the sunnah on returning from a journey.</p>
+
+<h2>Du'a' Before Leaving on a Journey</h2>
+<p>When boarding a vehicle or beginning a journey, recite:</p>
+<blockquote><em>Bismillah, tawakkaltu 'alAllah, wa la hawla wa la quwwata illa billah.</em><br>"In the name of Allah; I have placed my trust in Allah; there is no power or strength except with Allah." (Abu Dawud, Tirmidhi)</blockquote>
+<p>Also, when the vehicle begins to move, say: <em>Subhana-lladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila Rabbina la-munqalibun.</em></p>
+
+<h2>Saying Goodbye</h2>
+<ul>
+  <li>It is sunnah to ask family and friends for du'a' before travelling.</li>
+  <li>Give the traveller this du'a': <em>"Astawdi'ukallaha dinaka wa amanataka wa khawatima 'amalak"</em> — "I entrust to Allah your din, your trust, and the seal of your deeds."</li>
+</ul>
+
+<h2>Qasr — Shortening Salah While Travelling</h2>
+<p>When travelling a distance of approximately <strong>77-78 km or more</strong> (the legal travel distance), it is <strong>wajib</strong> in the Hanafi school to shorten the four-raka'at prayers to two:</p>
+<ul>
+  <li>Zuhr: 4 raka'at to 2 raka'at</li>
+  <li>'Asr: 4 raka'at to 2 raka'at</li>
+  <li>'Isha': 4 raka'at to 2 raka'at</li>
+  <li>Fajr (2 raka'at) and Maghrib (3 raka'at) remain unchanged.</li>
+</ul>
+<p>This mercy from Allah is called <strong>Qasr</strong>. The Prophet said: "This is a sadaqah that Allah has given you — accept His sadaqah."</p>
+
+<h2>Sunnah on Returning</h2>
+<ul>
+  <li>When close to home, say the du'a': <em>Ayibuna ta'ibuna 'abiduna, li-Rabbina hamidun</em> — "We return, repenting, worshipping, and praising our Lord."</li>
+  <li>The sunnah is to go to the <strong>masjid first</strong> after returning from a journey — pray two raka'at before going home.</li>
+  <li>Greet your family with salam and share the joy of being back.</li>
+</ul>
+`.trim();
+
+  const unit15 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-adab-travel' } },
+    create: {
+      slug: 'maktab-3-adab-travel',
+      courseId: course.id,
+      orderIndex: 15,
+      title: "Adab — Travelling",
+      description: "Du'a' before a journey, saying goodbye, shortening salah when travelling (qasr), and the sunnah practice when returning home.",
+      content: unit15Content,
+    },
+    update: {
+      title: "Adab — Travelling",
+      description: "Du'a' before a journey, saying goodbye, shortening salah when travelling (qasr), and the sunnah practice when returning home.",
+      content: unit15Content,
+    },
+  });
+  console.log('✅ Unit 15:', unit15.title);
+
+  // ══════════════════════════════════════════════
+  // UNIT 16: ADAB — Studying & Walking
+  // ══════════════════════════════════════════════
+
+  const unit16Content = `
+<h2>Learning Objectives</h2>
+<p>By the end of this unit, pupils will be able to describe the correct etiquette with a teacher, recite the du'a' for increase in knowledge, and explain the Islamic rules for walking.</p>
+
+<h2>Etiquette with Teachers (Adab al-Ta'allum)</h2>
+<p>Seeking knowledge is an obligation in Islam. The Prophet said: "Seeking knowledge is an obligation upon every Muslim." (Ibn Majah) Respect for teachers is essential:</p>
+<ul>
+  <li><strong>Sit properly</strong> — sit attentively and respectfully in front of the teacher, not slouching or turning away.</li>
+  <li><strong>Listen carefully</strong> — do not talk or distract others when the teacher is speaking.</li>
+  <li><strong>Do not interrupt</strong> — wait until the teacher finishes before asking a question.</li>
+  <li><strong>Ask respectfully</strong> — raise your hand and say "Excuse me" or "May I ask?"</li>
+  <li><strong>Act on what you learn</strong> — knowledge that is not acted upon is not complete.</li>
+  <li><strong>Greet your teacher</strong> with salam when you arrive and when you leave.</li>
+</ul>
+
+<h2>Du'a' for Increase in Knowledge</h2>
+<p>Allah commands the Prophet in the Quran:</p>
+<blockquote><em>Wa qul Rabbi zidni 'ilma.</em><br>"And say: My Lord, increase me in knowledge." (Quran 20:114)</blockquote>
+<p>Recite this du'a' before studying, before entering a classroom or madrasah, and whenever you want Allah's help in learning.</p>
+
+<h2>Walking Etiquette</h2>
+<p>Allah describes the servants of the Merciful: "They are those who walk humbly upon the earth." (Quran 25:63)</p>
+<ul>
+  <li><strong>Do not walk arrogantly</strong> — do not strut or swagger with pride. Allah does not love the arrogant.</li>
+  <li><strong>Walk with purpose and modesty</strong> — a calm, dignified pace is the sunnah.</li>
+  <li><strong>Do not walk in front of someone performing salah</strong> — this is a serious matter. The Prophet said it is better to wait 40 years than to pass in front of a praying person. If there is no sutrah (barrier), try to go around.</li>
+  <li><strong>Give salam to people you pass</strong> — the Prophet always greeted people first.</li>
+  <li><strong>Keep to the right side</strong> of the path when walking.</li>
+</ul>
+`.trim();
+
+  const unit16 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-3-adab-study-walk' } },
+    create: {
+      slug: 'maktab-3-adab-study-walk',
+      courseId: course.id,
+      orderIndex: 16,
+      title: "Adab — Studying & Walking",
+      description: "Etiquette with teachers, the du'a' for increase in knowledge (Rabbi zidni 'ilma), and the Islamic rules and manners for walking.",
+      content: unit16Content,
+    },
+    update: {
+      title: "Adab — Studying & Walking",
+      description: "Etiquette with teachers, the du'a' for increase in knowledge (Rabbi zidni 'ilma), and the Islamic rules and manners for walking.",
+      content: unit16Content,
+    },
+  });
+  console.log('✅ Unit 16:', unit16.title);
+
+  // ══════════════════════════════════════════════
+  // QUIZ DATA — 6-8 questions per unit
+  // ══════════════════════════════════════════════
+
+  const quizData: Array<{
+    unitId: string;
+    externalId: string;
+    type: string;
+    questionText: string;
+    options: string[];
+    correctAnswer: string;
+    explanation: string;
+  }> = [
+    // ── Unit 1: Taharah & Najasah ──
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q1', type: 'MULTIPLE_CHOICE',
+      questionText: 'What are the two types of taharah in Islam?',
+      options: ["Haqiqi and Ma'nawi", 'Ghalizah and Khafifah', 'Fard and Sunnah', 'Zahir and Batin'],
+      correctAnswer: "Haqiqi and Ma'nawi",
+      explanation: "Taharah Haqiqi is physical purity (removing dirt), while Taharah Ma'nawi is spiritual purity (purifying the heart from pride and jealousy)." },
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q2', type: 'MULTIPLE_CHOICE',
+      questionText: 'Which is an example of Najasah Ghalizah (heavy impurity)?',
+      options: ['Urine of a goat', 'Droppings of a crow', 'Human urine', 'Sweat'],
+      correctAnswer: 'Human urine',
+      explanation: 'Human urine is Najasah Ghalizah. Urine of animals whose meat is permissible (like a goat) is Najasah Khafifah (light impurity).' },
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q3', type: 'MULTIPLE_CHOICE',
+      questionText: 'If heavy impurity covers more than a dirham on clothing, what happens to salah performed in those clothes?',
+      options: ['It is valid but disliked', 'It is not valid', 'It is perfectly fine', 'It requires prostration of forgetfulness'],
+      correctAnswer: 'It is not valid',
+      explanation: 'If Najasah Ghalizah covers more than a dirham, salah is not valid and must be repeated after cleaning.' },
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q4', type: 'TRUE_FALSE',
+      questionText: 'Najasah Khafifah (light impurity) only affects salah if it covers more than a quarter of the garment or body part.',
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: 'Correct. Light impurity only invalidates salah when it covers more than a quarter of the affected garment or body part.' },
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q5', type: 'MULTIPLE_CHOICE',
+      questionText: 'How do you purify the ground if najasah falls on it?',
+      options: ['Wipe it with a cloth', 'Pour water over it', 'Leave it to dry', 'Dig it up'],
+      correctAnswer: 'Pour water over it',
+      explanation: 'If najasah falls on the ground, pouring water over it is sufficient to purify it.' },
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q6', type: 'FILL_BLANK',
+      questionText: 'The Prophet said: "Purity is half of ___."',
+      options: ['faith', 'prayer', 'knowledge', 'worship'], correctAnswer: 'faith',
+      explanation: 'The full hadith is: "Purity is half of faith (Iman)." (Muslim)' },
+    { unitId: unit1.id, externalId: 'maktab-3-tahara-q7', type: 'MULTIPLE_CHOICE',
+      questionText: 'Which of the following is Najasah Khafifah (light impurity)?',
+      options: ['Wine (alcohol)', 'Blood that flows', 'Urine of a camel', 'Human stool'],
+      correctAnswer: 'Urine of a camel',
+      explanation: 'Urine of animals whose meat is permissible (camel, cow, sheep) is Najasah Khafifah. Wine, flowing blood, and human stool are Najasah Ghalizah.' },
+
+    // ── Unit 2: Ghusl ──
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "How many fara'id (obligatory acts) does ghusl have?",
+      options: ['Two', 'Three', 'Four', 'Five'], correctAnswer: 'Three',
+      explanation: "Ghusl has three fara'id: (1) rinsing the mouth, (2) rinsing the nose, (3) washing the entire body." },
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "Which of the following is a fard (obligatory) act of ghusl?",
+      options: ['Washing both hands first', "Performing wudu' before ghusl", 'Rinsing the nose with water', 'Using soap'],
+      correctAnswer: 'Rinsing the nose with water',
+      explanation: "One of the three fara'id of ghusl is rinsing the nose (istinshaq). Washing hands and using soap are sunnah, not fard." },
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q3', type: 'TRUE_FALSE',
+      questionText: 'Ghusl is obligatory after hayd (monthly period) ends.',
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "When hayd ends, ghusl is fard (obligatory). A woman cannot pray or fast without ghusl after her period ends." },
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q4', type: 'MULTIPLE_CHOICE',
+      questionText: 'In the sunnah method of ghusl, when should you wash your feet?',
+      options: ['At the beginning', 'After washing the right side', 'At the very end, after moving to a clean spot', 'Before washing the head'],
+      correctAnswer: 'At the very end, after moving to a clean spot',
+      explanation: 'In the sunnah method of ghusl, the feet are washed at the very end after moving to a clean spot.' },
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q5', type: 'MULTIPLE_CHOICE',
+      questionText: "What is the ghusl of Jumu'ah (Friday)?",
+      options: ["Fard (obligatory)", "Sunnah mu'akkadah (confirmed sunnah)", 'Mustahabb (recommended)', 'Wajib'],
+      correctAnswer: "Sunnah mu'akkadah (confirmed sunnah)",
+      explanation: "Performing ghusl before Jumu'ah salah on Friday is a sunnah mu'akkadah. The Prophet strongly encouraged it." },
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q6', type: 'FILL_BLANK',
+      questionText: 'The giving of ghusl to a deceased Muslim is ___ al-kifayah.',
+      options: ['fard', 'sunnah', 'wajib', 'mustahabb'], correctAnswer: 'fard',
+      explanation: 'Giving ghusl to a deceased Muslim is fard al-kifayah — a communal obligation.' },
+    { unitId: unit2.id, externalId: 'maktab-3-ghusl-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "If someone performs ghusl but forgets to rinse their mouth, is the ghusl complete?",
+      options: ['Yes, the mouth is optional', "No, rinsing the mouth is a fard of ghusl", 'Yes, but it is disliked', 'It depends on why they forgot'],
+      correctAnswer: "No, rinsing the mouth is a fard of ghusl",
+      explanation: "Rinsing the mouth (madmadah) is one of the three fara'id of ghusl. If missed, the ghusl is incomplete." },
+
+    // ── Unit 3: Salah ──
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "How many fara'id (obligatory acts) does salah have within the prayer itself?",
+      options: ['Five', 'Six', 'Seven', 'Eight'], correctAnswer: 'Seven',
+      explanation: "Salah has seven internal fara'id: Takbir al-Tahrimah, Qiyam, Qira'ah, Ruku', Sajdah, Qa'dah al-Akhirah, and ending with salam." },
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "How many fard raka'at does Maghrib prayer have?",
+      options: ['Two', 'Three', 'Four', 'Five'], correctAnswer: 'Three',
+      explanation: "Maghrib prayer has 3 fard raka'at. It is the only fard prayer with an odd number besides Fajr (2)." },
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q3', type: 'TRUE_FALSE',
+      questionText: 'Facing the Qiblah is a prerequisite (shart) of salah that must be fulfilled before the prayer begins.',
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Facing the Qiblah (direction of the Ka'bah in Makkah) is one of the prerequisites of salah. Without it, salah is not valid." },
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q4', type: 'MULTIPLE_CHOICE',
+      questionText: 'What is Takbir al-Tahrimah?',
+      options: ['The final salam', 'The opening "Allahu Akbar" that begins salah', 'The bowing position', "The recitation of al-Fatihah"],
+      correctAnswer: 'The opening "Allahu Akbar" that begins salah',
+      explanation: 'Takbir al-Tahrimah is saying "Allahu Akbar" to begin salah. It makes certain things haram (forbidden) such as eating and speaking.' },
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q5', type: 'MULTIPLE_CHOICE',
+      questionText: "How many total fard raka'at are prayed in Fajr and 'Asr combined?",
+      options: ['Four', 'Six', 'Eight', 'Ten'], correctAnswer: 'Six',
+      explanation: "Fajr has 2 fard raka'at and 'Asr has 4. Together: 2 + 4 = 6 raka'at." },
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q6', type: 'FILL_BLANK',
+      questionText: "The final sitting in salah where at-Tashahhud is recited is called Qa'dah al-___.",
+      options: ["Akhirah", "Ula", "Wusta", "Kamilah"], correctAnswer: "Akhirah",
+      explanation: "The final sitting is Qa'dah al-Akhirah. It is a fard of salah — at-Tashahhud must be recited before ending with salam." },
+    { unitId: unit3.id, externalId: 'maktab-3-salah-q7', type: 'TRUE_FALSE',
+      questionText: "A person praying salah must have the intention (niyyah) in their heart — saying it aloud is not required.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Niyyah (intention) resides in the heart. While saying it aloud is permissible, it is not required. The heart's intention is what counts." },
+
+    // ── Unit 4: Ahadith — Love, Mercy & Compassion ──
+    { unitId: unit4.id, externalId: 'maktab-3-love-mercy-q1', type: 'MULTIPLE_CHOICE',
+      questionText: 'Complete the hadith: "None of you truly believes until he loves for his brother what he loves for ___."',
+      options: ['Allah', 'himself', 'his family', 'all Muslims'], correctAnswer: 'himself',
+      explanation: '"None of you truly believes until he loves for his brother what he loves for himself." (Bukhari & Muslim)' },
+    { unitId: unit4.id, externalId: 'maktab-3-love-mercy-q2', type: 'MULTIPLE_CHOICE',
+      questionText: 'According to the hadith, what happens when you show mercy to those on earth?',
+      options: ['You earn reward only on Judgement Day', 'Allah shows mercy to you', 'People will love you', 'You enter Jannah immediately'],
+      correctAnswer: 'Allah shows mercy to you',
+      explanation: '"Show mercy to those on earth, and the One in the heavens will show mercy to you." (Tirmidhi)' },
+    { unitId: unit4.id, externalId: 'maktab-3-love-mercy-q3', type: 'TRUE_FALSE',
+      questionText: 'According to the hadith, honouring guests is a sign of belief in Allah and the Last Day.',
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: '"Whoever believes in Allah and the Last Day, let him honour his guest." (Bukhari & Muslim) Generosity to guests is connected directly to Iman.' },
+    { unitId: unit4.id, externalId: 'maktab-3-love-mercy-q4', type: 'MULTIPLE_CHOICE',
+      questionText: 'What does "loving for your brother what you love for yourself" practically mean?',
+      options: ['Only sharing food', 'Wanting happiness, wellbeing and blessings for your Muslim siblings', 'Only praying for them', "Giving them gifts on 'Id"],
+      correctAnswer: 'Wanting happiness, wellbeing and blessings for your Muslim siblings',
+      explanation: 'This hadith means genuinely wanting every good thing for your fellow Muslim — food, shelter, happiness, guidance — just as you want for yourself.' },
+    { unitId: unit4.id, externalId: 'maktab-3-love-mercy-q5', type: 'MULTIPLE_CHOICE',
+      questionText: 'Who is included in "showing mercy to those on earth"?',
+      options: ['Only Muslims', 'Only children', 'All humans and even animals', 'Only the poor'],
+      correctAnswer: 'All humans and even animals',
+      explanation: "Scholars explain 'those on earth' includes all of Allah's creation — Muslims, non-Muslims, children, elderly, and even animals." },
+    { unitId: unit4.id, externalId: 'maktab-3-love-mercy-q6', type: 'FILL_BLANK',
+      questionText: 'The hadith "Show mercy to those on earth..." was narrated in ___.',
+      options: ['Tirmidhi', 'Bukhari', 'Muslim', 'Ibn Majah'], correctAnswer: 'Tirmidhi',
+      explanation: '"Show mercy to those on earth, and the One in the heavens will show mercy to you" is narrated in Tirmidhi.' },
+
+    // ── Unit 5: Ahadith — This World, Modesty & Steadfastness ──
+    { unitId: unit5.id, externalId: 'maktab-3-world-modesty-q1', type: 'MULTIPLE_CHOICE',
+      questionText: 'In the hadith about this world, the Prophet compared himself to what kind of traveller?',
+      options: ['A merchant resting at a market', 'A rider resting in the shade of a tree', 'A pilgrim walking to Makkah', 'A scholar sitting in a library'],
+      correctAnswer: 'A rider resting in the shade of a tree',
+      explanation: '"I am in this world like a rider who rests in the shade of a tree, then moves on and leaves it behind." — this dunya is a temporary resting place.' },
+    { unitId: unit5.id, externalId: 'maktab-3-world-modesty-q2', type: 'TRUE_FALSE',
+      questionText: "Haya' (modesty) is a branch of faith (Iman) according to the hadith.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "The Prophet said faith has seventy-odd branches, and haya' is among them. (Bukhari & Muslim)" },
+    { unitId: unit5.id, externalId: 'maktab-3-world-modesty-q3', type: 'MULTIPLE_CHOICE',
+      questionText: 'According to the hadith, what is the highest branch of faith?',
+      options: ['Fasting in Ramadan', 'Saying La ilaha illallah', "Haya'", 'Performing salah'],
+      correctAnswer: 'Saying La ilaha illallah',
+      explanation: '"The highest branch is saying La ilaha illallah." (Bukhari & Muslim)' },
+    { unitId: unit5.id, externalId: 'maktab-3-world-modesty-q4', type: 'MULTIPLE_CHOICE',
+      questionText: 'What does the hadith about fitnah compare holding on to din to?',
+      options: ['Climbing a mountain', 'Holding a burning coal', 'Swimming against a current', 'Running barefoot on gravel'],
+      correctAnswer: 'Holding a burning coal',
+      explanation: '"There will come a time when holding on to your din will be like holding a burning coal." (Tirmidhi)' },
+    { unitId: unit5.id, externalId: 'maktab-3-world-modesty-q5', type: 'FILL_BLANK',
+      questionText: 'Faith (Iman) has ___ branches according to the hadith.',
+      options: ['seventy-odd', 'five', 'one hundred', 'forty'], correctAnswer: 'seventy-odd',
+      explanation: "The hadith says faith has 'seventy-odd branches.' The key lesson is that faith has many levels." },
+    { unitId: unit5.id, externalId: 'maktab-3-world-modesty-q6', type: 'TRUE_FALSE',
+      questionText: "The Prophet said that haya' brings nothing but good.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: '"Haya\' does not bring anything except good." (Bukhari & Muslim)' },
+
+    // ── Unit 6: Sirah — Persecution & Migration to Abyssinia ──
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q1', type: 'MULTIPLE_CHOICE',
+      questionText: 'Why did the early Muslims migrate to Abyssinia?',
+      options: ['To trade goods', 'To escape persecution from Quraysh', 'To spread Islam there', 'Because they had no homes in Makkah'],
+      correctAnswer: 'To escape persecution from Quraysh',
+      explanation: 'Early Muslims were severely persecuted by the Quraysh. The Prophet advised them to migrate to Abyssinia, where the Christian king Najashi was known for his justice.' },
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "Who was the Najashi (Negus) of Abyssinia?",
+      options: ["A Muslim king who converted later", 'A just Christian king who protected the Muslims', 'A pagan ruler who expelled the Muslims', 'A Roman governor'],
+      correctAnswer: 'A just Christian king who protected the Muslims',
+      explanation: 'Najashi Ashama was a just and fair Christian king. He listened to the Muslims recite from the Quran and gave them protection.' },
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q3', type: 'MULTIPLE_CHOICE',
+      questionText: 'When did the first migration to Abyssinia take place?',
+      options: ['605 CE', '610 CE', '615 CE', '622 CE'],
+      correctAnswer: '615 CE',
+      explanation: 'The first migration to Abyssinia took place in 615 CE (the 5th year of Prophethood), when a group of about 15 Muslims left Makkah.' },
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q4', type: 'TRUE_FALSE',
+      questionText: "Sumayyah (may Allah be pleased with her) was the first martyr in Islam.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: 'Sumayyah bint Khayyat was killed by Abu Jahl and is considered the first martyr in Islamic history.' },
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q5', type: 'MULTIPLE_CHOICE',
+      questionText: 'What chapter of the Quran did Jafar ibn Abi Talib recite to the Najashi?',
+      options: ["Surah al-Fatihah", "Surah Maryam", "Surah al-Baqarah", "Surah al-Ikhlas"],
+      correctAnswer: "Surah Maryam",
+      explanation: "Ja'far ibn Abi Talib recited Surah Maryam to the Najashi, which moved the king to tears and he granted the Muslims protection." },
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q6', type: 'FILL_BLANK',
+      questionText: "The Quraysh sent ___ and his companion to convince the Najashi to return the Muslims.",
+      options: ["Amr ibn al-As", "Abu Sufyan", "Abu Jahl", "Khalid ibn al-Walid"],
+      correctAnswer: "Amr ibn al-As",
+      explanation: "The Quraysh sent Amr ibn al-As (before his conversion to Islam) and Abdullah ibn Abi Rabia to negotiate with the Najashi, but they failed." },
+    { unitId: unit6.id, externalId: 'maktab-3-abyssinia-q7', type: 'MULTIPLE_CHOICE',
+      questionText: 'Who was Bilal ibn Rabah and what did Umayyah ibn Khalaf do to him?',
+      options: ['A free man who was imprisoned', 'An enslaved man made to lie on hot sand in the sun', 'A merchant whose goods were seized', 'A young boy kept from his family'],
+      correctAnswer: 'An enslaved man made to lie on hot sand in the sun',
+      explanation: "Bilal was an enslaved man whose master Umayyah ibn Khalaf tortured him by placing heavy rocks on his chest in the desert sun. Abu Bakr (ra) eventually purchased and freed him." },
+
+    // ── Unit 7: Sirah — Year of Sorrow & al-Isra' wal-Mi'raj ──
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "Why is the 10th year of Prophethood called the 'Year of Sorrow'?",
+      options: ['Many Muslims were killed in battle', "Khadijah and Abu Talib both passed away", 'The Prophet was expelled from Makkah', 'A great drought struck Makkah'],
+      correctAnswer: "Khadijah and Abu Talib both passed away",
+      explanation: "In the 10th year of Prophethood, the Prophet's beloved wife Khadijah (ra) and his uncle Abu Talib both passed away, leaving the Prophet deeply grieved." },
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "What is al-Isra'?",
+      options: ["The ascent through the heavens", 'The night journey from Makkah to Masjid al-Aqsa', 'The journey to Abyssinia', 'The Hijrah to Madinah'],
+      correctAnswer: 'The night journey from Makkah to Masjid al-Aqsa',
+      explanation: "Al-Isra' is the miraculous night journey of the Prophet from Masjid al-Haram in Makkah to Masjid al-Aqsa in Jerusalem, riding on the Buraq." },
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "What great gift did Allah grant the Prophet during al-Mi'raj?",
+      options: ['The Quran', 'The five daily prayers', 'The ability to perform miracles', 'The date of Judgement Day'],
+      correctAnswer: 'The five daily prayers',
+      explanation: "During al-Mi'raj, Allah gifted the Ummah the five daily prayers. Originally 50 prayers were commanded, reduced to 5 through the intercession of Prophet Musa (as)." },
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q4', type: 'MULTIPLE_CHOICE',
+      questionText: 'What is the Buraq?',
+      options: ['A type of Angel', 'A heavenly animal the Prophet rode during al-Isra', 'The trumpet blown on Judgement Day', 'A star the Prophet saw in the sky'],
+      correctAnswer: "A heavenly animal the Prophet rode during al-Isra",
+      explanation: "Buraq is a white heavenly creature, larger than a donkey and smaller than a mule, that transported the Prophet from Makkah to Jerusalem during al-Isra'." },
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q5', type: 'TRUE_FALSE',
+      questionText: "During al-Mi'raj, the Prophet met and led salah of all the previous prophets in Masjid al-Aqsa.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "The Prophet led all the gathered prophets in salah in Masjid al-Aqsa, showing his position as the Seal and leader of all prophets." },
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q6', type: 'FILL_BLANK',
+      questionText: "Al-Isra' wal-Mi'raj is mentioned in Surah ___ at the beginning of the chapter.",
+      options: ["al-Isra'", "al-Baqarah", "al-Kahf", "al-Najm"],
+      correctAnswer: "al-Isra'",
+      explanation: "Surah al-Isra' (Chapter 17) begins with the verse about the night journey: 'Glory be to He who took His servant by night...'" },
+    { unitId: unit7.id, externalId: 'maktab-3-isra-miraj-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "Which prophet did the Prophet meet in the sixth heaven during al-Mi'raj?",
+      options: ["Prophet Idris (as)", "Prophet Musa (as)", "Prophet Ibrahim (as)", "Prophet Isa (as)"],
+      correctAnswer: "Prophet Musa (as)",
+      explanation: "Prophet Musa (as) was met in the sixth heaven. It was Musa who advised the Prophet to keep going back to Allah to reduce the prayers from 50." },
+
+    // ── Unit 8: Tarikh — Prophet Ibrahim (as) ──
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q1', type: 'MULTIPLE_CHOICE',
+      questionText: 'What did Ibrahim (as) call his people to worship instead of idols?',
+      options: ['The sun and moon', 'Only Allah', 'Fire', 'His ancestors'],
+      correctAnswer: 'Only Allah',
+      explanation: 'Ibrahim (as) called his people to worship Allah alone and reject the idols they carved themselves.' },
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "What happened when Ibrahim (as) was thrown into the fire?",
+      options: ['He was badly burned', 'He flew over the fire', 'Allah made the fire cool and safe for him', 'The fire went out immediately'],
+      correctAnswer: 'Allah made the fire cool and safe for him',
+      explanation: 'Allah commanded: "O fire! Be coolness and safety for Ibrahim." (Quran 21:69) — Ibrahim (as) emerged completely unharmed.' },
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "Where was Ibrahim (as) born?",
+      options: ['Makkah', 'Jerusalem', 'Iraq (Mesopotamia)', 'Egypt'],
+      correctAnswer: 'Iraq (Mesopotamia)',
+      explanation: 'Ibrahim (as) was born in the ancient city of Ur in Iraq (ancient Mesopotamia), in the time of King Nimrod.' },
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q4', type: 'TRUE_FALSE',
+      questionText: "Ibrahim's father Azar was a maker and seller of idols.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Ibrahim's father (Azar/Terah) made and sold idols. Despite this, Ibrahim (as) invited him to stop worshipping idols and turn to Allah." },
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q5', type: 'MULTIPLE_CHOICE',
+      questionText: "What was the great test Allah gave Ibrahim (as) regarding his son?",
+      options: ['To leave his son in the desert alone', 'To sacrifice his son in the way of Allah', 'To send his son to study', "To name his son after a prophet"],
+      correctAnswer: 'To sacrifice his son in the way of Allah',
+      explanation: "Allah tested Ibrahim (as) by commanding him to sacrifice his son. Both submitted, but Allah replaced the son with a ram at the moment of sacrifice." },
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q6', type: 'FILL_BLANK',
+      questionText: "Ibrahim (as) is given the title 'Khalilullah' which means the ___ of Allah.",
+      options: ['Friend', 'Prophet', 'Servant', 'Messenger'],
+      correctAnswer: 'Friend',
+      explanation: "'Khalilullah' means 'the Friend of Allah' — Ibrahim (as) is honoured with this special title due to his complete submission and devotion." },
+    { unitId: unit8.id, externalId: 'maktab-3-ibrahim-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "To which land did Ibrahim (as) migrate after leaving his people?",
+      options: ['Egypt', 'Yemen', 'Canaan (the Holy Land)', 'Abyssinia'],
+      correctAnswer: 'Canaan (the Holy Land)',
+      explanation: 'Ibrahim (as) migrated with his wife Sarah to Canaan (present-day Palestine/Israel), the blessed holy land.' },
+
+    // ── Unit 9: Tarikh — Prophet Ismail (as) & the Ka'bah ──
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "How did the Zamzam well appear in the desert?",
+      options: ['Ibrahim (as) dug it', "Hajar ran between Safa and Marwah and Allah caused it to spring up", 'A tribe found it while digging', 'It was always there'],
+      correctAnswer: "Hajar ran between Safa and Marwah and Allah caused it to spring up",
+      explanation: "Hajar ran between Safa and Marwah seven times searching for water for her baby Ismail (as). Allah caused the Zamzam spring to burst forth — a miracle still flowing today." },
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "Who built the Ka'bah?",
+      options: ["Ismail (as) alone", "Ibrahim and Ismail (as) together", "Ibrahim (as) alone", "The angels"],
+      correctAnswer: "Ibrahim and Ismail (as) together",
+      explanation: "Allah commanded Ibrahim (as) to build the Ka'bah. Ibrahim laid the stones while Ismail (as) helped carry them. They prayed together as they built." },
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "What is the special stone built into the corner of the Ka'bah?",
+      options: ['Al-Maqam', 'Al-Hajar al-Aswad (the Black Stone)', 'Zamzam Rock', 'Hijr Ismail'],
+      correctAnswer: 'Al-Hajar al-Aswad (the Black Stone)',
+      explanation: "Al-Hajar al-Aswad (the Black Stone) is set into the Ka'bah's eastern corner. It was a stone from Paradise given to Ibrahim (as) by Angel Jibril." },
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q4', type: 'TRUE_FALSE',
+      questionText: "Hajar's running between Safa and Marwah is commemorated in the Hajj ritual called Sa'i.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Sa'i — walking/running between the hills of Safa and Marwah seven times — is a compulsory act of Hajj and Umrah, commemorating Hajar's search for water." },
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q5', type: 'MULTIPLE_CHOICE',
+      questionText: "What did Ibrahim (as) pray for after building the Ka'bah?",
+      options: ["For riches and a large kingdom", "That Makkah be a city of peace and its people be fed fruits, and that a messenger from among them be raised", "For rain to come to the desert", "That his son become a king"],
+      correctAnswer: "That Makkah be a city of peace and its people be fed fruits, and that a messenger from among them be raised",
+      explanation: "Ibrahim (as) made the dua: 'My Lord, make this a city of peace and provide its people with fruits...' (2:126) and prayed for a messenger from among them." },
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q6', type: 'FILL_BLANK',
+      questionText: "The tribe that settled near the Zamzam well after Hajar's miracle was the tribe of ___.",
+      options: ['Jurhum', 'Quraysh', 'Thaqif', 'Aws'],
+      correctAnswer: 'Jurhum',
+      explanation: "The tribe of Jurhum, who were passing through, saw birds circling overhead (a sign of water) and came to settle near the Zamzam spring." },
+    { unitId: unit9.id, externalId: 'maktab-3-ismail-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "Where did Ibrahim (as) leave Hajar and baby Ismail?",
+      options: ['In Jerusalem', 'In Iraq near his homeland', 'In the valley of Makkah — a barren desert', 'In the town of Taif'],
+      correctAnswer: 'In the valley of Makkah — a barren desert',
+      explanation: "By Allah's command, Ibrahim (as) left Hajar and infant Ismail in the barren, uninhabited valley that would become the sacred city of Makkah." },
+
+    // ── Unit 10: Aqa'id — Prophets & Messengers ──
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "What is the difference between a Nabi and a Rasul?",
+      options: ['There is no difference', 'A Nabi received revelation while a Rasul was sent with a new scripture/message to a people', 'A Rasul is higher than a Nabi', 'A Nabi performed miracles but a Rasul did not'],
+      correctAnswer: 'A Nabi received revelation while a Rasul was sent with a new scripture/message to a people',
+      explanation: "A Nabi is someone who received divine revelation, while a Rasul (Messenger) is specifically sent with a divine book or message to a new people. All Rusul are also Anbiya', but not all Anbiya' are Rusul." },
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "What are the Ulu al-Azm prophets?",
+      options: ['The 5 prophets of greatest resolve and perseverance', 'The last 4 prophets only', 'Prophets who performed miracles', 'All 124,000 prophets'],
+      correctAnswer: 'The 5 prophets of greatest resolve and perseverance',
+      explanation: "Ulu al-Azm ('possessors of strong will') are the five greatest prophets: Muhammad (saw), Ibrahim, Musa, Isa, and Nuh (peace be upon them all)." },
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "Which quality of prophets means they are protected from sins?",
+      options: ["Sidq (truthfulness)", "'Ismah (divine protection from sin)", "Amanah (trustworthiness)", "Fatanah (intelligence)"],
+      correctAnswer: "'Ismah (divine protection from sin)",
+      explanation: "'Ismah means Allah protects the prophets from sinning. This ensures their message is trustworthy and uncorrupted." },
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q4', type: 'TRUE_FALSE',
+      questionText: "It is obligatory for Muslims to believe in all of Allah's prophets.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Belief in all of Allah's prophets is a pillar of Iman. We must believe in all of them, even those whose names are not mentioned in the Quran." },
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q5', type: 'FILL_BLANK',
+      questionText: "Prophets conveying Allah's message to people is the quality called ___.",
+      options: ['Tabligh', 'Sidq', 'Amanah', 'Fatanah'],
+      correctAnswer: 'Tabligh',
+      explanation: "'Tabligh' means conveying — prophets must deliver Allah's message completely without hiding any of it." },
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q6', type: 'MULTIPLE_CHOICE',
+      questionText: "Approximately how many Prophets (Anbiya') came according to scholarly estimates?",
+      options: ['25', '124,000', '313', '100'],
+      correctAnswer: '124,000',
+      explanation: "According to hadith narrated by Abu Dharr (ra), approximately 124,000 prophets were sent to humanity." },
+    { unitId: unit10.id, externalId: 'maktab-3-prophets-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "Which prophet is known as 'Kaliimullah' (one who spoke directly with Allah)?",
+      options: ['Ibrahim (as)', 'Isa (as)', 'Musa (as)', 'Nuh (as)'],
+      correctAnswer: 'Musa (as)',
+      explanation: "Musa (as) is given the title 'Kaliimullah' because Allah spoke to him directly without intermediary." },
+
+    // ── Unit 11: Aqa'id — Signs of the Last Day ──
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "Which of the following is a Major Sign of the Last Day?",
+      options: ['Increase in earthquakes', 'The appearance of Dajjal', 'Loss of religious knowledge', 'Widespread lying'],
+      correctAnswer: 'The appearance of Dajjal',
+      explanation: "Dajjal is one of the Major Signs. Minor signs include earthquakes, loss of knowledge, and moral decline — these happen gradually before the Major Signs." },
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "What is Dajjal?",
+      options: ['A great earthquake', 'A false messiah who will deceive people near the end of time', 'A tribe that will invade', 'An angel of punishment'],
+      correctAnswer: 'A false messiah who will deceive people near the end of time',
+      explanation: "Dajjal (the Antichrist/Deceiver) is a one-eyed man who will claim to be a prophet and even God. He will perform miracles and mislead many people." },
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q3', type: 'TRUE_FALSE',
+      questionText: "Ya'juj and Ma'juj (Gog and Magog) are among the Major Signs of the Last Day.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Ya'juj and Ma'juj are mentioned in the Quran (18:98) and hadith as one of the Major Signs. They will break free and cause great corruption." },
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q4', type: 'MULTIPLE_CHOICE',
+      questionText: "Which prophet will descend from the sky near the end of time?",
+      options: ["Ibrahim (as)", "Idris (as)", "Isa (as)", "Nuh (as)"],
+      correctAnswer: "Isa (as)",
+      explanation: "Prophet Isa (Jesus, peace be upon him) will descend from the sky near Damascus, defeat Dajjal, and lead the believers." },
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q5', type: 'FILL_BLANK',
+      questionText: "One major sign is that the sun will rise from the ___ instead of the east.",
+      options: ['west', 'north', 'south', 'ground'],
+      correctAnswer: 'west',
+      explanation: "The rising of the sun from the west is one of the Major Signs. After this, the door of repentance closes." },
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q6', type: 'MULTIPLE_CHOICE',
+      questionText: "Why is it important for Muslims to know about the Signs of the Last Day?",
+      options: ['To predict exactly when it will happen', 'To be prepared, stay firm in faith, and not be deceived', 'To fear every day', 'To convince non-believers'],
+      correctAnswer: 'To be prepared, stay firm in faith, and not be deceived',
+      explanation: "Knowing the signs helps believers stay firm in faith, recognise trials, and not be deceived by false claims (like Dajjal's miracles)." },
+    { unitId: unit11.id, externalId: 'maktab-3-lastday-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "Which of the following is a Minor Sign of the Last Day?",
+      options: ["Isa (as) descending from the sky", "The sun rising from the west", "Widespread earthquakes and natural disasters", "Ya'juj and Ma'juj being released"],
+      correctAnswer: "Widespread earthquakes and natural disasters",
+      explanation: "Increased earthquakes are among the Minor Signs that occur before the Major Signs. Isa's descent, the sun from the west, and Ya'juj Ma'juj are Major Signs." },
+
+    // ── Unit 12: Akhlaq — Kindness to Parents ──
+    { unitId: unit12.id, externalId: 'maktab-3-parents-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "In Surah al-Isra' (Bani Isra'il), after commanding worship of Allah alone, what does Allah command next?",
+      options: ['To pray five times a day', 'To be kind to parents', 'To fast in Ramadan', 'To give zakah'],
+      correctAnswer: 'To be kind to parents',
+      explanation: "Allah says: 'Your Lord has decreed that you worship none but Him, and that you are kind to parents.' (17:23) — honouring parents comes right after worshipping Allah." },
+    { unitId: unit12.id, externalId: 'maktab-3-parents-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "According to the Quran, what must children NOT say to their parents?",
+      options: ["Ask them questions", "Say 'Uff' (even a slight expression of annoyance)", "Disagree with them on any matter", "Speak before them"],
+      correctAnswer: "Say 'Uff' (even a slight expression of annoyance)",
+      explanation: "Allah commands: 'Do not even say Uff to them.' (17:23) — even the smallest expression of displeasure is forbidden." },
+    { unitId: unit12.id, externalId: 'maktab-3-parents-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "According to the hadith, who has the greatest right over you?",
+      options: ['Your father', 'Your mother', 'Your teacher', 'Allah alone'],
+      correctAnswer: 'Your mother',
+      explanation: "A man asked the Prophet: 'Who deserves most of my good company?' He replied: 'Your mother' three times before saying 'Your father' the fourth time." },
+    { unitId: unit12.id, externalId: 'maktab-3-parents-q4', type: 'TRUE_FALSE',
+      questionText: "Making dua for your parents is an act of worship that continues to benefit them even after they pass away.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "The Prophet said: 'When a person dies, all deeds end except three — sadaqah jariyah, beneficial knowledge, and a righteous child who makes dua for them.'" },
+    { unitId: unit12.id, externalId: 'maktab-3-parents-q5', type: 'FILL_BLANK',
+      questionText: "The Quranic dua for parents is: 'Rabbir hamhuma kama rabbayani ___.'",
+      options: ['saghira', 'kabira', 'muslima', 'karima'],
+      correctAnswer: 'saghira',
+      explanation: "'Rabbir hamhuma kama rabbayani saghira' means 'My Lord, have mercy on them both as they raised me when I was small.' (17:24)" },
+    { unitId: unit12.id, externalId: 'maktab-3-parents-q6', type: 'MULTIPLE_CHOICE',
+      questionText: "What should a child do when their parents ask them to stop doing something permissible?",
+      options: ['Always ignore them — only Allah commands', 'Listen and obey (unless it is clearly sinful)', 'Do it anyway but apologise after', 'Ask for a reason first, then decide'],
+      correctAnswer: 'Listen and obey (unless it is clearly sinful)',
+      explanation: "Islam teaches obedience to parents in all permissible matters. The exception is if they command actual sin (like lying or shirk)." },
+
+    // ── Unit 13: Akhlaq — Sharing & Truthfulness ──
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "Complete the hadith: 'The best of you are those who ___ others.'",
+      options: ['pray more than', 'benefit', 'correct', 'impress'],
+      correctAnswer: 'benefit',
+      explanation: "'The best of you are those who benefit others.' — encouraging Muslims to be of service and generosity to others." },
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q2', type: 'TRUE_FALSE',
+      questionText: "According to the hadith, a lie leads to another lie until a person is recorded as a liar with Allah.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "'Truthfulness leads to righteousness... and lying leads to wickedness... until a person is recorded as a liar with Allah.' (Bukhari & Muslim)" },
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "What does the Islamic principle 'Say good or remain silent' mean in practice?",
+      options: ['Never speak unless spoken to', 'Before speaking, consider: is this true, is it kind, is it necessary?', 'Speak only about religious topics', 'Silence is always better than speaking'],
+      correctAnswer: 'Before speaking, consider: is this true, is it kind, is it necessary?',
+      explanation: "'Whoever believes in Allah and the Last Day, let him say good or remain silent.' (Bukhari & Muslim) — every word should be meaningful, truthful and beneficial." },
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q4', type: 'MULTIPLE_CHOICE',
+      questionText: "Which of the following is an example of generosity mentioned in Islamic teachings?",
+      options: ['Hoarding food for emergencies', 'Sharing food with a hungry neighbour', 'Spending only when it benefits you', 'Giving gifts only to family'],
+      correctAnswer: 'Sharing food with a hungry neighbour',
+      explanation: "The Prophet said no Muslim should sleep full while their neighbour is hungry. Sharing food, time, and help is a core Islamic value." },
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q5', type: 'FILL_BLANK',
+      questionText: "The Prophet said: 'Truthfulness leads to righteousness, and righteousness leads to ___.'",
+      options: ['Jannah', 'wealth', 'knowledge', 'health'],
+      correctAnswer: 'Jannah',
+      explanation: "'Truthfulness leads to righteousness, and righteousness leads to Jannah.' — the path from truth to Paradise." },
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q6', type: 'TRUE_FALSE',
+      questionText: "In Islam, generosity (karam) applies only to sharing material things like food and money.",
+      options: ['True', 'False'], correctAnswer: 'False',
+      explanation: "Islamic generosity includes time, attention, smiling, giving advice, making dua for others, and sharing knowledge — not just material possessions." },
+    { unitId: unit13.id, externalId: 'maktab-3-sharing-q7', type: 'MULTIPLE_CHOICE',
+      questionText: "Why is lying prohibited in Islam?",
+      options: ['Because it looks bad in front of others', 'Because it destroys trust and leads to sin, and the liar is recorded as a liar with Allah', 'Because it upsets people', 'Because honest people earn more money'],
+      correctAnswer: 'Because it destroys trust and leads to sin, and the liar is recorded as a liar with Allah',
+      explanation: "Lying destroys trust, leads to more sin, and spiritually harms the liar. The hadith warns that lying leads to wickedness and eventually the person becomes a confirmed liar." },
+
+    // ── Unit 14: Adab — Quran & Masjid ──
+    { unitId: unit14.id, externalId: 'maktab-3-quranmasjid-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "Do you need wudu' to touch the physical Quran?",
+      options: ["No, it is just a book", "Yes, it is required according to the majority of scholars", "Only for adults", "Only if you are reading from it"],
+      correctAnswer: "Yes, it is required according to the majority of scholars",
+      explanation: "The majority of scholars hold that wudu' is required to touch the physical mushaf (Quran). The verse 'None shall touch it but the purified' (56:79) supports this." },
+    { unitId: unit14.id, externalId: 'maktab-3-quranmasjid-q2', type: 'TRUE_FALSE',
+      questionText: "When entering the masjid, you should enter with your right foot first.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "The Sunnah is to enter the masjid with the right foot, saying the dua: 'Allahumma ftah li abwaba rahmatik.'" },
+    { unitId: unit14.id, externalId: 'maktab-3-quranmasjid-q3', type: 'MULTIPLE_CHOICE',
+      questionText: "Before starting to recite the Quran, what should you say first?",
+      options: ["Bismillah only", "A'udhu billahi min al-shaytan al-rajim (ta'awwudh), then Bismillah", "Alhamdulillah", "La hawla wa la quwwata illa billah"],
+      correctAnswer: "A'udhu billahi min al-shaytan al-rajim (ta'awwudh), then Bismillah",
+      explanation: "The Quran commands: 'When you recite the Quran, seek refuge with Allah from Shaytan.' (16:98) — ta'awwudh comes before Bismillah." },
+    { unitId: unit14.id, externalId: 'maktab-3-quranmasjid-q4', type: 'MULTIPLE_CHOICE',
+      questionText: "When leaving the masjid, which foot goes first?",
+      options: ['Right foot', 'Left foot', 'Either foot — no sunnah for leaving', 'The foot nearest to the door'],
+      correctAnswer: 'Left foot',
+      explanation: "The sunnah when leaving the masjid is to step out with the left foot first, while reciting the leaving dua." },
+    { unitId: unit14.id, externalId: 'maktab-3-quranmasjid-q5', type: 'TRUE_FALSE',
+      questionText: "It is disrespectful to place the Quran on the floor or point your feet toward it.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "The Quran must be treated with utmost respect. It should never be placed on the floor, and we should never point our feet in its direction." },
+    { unitId: unit14.id, externalId: 'maktab-3-quranmasjid-q6', type: 'FILL_BLANK',
+      questionText: "The dua when entering the masjid begins: 'Allahumma ftah li abwaba ___.'",
+      options: ['rahmatik', 'barakatik', 'jannati', 'rizqik'],
+      correctAnswer: 'rahmatik',
+      explanation: "The full dua is: 'Allahumma ftah li abwaba rahmatik' — 'O Allah, open for me the gates of Your mercy.'" },
+
+    // ── Unit 15: Adab — Travelling ──
+    { unitId: unit15.id, externalId: 'maktab-3-travel-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "What is the dua said before beginning a journey?",
+      options: ["Bismillah al-Rahman al-Rahim", "Subhanallad-hi sakh-khara lana hadha wa ma kunna lahu muqrinin", "La hawla wa la quwwata illa billah", "Allahumma barik lana"],
+      correctAnswer: "Subhanallad-hi sakh-khara lana hadha wa ma kunna lahu muqrinin",
+      explanation: "The dua al-safar begins: 'Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin' — 'Glory to He who subjugated this for us...'" },
+    { unitId: unit15.id, externalId: 'maktab-3-travel-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "When travelling, how many rak'at is Dhuhr, Asr and Isha' shortened to?",
+      options: ['Four rak\'at each', 'Two rak\'at each', 'Three rak\'at each', 'One rak\'at each'],
+      correctAnswer: 'Two rak\'at each',
+      explanation: "During travel (qasr), prayers of 4 rak'at — Dhuhr, Asr, and Isha' — are shortened to 2 rak'at. Fajr (2) and Maghrib (3) remain unchanged." },
+    { unitId: unit15.id, externalId: 'maktab-3-travel-q3', type: 'TRUE_FALSE',
+      questionText: "According to the Sunnah, it is recommended to visit the masjid and pray upon returning from a journey.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Ka'b ibn Malik (ra) narrated that the Prophet, whenever he returned from a journey, would go to the masjid first and pray two rak'at of gratitude." },
+    { unitId: unit15.id, externalId: 'maktab-3-travel-q4', type: 'MULTIPLE_CHOICE',
+      questionText: "What should you do before leaving on a journey according to the Sunnah?",
+      options: ['Just say Bismillah at the door', 'Say the dua of travel, say a proper farewell to family', 'Pray tahajjud the night before', 'Make ghusl'],
+      correctAnswer: 'Say the dua of travel, say a proper farewell to family',
+      explanation: "The Sunnah includes reciting the dua al-safar (travel dua) and properly saying goodbye to family and loved ones before departing." },
+    { unitId: unit15.id, externalId: 'maktab-3-travel-q5', type: 'FILL_BLANK',
+      questionText: "The shortening of prayers during travel is called ___.",
+      options: ['Qasr', 'Jam', 'Tayammum', 'Rukhsah'],
+      correctAnswer: 'Qasr',
+      explanation: "Qasr means 'shortening' — a traveller shortens 4-rak'at prayers to 2. It is a mercy (rukhsah) from Allah for travellers." },
+    { unitId: unit15.id, externalId: 'maktab-3-travel-q6', type: 'MULTIPLE_CHOICE',
+      questionText: "What should you say when mounting a vehicle or riding animal to begin travel?",
+      options: ['Allahu Akbar', 'Bismillah', 'Alhamdulillah', 'Subhanallah'],
+      correctAnswer: 'Bismillah',
+      explanation: "Say 'Bismillah' first when mounting, then recite the full dua al-safar: 'Subhanal-ladhi sakhkhara lana hadha...'" },
+
+    // ── Unit 16: Adab — Studying & Walking ──
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q1', type: 'MULTIPLE_CHOICE',
+      questionText: "What is the dua for increase in knowledge from the Quran?",
+      options: ["Rabbi zidni 'ilma", "Rabbighfir li wa li walidayya", "Rabbi inni lima anzalta ilayya min khayrin faqir", "Rabbi la tadharni fardan"],
+      correctAnswer: "Rabbi zidni 'ilma",
+      explanation: "The Quranic dua is: 'Rabbi zidni 'ilma' — 'My Lord, increase me in knowledge.' (Surah Ta-Ha, 20:114)" },
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q2', type: 'MULTIPLE_CHOICE',
+      questionText: "How should a student sit with their teacher?",
+      options: ['Lying down comfortably', 'With respect and attentiveness, not interrupting', 'Doing other tasks to save time', 'Correcting the teacher if wrong'],
+      correctAnswer: 'With respect and attentiveness, not interrupting',
+      explanation: "Islamic etiquette with teachers includes sitting respectfully, listening attentively, not interrupting, not looking bored, and acting on the knowledge learned." },
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q3', type: 'TRUE_FALSE',
+      questionText: "Walking arrogantly is mentioned in the Quran as something Allah dislikes.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "'Do not walk on the earth arrogantly, for you will never be able to split the earth nor reach the mountains in height.' (Quran 17:37)" },
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q4', type: 'MULTIPLE_CHOICE',
+      questionText: "Why should you not walk between someone who is praying salah and their sutrah (prayer barrier)?",
+      options: ['It is unhygienic', 'It interrupts their concentration and is a major sin in some opinions', 'It wakes them up', 'The imam will tell you off'],
+      correctAnswer: 'It interrupts their concentration and is a major sin in some opinions',
+      explanation: "The Prophet said: 'If the person walking in front of the one praying knew the weight of that sin, it would be better for him to wait 40 (days/months/years) than to pass in front.' (Bukhari & Muslim)" },
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q5', type: 'FILL_BLANK',
+      questionText: "The Quran tells us to walk on earth with ___ (humility and gentleness).",
+      options: ['humility', 'speed', 'confidence', 'silence'],
+      correctAnswer: 'humility',
+      explanation: "'The servants of the Most Merciful are those who walk on earth humbly...' (Quran 25:63) — a believer's walk reflects their character." },
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q6', type: 'MULTIPLE_CHOICE',
+      questionText: "What does seeking knowledge (talab al-'ilm) lead to according to the hadith?",
+      options: ['A path to wealth', 'A path to Jannah', 'A path to leadership', 'A path to fame'],
+      correctAnswer: 'A path to Jannah',
+      explanation: "'Whoever treads a path seeking knowledge, Allah will make easy for him a path to Paradise.' (Muslim)" },
+    { unitId: unit16.id, externalId: 'maktab-3-studywalk-q7', type: 'TRUE_FALSE',
+      questionText: "According to the Sunnah, a student should act on knowledge learned, not just memorise it.",
+      options: ['True', 'False'], correctAnswer: 'True',
+      explanation: "Knowledge without action is condemned in Islamic tradition. The Prophet warned against knowledge that does not benefit its possessor by changing their character and deeds." },
+  ];
+
+  // ══════════════════════════════════════════════
+  // UPSERT QUIZ QUESTIONS
+  // ══════════════════════════════════════════════
+
+  for (const q of quizData) {
+    await prisma.question.upsert({
+      where: { externalId: q.externalId },
+      create: {
+        externalId: q.externalId,
+        unitId: q.unitId,
+        type: q.type as 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK',
+        questionText: q.questionText,
+        options: JSON.stringify(q.options),
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      },
+      update: {
+        unitId: q.unitId,
+        type: q.type as 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK',
+        questionText: q.questionText,
+        options: JSON.stringify(q.options),
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      },
+    });
+  }
+
+  console.log(`✅ Upserted ${quizData.length} quiz questions`);
+
+  // ══════════════════════════════════════════════
+  // FLASHCARDS (20-25 total)
+  // ══════════════════════════════════════════════
+
+  const flashcardData = [
+    { unitId: unit1.id, front: 'Taharah', back: 'Purity — removing physical and spiritual impurities according to Islamic law' },
+    { unitId: unit1.id, front: 'Najasah Ghalizah', back: 'Heavy impurity (e.g., human urine, blood, stool) — invalidates salah if more than a dirham' },
+    { unitId: unit1.id, front: 'Najasah Khafifah', back: 'Light impurity (e.g., urine of halal animals) — only affects salah if it covers more than a quarter of the area' },
+    { unitId: unit2.id, front: "Fara'id of Ghusl", back: 'Three obligatory acts of ghusl: (1) rinsing the mouth, (2) rinsing the nose, (3) washing the entire body' },
+    { unitId: unit2.id, front: 'Janabah', back: 'Major ritual impurity requiring ghusl — occurs after marital relations or wet dream' },
+    { unitId: unit3.id, front: 'Takbir al-Tahrimah', back: "The opening 'Allahu Akbar' that begins salah — a fard of salah" },
+    { unitId: unit3.id, front: "Qa'dah al-Akhirah", back: 'The final sitting in salah where at-Tashahhud is recited — a fard of salah' },
+    { unitId: unit4.id, front: 'Rahmah', back: "Mercy and compassion — a core attribute of Allah and a quality believers must show to all of Allah's creation" },
+    { unitId: unit5.id, front: "Haya'", back: 'Modesty and bashfulness — a branch of faith (Iman); the Prophet said haya\' brings nothing but good' },
+    { unitId: unit5.id, front: 'Dunya', back: 'This world — described in hadith as temporary like the shade of a tree; a place of passage, not destination' },
+    { unitId: unit6.id, front: 'Hijrah', back: 'Migration in the way of Allah — the first hijrah was to Abyssinia (615 CE); the second was to Madinah (622 CE)' },
+    { unitId: unit6.id, front: 'Najashi', back: "The just Christian King of Abyssinia (Ashama ibn Abjar) who gave protection to the early Muslim migrants" },
+    { unitId: unit7.id, front: "Al-Isra'", back: 'The miraculous night journey of the Prophet from Masjid al-Haram (Makkah) to Masjid al-Aqsa (Jerusalem)' },
+    { unitId: unit7.id, front: "Al-Mi'raj", back: 'The ascension of the Prophet through the seven heavens after al-Isra\' — where the five daily prayers were gifted' },
+    { unitId: unit8.id, front: 'Khalilullah', back: "Friend of Allah — the special title of Prophet Ibrahim (as)" },
+    { unitId: unit9.id, front: 'Zamzam', back: "The miraculous well in Makkah that appeared for Hajar and baby Ismail (as) — still flowing today" },
+    { unitId: unit10.id, front: "Ulu al-Azm", back: "The five prophets of greatest resolve: Muhammad (saw), Ibrahim, Musa, Isa, and Nuh (peace be upon them all)" },
+    { unitId: unit10.id, front: "'Ismah", back: "Divine protection of prophets from sin — ensures Allah's message is delivered without corruption" },
+    { unitId: unit11.id, front: 'Dajjal', back: 'The false messiah (Antichrist) — a Major Sign of the Last Day; he will have one eye and claim to be divine' },
+    { unitId: unit12.id, front: "Birr al-Walidayn", back: 'Dutifulness and kindness to parents — mentioned alongside worship of Allah alone in Surah al-Isra\'' },
+    { unitId: unit13.id, front: 'Sidq', back: 'Truthfulness — a quality of prophets and believers; the hadith says it leads to righteousness then Jannah' },
+    { unitId: unit14.id, front: "Ta'awwudh", back: "A'udhu billahi min al-shaytan al-rajim — seeking refuge with Allah from Shaytan before reciting the Quran" },
+    { unitId: unit15.id, front: 'Qasr', back: "Shortening of salah during travel — 4-rak'at prayers (Dhuhr, 'Asr, Isha') become 2 rak'at" },
+    { unitId: unit16.id, front: "Talab al-'Ilm", back: "Seeking knowledge — the Prophet said whoever treads this path, Allah makes easy for him a path to Jannah" },
+  ];
+
+  // Delete flashcards for this course, then recreate
+  await prisma.flashCard.deleteMany({ where: { courseId: course.id } });
+
+  const allUnitIds = [
+    unit1.id, unit2.id, unit3.id, unit4.id, unit5.id, unit6.id, unit7.id, unit8.id,
+    unit9.id, unit10.id, unit11.id, unit12.id, unit13.id, unit14.id, unit15.id, unit16.id,
+  ];
+
+  let flashCardIndex = 1;
+  for (const card of flashcardData) {
+    await prisma.flashCard.create({
+      data: {
+        courseId: course.id,
+        unitId: card.unitId,
+        front: card.front,
+        back: card.back,
+        category: 'Vocabulary',
+        tags: ['maktab-3'],
+        orderIndex: flashCardIndex++,
+      },
+    });
+  }
+
+  console.log(`✅ Created ${flashcardData.length} flashcards`);
+
+  // ══════════════════════════════════════════════
+  // ARABIC TERMS (12-18 total)
+  // ══════════════════════════════════════════════
+
+  const arabicTermsData = [
+    { unitId: unit1.id, arabicText: 'طَهَارَة', transliteration: 'Taharah', translation: 'Purity — the state of physical and spiritual cleanliness required for acts of worship' },
+    { unitId: unit1.id, arabicText: 'نَجَاسَة', transliteration: 'Najasah', translation: 'Impurity — substances that must be removed from body, clothing and place of prayer' },
+    { unitId: unit2.id, arabicText: 'غُسْل', transliteration: 'Ghusl', translation: 'Full ritual bath — obligatory in certain circumstances (janabah, end of hayd/nifas, death)' },
+    { unitId: unit3.id, arabicText: 'صَلَاة', transliteration: 'Salah', translation: 'Prayer — the second pillar of Islam, performed five times daily' },
+    { unitId: unit3.id, arabicText: 'تَكْبِيرَةُ الإِحْرَام', transliteration: 'Takbirat al-Ihram', translation: "Opening Allahu Akbar of salah — the saying that makes the prayer binding" },
+    { unitId: unit5.id, arabicText: 'حَيَاء', transliteration: "Haya'", translation: 'Modesty — a branch of faith; shyness and moral self-restraint that keeps a person from sin' },
+    { unitId: unit6.id, arabicText: 'هِجْرَة', transliteration: 'Hijrah', translation: "Migration in the way of Allah — from Makkah to Abyssinia (615 CE) and later to Madinah (622 CE)" },
+    { unitId: unit7.id, arabicText: 'الإِسْرَاء وَالمِعْرَاج', transliteration: "Al-Isra' wal-Mi'raj", translation: "The Night Journey (from Makkah to Jerusalem) and the Ascension (through the heavens)" },
+    { unitId: unit8.id, arabicText: 'خَلِيلُ اللَّه', transliteration: 'Khalilullah', translation: 'The Friend of Allah — honourable title of Prophet Ibrahim (as)' },
+    { unitId: unit9.id, arabicText: 'زَمْزَم', transliteration: 'Zamzam', translation: "Sacred well in Makkah that appeared miraculously for Hajar and Ismail (as)" },
+    { unitId: unit10.id, arabicText: 'أُولُو العَزْم', transliteration: "Ulu al-'Azm", translation: "Prophets of greatest resolve — the five: Muhammad, Ibrahim, Musa, Isa, and Nuh (peace be upon them)" },
+    { unitId: unit10.id, arabicText: 'عِصْمَة', transliteration: "'Ismah", translation: "Divine protection of prophets from sin — ensures the message of Allah reaches humanity uncorrupted" },
+    { unitId: unit11.id, arabicText: 'الدَّجَّال', transliteration: 'al-Dajjal', translation: 'The False Messiah (Antichrist) — a Major Sign of the Last Day; will try to deceive the world' },
+    { unitId: unit12.id, arabicText: 'بِرُّ الوَالِدَيْن', transliteration: 'Birr al-Walidayn', translation: "Kindness and dutifulness to parents — commanded by Allah right after worshipping Him alone" },
+    { unitId: unit15.id, arabicText: 'قَصْر', transliteration: 'Qasr', translation: "Shortening of salah during travel — 4-rak'at prayers become 2; a mercy (rukhsah) from Allah" },
+    { unitId: unit16.id, arabicText: 'طَلَبُ العِلْم', transliteration: "Talab al-'Ilm", translation: "Seeking knowledge — the Prophet said whoever walks this path, Allah eases a path to Jannah for them" },
+  ];
+
+  // Delete existing Arabic terms for each unit, then create new ones
+  for (const unitId of allUnitIds) {
+    await prisma.arabicTerm.deleteMany({ where: { unitId } });
+  }
+
+  for (const term of arabicTermsData) {
+    await prisma.arabicTerm.create({
+      data: {
+        unitId: term.unitId,
+        arabicText: term.arabicText,
+        transliteration: term.transliteration,
+        translation: term.translation,
+      },
+    });
+  }
+
+  console.log(`✅ Created ${arabicTermsData.length} Arabic terms`);
 
   // ══════════════════════════════════════════════
   // SUMMARY
   // ══════════════════════════════════════════════
 
-  console.log('');
-  console.log('🎉 Maktab Coursebook 3 seed completed!');
-  console.log('');
-  console.log('📊 Summary:');
-  console.log('   - 1 Course: Maktab Coursebook 3 (ages 8-9)');
-  console.log('   - 7 Units: Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā\'id, Akhlāq, Ādāb');
-  console.log(`   - ${7 + 6 + 6 + 6 + 5 + 6 + 5} Quiz questions (41 total)`);
-  console.log(`   - ${flashcardIndex} Flashcards`);
-  console.log(`   - 30 Arabic terms`);
+  console.log('\n🎉 Maktab Coursebook 3 seed complete!');
+  console.log(`   📚 Course: ${course.title}`);
+  console.log('   📖 Units: 16');
+  console.log(`   ❓ Questions: ${quizData.length}`);
+  console.log(`   🃏 Flashcards: ${flashcardData.length}`);
+  console.log(`   🔤 Arabic Terms: ${arabicTermsData.length}`);
 }
 
-// Allow standalone execution
 async function main() {
+  const prisma = new PrismaClient();
   try {
-    await seedMaktabCoursebook3();
-    console.log('');
-    console.log('✨ Seed completed successfully!');
-  } catch (error) {
-    console.error('❌ Error seeding Maktab Coursebook 3:', error);
-    throw error;
+    await seedMaktabCoursebook3(prisma);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 if (require.main === module) {
-  main()
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    })
-    .finally(async () => {
-      await prisma.$disconnect();
-    });
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 }
