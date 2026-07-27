@@ -136,6 +136,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-fiqh-wudu',
       courseId: course.id,
+      orderIndex: 1,
       title: 'Fiqh — Wuḍū\': Farā\'iḍ, Sunan, Makrūhāt & Nawāqiḍ',
       description: 'The four obligatory acts (farā\'iḍ) of wuḍū\', the recommended acts (sunan), the disliked acts (makrūhāt), and the things that nullify wuḍū\' (nawāqiḍ).',
       content: wuduContent,
@@ -184,6 +185,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-fiqh-tayammum',
       courseId: course.id,
+      orderIndex: 2,
       title: 'Fiqh — Tayammum: When, How & What Breaks It',
       description: 'When tayammum (dry ablution) is permissible, how to perform it correctly using clean earth or dust, and what nullifies it.',
       content: tayammumContent,
@@ -257,6 +259,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-fiqh-salah',
       courseId: course.id,
+      orderIndex: 3,
       title: 'Fiqh — Advanced Ṣalāh: Sunan, Masbūq, Qaḍā\' & \'Īd',
       description: 'The sunan and mustaḥabbāt of ṣalāh, rules for the masbūq (latecomer), making up missed prayers (qaḍā\'), and the method of \'Īd ṣalāh.',
       content: salahContent,
@@ -332,6 +335,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-fiqh-hajj',
       courseId: course.id,
+      orderIndex: 4,
       title: 'Fiqh — \'Umrah, Ḥajj & Ziyārah of Madīnah',
       description: 'The lesser pilgrimage (\'umrah): iḥrām, ṭawāf, sa\'ī, ḥalq/qaṣr. The greater pilgrimage (ḥajj): the days of Minā, \'Arafah, Muzdalifah, and Makkah. Visiting Madīnah al-Munawwarah.',
       content: hajjContent,
@@ -376,6 +380,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-ahadith-munafiq',
       courseId: course.id,
+      orderIndex: 5,
       title: 'Aḥādīth — Signs of the Munāfiq & Keeping Promises',
       description: 'The ḥadīth on the three signs of a hypocrite (munāfiq): lying when speaking, breaking promises, and betraying trusts. Lessons on truthfulness and amānah.',
       content: munafiqContent,
@@ -433,6 +438,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-ahadith-tongue',
       courseId: course.id,
+      orderIndex: 6,
       title: 'Aḥādīth — The Tongue, Ghībah & Social Speech',
       description: 'Six aḥādīth on guarding the tongue, the sin of ghībah (backbiting), not harming neighbours, speaking good or staying silent, avoiding suspicion, and the true Muslim.',
       content: tongueContent,
@@ -481,6 +487,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-ahadith-intoxicants',
       courseId: course.id,
+      orderIndex: 7,
       title: 'Aḥādīth — Prohibition of Intoxicants (Khamr)',
       description: 'The ḥadīth declaring every intoxicant to be khamr and ḥarām. Understanding why all intoxicants are forbidden regardless of quantity.',
       content: intoxicantsContent,
@@ -531,6 +538,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-ahadith-character',
       courseId: course.id,
+      orderIndex: 8,
       title: 'Aḥādīth — Good Character (Ḥusn al-Khuluq)',
       description: 'Two aḥādīth on the link between faith and good character — "the most complete in faith is the best in character" — and what constitutes excellent Islamic conduct.',
       content: characterContent,
@@ -589,6 +597,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-sirah-hudaybiyah',
       courseId: course.id,
+      orderIndex: 9,
       title: 'Sīrah — Treaty of Ḥudaybiyah (6 AH)',
       description: 'The journey for \'umrah in 6 AH, the Bay\'ah al-Riḍwān (pledge under the tree), the terms of the Treaty of Ḥudaybiyah, and its wisdom as a "clear victory."',
       content: hudaybiyahContent,
@@ -638,6 +647,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-sirah-fath',
       courseId: course.id,
+      orderIndex: 10,
       title: 'Sīrah — Conquest of Makkah (8 AH)',
       description: 'The march to Makkah with 10,000 Muslims in 8 AH, the peaceful entry, the forgiveness of the Quraysh ("Go, you are all free"), and the destruction of the idols.',
       content: fathContent,
@@ -687,6 +697,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-sirah-farewell',
       courseId: course.id,
+      orderIndex: 11,
       title: 'Sīrah — Farewell Ḥajj & Sermon (10 AH)',
       description: 'The Farewell Ḥajj with 100,000+ Companions in 10 AH, the key messages of the Khuṭbah al-Wadā\' (Farewell Sermon) at \'Arafah, and the completion of the dīn.',
       content: farewellContent,
@@ -740,6 +751,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-tarikh-musa',
       courseId: course.id,
+      orderIndex: 12,
       title: 'Tārīkh — Mūsā \'alayhi al-salām',
       description: 'The life of Mūsā عليه السلام: birth, the burning bush at Ṭūr Sīnā, miracles (staff and glowing hand), confronting Fir\'awn, the parting of the sea, and the Exodus.',
       content: musaContent,
@@ -793,6 +805,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-tarikh-isa',
       courseId: course.id,
+      orderIndex: 13,
       title: 'Tārīkh — \'Īsā \'alayhi al-salām',
       description: 'The story of \'Īsā عليه السلام: miraculous birth to Maryam, his miracles (cradle speech, healing, raising dead), his disciples, his ascension, and his second coming.',
       content: isaContent,
@@ -843,6 +856,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-aqaid-death-grave',
       courseId: course.id,
+      orderIndex: 14,
       title: 'Aqā\'id — Death & the Grave (Barzakh)',
       description: 'Islamic beliefs about death (sakrāt al-mawt), the angel of death, burial rites, the life of the grave (barzakh), questioning by Munkar and Nakīr, and reward or punishment in the grave.',
       content: deathGraveContent,
@@ -896,6 +910,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-aqaid-jannah',
       courseId: course.id,
+      orderIndex: 15,
       title: 'Aqā\'id — Jannah, Jahannam & A\'rāf',
       description: 'Beliefs about Yawm al-Qiyāmah: the Mīzān, al-Ṣirāṭ, A\'rāf, the descriptions of Jannah (Paradise) and Jahannam (Hell), their gates, and who shall dwell in each.',
       content: jannahContent,
@@ -940,6 +955,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-aqaid-qadr',
       courseId: course.id,
+      orderIndex: 16,
       title: 'Aqā\'id — Al-Qadr (Divine Decree)',
       description: 'The sixth pillar of Īmān: al-Qadr. Its four aspects (Ilm, Kitābah, Mashī\'ah, Khalq), human free will, Laylat al-Qadr, and the du\'ā\' for the Night of Power.',
       content: qadrContent,
@@ -991,6 +1007,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-akhlaq-mashwarah',
       courseId: course.id,
+      orderIndex: 17,
       title: 'Akhlāq — Mashwarah & Ṣabr',
       description: 'The virtue of seeking counsel (mashwarah) as a Qur\'ānic command and Prophetic sunnah, and the three types of patience (ṣabr) with their rewards.',
       content: mashwarahContent,
@@ -1036,6 +1053,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-akhlaq-silah',
       courseId: course.id,
+      orderIndex: 18,
       title: 'Akhlāq — Keeping Ties & Gifts',
       description: 'Ṣilah al-raḥim (maintaining family ties) as a Qur\'ānic and Prophetic duty, and the sunnah of gift-giving (hadiyyah) with its etiquettes.',
       content: silahContent,
@@ -1087,6 +1105,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-akhlaq-dhikr',
       courseId: course.id,
+      orderIndex: 19,
       title: 'Akhlāq — Dhikr, Shukr & Tawbah',
       description: 'The remembrance of Allāh (dhikr) and its effect on the heart, gratitude (shukr) in heart, tongue, and action, and the conditions of sincere repentance (tawbah).',
       content: dhikrContent,
@@ -1158,6 +1177,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-adab-ghusl',
       courseId: course.id,
+      orderIndex: 20,
       title: 'Ādāb — Ghusl & Miswāk',
       description: 'When ghusl is obligatory and when it is sunnah, the step-by-step method of ghusl, and the Islamic etiquette of using the miswāk with its benefits.',
       content: ghusContent,
@@ -1210,6 +1230,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-adab-social',
       courseId: course.id,
+      orderIndex: 21,
       title: 'Ādāb — Social Interaction & Writing',
       description: 'Islamic etiquettes of salām, seeking permission to enter homes (istidhan), using Bismillāh in daily life, and the Islamic ādāb of letter-writing and correspondence.',
       content: socialContent,
@@ -1259,6 +1280,7 @@ export async function seedMaktabCoursebook5() {
     create: {
       slug: 'maktab-5-adab-sick',
       courseId: course.id,
+      orderIndex: 22,
       title: 'Ādāb — Visiting the Sick',
       description: 'The Islamic duty of visiting the sick (iyyādah al-marīḍ): its reward, etiquettes, the Prophetic du\'ā\'s for the sick, and the spiritual reward for the patient.',
       content: sickContent,
