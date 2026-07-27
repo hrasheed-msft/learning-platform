@@ -3,2338 +3,2019 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 /**
- * Maktab Coursebook 8 — Islamic Curriculum Seed
+ * Maktab Coursebook 8 — Islamic Curriculum Seed (Restructured)
  * Source: An Nasihah Publications, Age Range: 13–14 years
  *
- * Covers seven subjects: Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā'id, Akhlāq, Ādāb
- * Each subject becomes a Unit; lessons are embedded as rich HTML content.
- * Includes quiz questions and flashcards per unit.
- *
- * Can be run independently: npx ts-node prisma/seed-maktab-coursebook8.ts
+ * 15 focused units — each covering exactly ONE main topic.
  */
 
 export async function seedMaktabCoursebook8() {
-  console.log('📚 Starting Maktab Coursebook 8 seed...');
+  console.log('✅ Starting Maktab Coursebook 8 seed...');
   console.log('');
 
-  // Require demo family from main seed
   const demoFamily = await prisma.family.findFirst({
     where: { name: 'Ahmad Family' },
   });
-
   if (!demoFamily) {
     console.log('⚠️  Demo family not found. Please run main seed first.');
     return;
   }
-
   console.log('✅ Found demo family:', demoFamily.name);
 
-  // ──────────────────────────────────────────────
-  // COURSE
-  // ──────────────────────────────────────────────
-
-    const course = await prisma.course.upsert({
+  // ── COURSE ──
+  const course = await prisma.course.upsert({
     where: { slug: 'maktab-coursebook-8' },
     create: {
       slug: 'maktab-coursebook-8',
-      title: 'An Nasihah Coursebook 8',
-      description: 'A comprehensive Islamic curriculum for teenagers aged 13–14, covering advanced fiqh (nawāfil ṣalāh, nikāḥ, ṭalāq, Islamic transactions, ribā, gambling, schools of fiqh), nine essential aḥādīth on character and worship, sīrah of Rasūlullāh ﷺ (shamā\'il) and the lives of \'Uthmān and \'Alī رضي الله عنهما, Islamic history (Ayyūb عليه السلام, Andalusia, the Crusades, the Ottomans), aqā\'id (attributes of Allāh, istiwā\', īmān, consulting the \'ulamā\'), akhlāq (taqwā, tawakkul, tawbah, modesty in gaze), and ādāb (debates, nikāḥ etiquette, transactions). Based on the An Nasihah Publications coursebook series.',
+      title: 'Maktab Coursebook 8',
+      description: 'A comprehensive Islamic curriculum for teenagers aged 13–14, covering nawāfil ṣalāh, nikāḥ, ṭalāq, Islamic transactions, ribā, aḥādīth on worship and character, sīrah (shamā\'il, \'Uthmān and \'Alī), Islamic history (Ayyūb, Andalusia, Crusades, Ottomans), aqā\'id (attributes of Allāh, complete īmān), akhlāq (taqwā, tawakkul, tawbah) and ādāb (modesty, debate, transactions). Based on the An Nasihah Publications coursebook series.',
       category: 'FIQH',
       ageLevels: ['PRE_TEEN', 'TEEN'],
       isPublished: true,
     },
     update: {
-      title: 'An Nasihah Coursebook 8',
-      description: 'A comprehensive Islamic curriculum for teenagers aged 13–14, covering advanced fiqh (nawāfil ṣalāh, nikāḥ, ṭalāq, Islamic transactions, ribā, gambling, schools of fiqh), nine essential aḥādīth on character and worship, sīrah of Rasūlullāh ﷺ (shamā\'il) and the lives of \'Uthmān and \'Alī رضي الله عنهما, Islamic history (Ayyūb عليه السلام, Andalusia, the Crusades, the Ottomans), aqā\'id (attributes of Allāh, istiwā\', īmān, consulting the \'ulamā\'), akhlāq (taqwā, tawakkul, tawbah, modesty in gaze), and ādāb (debates, nikāḥ etiquette, transactions). Based on the An Nasihah Publications coursebook series.',
+      title: 'Maktab Coursebook 8',
+      description: 'A comprehensive Islamic curriculum for teenagers aged 13–14, covering nawāfil ṣalāh, nikāḥ, ṭalāq, Islamic transactions, ribā, aḥādīth on worship and character, sīrah (shamā\'il, \'Uthmān and \'Alī), Islamic history (Ayyūb, Andalusia, Crusades, Ottomans), aqā\'id (attributes of Allāh, complete īmān), akhlāq (taqwā, tawakkul, tawbah) and ādāb (modesty, debate, transactions). Based on the An Nasihah Publications coursebook series.',
       category: 'FIQH',
       ageLevels: ['PRE_TEEN', 'TEEN'],
       isPublished: true,
     },
   });
-
   console.log('✅ Created course:', course.title);
 
-  // ──────────────────────────────────────────────
-  // UNIT 1: FIQH
-  // ──────────────────────────────────────────────
+  // ── CLEANUP old 7-unit slugs ──
+  const oldSlugs = [
+    'maktab-8-fiqh', 'maktab-8-ahadith', 'maktab-8-sirah',
+    'maktab-8-tarikh', 'maktab-8-aqaid', 'maktab-8-akhlaq', 'maktab-8-adab',
+  ];
+  for (const slug of oldSlugs) {
+    const old = await prisma.unit.findFirst({ where: { courseId: course.id, slug } });
+    if (old) {
+      await prisma.question.deleteMany({ where: { unitId: old.id } });
+      await prisma.unitProgress.deleteMany({ where: { unitId: old.id } });
+      await prisma.unit.delete({ where: { id: old.id } });
+    }
+  }
 
-    const unitFiqh = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-fiqh' } },
-    create: {
-      slug: 'maktab-8-fiqh',
-      courseId: course.id,
-      title: 'Fiqh — Nawāfil Ṣalāh, Nikāḥ, Ṭalāq & Islamic Transactions',
-      description: 'Advanced fiqh covering types of nawāfil prayers (Ishrāq, Ḍuḥā, Tahajjud, Taḥiyyatul Wuḍū\', Taḥiyyatul Masjid), khushū\' in ṣalāh, congregational prayer, the rulings of nikāḥ and mahr, ṭalāq and \'iddah, buyū\' (trade), ijārah (employment and leasing), ribā (interest), gambling, and the four schools of fiqh.',
-      orderIndex: 0,
-      content: `
+  // =============================================
+  // UNIT 1: FIQH — Nawāfil Ṣalāh & Khushūʿ
+  // =============================================
+
+  const nawailContent = `
 <h2>Learning Objectives</h2>
 <ul>
-  <li>Distinguish between the different types of nafl ṣalāh, the times they should be performed and their virtues.</li>
-  <li>Explain the significance of nikāḥ: the reasons for marrying and the qualities to look for in a spouse.</li>
-  <li>Recognise what mahr is and the different types of mahr.</li>
-  <li>Describe the different types of ṭalāq and define the rulings for a woman sitting in 'iddah.</li>
-  <li>Summarise the rulings regarding transactions, identifying the conditions and examples for each.</li>
-  <li>Explain the importance of taqlīd and recognise the four imāms.</li>
+  <li>Name the key nawāfil (voluntary) prayers and the correct time to perform each.</li>
+  <li>Explain the virtue of congregational prayer and the reward for performing it.</li>
+  <li>Define khushūʿ and describe practical ways to develop it in ṣalāh.</li>
 </ul>
 
-<h3>Nawāfil Ṣalāh</h3>
-<p>Allāh has made the five daily ṣalāh compulsory upon us. Ṣalāh can be thought of as 'meetings and conversations' with the King of the universe. From among the ways to become closer to Allāh is by performing extra ṣalāh. The Messenger of Allāh ﷺ said:</p>
-<p><em>"Allāh, the Exalted, has said: 'I will declare war against he who harms my pious worshippers. And the most beloved thing by which My slave comes nearer to Me, is what I have made compulsory upon him; and My slave keeps on coming closer to Me by performing nawāfil.'"</em> (Ṣaḥīḥ al-Bukhārī)</p>
+<h3>What are Nawāfil Prayers?</h3>
+<p>Beyond the five obligatory prayers, Allāh has gifted us with voluntary prayers (nawāfil) through which we draw closer to Him. Allāh says in a qudsi ḥadīth: <em>"My servant continues to draw near to Me through voluntary acts until I love him."</em> (Bukhārī)</p>
 
-<h4>Ishrāq</h4>
-<p>Ṣalātul Ishrāq is a nafl ṣalāh performed after sunrise — best performed fifteen minutes after sunrise. One can perform two or four rak'āt.</p>
-<p>The Prophet ﷺ said: <em>"Whosoever performs the Morning Prayer (Fajr) with jamā'ah then remains seated and makes dhikr until sunrise, thereafter he performs two rak'āt, he will gain a reward similar to performing Ḥajj and 'Umrah — complete, complete, complete!"</em> (Tirmidhī)</p>
+<h3>Tahaṡṡud — The Night Prayer</h3>
+<p>Tahaṡṡud is performed in the last third of the night after waking from sleep. Minimum 2 rakʿāt, often extended. It is the most virtuous nawāfil prayer.</p>
+<p>Allāh descends to the lowest heaven in the last third of the night and calls: <em>"Who is invoking Me so that I may respond? Who is asking forgiveness so that I may forgive?"</em> (Bukhārī)</p>
+<p>The Prophet ﷺ said: <em>"Hold fast to the night prayer, for it is the way of the pious, a means of nearness to Allāh, an expiation of sins, and a shield from evil."</em> (Tirmidhī)</p>
 
-<h4>Ḍuḥā</h4>
-<p>Ḍuḥā is performed in the second half of the morning, towards midday. The minimum is 2 rak'āt and the maximum is 12.</p>
-<p>Allāh says: <em>"O Son of Ādam, do not be weak in performing four rak'āt for Me at the beginning of the day: I will supply what you need till the end of the day."</em> (Abū Dāwūd)</p>
+<h3>Ishrāq — The Sunrise Prayer</h3>
+<p>Performed approximately 15–20 minutes after sunrise. 2–4 rakʿāt.</p>
+<p>The Prophet ﷺ said: <em>"Whoever prays Fajr with congregation, then sits in dhikr until sunrise, then prays two rakʿāt, receives a reward like that of Ḥajj and ʿUmrah — complete, complete, complete!"</em> (Tirmidhī)</p>
 
-<h4>Tahajjud</h4>
-<p>Tahajjud is the ṣalāh performed at night after waking from sleep — the most rewarding nafl ṣalāh.</p>
-<p><em>"Hold fast to the night prayer, indeed it is the trait of the pious predecessors, a means of nearness to your Lord, an expiation for sins and a barrier from sins."</em> (Tirmidhī)</p>
+<h3>Ḍuḥā — The Forenoon Prayer</h3>
+<p>Performed in the mid-morning when the sun has risen to about a quarter of the sky. Minimum 2 rakʿāt, maximum 12.</p>
+<p>Allāh says: <em>"O Son of Ādam, perform four rakʿāt for Me in the beginning of your day and I will suffice you for the rest of it."</em> (Abū Dāwūd)</p>
 
-<h4>Taḥiyyatul Wuḍū'</h4>
-<p>Two rak'āt performed after doing wuḍū'. Bilāl رضي الله عنه said he never performed wuḍū' without praying after it, and the Prophet ﷺ heard his footsteps in Paradise. (Ṣaḥīḥ al-Bukhārī)</p>
+<h3>Awwābīn — After Maghrib</h3>
+<p>6 rakʿāt prayed in pairs after Maghrib. The Prophet ﷺ said: <em>"Whoever prays 6 rakʿāt after Maghrib without speaking evil in between, their reward is equivalent to 12 years of worship."</em> (Tirmidhī)</p>
 
-<h4>Taḥiyyatul Masjid</h4>
-<p>Two rak'āt performed upon entering a masjid, expressing respect when entering the house of Allāh.</p>
+<h3>Tarāwīḥ — The Ramadān Night Prayer</h3>
+<p>Performed in congregation during Ramadān nights. 20 rakʿāt in the Ḥanafī school. The Prophet ﷺ said: <em>"Whoever stands (in prayer) in Ramadān with faith and hoping for reward, his past sins will be forgiven."</em> (Bukhārī)</p>
 
-<h3>Khushū' — Humility in Ṣalāh</h3>
-<p><em>"Success is really attained by the believers who concentrate their attention in humbleness when offering ṣalāh… Those are the inheritors who will inherit Firdaws. They will be there forever."</em> (Qur'ān 23:1–11)</p>
-<h4>Ways to attain Khushū'</h4>
+<h3>Virtue of Congregational Prayer</h3>
+<p>The Prophet ﷺ said: <em>"Prayer in congregation is 27 times superior to a prayer offered individually."</em> (Bukhārī) This reward applies especially to the five obligatory prayers prayed in the masjid.</p>
+
+<h3>Khushūʿ — Humility and Presence in Prayer</h3>
+<p>Khushūʿ means the humility, focus, and presence of heart that should characterise every ṣalāh. Allāh says: <em>"Successful indeed are the believers — those who are humble in their prayers."</em> (Qur\'an 23:1–2)</p>
+
+<h4>How to Develop Khushūʿ</h4>
 <ul>
-  <li>Prepare yourself properly for ṣalāh.</li>
-  <li>Pray at a measured pace.</li>
-  <li>Remember Allāh throughout and the Day of Judgement.</li>
-  <li>Pause at the end of each verse.</li>
-  <li>Recite in a slow and calm manner.</li>
-  <li>Vary the sūrahs recited.</li>
-  <li>Know that Allāh is listening and responding.</li>
+  <li><strong>Know the meanings:</strong> Learn the Arabic of what you recite so every phrase has meaning for you.</li>
+  <li><strong>Minimise distractions:</strong> Choose a clean, quiet space; face a sutrah (barrier); switch off notifications.</li>
+  <li><strong>Pray as if it is your last:</strong> The Prophet ﷺ said: <em>"Pray as though you are bidding farewell (to this world)."</em></li>
+  <li><strong>Engage before entering:</strong> Perform a thorough, mindful wudū\'.</li>
+  <li><strong>Pause between postures:</strong> Do not rush — each movement is an opportunity to connect with Allāh.</li>
 </ul>
-<h4>Things to Avoid</h4>
-<ul>
-  <li>Do not pray when a meal is ready (unless ṣalāh time will lapse).</li>
-  <li>Do not pray when needing the washroom.</li>
-  <li>Do not wear distracting clothes.</li>
-  <li>Do not pray in a lazy manner or fidget.</li>
-</ul>
+<p>Khushūʿ is the soul of ṣalāh. A prayer without humility is like a body without a soul. We ask Allāh to bless our prayers with true khushūʿ.</p>
+`.trim();
 
-<h3>Jamā'ah Ṣalāh</h3>
-<p>Ṣalāh with jamā'ah is greatly emphasised for men. The Prophet ﷺ said: <em>"A man's ṣalāh in congregation is twenty-five times more rewarding than his ṣalāh at home."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p><em>"Make the rows straight and do not differ, lest your hearts differ."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>Nikāḥ (Marriage)</h3>
-<p>Nikāḥ is a great sunnah in Islām. The Prophet ﷺ said: <em>"Whoever marries has completed half of his faith."</em> (Ṭabarānī)</p>
-<h4>Qualities to Look For</h4>
-<p><em>"Women are usually married for four reasons: wealth, ancestry, beauty and piety. Marry the pious one and you will be successful."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<h4>Requirements for Nikāḥ</h4>
-<p>Offer (ījāb) + Acceptance (qabūl) + at least two male witnesses (or one male and two female) who are Muslim, mature, and sane.</p>
-<h4>Mahr (Dower)</h4>
-<p>Mahr is wājib — the groom must give it to the bride. The minimum is the value of 10 dirhams (30.618g of silver). Mahr Azwāj an-Nabī was commonly 500 dirhams (1530.9g of silver).</p>
-
-<h3>Ṭalāq (Divorce)</h3>
-<p>If all efforts to resolve disputes are exhausted, Islām allows ṭalāq as a last resort.</p>
-<h4>Types</h4>
-<ul>
-  <li><strong>Ṭalāq Raj'ī (Revocable):</strong> The husband says "I give you ṭalāq" once or twice. Within the 'iddah, they can reconcile without a new nikāḥ.</li>
-  <li><strong>Ṭalāq Bā'in (Irrevocable):</strong> Uses indirect words with intention. A new nikāḥ is required to reconcile.</li>
-</ul>
-<h4>'Iddah (Waiting Period)</h4>
-<p>Three menstrual cycles (or 90 days if not menstruating). For a pregnant woman, until birth. Upon husband's death, 4 months and 10 days.</p>
-
-<h3>Buyū' (Trade)</h3>
-<p><em>"The truthful merchant is ranked with the prophets, the truthful elite and the martyrs."</em> (Tirmidhī)</p>
-<h4>Conditions</h4>
-<ol>
-  <li>The product must be ḥalāl.</li>
-  <li>The price and item must be clearly specified.</li>
-  <li>No ambiguity in any aspect.</li>
-  <li>The transaction should be unconditional.</li>
-</ol>
-
-<h3>Ijārah (Employment &amp; Leasing)</h3>
-<p><em>"O you who believe, when you transact a debt payable at a specified time, put it in writing."</em> (Qur'ān 2:282)</p>
-<p>Before taking any job, the following must be clearly agreed: job description, hours, contract length, wages, payment date, and holidays.</p>
-
-<h3>Ribā (Interest)</h3>
-<p>Interest is charging money for giving someone a loan — ḥarām to give and take.</p>
-<p><em>"Those who consume interest shall not stand up on the Day of Resurrection except like him who Shayṭān has driven mad."</em> (Qur'ān 2:275)</p>
-<p><em>"Allāh destroys interest and increases charity."</em> (Qur'ān 2:276)</p>
-<p><em>"Cursed is the receiver of interest, the payer, the recorder, and the two witnesses — they are all alike in guilt."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>Gambling</h3>
-<p><em>"O those who believe, verily wine, gambling, altar-stones and divining arrows are filth, a work of Shayṭān. Therefore, refrain from it, so that you may be successful."</em> (Qur'ān 5:90–91)</p>
-
-<h3>The Four Schools of Fiqh</h3>
-<ol>
-  <li><strong>Imām Abū Ḥanīfah</strong> (80–150 AH) — Born in Kūfa, Iraq. A Tābi'ī who met Anas رضي الله عنه. Studied under Ḥammād for nearly two decades. Founded the Ḥanafī school.</li>
-  <li><strong>Imām Mālik ibn Anas</strong> (93–179 AH) — Born and lived in Madīnah. Authored al-Muwaṭṭa'. Began lecturing after 70 scholars testified to his capability.</li>
-  <li><strong>Imām Shāfi'ī</strong> (150–204 AH) — Born in Gaza. Memorised the Qur'ān at 7 and al-Muwaṭṭa' at 10. Studied under Imām Mālik and Imām Muḥammad.</li>
-  <li><strong>Imām Aḥmad ibn Ḥanbal</strong> (164–241 AH) — Born in Baghdad. Travelled extensively seeking knowledge. Studied under Imām Shāfi'ī.</li>
-</ol>
-`.trim(),
-    },
-    update: {
-      title: 'Fiqh — Nawāfil Ṣalāh, Nikāḥ, Ṭalāq & Islamic Transactions',
-      description: 'Advanced fiqh covering types of nawāfil prayers (Ishrāq, Ḍuḥā, Tahajjud, Taḥiyyatul Wuḍū\', Taḥiyyatul Masjid), khushū\' in ṣalāh, congregational prayer, the rulings of nikāḥ and mahr, ṭalāq and \'iddah, buyū\' (trade), ijārah (employment and leasing), ribā (interest), gambling, and the four schools of fiqh.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Distinguish between the different types of nafl ṣalāh, the times they should be performed and their virtues.</li>
-  <li>Explain the significance of nikāḥ: the reasons for marrying and the qualities to look for in a spouse.</li>
-  <li>Recognise what mahr is and the different types of mahr.</li>
-  <li>Describe the different types of ṭalāq and define the rulings for a woman sitting in 'iddah.</li>
-  <li>Summarise the rulings regarding transactions, identifying the conditions and examples for each.</li>
-  <li>Explain the importance of taqlīd and recognise the four imāms.</li>
-</ul>
-
-<h3>Nawāfil Ṣalāh</h3>
-<p>Allāh has made the five daily ṣalāh compulsory upon us. Ṣalāh can be thought of as 'meetings and conversations' with the King of the universe. From among the ways to become closer to Allāh is by performing extra ṣalāh. The Messenger of Allāh ﷺ said:</p>
-<p><em>"Allāh, the Exalted, has said: 'I will declare war against he who harms my pious worshippers. And the most beloved thing by which My slave comes nearer to Me, is what I have made compulsory upon him; and My slave keeps on coming closer to Me by performing nawāfil.'"</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Ishrāq</h4>
-<p>Ṣalātul Ishrāq is a nafl ṣalāh performed after sunrise — best performed fifteen minutes after sunrise. One can perform two or four rak'āt.</p>
-<p>The Prophet ﷺ said: <em>"Whosoever performs the Morning Prayer (Fajr) with jamā'ah then remains seated and makes dhikr until sunrise, thereafter he performs two rak'āt, he will gain a reward similar to performing Ḥajj and 'Umrah — complete, complete, complete!"</em> (Tirmidhī)</p>
-
-<h4>Ḍuḥā</h4>
-<p>Ḍuḥā is performed in the second half of the morning, towards midday. The minimum is 2 rak'āt and the maximum is 12.</p>
-<p>Allāh says: <em>"O Son of Ādam, do not be weak in performing four rak'āt for Me at the beginning of the day: I will supply what you need till the end of the day."</em> (Abū Dāwūd)</p>
-
-<h4>Tahajjud</h4>
-<p>Tahajjud is the ṣalāh performed at night after waking from sleep — the most rewarding nafl ṣalāh.</p>
-<p><em>"Hold fast to the night prayer, indeed it is the trait of the pious predecessors, a means of nearness to your Lord, an expiation for sins and a barrier from sins."</em> (Tirmidhī)</p>
-
-<h4>Taḥiyyatul Wuḍū'</h4>
-<p>Two rak'āt performed after doing wuḍū'. Bilāl رضي الله عنه said he never performed wuḍū' without praying after it, and the Prophet ﷺ heard his footsteps in Paradise. (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Taḥiyyatul Masjid</h4>
-<p>Two rak'āt performed upon entering a masjid, expressing respect when entering the house of Allāh.</p>
-
-<h3>Khushū' — Humility in Ṣalāh</h3>
-<p><em>"Success is really attained by the believers who concentrate their attention in humbleness when offering ṣalāh… Those are the inheritors who will inherit Firdaws. They will be there forever."</em> (Qur'ān 23:1–11)</p>
-<h4>Ways to attain Khushū'</h4>
-<ul>
-  <li>Prepare yourself properly for ṣalāh.</li>
-  <li>Pray at a measured pace.</li>
-  <li>Remember Allāh throughout and the Day of Judgement.</li>
-  <li>Pause at the end of each verse.</li>
-  <li>Recite in a slow and calm manner.</li>
-  <li>Vary the sūrahs recited.</li>
-  <li>Know that Allāh is listening and responding.</li>
-</ul>
-<h4>Things to Avoid</h4>
-<ul>
-  <li>Do not pray when a meal is ready (unless ṣalāh time will lapse).</li>
-  <li>Do not pray when needing the washroom.</li>
-  <li>Do not wear distracting clothes.</li>
-  <li>Do not pray in a lazy manner or fidget.</li>
-</ul>
-
-<h3>Jamā'ah Ṣalāh</h3>
-<p>Ṣalāh with jamā'ah is greatly emphasised for men. The Prophet ﷺ said: <em>"A man's ṣalāh in congregation is twenty-five times more rewarding than his ṣalāh at home."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p><em>"Make the rows straight and do not differ, lest your hearts differ."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>Nikāḥ (Marriage)</h3>
-<p>Nikāḥ is a great sunnah in Islām. The Prophet ﷺ said: <em>"Whoever marries has completed half of his faith."</em> (Ṭabarānī)</p>
-<h4>Qualities to Look For</h4>
-<p><em>"Women are usually married for four reasons: wealth, ancestry, beauty and piety. Marry the pious one and you will be successful."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<h4>Requirements for Nikāḥ</h4>
-<p>Offer (ījāb) + Acceptance (qabūl) + at least two male witnesses (or one male and two female) who are Muslim, mature, and sane.</p>
-<h4>Mahr (Dower)</h4>
-<p>Mahr is wājib — the groom must give it to the bride. The minimum is the value of 10 dirhams (30.618g of silver). Mahr Azwāj an-Nabī was commonly 500 dirhams (1530.9g of silver).</p>
-
-<h3>Ṭalāq (Divorce)</h3>
-<p>If all efforts to resolve disputes are exhausted, Islām allows ṭalāq as a last resort.</p>
-<h4>Types</h4>
-<ul>
-  <li><strong>Ṭalāq Raj'ī (Revocable):</strong> The husband says "I give you ṭalāq" once or twice. Within the 'iddah, they can reconcile without a new nikāḥ.</li>
-  <li><strong>Ṭalāq Bā'in (Irrevocable):</strong> Uses indirect words with intention. A new nikāḥ is required to reconcile.</li>
-</ul>
-<h4>'Iddah (Waiting Period)</h4>
-<p>Three menstrual cycles (or 90 days if not menstruating). For a pregnant woman, until birth. Upon husband's death, 4 months and 10 days.</p>
-
-<h3>Buyū' (Trade)</h3>
-<p><em>"The truthful merchant is ranked with the prophets, the truthful elite and the martyrs."</em> (Tirmidhī)</p>
-<h4>Conditions</h4>
-<ol>
-  <li>The product must be ḥalāl.</li>
-  <li>The price and item must be clearly specified.</li>
-  <li>No ambiguity in any aspect.</li>
-  <li>The transaction should be unconditional.</li>
-</ol>
-
-<h3>Ijārah (Employment &amp; Leasing)</h3>
-<p><em>"O you who believe, when you transact a debt payable at a specified time, put it in writing."</em> (Qur'ān 2:282)</p>
-<p>Before taking any job, the following must be clearly agreed: job description, hours, contract length, wages, payment date, and holidays.</p>
-
-<h3>Ribā (Interest)</h3>
-<p>Interest is charging money for giving someone a loan — ḥarām to give and take.</p>
-<p><em>"Those who consume interest shall not stand up on the Day of Resurrection except like him who Shayṭān has driven mad."</em> (Qur'ān 2:275)</p>
-<p><em>"Allāh destroys interest and increases charity."</em> (Qur'ān 2:276)</p>
-<p><em>"Cursed is the receiver of interest, the payer, the recorder, and the two witnesses — they are all alike in guilt."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>Gambling</h3>
-<p><em>"O those who believe, verily wine, gambling, altar-stones and divining arrows are filth, a work of Shayṭān. Therefore, refrain from it, so that you may be successful."</em> (Qur'ān 5:90–91)</p>
-
-<h3>The Four Schools of Fiqh</h3>
-<ol>
-  <li><strong>Imām Abū Ḥanīfah</strong> (80–150 AH) — Born in Kūfa, Iraq. A Tābi'ī who met Anas رضي الله عنه. Studied under Ḥammād for nearly two decades. Founded the Ḥanafī school.</li>
-  <li><strong>Imām Mālik ibn Anas</strong> (93–179 AH) — Born and lived in Madīnah. Authored al-Muwaṭṭa'. Began lecturing after 70 scholars testified to his capability.</li>
-  <li><strong>Imām Shāfi'ī</strong> (150–204 AH) — Born in Gaza. Memorised the Qur'ān at 7 and al-Muwaṭṭa' at 10. Studied under Imām Mālik and Imām Muḥammad.</li>
-  <li><strong>Imām Aḥmad ibn Ḥanbal</strong> (164–241 AH) — Born in Baghdad. Travelled extensively seeking knowledge. Studied under Imām Shāfi'ī.</li>
-</ol>
-`.trim(),
-      orderIndex: 0,
-    },
-  });
-
-  console.log('✅ Created Unit 1:', unitFiqh.title);
-
-  // ──────────────────────────────────────────────
-  // UNIT 2: AḤĀDĪTH
-  // ──────────────────────────────────────────────
-
-    const unitAhadith = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-ahadith' } },
+  const unit1 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-fiqh-nawafil-khushu' } },
     create: {
-      slug: 'maktab-8-ahadith',
+      slug: 'maktab-8-fiqh-nawafil-khushu',
       courseId: course.id,
-      title: 'Aḥādīth — Nine Essential Ḥadīths on Character & Worship',
-      description: 'Nine carefully selected aḥādīth covering purity of heart, ṣadaqah, greeting with salām, rights of a Muslim, patience in trials, true wealth, sweetness of īmān, closeness to Allāh, and self-sufficiency.',
       orderIndex: 1,
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Memorise and understand nine essential aḥādīth on character and worship.</li>
-  <li>Apply the lessons of each ḥadīth in daily life.</li>
-</ul>
-
-<h3>1. Clean Heart</h3>
-<p>Anas رضي الله عنه relates that Rasūlullāh ﷺ said: <em>"O my son, if you can spend each morning and evening with a heart free of hatred or deception against anyone, then do so. My dear son, this is my practice (sunnah) and whoever loves my sunnah loves me, and whoever loves me will be with me in Jannah."</em> (Tirmidhī)</p>
-<p>Abū Hurayrah رضي الله عنه narrates that Rasūlullāh ﷺ said: <em>"Allāh is displeased with three things: meaningless chatter, wasting money, and asking too many questions."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>2. Ṣadaqah</h3>
-<p>Abū Hurayrah رضي الله عنه narrates that Rasūlullāh ﷺ said: <em>"Every morning at dawn, two angels descend — one says, 'O Allāh, give more to the person who spends in charity!' while the other says, 'O Allāh, destroy the wealth of the one who withholds!'"</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h3>3. Salām</h3>
-<p>Anas ibn Mālik رضي الله عنه narrates that Rasūlullāh ﷺ said: <em>"O my dear son, whenever you enter a home greet your family by saying 'Assalāmu 'alaykum' — it will be a blessing for you and your household."</em> (Tirmidhī)</p>
-
-<h3>4. Rights of a Muslim</h3>
-<p>Barā' ibn 'Āzib رضي الله عنه narrates: <em>"The Prophet ﷺ instructed us upon seven things: visit the sick, follow funeral processions, pray for one who sneezes, accept invitations, return greetings, help the wronged, and help others fulfil their oaths."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>Ṣuhayb رضي الله عنه narrates: <em>"How wonderful is the situation of a believer — everything is good for him. If he encounters good, he is grateful and that is good for him; if afflicted with hardship, he is patient and that is good for him."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>5. Reward of Patience</h3>
-<p>Anas رضي الله عنه narrates: <em>"Great rewards are given for great trials, and when Allāh loves a people, He tests them. Whoever accepts the trial cheerfully earns His good pleasure; whoever resents it earns His wrath."</em> (Tirmidhī)</p>
-<p>Abud Dardā' رضي الله عنه narrates: <em>"Whoever suffers an injury and forgives the person responsible, Allāh will raise his status and remove one of his sins."</em> (Tirmidhī)</p>
-
-<h3>6. True Wealth</h3>
-<p>Abū Hurayrah رضي الله عنه narrates: <em>"Wealth is not in having great riches — true wealth is contentment of the soul."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>The Prophet ﷺ also said: <em>"The religion of Islām is easy. No one ever made it difficult without it becoming too much for him. So avoid extremes and strike a balance."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h3>7. Sweetness of Īmān</h3>
-<p>Anas ibn Mālik رضي الله عنه narrates: <em>"Whoever has three qualities will taste the sweetness of īmān: to love Allāh and His Messenger more than anything else; to love someone for Allāh's sake alone; and to hate to return to unbelief just as much as one would hate to be thrown into the Fire."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p><em>"The first deed a person will be called to account for on the Day of Judgement will be his prayers. If they are in order he will be successful; if not, he will be ruined."</em> (Tirmidhī)</p>
-
-<h3>8. Closeness to Allāh</h3>
-<p>Abū Hurayrah رضي الله عنه narrates that Allāh says: <em>"I am as My servant thinks I am. I am with him when he mentions Me. If he comes one span nearer to Me, I go one arm's length nearer to him; if he draws near an arm's length, I go two arms nearer. And if he comes to Me walking, I go to him running."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>Ibn 'Abbās رضي الله عنهما narrates that the Prophet ﷺ said: <em>"Be mindful of Allāh and Allāh will protect you. Be mindful of Allāh and you will find Him in front of you. If you ask, ask Allāh alone. If you seek help, seek help from Allāh alone."</em> (Tirmidhī)</p>
-
-<h3>9. Being Self-Sufficient</h3>
-<p>Miqdām رضي الله عنه narrates: <em>"No one eats better food than what he earns with his own hands. The Prophet Dāwūd عليه السلام used to eat from what he earned by the work of his own hands."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-`.trim(),
+      title: 'Fiqh — Nawāfil Ṣalāh & Khushū\'',
+      description: 'The key voluntary prayers (tahaṡṡud, ishrāq, ḍuḥā, awwābīn, tarāwīḥ), their times and virtues, the 27× reward of congregational prayer, and how to develop khushū\' (humility and presence) in ṣalāh.',
+      content: nawailContent,
     },
     update: {
-      title: 'Aḥādīth — Nine Essential Ḥadīths on Character & Worship',
-      description: 'Nine carefully selected aḥādīth covering purity of heart, ṣadaqah, greeting with salām, rights of a Muslim, patience in trials, true wealth, sweetness of īmān, closeness to Allāh, and self-sufficiency.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Memorise and understand nine essential aḥādīth on character and worship.</li>
-  <li>Apply the lessons of each ḥadīth in daily life.</li>
-</ul>
-
-<h3>1. Clean Heart</h3>
-<p>Anas رضي الله عنه relates that Rasūlullāh ﷺ said: <em>"O my son, if you can spend each morning and evening with a heart free of hatred or deception against anyone, then do so. My dear son, this is my practice (sunnah) and whoever loves my sunnah loves me, and whoever loves me will be with me in Jannah."</em> (Tirmidhī)</p>
-<p>Abū Hurayrah رضي الله عنه narrates that Rasūlullāh ﷺ said: <em>"Allāh is displeased with three things: meaningless chatter, wasting money, and asking too many questions."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>2. Ṣadaqah</h3>
-<p>Abū Hurayrah رضي الله عنه narrates that Rasūlullāh ﷺ said: <em>"Every morning at dawn, two angels descend — one says, 'O Allāh, give more to the person who spends in charity!' while the other says, 'O Allāh, destroy the wealth of the one who withholds!'"</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h3>3. Salām</h3>
-<p>Anas ibn Mālik رضي الله عنه narrates that Rasūlullāh ﷺ said: <em>"O my dear son, whenever you enter a home greet your family by saying 'Assalāmu 'alaykum' — it will be a blessing for you and your household."</em> (Tirmidhī)</p>
-
-<h3>4. Rights of a Muslim</h3>
-<p>Barā' ibn 'Āzib رضي الله عنه narrates: <em>"The Prophet ﷺ instructed us upon seven things: visit the sick, follow funeral processions, pray for one who sneezes, accept invitations, return greetings, help the wronged, and help others fulfil their oaths."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>Ṣuhayb رضي الله عنه narrates: <em>"How wonderful is the situation of a believer — everything is good for him. If he encounters good, he is grateful and that is good for him; if afflicted with hardship, he is patient and that is good for him."</em> (Ṣaḥīḥ Muslim)</p>
-
-<h3>5. Reward of Patience</h3>
-<p>Anas رضي الله عنه narrates: <em>"Great rewards are given for great trials, and when Allāh loves a people, He tests them. Whoever accepts the trial cheerfully earns His good pleasure; whoever resents it earns His wrath."</em> (Tirmidhī)</p>
-<p>Abud Dardā' رضي الله عنه narrates: <em>"Whoever suffers an injury and forgives the person responsible, Allāh will raise his status and remove one of his sins."</em> (Tirmidhī)</p>
-
-<h3>6. True Wealth</h3>
-<p>Abū Hurayrah رضي الله عنه narrates: <em>"Wealth is not in having great riches — true wealth is contentment of the soul."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>The Prophet ﷺ also said: <em>"The religion of Islām is easy. No one ever made it difficult without it becoming too much for him. So avoid extremes and strike a balance."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h3>7. Sweetness of Īmān</h3>
-<p>Anas ibn Mālik رضي الله عنه narrates: <em>"Whoever has three qualities will taste the sweetness of īmān: to love Allāh and His Messenger more than anything else; to love someone for Allāh's sake alone; and to hate to return to unbelief just as much as one would hate to be thrown into the Fire."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p><em>"The first deed a person will be called to account for on the Day of Judgement will be his prayers. If they are in order he will be successful; if not, he will be ruined."</em> (Tirmidhī)</p>
-
-<h3>8. Closeness to Allāh</h3>
-<p>Abū Hurayrah رضي الله عنه narrates that Allāh says: <em>"I am as My servant thinks I am. I am with him when he mentions Me. If he comes one span nearer to Me, I go one arm's length nearer to him; if he draws near an arm's length, I go two arms nearer. And if he comes to Me walking, I go to him running."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>Ibn 'Abbās رضي الله عنهما narrates that the Prophet ﷺ said: <em>"Be mindful of Allāh and Allāh will protect you. Be mindful of Allāh and you will find Him in front of you. If you ask, ask Allāh alone. If you seek help, seek help from Allāh alone."</em> (Tirmidhī)</p>
-
-<h3>9. Being Self-Sufficient</h3>
-<p>Miqdām رضي الله عنه narrates: <em>"No one eats better food than what he earns with his own hands. The Prophet Dāwūd عليه السلام used to eat from what he earned by the work of his own hands."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-`.trim(),
-      orderIndex: 1,
+      title: 'Fiqh — Nawāfil Ṣalāh & Khushū\'',
+      description: 'The key voluntary prayers (tahaṡṡud, ishrāq, ḍuḥā, awwābīn, tarāwīḥ), their times and virtues, the 27× reward of congregational prayer, and how to develop khushū\' (humility and presence) in ṣalāh.',
+      content: nawailContent,
     },
   });
+  console.log('✅ Unit 1:', unit1.title);
 
-  console.log('✅ Created Unit 2:', unitAhadith.title);
+  // =============================================
+  // UNIT 2: FIQH — Nikāḥ & Ṭalāq
+  // =============================================
 
-  // ──────────────────────────────────────────────
-  // UNIT 3: SĪRAH
-  // ──────────────────────────────────────────────
+  const nikahContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>List and explain the conditions that make a nikāḥ (marriage) valid in Islam.</li>
+  <li>Define mahr and explain when it becomes obligatory.</li>
+  <li>Distinguish between the types of ṭalāq (divorce) and explain \'iddah.</li>
+  <li>Understand the concept of rujū\' and when it applies.</li>
+</ul>
 
-    const unitSirah = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-sirah' } },
+<h3>Nikāḥ — The Islamic Marriage Contract</h3>
+<p>Nikāḥ is a sacred covenant and a highly emphasised sunnah of the Prophet ﷺ. He said: <em>"Marriage is from my sunnah. Whoever turns away from my sunnah is not of me."</em></p>
+
+<h4>Conditions of a Valid Nikāḥ</h4>
+<ol>
+  <li><strong>Ījāb and Qabūl</strong> — Offer and acceptance in the same sitting.</li>
+  <li><strong>Two adult Muslim witnesses</strong> — The nikāḥ must be announced, not secret.</li>
+  <li><strong>Walī</strong> — A male guardian (father, brother, etc.) for the bride. The Prophet ﷺ said: <em>"There is no nikāḥ without a walī."</em> (Abū Dāwūd)</li>
+  <li><strong>Mahr</strong> — A mandatory gift from the groom to the bride.</li>
+</ol>
+
+<h4>Prohibited Marriages (Maḥram Relationships)</h4>
+<p>Certain relationships permanently prohibit marriage: mothers, daughters, sisters, aunts, nieces, foster mothers/sisters, mothers-in-law, and stepdaughters. These are detailed in Qūrʼanic verse 4:23.</p>
+
+<h3>Mahr — The Bridal Gift</h3>
+<p>Mahr is an obligatory monetary gift or property from the husband to the wife at the time of nikāḥ. Allāh says: <em>"Give women their mahr as a free gift."</em> (4:4)</p>
+<ul>
+  <li>The wife has complete ownership of her mahr.</li>
+  <li>There is no fixed minimum in Islamic law, though a practical minimum is observed.</li>
+  <li>Mahr becomes fully owed upon consummation of the marriage or upon the husband\'s death.</li>
+</ul>
+
+<h3>Ṭalāq — Divorce</h3>
+<p>Allāh has permitted divorce as a last resort. The Prophet ﷺ said: <em>"Of all the permitted acts, divorce is the most hated by Allāh."</em> (Abū Dāwūd)</p>
+
+<h4>Types of Ṭalāq</h4>
+<ul>
+  <li><strong>Ṭalāq al-Sunnah</strong>: One revocable divorce pronounced during a period of purity, followed by waiting. This is the preferred, valid method.</li>
+  <li><strong>Ṭalāq al-Bid\'ah</strong>: Three divorces pronounced at once. This is valid (the separation takes effect) but sinful — a serious warning from scholars.</li>
+</ul>
+
+<h3>\'Iddah — The Waiting Period</h3>
+<p>\'Iddah is the mandatory waiting period for a woman after divorce or her husband\'s death before she may remarry.</p>
+<ul>
+  <li>After divorce: 3 menstrual cycles (for women who menstruate).</li>
+  <li>After death of husband: 4 months and 10 days.</li>
+  <li>Purpose: establish whether the woman is pregnant; provide time for reconciliation.</li>
+</ul>
+
+<h3>Rujū\' — Returning to the Marriage</h3>
+<p>After a single revocable (ṭalāq al-sunnah) divorce, the husband may return to his wife during \'iddah without a new nikāḥ. This is called rujū\'. After \'iddah ends, a new nikāḥ is required if both parties wish to reconcile.</p>
+`.trim();
+
+  const unit2 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-fiqh-nikah-talaq' } },
     create: {
-      slug: 'maktab-8-sirah',
+      slug: 'maktab-8-fiqh-nikah-talaq',
       courseId: course.id,
-      title: 'Sīrah — Shamā\'il of Rasūlullāh ﷺ, \'Uthmān & \'Alī رضي الله عنهما',
-      description: 'The noble character (shamā\'il) of Rasūlullāh ﷺ — his gentleness, humility, bravery and simple life; and the lives, sacrifices and leadership of the third and fourth Khulafā\' ar-Rāshidūn.',
       orderIndex: 2,
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Understand the noble character (shamā'il) of Rasūlullāh ﷺ and apply these qualities in daily life.</li>
-  <li>Describe the key events in the life of 'Uthmān رضي الله عنه and his sacrifices for Islām.</li>
-  <li>Appreciate the bravery, justice and piety of 'Alī رضي الله عنه.</li>
-</ul>
-
-<h3>Shamā'il — The Noble Character of Rasūlullāh ﷺ</h3>
-
-<h4>Consideration</h4>
-<p>Once a Companion found a bird's egg and took it. The bird began circling in distress. The Prophet ﷺ asked: <em>"Who has distressed this bird by taking its egg? Return it to her."</em> His consideration extended to every living creature.</p>
-
-<h4>Gentleness</h4>
-<p>A bedouin once urinated in the masjid. The Companions wanted to rebuke him harshly, but the Prophet ﷺ said: <em>"Leave him alone and pour a bucket of water over it. You have been sent to make things easy, not to make things difficult."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Patience with Those Around Him</h4>
-<p>Anas رضي الله عنه served the Prophet ﷺ for ten years and said: <em>"He never once said 'uff' (a word of displeasure) to me. He never said, 'Why did you do this?' or 'Why did you not do that?'"</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Tolerance</h4>
-<p>A villager once grabbed the Prophet's ﷺ garment so roughly that it left marks on his neck, demanding wealth. The Prophet ﷺ simply smiled and instructed that the man be given what he asked for. (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Bravery</h4>
-<p>'Alī رضي الله عنه said: <em>"When the fighting became fierce, we used to seek shelter behind the Messenger of Allāh ﷺ."</em> At the Battle of Ḥunayn, when soldiers fled, the Prophet ﷺ stood firm on his mule calling out: <em>"I am the Prophet, this is no lie! I am the son of 'Abdul Muṭṭalib!"</em></p>
-
-<h4>Humility</h4>
-<p>The Prophet ﷺ would mend his own shoes, patch his own clothes, and milk his own goats. He would help with household chores and never considered himself above any task.</p>
-
-<h4>Loyalty — Treaty of Ḥudaybiyah</h4>
-<p>When Abū Jandal escaped from Quraysh seeking refuge, the Prophet ﷺ honoured the treaty and returned him, despite the pain it caused, teaching us to keep our word even when it is difficult.</p>
-
-<h4>Simple Life</h4>
-<p>'Ā'ishah رضي الله عنها said: <em>"Three new moons would pass — two months — without any cooking in the house of the Prophet ﷺ. We survived on dates and water."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>The Prophet ﷺ left behind neither money nor anything except his white riding mule, his arms, and a piece of land which he left to charity.</p>
-
-<h3>'Uthmān رضي الله عنه — The Third Khalīfah</h3>
-
-<h4>Early Life and Conversion</h4>
-<p>'Uthmān ibn 'Affān رضي الله عنه was born in 576 CE. He was a wealthy and respected merchant of the Quraysh. He accepted Islām through Abū Bakr رضي الله عنه and was among the earliest converts.</p>
-
-<h4>Dhun Nūrayn</h4>
-<p>'Uthmān was given the title <strong>Dhun Nūrayn</strong> (Possessor of Two Lights) because he married two daughters of the Prophet ﷺ: Ruqayyah and then Umm Kulthūm.</p>
-
-<h4>Al-'Asharah al-Mubasharah</h4>
-<p>He was one of the ten Companions promised Paradise during their lifetime.</p>
-
-<h4>Sacrifices for Islām</h4>
-<p>He migrated to Abyssinia with his wife Ruqayyah — the first couple to migrate for the sake of Allāh. He bought the well of <strong>Bi'r Rūmah</strong> for 20,000 dirhams and donated it for the Muslims' use. He also purchased land to expand the Prophet's Masjid in Madīnah.</p>
-
-<h4>Khilāfah</h4>
-<p>'Uthmān became khalīfah after 'Umar رضي الله عنه. His greatest achievement was the compilation and standardisation of the Qur'ān into a single unified text (muṣḥaf), which was distributed to major cities.</p>
-
-<h3>'Alī رضي الله عنه — The Fourth Khalīfah</h3>
-
-<h4>Early Acceptance of Islām</h4>
-<p>'Alī ibn Abī Ṭālib رضي الله عنه accepted Islām as a youth — he was one of the first to believe. The Prophet ﷺ raised him in his own household.</p>
-
-<h4>The Night of Hijrah</h4>
-<p>On the night the Quraysh planned to assassinate the Prophet ﷺ, 'Alī bravely slept in the Prophet's bed, risking his own life so that the Prophet ﷺ could escape safely to Madīnah.</p>
-
-<h4>Bravery and Knowledge</h4>
-<p>'Alī رضي الله عنه was known as Asadullāh (the Lion of Allāh). He was the hero of many battles and also one of the most knowledgeable Companions. The Prophet ﷺ said: <em>"I am the city of knowledge and 'Alī is its gate."</em></p>
-
-<h4>Khilāfah</h4>
-<p>'Alī moved the capital from Madīnah to Kufa. He faced internal conflicts including the Battle of Ṣiffīn against Mu'āwiyah رضي الله عنه. The Khawārij, a group of extremists, emerged from this period.</p>
-
-<h4>Justice</h4>
-<p>Once 'Alī رضي الله عنه lost his shield and found it with a Jewish man. He took the case to the qāḍī (judge), who ruled in favour of the Jewish man because 'Alī could not produce sufficient witnesses. 'Alī accepted the ruling with humility. The Jewish man was so impressed by this justice that he accepted Islām.</p>
-
-<h4>Martyrdom</h4>
-<p>'Alī رضي الله عنه was struck by a Khārijī named Ibn Muljam while leading the Fajr prayer in 40 AH. He passed away two days later. He was approximately 63 years old.</p>
-`.trim(),
+      title: 'Fiqh — Nikāḥ & Ṭalāq',
+      description: 'Conditions of a valid Islamic marriage (nikāḥ): Ījāb/qabūl, witnesses, walī, and mahr. Prohibited marriages. Types of divorce (ṭalāq al-sunnah and al-bid\'ah), the waiting period (\'iddah), and rujū\' (returning to marriage).',
+      content: nikahContent,
     },
     update: {
-      title: 'Sīrah — Shamā\'il of Rasūlullāh ﷺ, \'Uthmān & \'Alī رضي الله عنهما',
-      description: 'The noble character (shamā\'il) of Rasūlullāh ﷺ — his gentleness, humility, bravery and simple life; and the lives, sacrifices and leadership of the third and fourth Khulafā\' ar-Rāshidūn.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Understand the noble character (shamā'il) of Rasūlullāh ﷺ and apply these qualities in daily life.</li>
-  <li>Describe the key events in the life of 'Uthmān رضي الله عنه and his sacrifices for Islām.</li>
-  <li>Appreciate the bravery, justice and piety of 'Alī رضي الله عنه.</li>
-</ul>
-
-<h3>Shamā'il — The Noble Character of Rasūlullāh ﷺ</h3>
-
-<h4>Consideration</h4>
-<p>Once a Companion found a bird's egg and took it. The bird began circling in distress. The Prophet ﷺ asked: <em>"Who has distressed this bird by taking its egg? Return it to her."</em> His consideration extended to every living creature.</p>
-
-<h4>Gentleness</h4>
-<p>A bedouin once urinated in the masjid. The Companions wanted to rebuke him harshly, but the Prophet ﷺ said: <em>"Leave him alone and pour a bucket of water over it. You have been sent to make things easy, not to make things difficult."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Patience with Those Around Him</h4>
-<p>Anas رضي الله عنه served the Prophet ﷺ for ten years and said: <em>"He never once said 'uff' (a word of displeasure) to me. He never said, 'Why did you do this?' or 'Why did you not do that?'"</em> (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Tolerance</h4>
-<p>A villager once grabbed the Prophet's ﷺ garment so roughly that it left marks on his neck, demanding wealth. The Prophet ﷺ simply smiled and instructed that the man be given what he asked for. (Ṣaḥīḥ al-Bukhārī)</p>
-
-<h4>Bravery</h4>
-<p>'Alī رضي الله عنه said: <em>"When the fighting became fierce, we used to seek shelter behind the Messenger of Allāh ﷺ."</em> At the Battle of Ḥunayn, when soldiers fled, the Prophet ﷺ stood firm on his mule calling out: <em>"I am the Prophet, this is no lie! I am the son of 'Abdul Muṭṭalib!"</em></p>
-
-<h4>Humility</h4>
-<p>The Prophet ﷺ would mend his own shoes, patch his own clothes, and milk his own goats. He would help with household chores and never considered himself above any task.</p>
-
-<h4>Loyalty — Treaty of Ḥudaybiyah</h4>
-<p>When Abū Jandal escaped from Quraysh seeking refuge, the Prophet ﷺ honoured the treaty and returned him, despite the pain it caused, teaching us to keep our word even when it is difficult.</p>
-
-<h4>Simple Life</h4>
-<p>'Ā'ishah رضي الله عنها said: <em>"Three new moons would pass — two months — without any cooking in the house of the Prophet ﷺ. We survived on dates and water."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>The Prophet ﷺ left behind neither money nor anything except his white riding mule, his arms, and a piece of land which he left to charity.</p>
-
-<h3>'Uthmān رضي الله عنه — The Third Khalīfah</h3>
-
-<h4>Early Life and Conversion</h4>
-<p>'Uthmān ibn 'Affān رضي الله عنه was born in 576 CE. He was a wealthy and respected merchant of the Quraysh. He accepted Islām through Abū Bakr رضي الله عنه and was among the earliest converts.</p>
-
-<h4>Dhun Nūrayn</h4>
-<p>'Uthmān was given the title <strong>Dhun Nūrayn</strong> (Possessor of Two Lights) because he married two daughters of the Prophet ﷺ: Ruqayyah and then Umm Kulthūm.</p>
-
-<h4>Al-'Asharah al-Mubasharah</h4>
-<p>He was one of the ten Companions promised Paradise during their lifetime.</p>
-
-<h4>Sacrifices for Islām</h4>
-<p>He migrated to Abyssinia with his wife Ruqayyah — the first couple to migrate for the sake of Allāh. He bought the well of <strong>Bi'r Rūmah</strong> for 20,000 dirhams and donated it for the Muslims' use. He also purchased land to expand the Prophet's Masjid in Madīnah.</p>
-
-<h4>Khilāfah</h4>
-<p>'Uthmān became khalīfah after 'Umar رضي الله عنه. His greatest achievement was the compilation and standardisation of the Qur'ān into a single unified text (muṣḥaf), which was distributed to major cities.</p>
-
-<h3>'Alī رضي الله عنه — The Fourth Khalīfah</h3>
-
-<h4>Early Acceptance of Islām</h4>
-<p>'Alī ibn Abī Ṭālib رضي الله عنه accepted Islām as a youth — he was one of the first to believe. The Prophet ﷺ raised him in his own household.</p>
-
-<h4>The Night of Hijrah</h4>
-<p>On the night the Quraysh planned to assassinate the Prophet ﷺ, 'Alī bravely slept in the Prophet's bed, risking his own life so that the Prophet ﷺ could escape safely to Madīnah.</p>
-
-<h4>Bravery and Knowledge</h4>
-<p>'Alī رضي الله عنه was known as Asadullāh (the Lion of Allāh). He was the hero of many battles and also one of the most knowledgeable Companions. The Prophet ﷺ said: <em>"I am the city of knowledge and 'Alī is its gate."</em></p>
-
-<h4>Khilāfah</h4>
-<p>'Alī moved the capital from Madīnah to Kufa. He faced internal conflicts including the Battle of Ṣiffīn against Mu'āwiyah رضي الله عنه. The Khawārij, a group of extremists, emerged from this period.</p>
-
-<h4>Justice</h4>
-<p>Once 'Alī رضي الله عنه lost his shield and found it with a Jewish man. He took the case to the qāḍī (judge), who ruled in favour of the Jewish man because 'Alī could not produce sufficient witnesses. 'Alī accepted the ruling with humility. The Jewish man was so impressed by this justice that he accepted Islām.</p>
-
-<h4>Martyrdom</h4>
-<p>'Alī رضي الله عنه was struck by a Khārijī named Ibn Muljam while leading the Fajr prayer in 40 AH. He passed away two days later. He was approximately 63 years old.</p>
-`.trim(),
-      orderIndex: 2,
+      title: 'Fiqh — Nikāḥ & Ṭalāq',
+      description: 'Conditions of a valid Islamic marriage (nikāḥ): Ījāb/qabūl, witnesses, walī, and mahr. Prohibited marriages. Types of divorce (ṭalāq al-sunnah and al-bid\'ah), the waiting period (\'iddah), and rujū\' (returning to marriage).',
+      content: nikahContent,
     },
   });
+  console.log('✅ Unit 2:', unit2.title);
 
-  console.log('✅ Created Unit 3:', unitSirah.title);
+  // =============================================
+  // UNIT 3: FIQH — Islamic Transactions: Buyū\', Ribā & Gambling
+  // =============================================
 
-  // ──────────────────────────────────────────────
-  // UNIT 4: TĀRĪKH
-  // ──────────────────────────────────────────────
+  const transactionsContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>State the conditions that make a sale (bay\') valid in Islam.</li>
+  <li>Define ribā (interest/usury), explain its two types, and understand why it is ḥarām.</li>
+  <li>Explain the prohibition of maysir (gambling) and its harms.</li>
+  <li>Describe ijārah (hire/lease) and its conditions.</li>
+</ul>
 
-    const unitTarikh = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-tarikh' } },
+<h3>Bay\' — Valid Sale Conditions</h3>
+<p>Islam encourages honest trade: <em>"The truthful, trustworthy merchant will be with the prophets, the truthful, and the martyrs."</em> (Tirmidhī) For a sale to be valid, four conditions must be met:</p>
+<ol>
+  <li><strong>Known price:</strong> The buyer and seller must know exactly what amount is being paid.</li>
+  <li><strong>Known item:</strong> The item must be clearly identified (type, quantity, quality).</li>
+  <li><strong>Owned by seller:</strong> One cannot sell what one does not own.</li>
+  <li><strong>Deliverable:</strong> The item must be capable of being handed over to the buyer.</li>
+</ol>
+
+<h3>Ribā — Interest and Usury</h3>
+<p>Ribā literally means \'increase\'. Islamically, it refers to any unlawful increase in wealth without a legitimate exchange. Allāh declares:</p>
+<p class="arabic" dir="rtl" lang="ar">وَأَحَلَّ اللَّهُ الْبَيْعَ وَحَرَّمَ الرِّبَا</p>
+<p><em>"Allāh has permitted trade and forbidden ribā."</em> (Qur\'an 2:275)</p>
+
+<h4>Two Types of Ribā</h4>
+<ul>
+  <li><strong>Ribā al-Faḍl:</strong> Exchanging the same commodity in unequal amounts (e.g., 100g of gold for 110g of gold).</li>
+  <li><strong>Ribā al-Nasī\'ah:</strong> Interest charged for deferred payment — the most common form today (bank interest, credit card charges, conventional mortgages).</li>
+</ul>
+
+<h4>Why Ribā is Ḥarām</h4>
+<ul>
+  <li>It exploits those in financial need.</li>
+  <li>It creates wealth without real work or trade.</li>
+  <li>It destabilises economies and widens inequality.</li>
+  <li>Allāh declares war on those who deal in ribā (Qur\'an 2:279).</li>
+</ul>
+
+<h3>Maysir — Gambling</h3>
+<p>Maysir (gambling) is prohibited. Allāh says: <em>"O you who believe! Intoxicants, gambling, [sacrificing on] stone altars... are abominations from the work of Shayṭān, so avoid them."</em> (5:90)</p>
+<p>Gambling destroys wealth, breeds addiction, causes family breakdown, and creates enmity. Any game or activity where money changes hands based on chance falls under this prohibition.</p>
+
+<h3>Ijārah — Hire and Lease</h3>
+<p>Ijārah is the rental or hiring of a person or service for a specified period at an agreed price. It is lawful when:</p>
+<ul>
+  <li>The service or benefit is clearly defined.</li>
+  <li>The duration is known.</li>
+  <li>The wage/rent is agreed in advance.</li>
+</ul>
+<p>The Prophet ﷺ said: <em>"Pay the worker his wage before his sweat dries."</em> (Ibn Mājah)</p>
+
+<h3>Modern Applications</h3>
+<p>Muslims navigating modern finance should: avoid interest-based mortgages and credit cards where possible; use Islamic finance products (murābaḥah, ijārah-based mortgages); consult qualified scholars about specific situations. The rule is: when in doubt, seek Islamic guidance rather than assume permissibility.</p>
+`.trim();
+
+  const unit3 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-fiqh-transactions' } },
     create: {
-      slug: 'maktab-8-tarikh',
+      slug: 'maktab-8-fiqh-transactions',
       courseId: course.id,
-      title: 'Tārīkh — Ayyūb, Andalusia, the Crusades & the Ottomans',
-      description: 'The patience of Prophet Ayyūb عليه السلام, the rise and fall of Muslim Spain (711–1492 AD), the Crusades and the heroes Nūruddīn and Ṣalāḥuddīn, the Ottoman Empire (1299–1923 AD), and key lessons from Islamic history.',
       orderIndex: 3,
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Describe the patience of Ayyūb عليه السلام and its lessons for daily life.</li>
-  <li>Outline the rise and fall of Muslim Spain (al-Andalus).</li>
-  <li>Explain the significance of the Crusades and the roles of Nūruddīn and Ṣalāḥuddīn.</li>
-  <li>Summarise the rise, achievements and decline of the Ottoman Empire.</li>
-</ul>
-
-<h3>Ayyūb عليه السلام — The Prophet of Patience</h3>
-<p>Ayyūb عليه السلام was a wealthy and pious prophet blessed with health, wealth, and a large family. Allāh tested him by taking away everything — his wealth, his children, and his health. He was afflicted with a severe illness for <strong>seven years</strong>, yet he never once complained to anyone other than Allāh.</p>
-<p><em>"And remember Our servant Ayyūb, when he called to his Lord: 'Indeed, Shayṭān has touched me with hardship and suffering.'"</em> (Qur'ān 38:41)</p>
-<p>His wife remained faithful throughout his trial. When he finally called upon Allāh, he was told: <em>"Strike with your foot — here is cool water to wash with and to drink."</em> (Qur'ān 38:42). Allāh restored his health, doubled his wealth, and blessed him with a new family.</p>
-<p><strong>Lesson:</strong> No matter how severe the trial, a believer must remain patient and turn only to Allāh for relief.</p>
-
-<h3>Al-Andalus — Muslim Spain (711–1492 AD)</h3>
-
-<h4>The Conquest</h4>
-<p>In 711 AD, the Muslim general <strong>Ṭāriq ibn Ziyād</strong> crossed the strait (later named Jabal Ṭāriq — Gibraltar) with an army and defeated the Visigothic King Roderic. Within a few years, most of the Iberian Peninsula was under Muslim rule.</p>
-<p>'Abdur Raḥmān al-Dākhil established the Umayyad Emirate of Córdoba, and later 'Abdur Raḥmān III declared a Caliphate. Córdoba became one of the most advanced cities in Europe.</p>
-
-<h4>Golden Age</h4>
-<p>Muslim Spain became a beacon of learning, tolerance, and civilisation:</p>
-<ul>
-  <li>Córdoba had over <strong>600 libraries</strong> and its great mosque was a wonder of architecture.</li>
-  <li>Muslims, Christians, and Jews lived together in relative harmony (convivencia).</li>
-  <li>Scholars excelled in medicine, astronomy, mathematics, agriculture, and philosophy.</li>
-  <li>Translations of Greek and Arabic texts into Latin helped spark the European Renaissance.</li>
-</ul>
-
-<h4>Decline and Fall</h4>
-<p>Internal divisions (ta'ifas — petty kingdoms) weakened Muslim unity. The Christian Reconquista gradually recaptured territory. In 1492 AD, the last Muslim ruler of Granada, Abū 'Abdillāh (Boabdil), surrendered to Ferdinand and Isabella.</p>
-<p><strong>Lesson:</strong> The greatest lesson from Islamic Spain is the danger of <strong>division</strong> and disunity. When Muslims divided into warring factions, they lost everything.</p>
-
-<h3>The Crusades</h3>
-
-<h4>Background</h4>
-<p>In 1095, Pope Urban II called for a holy war to recapture Jerusalem from the Muslims. In 1099, the Crusaders conquered Jerusalem and massacred its Muslim and Jewish inhabitants.</p>
-
-<h4>Nūruddīn Zankī</h4>
-<p>Nūruddīn Zankī (1118–1174 AD) was a pious and just ruler who united the Muslim lands of Syria and Egypt. He was known as a man of prayer, fasting, and justice. His year of unification was 1155 AD. He prepared the ground for the reconquest of Jerusalem.</p>
-
-<h4>Ṣalāḥuddīn al-Ayyūbī</h4>
-<p>Ṣalāḥuddīn (1137–1193 AD) succeeded Nūruddīn's vision. At the <strong>Battle of Ḥiṭṭīn</strong> in 1187 AD, he decisively defeated the Crusader forces. He then peacefully conquered Jerusalem, allowing Christians to leave with their belongings — a stark contrast to the bloodshed of 1099.</p>
-<p>When he died, he had barely enough money for his funeral. He gave away almost everything to the poor.</p>
-
-<h3>The Ottoman Empire (1299–1923 AD)</h3>
-
-<h4>Rise</h4>
-<p>The Ottoman state was founded by 'Uthmān I in 1299 AD in Anatolia (modern Turkey). The Ottomans rapidly expanded through military skill, justice, and good governance.</p>
-
-<h4>Conquest of Constantinople</h4>
-<p>In 1453 AD, Sultan <strong>Meḥmet II</strong> conquered Constantinople (modern Istanbul), fulfilling the prophecy of the Prophet ﷺ: <em>"You will certainly conquer Constantinople. How blessed is the commander who conquers it and how blessed is his army."</em> (Aḥmad)</p>
-<p>He renamed it Islāmbol and converted the Hagia Sophia into a masjid. The conquest marked the end of the Byzantine Empire.</p>
-
-<h4>Golden Age</h4>
-<p>Under Sulaymān the Magnificent (1520–1566), the Ottoman Empire stretched across three continents. The Ottomans built magnificent mosques, bridges, and public works. They maintained the ḥaramayn (Makkah and Madīnah) for centuries.</p>
-
-<h4>Decline and End</h4>
-<p>Internal corruption, military defeats, and European colonialism weakened the empire. After World War I, the empire was dismantled. In 1924, the Caliphate was officially abolished by Mustafa Kemal Atatürk.</p>
-`.trim(),
+      title: 'Fiqh — Islamic Transactions: Buyū\', Ribā & Gambling',
+      description: 'Conditions of a valid sale, the prohibition of ribā (interest/usury) and its two types (al-faḍl and al-nasī\'ah), why ribā is ḥarām, prohibition of maysir (gambling), and the rules of ijārah (hire/lease).',
+      content: transactionsContent,
     },
     update: {
-      title: 'Tārīkh — Ayyūb, Andalusia, the Crusades & the Ottomans',
-      description: 'The patience of Prophet Ayyūb عليه السلام, the rise and fall of Muslim Spain (711–1492 AD), the Crusades and the heroes Nūruddīn and Ṣalāḥuddīn, the Ottoman Empire (1299–1923 AD), and key lessons from Islamic history.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Describe the patience of Ayyūb عليه السلام and its lessons for daily life.</li>
-  <li>Outline the rise and fall of Muslim Spain (al-Andalus).</li>
-  <li>Explain the significance of the Crusades and the roles of Nūruddīn and Ṣalāḥuddīn.</li>
-  <li>Summarise the rise, achievements and decline of the Ottoman Empire.</li>
-</ul>
-
-<h3>Ayyūb عليه السلام — The Prophet of Patience</h3>
-<p>Ayyūb عليه السلام was a wealthy and pious prophet blessed with health, wealth, and a large family. Allāh tested him by taking away everything — his wealth, his children, and his health. He was afflicted with a severe illness for <strong>seven years</strong>, yet he never once complained to anyone other than Allāh.</p>
-<p><em>"And remember Our servant Ayyūb, when he called to his Lord: 'Indeed, Shayṭān has touched me with hardship and suffering.'"</em> (Qur'ān 38:41)</p>
-<p>His wife remained faithful throughout his trial. When he finally called upon Allāh, he was told: <em>"Strike with your foot — here is cool water to wash with and to drink."</em> (Qur'ān 38:42). Allāh restored his health, doubled his wealth, and blessed him with a new family.</p>
-<p><strong>Lesson:</strong> No matter how severe the trial, a believer must remain patient and turn only to Allāh for relief.</p>
-
-<h3>Al-Andalus — Muslim Spain (711–1492 AD)</h3>
-
-<h4>The Conquest</h4>
-<p>In 711 AD, the Muslim general <strong>Ṭāriq ibn Ziyād</strong> crossed the strait (later named Jabal Ṭāriq — Gibraltar) with an army and defeated the Visigothic King Roderic. Within a few years, most of the Iberian Peninsula was under Muslim rule.</p>
-<p>'Abdur Raḥmān al-Dākhil established the Umayyad Emirate of Córdoba, and later 'Abdur Raḥmān III declared a Caliphate. Córdoba became one of the most advanced cities in Europe.</p>
-
-<h4>Golden Age</h4>
-<p>Muslim Spain became a beacon of learning, tolerance, and civilisation:</p>
-<ul>
-  <li>Córdoba had over <strong>600 libraries</strong> and its great mosque was a wonder of architecture.</li>
-  <li>Muslims, Christians, and Jews lived together in relative harmony (convivencia).</li>
-  <li>Scholars excelled in medicine, astronomy, mathematics, agriculture, and philosophy.</li>
-  <li>Translations of Greek and Arabic texts into Latin helped spark the European Renaissance.</li>
-</ul>
-
-<h4>Decline and Fall</h4>
-<p>Internal divisions (ta'ifas — petty kingdoms) weakened Muslim unity. The Christian Reconquista gradually recaptured territory. In 1492 AD, the last Muslim ruler of Granada, Abū 'Abdillāh (Boabdil), surrendered to Ferdinand and Isabella.</p>
-<p><strong>Lesson:</strong> The greatest lesson from Islamic Spain is the danger of <strong>division</strong> and disunity. When Muslims divided into warring factions, they lost everything.</p>
-
-<h3>The Crusades</h3>
-
-<h4>Background</h4>
-<p>In 1095, Pope Urban II called for a holy war to recapture Jerusalem from the Muslims. In 1099, the Crusaders conquered Jerusalem and massacred its Muslim and Jewish inhabitants.</p>
-
-<h4>Nūruddīn Zankī</h4>
-<p>Nūruddīn Zankī (1118–1174 AD) was a pious and just ruler who united the Muslim lands of Syria and Egypt. He was known as a man of prayer, fasting, and justice. His year of unification was 1155 AD. He prepared the ground for the reconquest of Jerusalem.</p>
-
-<h4>Ṣalāḥuddīn al-Ayyūbī</h4>
-<p>Ṣalāḥuddīn (1137–1193 AD) succeeded Nūruddīn's vision. At the <strong>Battle of Ḥiṭṭīn</strong> in 1187 AD, he decisively defeated the Crusader forces. He then peacefully conquered Jerusalem, allowing Christians to leave with their belongings — a stark contrast to the bloodshed of 1099.</p>
-<p>When he died, he had barely enough money for his funeral. He gave away almost everything to the poor.</p>
-
-<h3>The Ottoman Empire (1299–1923 AD)</h3>
-
-<h4>Rise</h4>
-<p>The Ottoman state was founded by 'Uthmān I in 1299 AD in Anatolia (modern Turkey). The Ottomans rapidly expanded through military skill, justice, and good governance.</p>
-
-<h4>Conquest of Constantinople</h4>
-<p>In 1453 AD, Sultan <strong>Meḥmet II</strong> conquered Constantinople (modern Istanbul), fulfilling the prophecy of the Prophet ﷺ: <em>"You will certainly conquer Constantinople. How blessed is the commander who conquers it and how blessed is his army."</em> (Aḥmad)</p>
-<p>He renamed it Islāmbol and converted the Hagia Sophia into a masjid. The conquest marked the end of the Byzantine Empire.</p>
-
-<h4>Golden Age</h4>
-<p>Under Sulaymān the Magnificent (1520–1566), the Ottoman Empire stretched across three continents. The Ottomans built magnificent mosques, bridges, and public works. They maintained the ḥaramayn (Makkah and Madīnah) for centuries.</p>
-
-<h4>Decline and End</h4>
-<p>Internal corruption, military defeats, and European colonialism weakened the empire. After World War I, the empire was dismantled. In 1924, the Caliphate was officially abolished by Mustafa Kemal Atatürk.</p>
-`.trim(),
-      orderIndex: 3,
+      title: 'Fiqh — Islamic Transactions: Buyū\', Ribā & Gambling',
+      description: 'Conditions of a valid sale, the prohibition of ribā (interest/usury) and its two types (al-faḍl and al-nasī\'ah), why ribā is ḥarām, prohibition of maysir (gambling), and the rules of ijārah (hire/lease).',
+      content: transactionsContent,
     },
   });
+  console.log('✅ Unit 3:', unit3.title);
 
-  console.log('✅ Created Unit 4:', unitTarikh.title);
+  // =============================================
+  // UNIT 4: AḤĀDĪTH — Worship & Closeness to Allāh
+  // =============================================
 
-  // ──────────────────────────────────────────────
-  // UNIT 5: AQĀ'ID
-  // ──────────────────────────────────────────────
+  const hadithWorshipContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Understand and reflect on the ḥadīth about the sweetness of īmān.</li>
+  <li>Explain what \'true wealth\' means according to the Prophet ﷺ.</li>
+  <li>Appreciate the unlimited reward of patience according to the Qur\'an.</li>
+  <li>Know when Allāh descends to the lowest heaven and what this means for worship.</li>
+</ul>
 
-    const unitAqaid = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-aqaid' } },
+<h3>Ḥadīth 1: The Sweetness of Īmān</h3>
+<p class="arabic" dir="rtl" lang="ar">ثَلَاثٌ مَنْ كُنَّ فِيهِ وَجَدَ حَلَاوَةَ الْإِيمَانِ</p>
+<p><em>"Three things, whoever possesses them will find the sweetness of faith: that Allāh and His Messenger are more beloved to him than anything else; that he loves another person only for the sake of Allāh; and that he hates to return to disbelief as he hates to be thrown into fire."</em> (Bukhārī &amp; Muslim)</p>
+<p>This ḥadīth identifies three conditions for tasting true īmān:</p>
+<ol>
+  <li>Loving Allāh and His Messenger more than anyone and anything.</li>
+  <li>Loving others sincerely for Allāh\'s sake — not for worldly gain.</li>
+  <li>Despising returning to disbelief — treating sin as deeply repulsive.</li>
+</ol>
+
+<h3>Ḥadīth 2: True Wealth</h3>
+<p class="arabic" dir="rtl" lang="ar">لَيْسَ الغِنَى عَنْ كَثْرَةِ العَرَضِ، وَلَكِنَّ الغِنَى غِنَى النَّفْسِ</p>
+<p><em>"True wealth is not having many possessions. Rather, true wealth is the contentment of the soul."</em> (Bukhārī)</p>
+<p>True richness is internal. A person with millions but no contentment is spiritually poor. A person of modest means with a satisfied heart is truly wealthy. This teaches us to focus on gratitude (shukr) and reliance on Allāh (tawakkul) rather than endless acquisition.</p>
+
+<h3>Ḥadīth 3: The Reward of Patience</h3>
+<p class="arabic" dir="rtl" lang="ar">إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُمْ بِغَيْرِ حِسَابٍ</p>
+<p><em>"Truly, those who are patient will be given their reward without limit."</em> (Qur\'an 39:10)</p>
+<p>Every other act of worship has a specific multiplier of reward. Patience alone has no ceiling — Allāh will reward the patient person without measure. Whether the trial is illness, loss, poverty, or difficulty in obeying Allāh — all patience counts.</p>
+
+<h3>Ḥadīth 4: Allāh Descends to the Lowest Heaven</h3>
+<p><em>"Our Lord, the Blessed, the Exalted, descends every night to the lowest heaven when one-third of the night remains, and says: Who is invoking Me, that I may respond? Who is asking of Me, that I may give? Who is seeking My forgiveness, that I may forgive?"</em> (Bukhārī &amp; Muslim)</p>
+<p>This ḥadīth teaches us to seize the last third of the night for du\'a\', tawbah, and worship. Allāh is actively inviting us to call upon Him. Waking up even 20 minutes before Fajr to pray and make du\'a\' is one of the most powerful habits a Muslim can develop.</p>
+`.trim();
+
+  const unit4 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-ahadith-worship' } },
     create: {
-      slug: 'maktab-8-aqaid',
+      slug: 'maktab-8-ahadith-worship',
       courseId: course.id,
-      title: 'Aqā\'id — Attributes of Allāh, Istiwā\', Īmān & the \'Ulamā\'',
-      description: 'Understanding the attributes (ṣifāt) of Allāh including the mutashābihāt, the approaches of tafwīḍ and ta\'wīl, the meaning of istiwā\', the importance of full conviction in shahādah, and the role of authentic \'ulamā\' and isnād.',
       orderIndex: 4,
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Understand the attributes (ṣifāt) of Allāh and the concept of mutashābihāt.</li>
-  <li>Explain the approaches of tafwīḍ and ta'wīl in understanding ambiguous texts.</li>
-  <li>Define istiwā' and its correct understanding in Islamic theology.</li>
-  <li>Appreciate the importance of the shahādah with full conviction.</li>
-  <li>Recognise the role of the 'ulamā' and the significance of isnād.</li>
-</ul>
-
-<h3>The Attributes of Allāh</h3>
-<p>Allāh describes Himself in the Qur'ān with many attributes (ṣifāt): He is the All-Knowing, the All-Seeing, the All-Hearing, the Most Merciful, the Most Powerful. These are called <strong>muḥkamāt</strong> — clear verses whose meanings are well established.</p>
-<p>However, some verses describe Allāh with words like "Hand" (yad), "Face" (wajh), and "Eye" ('ayn). These are known as <strong>mutashābihāt</strong> — verses whose apparent meaning might suggest a resemblance to creation.</p>
-<p><em>"There is nothing like unto Him, and He is the Hearing, the Seeing."</em> (Qur'ān 42:11)</p>
-<p>This fundamental verse establishes that Allāh does not resemble His creation in any way.</p>
-
-<h3>Tafwīḍ and Ta'wīl</h3>
-<p>The scholars of Ahl al-Sunnah have two approaches to the mutashābihāt:</p>
-<ol>
-  <li><strong>Tafwīḍ:</strong> To believe in the text as it is and hand over its true meaning to Allāh. We affirm the words but do not attempt to define their precise meaning. This was the approach of many of the Salaf.</li>
-  <li><strong>Ta'wīl:</strong> To interpret the text in a manner that befits Allāh's majesty, without attributing physical characteristics. For example, "Hand" may be interpreted as power or generosity. This approach was used by later scholars to protect common people from misunderstanding.</li>
-</ol>
-<p>Both approaches are valid within Ahl al-Sunnah. What is not permissible is to take these verses literally and attribute physical form to Allāh (tajsīm) or to deny them entirely (ta'ṭīl).</p>
-
-<h3>Istiwā'</h3>
-<p><em>"The Most Merciful rose over ('alā) the Throne (istiwā')."</em> (Qur'ān 20:5)</p>
-<p>Imām Mālik was asked about this verse and replied: <em>"Istiwā' is not unknown. The 'how' (kayf) is not conceivable. Belief in it is obligatory. Asking about it is an innovation."</em></p>
-<p>Allāh does not physically sit on His Throne like a created being. His istiwā' is in a manner that befits His majesty, without resemblance to creation.</p>
-
-<h3>Shahādah with Full Conviction</h3>
-<p>The shahādah is not merely words spoken by the tongue. It requires full conviction (yaqīn) in the heart. A person who says the shahādah must believe in:</p>
-<ul>
-  <li>The oneness of Allāh (tawḥīd) — no partner, no equal, no rival.</li>
-  <li>The prophethood of Muḥammad ﷺ — the final messenger of Allāh.</li>
-  <li>Everything that the Prophet ﷺ brought — the Qur'ān, Sunnah, and the teachings of Islām.</li>
-</ul>
-
-<h3>The Role of the 'Ulamā'</h3>
-<p>The Prophet ﷺ said: <em>"The 'ulamā' are the inheritors of the prophets."</em> (Abū Dāwūd)</p>
-<p>The 'ulamā' preserve and transmit the knowledge of Islām from generation to generation. It is essential for laypeople to consult qualified scholars on matters of religion rather than relying on their own understanding of the Qur'ān and ḥadīth.</p>
-
-<h3>Isnād — The Chain of Narration</h3>
-<p>Isnād is a unique feature of Islāmic scholarship — an unbroken chain of transmission from a scholar back to the Prophet ﷺ. It ensures the authenticity of knowledge.</p>
-<p>'Abdullāh ibn al-Mubārak said: <em>"Isnād is part of the religion. Were it not for isnād, anyone could say whatever they wished."</em></p>
-<p>Every student of knowledge receives their learning through a teacher, who learned from their teacher, in an unbroken chain going back to Rasūlullāh ﷺ.</p>
-`.trim(),
+      title: 'Aḥādīth — Worship & Closeness to Allāh',
+      description: 'Four key aḥādīth: three conditions for sweetness of īmān; true wealth is contentment of the soul; the unlimited reward of patience; Allāh\'s descent in the last third of the night.',
+      content: hadithWorshipContent,
     },
     update: {
-      title: 'Aqā\'id — Attributes of Allāh, Istiwā\', Īmān & the \'Ulamā\'',
-      description: 'Understanding the attributes (ṣifāt) of Allāh including the mutashābihāt, the approaches of tafwīḍ and ta\'wīl, the meaning of istiwā\', the importance of full conviction in shahādah, and the role of authentic \'ulamā\' and isnād.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Understand the attributes (ṣifāt) of Allāh and the concept of mutashābihāt.</li>
-  <li>Explain the approaches of tafwīḍ and ta'wīl in understanding ambiguous texts.</li>
-  <li>Define istiwā' and its correct understanding in Islamic theology.</li>
-  <li>Appreciate the importance of the shahādah with full conviction.</li>
-  <li>Recognise the role of the 'ulamā' and the significance of isnād.</li>
-</ul>
-
-<h3>The Attributes of Allāh</h3>
-<p>Allāh describes Himself in the Qur'ān with many attributes (ṣifāt): He is the All-Knowing, the All-Seeing, the All-Hearing, the Most Merciful, the Most Powerful. These are called <strong>muḥkamāt</strong> — clear verses whose meanings are well established.</p>
-<p>However, some verses describe Allāh with words like "Hand" (yad), "Face" (wajh), and "Eye" ('ayn). These are known as <strong>mutashābihāt</strong> — verses whose apparent meaning might suggest a resemblance to creation.</p>
-<p><em>"There is nothing like unto Him, and He is the Hearing, the Seeing."</em> (Qur'ān 42:11)</p>
-<p>This fundamental verse establishes that Allāh does not resemble His creation in any way.</p>
-
-<h3>Tafwīḍ and Ta'wīl</h3>
-<p>The scholars of Ahl al-Sunnah have two approaches to the mutashābihāt:</p>
-<ol>
-  <li><strong>Tafwīḍ:</strong> To believe in the text as it is and hand over its true meaning to Allāh. We affirm the words but do not attempt to define their precise meaning. This was the approach of many of the Salaf.</li>
-  <li><strong>Ta'wīl:</strong> To interpret the text in a manner that befits Allāh's majesty, without attributing physical characteristics. For example, "Hand" may be interpreted as power or generosity. This approach was used by later scholars to protect common people from misunderstanding.</li>
-</ol>
-<p>Both approaches are valid within Ahl al-Sunnah. What is not permissible is to take these verses literally and attribute physical form to Allāh (tajsīm) or to deny them entirely (ta'ṭīl).</p>
-
-<h3>Istiwā'</h3>
-<p><em>"The Most Merciful rose over ('alā) the Throne (istiwā')."</em> (Qur'ān 20:5)</p>
-<p>Imām Mālik was asked about this verse and replied: <em>"Istiwā' is not unknown. The 'how' (kayf) is not conceivable. Belief in it is obligatory. Asking about it is an innovation."</em></p>
-<p>Allāh does not physically sit on His Throne like a created being. His istiwā' is in a manner that befits His majesty, without resemblance to creation.</p>
-
-<h3>Shahādah with Full Conviction</h3>
-<p>The shahādah is not merely words spoken by the tongue. It requires full conviction (yaqīn) in the heart. A person who says the shahādah must believe in:</p>
-<ul>
-  <li>The oneness of Allāh (tawḥīd) — no partner, no equal, no rival.</li>
-  <li>The prophethood of Muḥammad ﷺ — the final messenger of Allāh.</li>
-  <li>Everything that the Prophet ﷺ brought — the Qur'ān, Sunnah, and the teachings of Islām.</li>
-</ul>
-
-<h3>The Role of the 'Ulamā'</h3>
-<p>The Prophet ﷺ said: <em>"The 'ulamā' are the inheritors of the prophets."</em> (Abū Dāwūd)</p>
-<p>The 'ulamā' preserve and transmit the knowledge of Islām from generation to generation. It is essential for laypeople to consult qualified scholars on matters of religion rather than relying on their own understanding of the Qur'ān and ḥadīth.</p>
-
-<h3>Isnād — The Chain of Narration</h3>
-<p>Isnād is a unique feature of Islāmic scholarship — an unbroken chain of transmission from a scholar back to the Prophet ﷺ. It ensures the authenticity of knowledge.</p>
-<p>'Abdullāh ibn al-Mubārak said: <em>"Isnād is part of the religion. Were it not for isnād, anyone could say whatever they wished."</em></p>
-<p>Every student of knowledge receives their learning through a teacher, who learned from their teacher, in an unbroken chain going back to Rasūlullāh ﷺ.</p>
-`.trim(),
-      orderIndex: 4,
+      title: 'Aḥādīth — Worship & Closeness to Allāh',
+      description: 'Four key aḥādīth: three conditions for sweetness of īmān; true wealth is contentment of the soul; the unlimited reward of patience; Allāh\'s descent in the last third of the night.',
+      content: hadithWorshipContent,
     },
   });
+  console.log('✅ Unit 4:', unit4.title);
 
-  console.log('✅ Created Unit 5:', unitAqaid.title);
+  // =============================================
+  // UNIT 5: AḤĀDĪTH — Character, Ṣadaqah & Rights of Muslims
+  // =============================================
 
-  // ──────────────────────────────────────────────
-  // UNIT 6: AKHLĀQ
-  // ──────────────────────────────────────────────
+  const hadithCharContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Understand that Allāh judges people by hearts and deeds, not appearances.</li>
+  <li>Explain how ṣadaqah extinguishes sins like water extinguishes fire.</li>
+  <li>List the six rights a Muslim has over another.</li>
+  <li>Apply the ḥadīth on self-sufficiency to real life.</li>
+</ul>
 
-    const unitAkhlaq = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-akhlaq' } },
+<h3>Ḥadīth 1: Allāh Looks at Hearts and Deeds</h3>
+<p class="arabic" dir="rtl" lang="ar">إِنَّ اللَّهَ لَا يَنْظُرُ إِلَى صُوَرِكُمْ وَأَمْوَالِكُمْ، وَلَكِنَّ يَنْظُرُ إِلَى قُلُوبِكُمْ وَأَعْمَالِكُمْ</p>
+<p><em>"Allāh does not look at your appearances or your wealth, but He looks at your hearts and your deeds."</em> (Muslim)</p>
+<p>Physical beauty, social status, and worldly wealth carry no weight with Allāh. What matters is sincerity in the heart and righteousness in action. This should free us from caring what others think of our outward appearance and instead focus on internal character.</p>
+
+<h3>Ḥadīth 2: Ṣadaqah Extinguishes Sins</h3>
+<p><em>"Ṣadaqah extinguishes sin just as water extinguishes fire."</em> (Tirmidhī)</p>
+<p>Giving in charity is one of the most powerful tools for spiritual purification. This does not mean one can deliberately sin expecting charity to \'cancel\' it out. Rather, the sincere believer who gives charity alongside seeking forgiveness finds their sins wiped away by Allāh\'s mercy.</p>
+
+<h3>Ḥadīth 3: Spreading Salām Widely</h3>
+<p><em>"You will not enter Paradise until you believe, and you will not believe until you love one another. Shall I not tell you of something that, if you do it, you will love one another? Spread salām among yourselves."</em> (Muslim)</p>
+<p>The simple act of saying <em>\"Al-Salāmu \'alaykum\"</em> creates love, breaks barriers, and earns reward. The Prophet ﷺ greeted everyone — young, old, known, unknown.</p>
+
+<h3>Ḥadīth 4: Six Rights of a Muslim over Another</h3>
+<p><em>"The rights of a Muslim over another Muslim are six..."</em></p>
+<ol>
+  <li>When you meet him, give salām.</li>
+  <li>When he invites you, accept the invitation.</li>
+  <li>When he seeks your advice (naṣīḥah), give it sincerely.</li>
+  <li>When he sneezes and says alḥamdulillāh, say yarḥamukallāh.</li>
+  <li>When he is sick, visit him.</li>
+  <li>When he dies, follow his janāzah.</li>
+</ol>
+<p>These six rights build a community of care and brotherhood. Every Muslim should strive to fulfil them.</p>
+
+<h3>Ḥadīth 5: The Value of Self-Sufficiency</h3>
+<p><em>"That one of you should take his rope, go to the mountain, cut wood and carry it, and thereby save his dignity, is better than that he should ask people who may give or refuse him."</em> (Bukhārī)</p>
+<p>Working with one\'s own hands — even a humble job — is more dignified than begging. Islam values self-reliance and hard work as acts of worship and means of protecting one\'s honour.</p>
+`.trim();
+
+  const unit5 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-ahadith-character' } },
     create: {
-      slug: 'maktab-8-akhlaq',
+      slug: 'maktab-8-ahadith-character',
       courseId: course.id,
-      title: 'Akhlāq — Taqwā, Tawakkul, Tawbah & Modesty in Gaze',
-      description: 'Reflecting on the shortness of this worldly life, cultivating taqwā (God-consciousness), placing tawakkul (reliance) upon Allāh, the gift of tawbah (repentance), and guarding modesty in gaze.',
       orderIndex: 5,
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Reflect on the temporary nature of this worldly life.</li>
-  <li>Understand and cultivate taqwā (God-consciousness) in daily life.</li>
-  <li>Place tawakkul (reliance) upon Allāh while also taking practical means.</li>
-  <li>Appreciate the gift of tawbah and its three conditions.</li>
-  <li>Guard modesty in gaze and understand the concept of ḥayā'.</li>
-</ul>
-
-<h3>The Shortness of This Worldly Life</h3>
-<p>Imām Ghazālī compared worldly life to a man who fell into a well. He grabbed a branch growing from the side. Below him was a serpent with its mouth open, and above him was a lion waiting. Two mice — one white (day) and one black (night) — gnawed at the branch. On the branch was a beehive dripping honey. The man became distracted licking the honey, forgetting his perilous situation.</p>
-<p>This parable illustrates how people become distracted by the fleeting pleasures of this world while forgetting death and the Hereafter.</p>
-<p><em>"Every soul shall taste death. And you will only be given your full compensation on the Day of Resurrection."</em> (Qur'ān 3:185)</p>
-
-<h3>Taqwā — God-Consciousness</h3>
-<p>Taqwā comes from the root wiqāyah (to protect). It means to abstain from sin for the fear of Allāh, to be conscious of Allāh in all matters — in public and in private.</p>
-<p><em>"Whoever fears Allāh, He brings forth a way out for him, and provides for him from sources he could never imagine."</em> (Qur'ān 65:2–3)</p>
-<p>'Umar رضي الله عنه asked Ubayy ibn Ka'b رضي الله عنه about taqwā. Ubayy said: <em>"Have you ever walked on a path full of thorns?" 'Umar said: "Yes." Ubayy said: "What did you do?" 'Umar said: "I gathered my garments and walked carefully." Ubayy said: "That is taqwā."</em></p>
-
-<h3>Tawakkul — Reliance upon Allāh</h3>
-<p>Tawakkul means to rely upon Allāh after taking all practical means. It is not laziness or neglecting effort — it is trusting that the outcome is in Allāh's hands.</p>
-<p>The Prophet ﷺ said: <em>"If you were to rely upon Allāh with true reliance, He would provide for you as He provides the birds — they go out in the morning hungry and return in the evening full."</em> (Tirmidhī)</p>
-<p>When asked whether one should tie one's camel or rely on Allāh, the Prophet ﷺ said: <em>"Tie it, then place your trust in Allāh."</em> (Tirmidhī)</p>
-
-<h3>Tawbah — Repentance</h3>
-<p>Allāh loves those who repent. The door of tawbah is always open. Allāh says: <em>"Say: O My servants who have transgressed against themselves, do not despair of the mercy of Allāh. Indeed, Allāh forgives all sins."</em> (Qur'ān 39:53)</p>
-<h4>Three Conditions of Tawbah</h4>
-<ol>
-  <li><strong>Regret (nadam):</strong> To feel genuine remorse for the sin committed.</li>
-  <li><strong>Abandoning the sin:</strong> To immediately stop the sinful action.</li>
-  <li><strong>Resolve not to return:</strong> To make a firm intention never to commit the sin again.</li>
-</ol>
-<p>If the sin involves the rights of another person, a fourth condition applies: to return the right or seek their forgiveness.</p>
-
-<h3>Ḥayā' — Modesty</h3>
-<p>The Prophet ﷺ said: <em>"Īmān consists of more than sixty branches. And ḥayā' (modesty) is a part of faith."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>Modesty in gaze is an essential aspect of ḥayā'. Allāh commands: <em>"Tell the believing men to lower their gaze and guard their modesty."</em> (Qur'ān 24:30)</p>
-<p>The Prophet ﷺ said: <em>"The glance is a poisoned arrow from the arrows of Iblīs. Whoever lowers his gaze for the sake of Allāh, Allāh will grant him a sweetness of faith that he will feel in his heart."</em></p>
-
-<h3>Istighfār — Seeking Forgiveness</h3>
-<p>The Prophet ﷺ used to seek Allāh's forgiveness more than seventy times a day, despite being sinless. Istighfār brings relief from anxiety, opens doors of provision, and is a means of earning Allāh's mercy.</p>
-<p>Sayyidul Istighfār (the master supplication for forgiveness): <em>"O Allāh, You are my Lord. There is no god but You. You created me and I am Your slave. I follow Your covenant and promise as best I can. I seek refuge in You from the evil I have done. I acknowledge Your blessings upon me and I acknowledge my sins. Forgive me, for none forgives sins but You."</em></p>
-`.trim(),
+      title: 'Aḥādīth — Character, Ṣadaqah & Rights of Muslims',
+      description: 'Five aḥādīth: Allāh looks at hearts and deeds; ṣadaqah extinguishes sins like water; spreading salām; the six rights of a Muslim over another; the value of self-sufficiency over begging.',
+      content: hadithCharContent,
     },
     update: {
-      title: 'Akhlāq — Taqwā, Tawakkul, Tawbah & Modesty in Gaze',
-      description: 'Reflecting on the shortness of this worldly life, cultivating taqwā (God-consciousness), placing tawakkul (reliance) upon Allāh, the gift of tawbah (repentance), and guarding modesty in gaze.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Reflect on the temporary nature of this worldly life.</li>
-  <li>Understand and cultivate taqwā (God-consciousness) in daily life.</li>
-  <li>Place tawakkul (reliance) upon Allāh while also taking practical means.</li>
-  <li>Appreciate the gift of tawbah and its three conditions.</li>
-  <li>Guard modesty in gaze and understand the concept of ḥayā'.</li>
-</ul>
-
-<h3>The Shortness of This Worldly Life</h3>
-<p>Imām Ghazālī compared worldly life to a man who fell into a well. He grabbed a branch growing from the side. Below him was a serpent with its mouth open, and above him was a lion waiting. Two mice — one white (day) and one black (night) — gnawed at the branch. On the branch was a beehive dripping honey. The man became distracted licking the honey, forgetting his perilous situation.</p>
-<p>This parable illustrates how people become distracted by the fleeting pleasures of this world while forgetting death and the Hereafter.</p>
-<p><em>"Every soul shall taste death. And you will only be given your full compensation on the Day of Resurrection."</em> (Qur'ān 3:185)</p>
-
-<h3>Taqwā — God-Consciousness</h3>
-<p>Taqwā comes from the root wiqāyah (to protect). It means to abstain from sin for the fear of Allāh, to be conscious of Allāh in all matters — in public and in private.</p>
-<p><em>"Whoever fears Allāh, He brings forth a way out for him, and provides for him from sources he could never imagine."</em> (Qur'ān 65:2–3)</p>
-<p>'Umar رضي الله عنه asked Ubayy ibn Ka'b رضي الله عنه about taqwā. Ubayy said: <em>"Have you ever walked on a path full of thorns?" 'Umar said: "Yes." Ubayy said: "What did you do?" 'Umar said: "I gathered my garments and walked carefully." Ubayy said: "That is taqwā."</em></p>
-
-<h3>Tawakkul — Reliance upon Allāh</h3>
-<p>Tawakkul means to rely upon Allāh after taking all practical means. It is not laziness or neglecting effort — it is trusting that the outcome is in Allāh's hands.</p>
-<p>The Prophet ﷺ said: <em>"If you were to rely upon Allāh with true reliance, He would provide for you as He provides the birds — they go out in the morning hungry and return in the evening full."</em> (Tirmidhī)</p>
-<p>When asked whether one should tie one's camel or rely on Allāh, the Prophet ﷺ said: <em>"Tie it, then place your trust in Allāh."</em> (Tirmidhī)</p>
-
-<h3>Tawbah — Repentance</h3>
-<p>Allāh loves those who repent. The door of tawbah is always open. Allāh says: <em>"Say: O My servants who have transgressed against themselves, do not despair of the mercy of Allāh. Indeed, Allāh forgives all sins."</em> (Qur'ān 39:53)</p>
-<h4>Three Conditions of Tawbah</h4>
-<ol>
-  <li><strong>Regret (nadam):</strong> To feel genuine remorse for the sin committed.</li>
-  <li><strong>Abandoning the sin:</strong> To immediately stop the sinful action.</li>
-  <li><strong>Resolve not to return:</strong> To make a firm intention never to commit the sin again.</li>
-</ol>
-<p>If the sin involves the rights of another person, a fourth condition applies: to return the right or seek their forgiveness.</p>
-
-<h3>Ḥayā' — Modesty</h3>
-<p>The Prophet ﷺ said: <em>"Īmān consists of more than sixty branches. And ḥayā' (modesty) is a part of faith."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>Modesty in gaze is an essential aspect of ḥayā'. Allāh commands: <em>"Tell the believing men to lower their gaze and guard their modesty."</em> (Qur'ān 24:30)</p>
-<p>The Prophet ﷺ said: <em>"The glance is a poisoned arrow from the arrows of Iblīs. Whoever lowers his gaze for the sake of Allāh, Allāh will grant him a sweetness of faith that he will feel in his heart."</em></p>
-
-<h3>Istighfār — Seeking Forgiveness</h3>
-<p>The Prophet ﷺ used to seek Allāh's forgiveness more than seventy times a day, despite being sinless. Istighfār brings relief from anxiety, opens doors of provision, and is a means of earning Allāh's mercy.</p>
-<p>Sayyidul Istighfār (the master supplication for forgiveness): <em>"O Allāh, You are my Lord. There is no god but You. You created me and I am Your slave. I follow Your covenant and promise as best I can. I seek refuge in You from the evil I have done. I acknowledge Your blessings upon me and I acknowledge my sins. Forgive me, for none forgives sins but You."</em></p>
-`.trim(),
-      orderIndex: 5,
+      title: 'Aḥādīth — Character, Ṣadaqah & Rights of Muslims',
+      description: 'Five aḥādīth: Allāh looks at hearts and deeds; ṣadaqah extinguishes sins like water; spreading salām; the six rights of a Muslim over another; the value of self-sufficiency over begging.',
+      content: hadithCharContent,
     },
   });
+  console.log('✅ Unit 5:', unit5.title);
 
-  console.log('✅ Created Unit 6:', unitAkhlaq.title);
+  // =============================================
+  // UNIT 6: SĪRAH — Shamāʼil of Rasūlullāh ﷺ
+  // =============================================
 
-  // ──────────────────────────────────────────────
-  // UNIT 7: ĀDĀB
-  // ──────────────────────────────────────────────
+  const shamailContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Review the physical description (shamā\'il) of the Prophet ﷺ.</li>
+  <li>Know key miracles of the Prophet ﷺ and their lessons.</li>
+  <li>Appreciate how the Prophet ﷺ transformed the world in 23 years.</li>
+  <li>Identify one specific sunnah to implement personally.</li>
+</ul>
 
-    const unitAdab = await prisma.unit.upsert({
-    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-adab' } },
+<h3>What are Shamā\'il?</h3>
+<p>Shamā\'il means the noble characteristics — both physical and moral — of the Prophet Muḥammad ﷺ. The Companions described him in detail so that every generation could know and love him. Imām Tirmidhī compiled the famous collection <em>Al-Shamā\'il al-Muḥammadiyyah</em>.</p>
+
+<h3>Physical Description</h3>
+<p>The Prophet ﷺ was of medium height, with a broad chest, a face that shone like the full moon, black hair, and large dark eyes. His walk was purposeful — as if descending a slope. His smile lit up the room. Those who saw him said they had never seen anyone more beautiful before or after him.</p>
+<p>\'Alī ibn Abī Ṭālib said: <em>"He was neither very tall nor very short. He was of medium build. His hair was neither curly nor completely straight. He was the most generous in giving, the most truthful in speech, the most gentle in nature."</em></p>
+
+<h3>Selected Miracles of the Prophet ﷺ</h3>
+<h4>The Splitting of the Moon</h4>
+<p>Allāh says: <em>"The Hour has drawn near and the moon has split."</em> (54:1) The Quraysh demanded a sign; Allāh caused the moon to visibly split into two halves and then rejoin. This miracle is confirmed in the Qur\'an itself.</p>
+
+<h4>Water Flowing from His Fingers</h4>
+<p>At Ḥudaybiyah, 1,400 companions had water only in a small vessel. The Prophet ﷺ placed his hand in it — water flowed from between his fingers like springs until everyone drank and filled their vessels. (Bukhārī)</p>
+
+<h4>Feeding Multitudes from Little</h4>
+<p>Jābir ibn \'Abdullāh reported that at a feast, 1,000 companions ate from a small amount of food prepared for 10 — and it was not exhausted. (Bukhārī)</p>
+
+<h4>The Night Journey (Isrā\' and Mi\'rāj)</h4>
+<p>In one night, the Prophet ﷺ was taken from Makkah to Masjid al-Aqṣā and then ascended through the seven heavens to a station no other creation has reached. He returned before dawn. This miracle confirmed his unique status.</p>
+
+<h3>23 Years That Changed the World</h3>
+<p>In 23 years, the Prophet ﷺ transformed a scattered, idol-worshipping people into a nation that would carry the light of tawḥīd across three continents within a century of his passing. He:</p>
+<ul>
+  <li>Abolished idol worship and established the worship of Allāh alone.</li>
+  <li>Ended female infanticide and elevated the status of women.</li>
+  <li>Established justice, contracts, and human rights 14 centuries before modern frameworks.</li>
+  <li>United warring Arab tribes into a cohesive ummah.</li>
+  <li>Left a Sunnah so comprehensive it covers every aspect of life.</li>
+</ul>
+
+<h3>Implementing the Sunnah</h3>
+<p>The Prophet ﷺ said: <em>"Whoever loves my sunnah loves me, and whoever loves me will be with me in Paradise."</em> Choose one specific sunnah to implement consistently — even a small one done regularly. Examples: eating with the right hand, saying bismilllāh before meals, greeting with the full salām, smiling when meeting others.</p>
+`.trim();
+
+  const unit6 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-sirah-shamail' } },
     create: {
-      slug: 'maktab-8-adab',
+      slug: 'maktab-8-sirah-shamail',
       courseId: course.id,
-      title: 'Ādāb — Debates, Nikāḥ Etiquette & Transactions',
-      description: 'The Islamic etiquette of debates and discussions, the ādāb of nikāḥ ceremonies, and the etiquette for sellers and buyers in Islamic transactions.',
       orderIndex: 6,
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Understand the Islamic etiquette of debates and discussions.</li>
-  <li>Learn the ādāb of nikāḥ ceremonies and the engagement period.</li>
-  <li>Apply Islamic principles in buying and selling transactions.</li>
-</ul>
-
-<h3>Ādāb of Debates and Discussions</h3>
-<p>Islām encourages seeking knowledge and healthy intellectual discussion. However, there is a clear difference between a sincere discussion and an argument driven by ego.</p>
-<h4>Guidelines for Islamic Debate</h4>
-<ul>
-  <li>The intention should always be to reach the <strong>correct conclusion</strong>, not to win or show off.</li>
-  <li>Speak with respect and do not raise your voice.</li>
-  <li>Listen to the other person's point of view fully before responding.</li>
-  <li>Use evidence from the Qur'ān and Sunnah where possible.</li>
-  <li>If you realise you are wrong, accept it graciously.</li>
-  <li>Avoid personal attacks and insults.</li>
-  <li>The Prophet ﷺ said: <em>"I guarantee a house in the middle of Jannah for the one who abandons arguing even if he is right."</em> (Abū Dāwūd)</li>
-</ul>
-<p><em>"Invite to the way of your Lord with wisdom and good counsel, and argue with them in a way that is best."</em> (Qur'ān 16:125)</p>
-
-<h3>Ādāb of Nikāḥ</h3>
-<h4>The Engagement Period</h4>
-<p>Once a proposal is accepted, the couple are still non-maḥram (not yet married). It is <strong>not permissible</strong> for a fiancé and fiancée to text, call, or meet privately before the nikāḥ. All interactions should be conducted through families.</p>
-
-<h4>The Nikāḥ Ceremony</h4>
-<ul>
-  <li>Keep the nikāḥ simple — the most blessed nikāḥ is the one with the least expense.</li>
-  <li>Perform the nikāḥ in a masjid if possible.</li>
-  <li>The khuṭbah (sermon) of nikāḥ should be recited.</li>
-  <li>Announce the nikāḥ publicly — do not keep it secret.</li>
-</ul>
-
-<h4>Walīmah</h4>
-<p>The walīmah (wedding feast) is a sunnah. The Prophet ﷺ said: <em>"The worst feast is the walīmah where the rich are invited and the poor are left out."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>The walīmah should be simple and within one's means. Extravagance and show-off should be avoided.</p>
-
-<h3>Ādāb of Transactions</h3>
-
-<h4>Etiquette for the Seller</h4>
-<ul>
-  <li>Be honest and transparent — do not hide defects in the product.</li>
-  <li>Have prices clearly marked on items for sale.</li>
-  <li>Do not swear oaths to sell goods — the Prophet ﷺ warned against this.</li>
-  <li>If an item has a fault, inform the buyer before selling.</li>
-  <li>Be fair in weighing and measuring.</li>
-  <li>Do not hoard goods to drive up prices.</li>
-</ul>
-
-<h4>Etiquette for the Buyer</h4>
-<ul>
-  <li>Do not be extravagant — buy what you need.</li>
-  <li>Do not lie when returning an item for a refund.</li>
-  <li>Pay the agreed price willingly and on time.</li>
-  <li>Do not haggle excessively to the point of oppression.</li>
-  <li>If you see a seller in need, be generous.</li>
-</ul>
-
-<p>The Prophet ﷺ said: <em>"Speak good or remain silent."</em> (Ṣaḥīḥ al-Bukhārī) — This applies equally to business dealings, where honesty and kind speech ensure barakah in one's trade.</p>
-`.trim(),
+      title: 'Sīrah — Shamā\'il of Rasūlullāh ﷺ',
+      description: 'Comprehensive study of the shamā\'il (noble characteristics) of the Prophet ﷺ: physical description, key miracles (moon-splitting, water from fingers, feeding multitudes), how he changed the world in 23 years, and implementing one sunnah.',
+      content: shamailContent,
     },
     update: {
-      title: 'Ādāb — Debates, Nikāḥ Etiquette & Transactions',
-      description: 'The Islamic etiquette of debates and discussions, the ādāb of nikāḥ ceremonies, and the etiquette for sellers and buyers in Islamic transactions.',
-      content: `
-<h2>Learning Objectives</h2>
-<ul>
-  <li>Understand the Islamic etiquette of debates and discussions.</li>
-  <li>Learn the ādāb of nikāḥ ceremonies and the engagement period.</li>
-  <li>Apply Islamic principles in buying and selling transactions.</li>
-</ul>
-
-<h3>Ādāb of Debates and Discussions</h3>
-<p>Islām encourages seeking knowledge and healthy intellectual discussion. However, there is a clear difference between a sincere discussion and an argument driven by ego.</p>
-<h4>Guidelines for Islamic Debate</h4>
-<ul>
-  <li>The intention should always be to reach the <strong>correct conclusion</strong>, not to win or show off.</li>
-  <li>Speak with respect and do not raise your voice.</li>
-  <li>Listen to the other person's point of view fully before responding.</li>
-  <li>Use evidence from the Qur'ān and Sunnah where possible.</li>
-  <li>If you realise you are wrong, accept it graciously.</li>
-  <li>Avoid personal attacks and insults.</li>
-  <li>The Prophet ﷺ said: <em>"I guarantee a house in the middle of Jannah for the one who abandons arguing even if he is right."</em> (Abū Dāwūd)</li>
-</ul>
-<p><em>"Invite to the way of your Lord with wisdom and good counsel, and argue with them in a way that is best."</em> (Qur'ān 16:125)</p>
-
-<h3>Ādāb of Nikāḥ</h3>
-<h4>The Engagement Period</h4>
-<p>Once a proposal is accepted, the couple are still non-maḥram (not yet married). It is <strong>not permissible</strong> for a fiancé and fiancée to text, call, or meet privately before the nikāḥ. All interactions should be conducted through families.</p>
-
-<h4>The Nikāḥ Ceremony</h4>
-<ul>
-  <li>Keep the nikāḥ simple — the most blessed nikāḥ is the one with the least expense.</li>
-  <li>Perform the nikāḥ in a masjid if possible.</li>
-  <li>The khuṭbah (sermon) of nikāḥ should be recited.</li>
-  <li>Announce the nikāḥ publicly — do not keep it secret.</li>
-</ul>
-
-<h4>Walīmah</h4>
-<p>The walīmah (wedding feast) is a sunnah. The Prophet ﷺ said: <em>"The worst feast is the walīmah where the rich are invited and the poor are left out."</em> (Ṣaḥīḥ al-Bukhārī)</p>
-<p>The walīmah should be simple and within one's means. Extravagance and show-off should be avoided.</p>
-
-<h3>Ādāb of Transactions</h3>
-
-<h4>Etiquette for the Seller</h4>
-<ul>
-  <li>Be honest and transparent — do not hide defects in the product.</li>
-  <li>Have prices clearly marked on items for sale.</li>
-  <li>Do not swear oaths to sell goods — the Prophet ﷺ warned against this.</li>
-  <li>If an item has a fault, inform the buyer before selling.</li>
-  <li>Be fair in weighing and measuring.</li>
-  <li>Do not hoard goods to drive up prices.</li>
-</ul>
-
-<h4>Etiquette for the Buyer</h4>
-<ul>
-  <li>Do not be extravagant — buy what you need.</li>
-  <li>Do not lie when returning an item for a refund.</li>
-  <li>Pay the agreed price willingly and on time.</li>
-  <li>Do not haggle excessively to the point of oppression.</li>
-  <li>If you see a seller in need, be generous.</li>
-</ul>
-
-<p>The Prophet ﷺ said: <em>"Speak good or remain silent."</em> (Ṣaḥīḥ al-Bukhārī) — This applies equally to business dealings, where honesty and kind speech ensure barakah in one's trade.</p>
-`.trim(),
-      orderIndex: 6,
+      title: 'Sīrah — Shamā\'il of Rasūlullāh ﷺ',
+      description: 'Comprehensive study of the shamā\'il (noble characteristics) of the Prophet ﷺ: physical description, key miracles (moon-splitting, water from fingers, feeding multitudes), how he changed the world in 23 years, and implementing one sunnah.',
+      content: shamailContent,
     },
   });
+  console.log('✅ Unit 6:', unit6.title);
 
-  console.log('✅ Created Unit 7:', unitAdab.title);
+  // =============================================
+  // UNIT 7: SĪRAH — \'Uthmān Ibn \'Affān رضي الله عنه
+  // =============================================
 
-  // ══════════════════════════════════════════════
-  // QUIZ QUESTIONS
-  // ══════════════════════════════════════════════
+  const uthmanContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Explain why \'Uthmān was called \'Dhū al-Nūrayn\'.</li>
+  <li>Describe his remarkable generosity, especially in the expedition of Tabūk.</li>
+  <li>Understand his greatest legacy: standardising the Qur\'an.</li>
+  <li>Know the circumstances of his martyrdom.</li>
+</ul>
 
-  console.log('');
-  console.log('📝 Creating quiz questions...');
+<h3>Early Life and Title</h3>
+<p>\'Uthmān ibn \'Affān رضي الله عنه was born into a wealthy noble family of Makkah. He was among the very first to accept Islam, drawn by Abū Bakr رضي الله عنه. He is called <strong>Dhū al-Nūrayn</strong> (\'He of the Two Lights\') because he married two daughters of the Prophet ﷺ in succession: first Ruqayyah, and after her death, Umm Kulthūm. No other man in history married two daughters of a prophet.</p>
 
-  // --- Fiqh Quizzes ---
+<h3>Extraordinary Generosity</h3>
+<h4>The Well of Rūmah</h4>
+<p>When the Muslims of Madīnah needed water, a Jewish man owned the only well and sold water at high prices. \'Uthmān purchased the well and donated it for free use to all Muslims — his reward continues until today.</p>
+<h4>The Expedition of Tabūk</h4>
+<p>In the 9th year after Hijrah, the Muslim army faced a critical expedition to Tabūk but lacked equipment. The Prophet ﷺ appealed for donations. \'Uthmān came forward with 300 camels fully loaded with supplies, 1,000 dinars in gold, and 300 horses. The Prophet ﷺ raised his hands and said: <em>"\'Uthmān\'s deeds after today will not harm him."</em></p>
 
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q1' },
-      create: {
-        externalId: 'maktab-8-fiqh-q1',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What is the best time to perform Ṣalātul Ishrāq?',
-        options: JSON.stringify(['Before sunrise', 'Fifteen minutes after sunrise', 'At midday', 'After \'Aṣr']),
-        correctAnswer: 'Fifteen minutes after sunrise',
-        explanation: 'Ṣalātul Ishrāq is a nafl ṣalāh best performed approximately fifteen minutes after sunrise.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What is the best time to perform Ṣalātul Ishrāq?',
-        options: JSON.stringify(['Before sunrise', 'Fifteen minutes after sunrise', 'At midday', 'After \'Aṣr']),
-        correctAnswer: 'Fifteen minutes after sunrise',
-        explanation: 'Ṣalātul Ishrāq is a nafl ṣalāh best performed approximately fifteen minutes after sunrise.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q2' },
-      create: {
-        externalId: 'maktab-8-fiqh-q2',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Tahajjud is performed at what time?',
-        options: JSON.stringify(['After Fajr', 'Before Maghrib', 'At night after waking from sleep', 'At midday']),
-        correctAnswer: 'At night after waking from sleep',
-        explanation: 'Tahajjud is the ṣalāh performed at night after waking from sleep. It is the most rewarding nafl ṣalāh.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Tahajjud is performed at what time?',
-        options: JSON.stringify(['After Fajr', 'Before Maghrib', 'At night after waking from sleep', 'At midday']),
-        correctAnswer: 'At night after waking from sleep',
-        explanation: 'Tahajjud is the ṣalāh performed at night after waking from sleep. It is the most rewarding nafl ṣalāh.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q3' },
-      create: {
-        externalId: 'maktab-8-fiqh-q3',
-        unitId: unitFiqh.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Khushū\' means praying ṣalāh as quickly as possible.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Khushū\' is humility and devotion in ṣalāh — praying at a measured pace with full concentration, not rushing.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Khushū\' means praying ṣalāh as quickly as possible.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Khushū\' is humility and devotion in ṣalāh — praying at a measured pace with full concentration, not rushing.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q4' },
-      create: {
-        externalId: 'maktab-8-fiqh-q4',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How many times more rewarding is ṣalāh in congregation?',
-        options: JSON.stringify(['Five times', 'Ten times', 'Twenty-five times', 'Fifty times']),
-        correctAnswer: 'Twenty-five times',
-        explanation: 'The Prophet ﷺ said: "A man\'s ṣalāh in congregation is twenty-five times more rewarding than his ṣalāh at home."',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'How many times more rewarding is ṣalāh in congregation?',
-        options: JSON.stringify(['Five times', 'Ten times', 'Twenty-five times', 'Fifty times']),
-        correctAnswer: 'Twenty-five times',
-        explanation: 'The Prophet ﷺ said: "A man\'s ṣalāh in congregation is twenty-five times more rewarding than his ṣalāh at home."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q5' },
-      create: {
-        externalId: 'maktab-8-fiqh-q5',
-        unitId: unitFiqh.id,
-        type: 'FILL_BLANK',
-        questionText: 'The minimum amount of mahr is the value of _____ dirhams.',
-        options: undefined,
-        correctAnswer: '10',
-        explanation: 'The minimum mahr is the value of 10 dirhams (30.618g of silver).',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'The minimum amount of mahr is the value of _____ dirhams.',
-        options: undefined,
-        correctAnswer: '10',
-        explanation: 'The minimum mahr is the value of 10 dirhams (30.618g of silver).',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q6' },
-      create: {
-        externalId: 'maktab-8-fiqh-q6',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What are the two types of ṭalāq?',
-        options: JSON.stringify(['Major and minor', 'Raj\'ī and Bā\'in', 'Written and spoken', 'Fardh and wājib']),
-        correctAnswer: 'Raj\'ī and Bā\'in',
-        explanation: 'Ṭalāq Raj\'ī (revocable) allows reconciliation within the \'iddah. Ṭalāq Bā\'in (irrevocable) requires a new nikāḥ to reconcile.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'What are the two types of ṭalāq?',
-        options: JSON.stringify(['Major and minor', 'Raj\'ī and Bā\'in', 'Written and spoken', 'Fardh and wājib']),
-        correctAnswer: 'Raj\'ī and Bā\'in',
-        explanation: 'Ṭalāq Raj\'ī (revocable) allows reconciliation within the \'iddah. Ṭalāq Bā\'in (irrevocable) requires a new nikāḥ to reconcile.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q7' },
-      create: {
-        externalId: 'maktab-8-fiqh-q7',
-        unitId: unitFiqh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Which of the following is NOT a condition for a valid sale (buyū\')?',
-        options: JSON.stringify(['Product must be ḥalāl', 'Price must be specified', 'No ambiguity', 'The buyer must be wealthy']),
-        correctAnswer: 'The buyer must be wealthy',
-        explanation: 'The conditions for a valid sale are: the product must be ḥalāl, the price must be specified, there should be no ambiguity, and the transaction should be unconditional. Wealth of the buyer is not a condition.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Which of the following is NOT a condition for a valid sale (buyū\')?',
-        options: JSON.stringify(['Product must be ḥalāl', 'Price must be specified', 'No ambiguity', 'The buyer must be wealthy']),
-        correctAnswer: 'The buyer must be wealthy',
-        explanation: 'The conditions for a valid sale are: the product must be ḥalāl, the price must be specified, there should be no ambiguity, and the transaction should be unconditional. Wealth of the buyer is not a condition.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-fiqh-q8' },
-      create: {
-        externalId: 'maktab-8-fiqh-q8',
-        unitId: unitFiqh.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Ribā (interest) is permissible in small amounts.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Dealing in interest (ribā) is ḥarām in any amount. The Qur\'ān and ḥadīth clearly prohibit it.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Ribā (interest) is permissible in small amounts.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Dealing in interest (ribā) is ḥarām in any amount. The Qur\'ān and ḥadīth clearly prohibit it.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
+<h3>Greatest Achievement: The Standardised Qur\'an</h3>
+<p>As Islam spread to Persia, Iraq, and Syria, different regions read the Qur\'an in different dialects (qirā\'āt). Disagreements arose about \'correct\' recitation. \'Uthmān\'s companion Ḥudhayfah ibn al-Yamān rushed to him alarmed: <em>"Save this ummah before they differ about the Qur\'an as the Jews and Christians differed."</em></p>
+<p>\'Uthmān convened a committee of the foremost Companions, led by Zayd ibn Thābit. They produced a single authoritative copy (the Muṣḥaf \'Uthmānī) in the Qurayshī dialect and sent copies to all provinces, requesting that all variant copies be burned. This preserved the Qur\'an in one unified form for all time.</p>
 
-  // --- Aḥādīth Quizzes ---
+<h3>His Caliphate (644–656 CE)</h3>
+<p>\'Uthmān was elected the third Caliph after \'Umar رضي الله عنه. Under his rule, the Islamic state expanded further: Azerbaijan, Cyprus, parts of North Africa, and Khurāsān were added. The Islamic navy was established.</p>
 
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q1' },
-      create: {
-        externalId: 'maktab-8-ahadith-q1',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What did the Prophet ﷺ say about keeping a clean heart?',
-        options: JSON.stringify(['It is optional', 'Whoever loves my sunnah will be with me in Jannah', 'Only scholars need to keep a clean heart', 'It has no reward']),
-        correctAnswer: 'Whoever loves my sunnah will be with me in Jannah',
-        explanation: 'The Prophet ﷺ said: "This is my sunnah and whoever loves my sunnah loves me, and whoever loves me will be with me in Jannah."',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What did the Prophet ﷺ say about keeping a clean heart?',
-        options: JSON.stringify(['It is optional', 'Whoever loves my sunnah will be with me in Jannah', 'Only scholars need to keep a clean heart', 'It has no reward']),
-        correctAnswer: 'Whoever loves my sunnah will be with me in Jannah',
-        explanation: 'The Prophet ﷺ said: "This is my sunnah and whoever loves my sunnah loves me, and whoever loves me will be with me in Jannah."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q2' },
-      create: {
-        externalId: 'maktab-8-ahadith-q2',
-        unitId: unitAhadith.id,
-        type: 'FILL_BLANK',
-        questionText: 'True wealth is contentment of the _____.',
-        options: undefined,
-        correctAnswer: 'soul',
-        explanation: 'The Prophet ﷺ said: "Wealth is not in having great riches — true wealth is contentment of the soul."',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'True wealth is contentment of the _____.',
-        options: undefined,
-        correctAnswer: 'soul',
-        explanation: 'The Prophet ﷺ said: "Wealth is not in having great riches — true wealth is contentment of the soul."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q3' },
-      create: {
-        externalId: 'maktab-8-ahadith-q3',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What are the three qualities that give a taste of sweetness of īmān?',
-        options: JSON.stringify(['Fasting, prayer, charity', 'Loving Allāh and His Messenger most, loving for Allāh\'s sake, hating to return to unbelief', 'Wealth, health, knowledge', 'Reading Qur\'ān, praying tahajjud, giving ṣadaqah']),
-        correctAnswer: 'Loving Allāh and His Messenger most, loving for Allāh\'s sake, hating to return to unbelief',
-        explanation: 'The Prophet ﷺ mentioned three qualities: loving Allāh and His Messenger above all, loving someone only for Allāh\'s sake, and hating to return to disbelief as one would hate being thrown into fire.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'What are the three qualities that give a taste of sweetness of īmān?',
-        options: JSON.stringify(['Fasting, prayer, charity', 'Loving Allāh and His Messenger most, loving for Allāh\'s sake, hating to return to unbelief', 'Wealth, health, knowledge', 'Reading Qur\'ān, praying tahajjud, giving ṣadaqah']),
-        correctAnswer: 'Loving Allāh and His Messenger most, loving for Allāh\'s sake, hating to return to unbelief',
-        explanation: 'The Prophet ﷺ mentioned three qualities: loving Allāh and His Messenger above all, loving someone only for Allāh\'s sake, and hating to return to disbelief as one would hate being thrown into fire.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q4' },
-      create: {
-        externalId: 'maktab-8-ahadith-q4',
-        unitId: unitAhadith.id,
-        type: 'TRUE_FALSE',
-        questionText: 'The first deed a person will be called to account for is charity.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'The first deed a person will be called to account for on the Day of Judgement is ṣalāh (prayer), not charity.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'The first deed a person will be called to account for is charity.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'The first deed a person will be called to account for on the Day of Judgement is ṣalāh (prayer), not charity.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q5' },
-      create: {
-        externalId: 'maktab-8-ahadith-q5',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'When Allāh loves a people, He _____ them.',
-        options: JSON.stringify(['rewards', 'tests', 'enriches', 'ignores']),
-        correctAnswer: 'tests',
-        explanation: 'The Prophet ﷺ said: "Great rewards are given for great trials, and when Allāh loves a people, He tests them."',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'When Allāh loves a people, He _____ them.',
-        options: JSON.stringify(['rewards', 'tests', 'enriches', 'ignores']),
-        correctAnswer: 'tests',
-        explanation: 'The Prophet ﷺ said: "Great rewards are given for great trials, and when Allāh loves a people, He tests them."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q6' },
-      create: {
-        externalId: 'maktab-8-ahadith-q6',
-        unitId: unitAhadith.id,
-        type: 'FILL_BLANK',
-        questionText: 'No one eats better food than what he earns with his own _____.',
-        options: undefined,
-        correctAnswer: 'hands',
-        explanation: 'The Prophet ﷺ said: "No one eats better food than what he earns with his own hands. The Prophet Dāwūd عليه السلام used to eat from what he earned by the work of his own hands."',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'No one eats better food than what he earns with his own _____.',
-        options: undefined,
-        correctAnswer: 'hands',
-        explanation: 'The Prophet ﷺ said: "No one eats better food than what he earns with his own hands. The Prophet Dāwūd عليه السلام used to eat from what he earned by the work of his own hands."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-ahadith-q7' },
-      create: {
-        externalId: 'maktab-8-ahadith-q7',
-        unitId: unitAhadith.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'The seven rights of a Muslim include all EXCEPT:',
-        options: JSON.stringify(['Visiting the sick', 'Following funerals', 'Returning greetings', 'Lending money']),
-        correctAnswer: 'Lending money',
-        explanation: 'The seven rights include: visiting the sick, following funerals, praying for one who sneezes, accepting invitations, returning greetings, helping the wronged, and helping others fulfil their oaths. Lending money is not listed.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'The seven rights of a Muslim include all EXCEPT:',
-        options: JSON.stringify(['Visiting the sick', 'Following funerals', 'Returning greetings', 'Lending money']),
-        correctAnswer: 'Lending money',
-        explanation: 'The seven rights include: visiting the sick, following funerals, praying for one who sneezes, accepting invitations, returning greetings, helping the wronged, and helping others fulfil their oaths. Lending money is not listed.',
-        difficulty: 'MEDIUM',
-      },
-    })
-  ]);
+<h3>Martyrdom</h3>
+<p>In his final years, political unrest grew. Rebels from Egypt, Kufa, and Basra marched to Madīnah and besieged \'Uthmān in his home for 49 days. He refused to use force against Muslims, saying: <em>"I will not be the first to spill Muslim blood."</em></p>
+<p>On the 18th of Dhūl Ḥijjah 35 AH, the rebels broke into his house and martyred him while he was reciting the Qur\'an. His blood fell onto the page at the verse: <em>"Allah will suffice you against them; and He is the All-Hearing, the All-Knowing."</em> (2:137)</p>
+`.trim();
 
-  // --- Sīrah Quizzes ---
-
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-sirah-q1' },
-      create: {
-        externalId: 'maktab-8-sirah-q1',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What title was \'Uthmān رضي الله عنه given?',
-        options: JSON.stringify(['Al-Amīn', 'Dhun Nūrayn', 'Aṣ-Ṣiddīq', 'Al-Fārūq']),
-        correctAnswer: 'Dhun Nūrayn',
-        explanation: '\'Uthmān was called Dhun Nūrayn (Possessor of Two Lights) because he married two daughters of the Prophet ﷺ: Ruqayyah and Umm Kulthūm.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What title was \'Uthmān رضي الله عنه given?',
-        options: JSON.stringify(['Al-Amīn', 'Dhun Nūrayn', 'Aṣ-Ṣiddīq', 'Al-Fārūq']),
-        correctAnswer: 'Dhun Nūrayn',
-        explanation: '\'Uthmān was called Dhun Nūrayn (Possessor of Two Lights) because he married two daughters of the Prophet ﷺ: Ruqayyah and Umm Kulthūm.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-sirah-q2' },
-      create: {
-        externalId: 'maktab-8-sirah-q2',
-        unitId: unitSirah.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Anas رضي الله عنه said the Prophet ﷺ never once said \'uff\' to him in ten years of service.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'Anas served the Prophet ﷺ for ten years and testified that the Prophet never once expressed displeasure or said "uff" to him.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Anas رضي الله عنه said the Prophet ﷺ never once said \'uff\' to him in ten years of service.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'Anas served the Prophet ﷺ for ten years and testified that the Prophet never once expressed displeasure or said "uff" to him.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-sirah-q3' },
-      create: {
-        externalId: 'maktab-8-sirah-q3',
-        unitId: unitSirah.id,
-        type: 'FILL_BLANK',
-        questionText: '\'Uthmān bought the well of Bi\'r Rūmah for _____ dirhams.',
-        options: undefined,
-        correctAnswer: '20,000',
-        explanation: '\'Uthmān رضي الله عنه purchased the well of Bi\'r Rūmah for 20,000 dirhams and donated it for the Muslims\' free use.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: '\'Uthmān bought the well of Bi\'r Rūmah for _____ dirhams.',
-        options: undefined,
-        correctAnswer: '20,000',
-        explanation: '\'Uthmān رضي الله عنه purchased the well of Bi\'r Rūmah for 20,000 dirhams and donated it for the Muslims\' free use.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-sirah-q4' },
-      create: {
-        externalId: 'maktab-8-sirah-q4',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: '\'Alī رضي الله عنه was martyred during which prayer?',
-        options: JSON.stringify(['Fajr', 'Ḍhuhr', 'Maghrib', '\'Ishā\'']),
-        correctAnswer: 'Fajr',
-        explanation: '\'Alī رضي الله عنه was struck by a Khārijī named Ibn Muljam while leading the Fajr prayer in 40 AH.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: '\'Alī رضي الله عنه was martyred during which prayer?',
-        options: JSON.stringify(['Fajr', 'Ḍhuhr', 'Maghrib', '\'Ishā\'']),
-        correctAnswer: 'Fajr',
-        explanation: '\'Alī رضي الله عنه was struck by a Khārijī named Ibn Muljam while leading the Fajr prayer in 40 AH.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-sirah-q5' },
-      create: {
-        externalId: 'maktab-8-sirah-q5',
-        unitId: unitSirah.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Who slept in the Prophet\'s bed on the night of hijrah?',
-        options: JSON.stringify(['Abū Bakr', '\'Umar', '\'Uthmān', '\'Alī']),
-        correctAnswer: '\'Alī',
-        explanation: '\'Alī رضي الله عنه bravely slept in the Prophet\'s bed on the night the Quraysh planned to assassinate the Prophet ﷺ, allowing the Prophet to escape safely to Madīnah.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Who slept in the Prophet\'s bed on the night of hijrah?',
-        options: JSON.stringify(['Abū Bakr', '\'Umar', '\'Uthmān', '\'Alī']),
-        correctAnswer: '\'Alī',
-        explanation: '\'Alī رضي الله عنه bravely slept in the Prophet\'s bed on the night the Quraysh planned to assassinate the Prophet ﷺ, allowing the Prophet to escape safely to Madīnah.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-sirah-q6' },
-      create: {
-        externalId: 'maktab-8-sirah-q6',
-        unitId: unitSirah.id,
-        type: 'FILL_BLANK',
-        questionText: 'The Prophet ﷺ left neither money nor anything except his white riding mule, his arms, and a piece of _____ which he left to charity.',
-        options: undefined,
-        correctAnswer: 'land',
-        explanation: 'The Prophet ﷺ lived such a simple life that he left behind only his white riding mule, his arms, and a piece of land which he left to charity.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'The Prophet ﷺ left neither money nor anything except his white riding mule, his arms, and a piece of _____ which he left to charity.',
-        options: undefined,
-        correctAnswer: 'land',
-        explanation: 'The Prophet ﷺ lived such a simple life that he left behind only his white riding mule, his arms, and a piece of land which he left to charity.',
-        difficulty: 'MEDIUM',
-      },
-    })
-  ]);
-
-  // --- Tārīkh Quizzes ---
-
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-tarikh-q1' },
-      create: {
-        externalId: 'maktab-8-tarikh-q1',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'How long was Ayyūb عليه السلام tested with illness?',
-        options: JSON.stringify(['Three years', 'Seven years', 'Forty years', 'Eighty years']),
-        correctAnswer: 'Seven years',
-        explanation: 'Ayyūb عليه السلام was tested with a severe illness for seven years, yet he never complained to anyone other than Allāh.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'How long was Ayyūb عليه السلام tested with illness?',
-        options: JSON.stringify(['Three years', 'Seven years', 'Forty years', 'Eighty years']),
-        correctAnswer: 'Seven years',
-        explanation: 'Ayyūb عليه السلام was tested with a severe illness for seven years, yet he never complained to anyone other than Allāh.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-tarikh-q2' },
-      create: {
-        externalId: 'maktab-8-tarikh-q2',
-        unitId: unitTarikh.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Ṭāriq ibn Ziyād conquered Spain in 711 AD.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'In 711 AD, Ṭāriq ibn Ziyād crossed the strait (Gibraltar) with a Muslim army and conquered most of the Iberian Peninsula.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Ṭāriq ibn Ziyād conquered Spain in 711 AD.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'In 711 AD, Ṭāriq ibn Ziyād crossed the strait (Gibraltar) with a Muslim army and conquered most of the Iberian Peninsula.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-tarikh-q3' },
-      create: {
-        externalId: 'maktab-8-tarikh-q3',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Who conquered Constantinople in 1453 AD?',
-        options: JSON.stringify(['Ṣalāḥuddīn', 'Meḥmet II', 'Nūruddīn', '\'Abdur Raḥmān']),
-        correctAnswer: 'Meḥmet II',
-        explanation: 'Sultan Meḥmet II conquered Constantinople in 1453 AD, fulfilling the prophecy of the Prophet ﷺ about the conquest of that great city.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'Who conquered Constantinople in 1453 AD?',
-        options: JSON.stringify(['Ṣalāḥuddīn', 'Meḥmet II', 'Nūruddīn', '\'Abdur Raḥmān']),
-        correctAnswer: 'Meḥmet II',
-        explanation: 'Sultan Meḥmet II conquered Constantinople in 1453 AD, fulfilling the prophecy of the Prophet ﷺ about the conquest of that great city.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-tarikh-q4' },
-      create: {
-        externalId: 'maktab-8-tarikh-q4',
-        unitId: unitTarikh.id,
-        type: 'FILL_BLANK',
-        questionText: 'The greatest lesson from Islamic Spain is the danger of _____ and disunity.',
-        options: undefined,
-        correctAnswer: 'division',
-        explanation: 'Internal divisions among Muslim rulers (ta\'ifas) led to the eventual loss of all Muslim lands in Spain.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'The greatest lesson from Islamic Spain is the danger of _____ and disunity.',
-        options: undefined,
-        correctAnswer: 'division',
-        explanation: 'Internal divisions among Muslim rulers (ta\'ifas) led to the eventual loss of all Muslim lands in Spain.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-tarikh-q5' },
-      create: {
-        externalId: 'maktab-8-tarikh-q5',
-        unitId: unitTarikh.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Ṣalāḥuddīn conquered Jerusalem in which year?',
-        options: JSON.stringify(['1099 AD', '1187 AD', '1453 AD', '1492 AD']),
-        correctAnswer: '1187 AD',
-        explanation: 'After his decisive victory at the Battle of Ḥiṭṭīn, Ṣalāḥuddīn peacefully conquered Jerusalem in 1187 AD.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'Ṣalāḥuddīn conquered Jerusalem in which year?',
-        options: JSON.stringify(['1099 AD', '1187 AD', '1453 AD', '1492 AD']),
-        correctAnswer: '1187 AD',
-        explanation: 'After his decisive victory at the Battle of Ḥiṭṭīn, Ṣalāḥuddīn peacefully conquered Jerusalem in 1187 AD.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-tarikh-q6' },
-      create: {
-        externalId: 'maktab-8-tarikh-q6',
-        unitId: unitTarikh.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Ṣalāḥuddīn killed all the Christians when he entered Jerusalem.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Ṣalāḥuddīn allowed the Christians to leave Jerusalem with their belongings — a stark contrast to the Crusaders\' massacre of 1099.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Ṣalāḥuddīn killed all the Christians when he entered Jerusalem.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Ṣalāḥuddīn allowed the Christians to leave Jerusalem with their belongings — a stark contrast to the Crusaders\' massacre of 1099.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
-
-  // --- Aqā'id Quizzes ---
-
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-aqaid-q1' },
-      create: {
-        externalId: 'maktab-8-aqaid-q1',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What are the mutashābihāt?',
-        options: JSON.stringify(['Clear verses about ḥalāl and ḥarām', 'Verses whose apparent meaning is unclear', 'Verses about Jannah', 'Verses about the prophets']),
-        correctAnswer: 'Verses whose apparent meaning is unclear',
-        explanation: 'Mutashābihāt are verses whose apparent meaning might suggest a resemblance to creation when describing Allāh. Scholars use tafwīḍ or ta\'wīl to understand them.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'What are the mutashābihāt?',
-        options: JSON.stringify(['Clear verses about ḥalāl and ḥarām', 'Verses whose apparent meaning is unclear', 'Verses about Jannah', 'Verses about the prophets']),
-        correctAnswer: 'Verses whose apparent meaning is unclear',
-        explanation: 'Mutashābihāt are verses whose apparent meaning might suggest a resemblance to creation when describing Allāh. Scholars use tafwīḍ or ta\'wīl to understand them.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-aqaid-q2' },
-      create: {
-        externalId: 'maktab-8-aqaid-q2',
-        unitId: unitAqaid.id,
-        type: 'FILL_BLANK',
-        questionText: 'Tafwīḍ means to believe in the text and hand over its meaning to _____.',
-        options: undefined,
-        correctAnswer: 'Allāh',
-        explanation: 'Tafwīḍ is to affirm the words of the text while handing over its true intended meaning to Allāh, without attempting to define it precisely.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Tafwīḍ means to believe in the text and hand over its meaning to _____.',
-        options: undefined,
-        correctAnswer: 'Allāh',
-        explanation: 'Tafwīḍ is to affirm the words of the text while handing over its true intended meaning to Allāh, without attempting to define it precisely.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-aqaid-q3' },
-      create: {
-        externalId: 'maktab-8-aqaid-q3',
-        unitId: unitAqaid.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Allāh physically sits on His Throne like a created being.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Allāh\'s istiwā\' is in a manner that befits His majesty. "There is nothing like unto Him" (Qur\'ān 42:11). Attributing physical form to Allāh is not permissible.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'Allāh physically sits on His Throne like a created being.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Allāh\'s istiwā\' is in a manner that befits His majesty. "There is nothing like unto Him" (Qur\'ān 42:11). Attributing physical form to Allāh is not permissible.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-aqaid-q4' },
-      create: {
-        externalId: 'maktab-8-aqaid-q4',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What does isnād mean?',
-        options: JSON.stringify(['Prayer', 'Chain of narration', 'Pilgrimage', 'Fasting']),
-        correctAnswer: 'Chain of narration',
-        explanation: 'Isnād is the unbroken chain of transmission from a scholar back to the Prophet ﷺ, ensuring the authenticity of Islamic knowledge.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What does isnād mean?',
-        options: JSON.stringify(['Prayer', 'Chain of narration', 'Pilgrimage', 'Fasting']),
-        correctAnswer: 'Chain of narration',
-        explanation: 'Isnād is the unbroken chain of transmission from a scholar back to the Prophet ﷺ, ensuring the authenticity of Islamic knowledge.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-aqaid-q5' },
-      create: {
-        externalId: 'maktab-8-aqaid-q5',
-        unitId: unitAqaid.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'The \'ulamā\' are described by the Prophet ﷺ as:',
-        options: JSON.stringify(['The leaders of governments', 'The inheritors of the prophets', 'The wealthiest people', 'The strongest warriors']),
-        correctAnswer: 'The inheritors of the prophets',
-        explanation: 'The Prophet ﷺ said: "The \'ulamā\' are the inheritors of the prophets." They preserve and transmit Islamic knowledge.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'The \'ulamā\' are described by the Prophet ﷺ as:',
-        options: JSON.stringify(['The leaders of governments', 'The inheritors of the prophets', 'The wealthiest people', 'The strongest warriors']),
-        correctAnswer: 'The inheritors of the prophets',
-        explanation: 'The Prophet ﷺ said: "The \'ulamā\' are the inheritors of the prophets." They preserve and transmit Islamic knowledge.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-aqaid-q6' },
-      create: {
-        externalId: 'maktab-8-aqaid-q6',
-        unitId: unitAqaid.id,
-        type: 'FILL_BLANK',
-        questionText: '"There is nothing like unto Him, and He is the _____, the Seeing." (Qur\'ān 42:11)',
-        options: undefined,
-        correctAnswer: 'Hearing',
-        explanation: 'This verse establishes that Allāh does not resemble His creation in any way while affirming He is the All-Hearing (al-Samī\') and All-Seeing (al-Baṣīr).',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: '"There is nothing like unto Him, and He is the _____, the Seeing." (Qur\'ān 42:11)',
-        options: undefined,
-        correctAnswer: 'Hearing',
-        explanation: 'This verse establishes that Allāh does not resemble His creation in any way while affirming He is the All-Hearing (al-Samī\') and All-Seeing (al-Baṣīr).',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
-
-  // --- Akhlāq Quizzes ---
-
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q1' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q1',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What does taqwā mean?',
-        options: JSON.stringify(['To give charity', 'To abstain for the fear of Allāh', 'To fast every day', 'To memorise the Qur\'ān']),
-        correctAnswer: 'To abstain for the fear of Allāh',
-        explanation: 'Taqwā means to abstain from sin for the fear of Allāh — to be conscious of Allāh in all matters, in public and in private.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What does taqwā mean?',
-        options: JSON.stringify(['To give charity', 'To abstain for the fear of Allāh', 'To fast every day', 'To memorise the Qur\'ān']),
-        correctAnswer: 'To abstain for the fear of Allāh',
-        explanation: 'Taqwā means to abstain from sin for the fear of Allāh — to be conscious of Allāh in all matters, in public and in private.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q2' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q2',
-        unitId: unitAkhlaq.id,
-        type: 'FILL_BLANK',
-        questionText: '"Whoever fears Allāh, He brings forth a _____ for him." (Qur\'ān 65:2-3)',
-        options: undefined,
-        correctAnswer: 'way out',
-        explanation: 'Allāh promises that whoever has taqwā, He will create a way out for him from every difficulty and provide for him from sources he could never imagine.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: '"Whoever fears Allāh, He brings forth a _____ for him." (Qur\'ān 65:2-3)',
-        options: undefined,
-        correctAnswer: 'way out',
-        explanation: 'Allāh promises that whoever has taqwā, He will create a way out for him from every difficulty and provide for him from sources he could never imagine.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q3' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q3',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What did the Prophet ﷺ say about trusting Allāh for provision?',
-        options: JSON.stringify(['He would make you wealthy immediately', 'He would provide like He provides the birds', 'He would remove all hardship', 'He would give you a house in Jannah']),
-        correctAnswer: 'He would provide like He provides the birds',
-        explanation: 'The Prophet ﷺ said: "If you were to rely upon Allāh with true reliance, He would provide for you as He provides the birds — they go out in the morning hungry and return in the evening full."',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What did the Prophet ﷺ say about trusting Allāh for provision?',
-        options: JSON.stringify(['He would make you wealthy immediately', 'He would provide like He provides the birds', 'He would remove all hardship', 'He would give you a house in Jannah']),
-        correctAnswer: 'He would provide like He provides the birds',
-        explanation: 'The Prophet ﷺ said: "If you were to rely upon Allāh with true reliance, He would provide for you as He provides the birds — they go out in the morning hungry and return in the evening full."',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q4' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q4',
-        unitId: unitAkhlaq.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Tawbah (repentance) has only one condition: saying sorry.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Tawbah has three conditions: genuine regret (nadam), abandoning the sin immediately, and making a firm resolve never to commit the sin again.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'Tawbah (repentance) has only one condition: saying sorry.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Tawbah has three conditions: genuine regret (nadam), abandoning the sin immediately, and making a firm resolve never to commit the sin again.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q5' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q5',
-        unitId: unitAkhlaq.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What are the three conditions of tawbah?',
-        options: JSON.stringify(['Fasting, prayer, charity', 'Regret, abandoning the sin, promising not to return', 'Reading Qur\'ān, making du\'ā\', giving ṣadaqah', 'Saying sorry, paying money, doing good deeds']),
-        correctAnswer: 'Regret, abandoning the sin, promising not to return',
-        explanation: 'The three conditions of tawbah are: feeling genuine regret, immediately stopping the sinful action, and resolving never to repeat it.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'What are the three conditions of tawbah?',
-        options: JSON.stringify(['Fasting, prayer, charity', 'Regret, abandoning the sin, promising not to return', 'Reading Qur\'ān, making du\'ā\', giving ṣadaqah', 'Saying sorry, paying money, doing good deeds']),
-        correctAnswer: 'Regret, abandoning the sin, promising not to return',
-        explanation: 'The three conditions of tawbah are: feeling genuine regret, immediately stopping the sinful action, and resolving never to repeat it.',
-        difficulty: 'MEDIUM',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q6' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q6',
-        unitId: unitAkhlaq.id,
-        type: 'FILL_BLANK',
-        questionText: '"Īmān consists of more than sixty branches. And ḥayā\' (modesty) is a part of _____."',
-        options: undefined,
-        correctAnswer: 'faith',
-        explanation: 'The Prophet ﷺ described ḥayā\' (modesty) as a branch of faith (īmān), highlighting its central importance in a Muslim\'s character.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: '"Īmān consists of more than sixty branches. And ḥayā\' (modesty) is a part of _____."',
-        options: undefined,
-        correctAnswer: 'faith',
-        explanation: 'The Prophet ﷺ described ḥayā\' (modesty) as a branch of faith (īmān), highlighting its central importance in a Muslim\'s character.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-akhlaq-q7' },
-      create: {
-        externalId: 'maktab-8-akhlaq-q7',
-        unitId: unitAkhlaq.id,
-        type: 'TRUE_FALSE',
-        questionText: 'Imām Ghazālī compared worldly life to a man trapped in a well with a lion above and a serpent below.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'Imām Ghazālī used this parable to illustrate how people become distracted by the fleeting pleasures of this world (the honey) while forgetting death and the Hereafter.',
-        difficulty: 'MEDIUM',
-      },
-      update: {
-        questionText: 'Imām Ghazālī compared worldly life to a man trapped in a well with a lion above and a serpent below.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'True',
-        explanation: 'Imām Ghazālī used this parable to illustrate how people become distracted by the fleeting pleasures of this world (the honey) while forgetting death and the Hereafter.',
-        difficulty: 'MEDIUM',
-      },
-    })
-  ]);
-
-  // --- Ādāb Quizzes ---
-
-    await Promise.all([
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-adab-q1' },
-      create: {
-        externalId: 'maktab-8-adab-q1',
-        unitId: unitAdab.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What should be the intention of a debate?',
-        options: JSON.stringify(['To win', 'To reach the correct conclusion', 'To embarrass the opponent', 'To show how clever you are']),
-        correctAnswer: 'To reach the correct conclusion',
-        explanation: 'In Islām, the intention of a debate or discussion should always be to reach the correct conclusion, not to win, show off, or embarrass the other person.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What should be the intention of a debate?',
-        options: JSON.stringify(['To win', 'To reach the correct conclusion', 'To embarrass the opponent', 'To show how clever you are']),
-        correctAnswer: 'To reach the correct conclusion',
-        explanation: 'In Islām, the intention of a debate or discussion should always be to reach the correct conclusion, not to win, show off, or embarrass the other person.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-adab-q2' },
-      create: {
-        externalId: 'maktab-8-adab-q2',
-        unitId: unitAdab.id,
-        type: 'TRUE_FALSE',
-        questionText: 'It is permissible for a fiancé and fiancée to text each other before nikāḥ.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Before the nikāḥ, the couple are still non-maḥram. It is not permissible for them to text, call, or meet privately. All interactions should be through families.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'It is permissible for a fiancé and fiancée to text each other before nikāḥ.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Before the nikāḥ, the couple are still non-maḥram. It is not permissible for them to text, call, or meet privately. All interactions should be through families.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-adab-q3' },
-      create: {
-        externalId: 'maktab-8-adab-q3',
-        unitId: unitAdab.id,
-        type: 'FILL_BLANK',
-        questionText: 'A businessperson should make sure he has _____ clearly marked on items for sale.',
-        options: undefined,
-        correctAnswer: 'prices',
-        explanation: 'Having prices clearly marked on items for sale is part of Islamic business etiquette, ensuring transparency and avoiding ambiguity.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'A businessperson should make sure he has _____ clearly marked on items for sale.',
-        options: undefined,
-        correctAnswer: 'prices',
-        explanation: 'Having prices clearly marked on items for sale is part of Islamic business etiquette, ensuring transparency and avoiding ambiguity.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-adab-q4' },
-      create: {
-        externalId: 'maktab-8-adab-q4',
-        unitId: unitAdab.id,
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'What should a seller do if an item has a fault?',
-        options: JSON.stringify(['Hide the fault', 'Inform the buyer before selling', 'Increase the price', 'Refuse to sell it']),
-        correctAnswer: 'Inform the buyer before selling',
-        explanation: 'Islamic etiquette requires the seller to be honest and transparent, informing the buyer of any defects before completing the sale.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'What should a seller do if an item has a fault?',
-        options: JSON.stringify(['Hide the fault', 'Inform the buyer before selling', 'Increase the price', 'Refuse to sell it']),
-        correctAnswer: 'Inform the buyer before selling',
-        explanation: 'Islamic etiquette requires the seller to be honest and transparent, informing the buyer of any defects before completing the sale.',
-        difficulty: 'EASY',
-      },
-    }),
-    prisma.question.upsert({
-      where: { externalId: 'maktab-8-adab-q5' },
-      create: {
-        externalId: 'maktab-8-adab-q5',
-        unitId: unitAdab.id,
-        type: 'TRUE_FALSE',
-        questionText: 'A buyer may lie when returning an item for a refund.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Lying is ḥarām in all situations, including when returning items. A Muslim must be truthful in all dealings.',
-        difficulty: 'EASY',
-      },
-      update: {
-        questionText: 'A buyer may lie when returning an item for a refund.',
-        options: JSON.stringify(['True', 'False']),
-        correctAnswer: 'False',
-        explanation: 'Lying is ḥarām in all situations, including when returning items. A Muslim must be truthful in all dealings.',
-        difficulty: 'EASY',
-      },
-    })
-  ]);
-
-  console.log('✅ Created quiz questions for all 7 units');
-
-  // ══════════════════════════════════════════════
-  // FLASHCARDS
-  // ══════════════════════════════════════════════
-
-  console.log('');
-  console.log('🃏 Creating flashcards...');
-
-  let flashcardIndex = 0;
-
-  // --- Fiqh Flashcards (10) ---
-
-  const fiqhFlashcards = [
-    { front: 'Ishrāq', back: 'A nafl ṣalāh performed fifteen minutes after sunrise. The Prophet ﷺ said it carries a reward similar to performing Ḥajj and \'Umrah.', frontArabic: 'إِشْرَاق', backArabic: null, category: 'concept', tags: ['fiqh', 'nawāfil', 'ishrāq'], difficulty: 'EASY' as const },
-    { front: 'Ḍuḥā', back: 'Nafl ṣalāh performed in the second half of the morning, towards midday. Minimum 2 rak\'āt, maximum 12.', frontArabic: 'ضُحَى', backArabic: null, category: 'concept', tags: ['fiqh', 'nawāfil', 'ḍuḥā'], difficulty: 'EASY' as const },
-    { front: 'Tahajjud', back: 'Night prayer performed after waking from sleep — the most rewarding nafl ṣalāh. A trait of the pious predecessors.', frontArabic: 'تَهَجُّد', backArabic: null, category: 'concept', tags: ['fiqh', 'nawāfil', 'tahajjud'], difficulty: 'EASY' as const },
-    { front: 'Khushū\'', back: 'Humility and devotion in ṣalāh — concentrating fully and praying at a measured pace. A quality of the successful believers.', frontArabic: 'خُشُوع', backArabic: null, category: 'vocabulary', tags: ['fiqh', 'ṣalāh', 'khushū\''], difficulty: 'MEDIUM' as const },
-    { front: 'Nikāḥ', back: 'Marriage in Islām. Requires offer (ījāb), acceptance (qabūl), and at least two male witnesses. The Prophet ﷺ said it completes half of one\'s faith.', frontArabic: 'نِكَاح', backArabic: null, category: 'concept', tags: ['fiqh', 'nikāḥ', 'marriage'], difficulty: 'EASY' as const },
-    { front: 'Mahr', back: 'The dower given by the groom to the bride — it is wājib. The minimum is the value of 10 dirhams (30.618g of silver).', frontArabic: 'مَهْر', backArabic: null, category: 'vocabulary', tags: ['fiqh', 'nikāḥ', 'mahr'], difficulty: 'MEDIUM' as const },
-    { front: 'Ṭalāq', back: 'Divorce — allowed as a last resort. Ṭalāq Raj\'ī (revocable) allows reconciliation within \'iddah. Ṭalāq Bā\'in (irrevocable) requires a new nikāḥ.', frontArabic: 'طَلَاق', backArabic: null, category: 'concept', tags: ['fiqh', 'ṭalāq', 'divorce'], difficulty: 'MEDIUM' as const },
-    { front: '\'Iddah', back: 'The waiting period after divorce: three menstrual cycles, 90 days if not menstruating, or until birth if pregnant. Upon death, 4 months 10 days.', frontArabic: 'عِدَّة', backArabic: null, category: 'vocabulary', tags: ['fiqh', 'ṭalāq', '\'iddah'], difficulty: 'MEDIUM' as const },
-    { front: 'Ribā', back: 'Interest — charging money for giving a loan. Ḥarām to give, take, record, or witness. Allāh destroys interest and increases charity.', frontArabic: 'رِبَا', backArabic: null, category: 'concept', tags: ['fiqh', 'transactions', 'ribā'], difficulty: 'EASY' as const },
-    { front: 'Buyū\'', back: 'Trade and transactions. Conditions: the product must be ḥalāl, price must be specified, no ambiguity, and the transaction must be unconditional.', frontArabic: 'بُيُوع', backArabic: null, category: 'concept', tags: ['fiqh', 'transactions', 'buyū\''], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    fiqhFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitFiqh.id, orderIndex } },
-        create: { ...fc, unitId: unitFiqh.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += fiqhFlashcards.length;
-
-  // --- Aḥādīth Flashcards (8) ---
-
-  const ahadithFlashcards = [
-    { front: 'Clean Heart', back: 'The Prophet ﷺ said: "If you can spend each morning and evening with a heart free of hatred or deception, do so… whoever loves my sunnah will be with me in Jannah."', frontArabic: 'سَلِيم القَلْب', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'heart', 'sunnah'], difficulty: 'EASY' as const },
-    { front: 'Ṣadaqah', back: '"Every morning two angels descend — one prays for the one who gives in charity, the other prays for the destruction of the wealth of the one who withholds."', frontArabic: 'صَدَقَة', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'ṣadaqah', 'charity'], difficulty: 'EASY' as const },
-    { front: 'Salām', back: '"Whenever you enter a home, greet your family with Assalāmu \'alaykum — it will be a blessing for you and your household." (Tirmidhī)', frontArabic: 'سَلَام', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'salām', 'greeting'], difficulty: 'EASY' as const },
-    { front: 'Rights of a Muslim', back: 'Seven rights: visit the sick, follow funerals, pray for one who sneezes, accept invitations, return greetings, help the wronged, help fulfil oaths.', frontArabic: 'حُقُوق المُسْلِم', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'rights', 'muslim'], difficulty: 'MEDIUM' as const },
-    { front: 'True Wealth', back: '"Wealth is not in having great riches — true wealth is contentment of the soul." (Ṣaḥīḥ al-Bukhārī)', frontArabic: 'الغِنَى', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'wealth', 'contentment'], difficulty: 'EASY' as const },
-    { front: 'Sweetness of Īmān', back: 'Three qualities: loving Allāh and His Messenger above all else, loving someone for Allāh\'s sake alone, and hating to return to unbelief.', frontArabic: 'حَلَاوَة الإِيمَان', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'īmān', 'sweetness'], difficulty: 'MEDIUM' as const },
-    { front: 'Closeness to Allāh (Ḥadīth Qudsī)', back: '"I am as My servant thinks I am. If he comes one span nearer, I go one arm nearer. If he comes walking, I go running." (Ṣaḥīḥ al-Bukhārī)', frontArabic: 'القُرْب مِن الله', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'closeness', 'qudsī'], difficulty: 'MEDIUM' as const },
-    { front: 'Self-Sufficiency', back: '"No one eats better food than what he earns with his own hands. Dāwūd عليه السلام used to eat from the work of his own hands." (Ṣaḥīḥ al-Bukhārī)', frontArabic: 'الاِكْتِفَاء الذَّاتِي', backArabic: null, category: 'ḥadīth', tags: ['aḥādīth', 'work', 'self-sufficiency'], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    ahadithFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAhadith.id, orderIndex } },
-        create: { ...fc, unitId: unitAhadith.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += ahadithFlashcards.length;
-
-  // --- Sīrah Flashcards (8) ---
-
-  const sirahFlashcards = [
-    { front: 'Shamā\'il', back: 'The noble character traits of Rasūlullāh ﷺ — his gentleness, humility, bravery, tolerance, consideration, and simple lifestyle.', frontArabic: 'شَمَائِل', backArabic: null, category: 'concept', tags: ['sīrah', 'shamā\'il', 'character'], difficulty: 'EASY' as const },
-    { front: 'Dhun Nūrayn', back: '\'Uthmān رضي الله عنه was called "Possessor of Two Lights" because he married two daughters of the Prophet ﷺ: Ruqayyah and Umm Kulthūm.', frontArabic: 'ذُو النُّورَيْن', backArabic: null, category: 'biography', tags: ['sīrah', '\'uthmān', 'title'], difficulty: 'EASY' as const },
-    { front: 'Al-\'Asharah al-Mubasharah', back: 'The ten Companions promised Paradise during their lifetime. Both \'Uthmān and \'Alī رضي الله عنهما were among them.', frontArabic: 'العَشَرَة المُبَشَّرَة', backArabic: null, category: 'concept', tags: ['sīrah', 'companions', 'jannah'], difficulty: 'MEDIUM' as const },
-    { front: 'Bi\'r Rūmah', back: '\'Uthmān رضي الله عنه bought this well for 20,000 dirhams and donated it for the Muslims\' free use.', frontArabic: 'بِئْر رُومَة', backArabic: null, category: 'event', tags: ['sīrah', '\'uthmān', 'sacrifice'], difficulty: 'MEDIUM' as const },
-    { front: '\'Alī\'s Acceptance of Islām', back: '\'Alī رضي الله عنه accepted Islām as a youth — one of the first to believe. The Prophet ﷺ raised him in his own household.', frontArabic: 'إِسْلَام عَلِي', backArabic: null, category: 'event', tags: ['sīrah', '\'alī', 'conversion'], difficulty: 'EASY' as const },
-    { front: 'Battle of Ṣiffīn', back: 'A conflict between \'Alī and Mu\'āwiyah رضي الله عنهما during \'Alī\'s khilāfah. It ended in arbitration and led to the emergence of the Khawārij.', frontArabic: 'مَعْرَكَة صِفِّين', backArabic: null, category: 'event', tags: ['sīrah', '\'alī', 'ṣiffīn'], difficulty: 'MEDIUM' as const },
-    { front: 'Khawārij', back: 'A group of extremists who emerged after the Battle of Ṣiffīn. They declared Muslims who disagreed with them to be disbelievers. A Khārijī assassinated \'Alī رضي الله عنه.', frontArabic: 'خَوَارِج', backArabic: null, category: 'concept', tags: ['sīrah', 'khawārij', 'extremism'], difficulty: 'MEDIUM' as const },
-    { front: '\'Alī\'s Justice', back: '\'Alī lost his shield and found it with a Jewish man. The judge ruled against \'Alī due to insufficient evidence. \'Alī accepted, and the Jewish man was so impressed he accepted Islām.', frontArabic: 'عَدْل عَلِي', backArabic: null, category: 'event', tags: ['sīrah', '\'alī', 'justice'], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    sirahFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitSirah.id, orderIndex } },
-        create: { ...fc, unitId: unitSirah.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += sirahFlashcards.length;
-
-  // --- Tārīkh Flashcards (8) ---
-
-  const tarikhFlashcards = [
-    { front: 'Ayyūb عليه السلام', back: 'A prophet tested with illness for seven years. He lost his wealth, children, and health but never complained to anyone other than Allāh. Allāh restored everything and more.', frontArabic: 'أَيُّوب عَلَيْهِ السَّلَام', backArabic: null, category: 'biography', tags: ['tārīkh', 'ayyūb', 'patience'], difficulty: 'EASY' as const },
-    { front: 'Ṭāriq ibn Ziyād', back: 'The Muslim general who conquered Spain in 711 AD. The strait he crossed was named Jabal Ṭāriq (Gibraltar) after him.', frontArabic: 'طَارِق بْن زِيَاد', backArabic: null, category: 'biography', tags: ['tārīkh', 'andalus', 'conquest'], difficulty: 'EASY' as const },
-    { front: 'Córdoba', back: 'The capital of Muslim Spain. Had over 600 libraries and its great mosque was a wonder of architecture. A beacon of learning and tolerance.', frontArabic: 'قُرْطُبَة', backArabic: null, category: 'place', tags: ['tārīkh', 'andalus', 'córdoba'], difficulty: 'EASY' as const },
-    { front: 'Ṣalāḥuddīn al-Ayyūbī', back: 'Conquered Jerusalem peacefully in 1187 AD after defeating the Crusaders at the Battle of Ḥiṭṭīn. He allowed Christians to leave with their belongings.', frontArabic: 'صَلَاح الدِّين الأَيُّوبِي', backArabic: null, category: 'biography', tags: ['tārīkh', 'crusades', 'ṣalāḥuddīn'], difficulty: 'EASY' as const },
-    { front: 'Nūruddīn Zankī', back: 'A pious ruler who united Muslim lands of Syria and Egypt. His year of unification was 1155 AD. He prepared the ground for the reconquest of Jerusalem.', frontArabic: 'نُورُ الدِّين زَنْكِي', backArabic: null, category: 'biography', tags: ['tārīkh', 'crusades', 'nūruddīn'], difficulty: 'MEDIUM' as const },
-    { front: 'Sultan Meḥmet II', back: 'Conquered Constantinople in 1453 AD, fulfilling the prophecy of the Prophet ﷺ. Renamed it Islāmbol and marked the end of the Byzantine Empire.', frontArabic: 'مُحَمَّد الفَاتِح', backArabic: null, category: 'biography', tags: ['tārīkh', 'ottomans', 'constantinople'], difficulty: 'MEDIUM' as const },
-    { front: 'Battle of Ḥiṭṭīn', back: 'The decisive battle in 1187 AD where Ṣalāḥuddīn defeated the Crusader forces, leading to the reconquest of Jerusalem.', frontArabic: 'مَعْرَكَة حِطِّين', backArabic: null, category: 'event', tags: ['tārīkh', 'crusades', 'ḥiṭṭīn'], difficulty: 'MEDIUM' as const },
-    { front: 'Lessons from History', back: 'The greatest lesson from Islamic Spain and history is the danger of division and disunity. When Muslims divided into warring factions, they lost everything.', frontArabic: null, backArabic: null, category: 'concept', tags: ['tārīkh', 'lessons', 'unity'], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    tarikhFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitTarikh.id, orderIndex } },
-        create: { ...fc, unitId: unitTarikh.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += tarikhFlashcards.length;
-
-  // --- Aqā'id Flashcards (7) ---
-
-  const aqaidFlashcards = [
-    { front: 'Mutashābihāt', back: 'Verses whose apparent meaning might suggest resemblance to creation (e.g., "Hand", "Face", "Eye" of Allāh). Scholars use tafwīḍ or ta\'wīl to understand them.', frontArabic: 'مُتَشَابِهَات', backArabic: null, category: 'vocabulary', tags: ['aqā\'id', 'mutashābihāt', 'qur\'ān'], difficulty: 'MEDIUM' as const },
-    { front: 'Tafwīḍ', back: 'To believe in the text as it is and hand over its true meaning to Allāh, without attempting to define its precise meaning. The approach of many of the Salaf.', frontArabic: 'تَفْوِيض', backArabic: null, category: 'concept', tags: ['aqā\'id', 'tafwīḍ', 'methodology'], difficulty: 'MEDIUM' as const },
-    { front: 'Ta\'wīl', back: 'To interpret ambiguous texts in a manner that befits Allāh\'s majesty, without attributing physical characteristics. Used by later scholars to protect from misunderstanding.', frontArabic: 'تَأْوِيل', backArabic: null, category: 'concept', tags: ['aqā\'id', 'ta\'wīl', 'methodology'], difficulty: 'MEDIUM' as const },
-    { front: 'Istiwā\'', back: 'Allāh\'s rising over the Throne — in a manner befitting His majesty. Imām Mālik said: "Istiwā\' is not unknown. The how is not conceivable. Belief in it is obligatory."', frontArabic: 'اِسْتِوَاء', backArabic: null, category: 'concept', tags: ['aqā\'id', 'istiwā\'', 'throne'], difficulty: 'MEDIUM' as const },
-    { front: 'Isnād', back: 'An unbroken chain of narration from a scholar back to the Prophet ﷺ. A unique feature of Islamic scholarship ensuring authenticity of knowledge.', frontArabic: 'إِسْنَاد', backArabic: null, category: 'vocabulary', tags: ['aqā\'id', 'isnād', 'knowledge'], difficulty: 'EASY' as const },
-    { front: '"Nothing Like Unto Him" (42:11)', back: '"There is nothing like unto Him, and He is the Hearing, the Seeing." The fundamental verse establishing that Allāh does not resemble creation.', frontArabic: null, backArabic: 'لَيْسَ كَمِثْلِهِ شَيْءٌ وَهُوَ السَّمِيعُ البَصِير', category: 'concept', tags: ['aqā\'id', 'tawḥīd', 'qur\'ān'], difficulty: 'EASY' as const },
-    { front: 'Shahādah with Full Conviction', back: 'The shahādah requires full conviction (yaqīn) in the heart — belief in tawḥīd, the prophethood of Muḥammad ﷺ, and everything he brought.', frontArabic: 'شَهَادَة', backArabic: null, category: 'concept', tags: ['aqā\'id', 'shahādah', 'yaqīn'], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    aqaidFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAqaid.id, orderIndex } },
-        create: { ...fc, unitId: unitAqaid.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += aqaidFlashcards.length;
-
-  // --- Akhlāq Flashcards (7) ---
-
-  const akhlaqFlashcards = [
-    { front: 'Taqwā', back: 'God-consciousness — to abstain from sin for the fear of Allāh. Ubayy ibn Ka\'b compared it to walking carefully on a thorny path.', frontArabic: 'تَقْوَى', backArabic: null, category: 'concept', tags: ['akhlāq', 'taqwā', 'consciousness'], difficulty: 'EASY' as const },
-    { front: 'Tawakkul', back: 'Reliance upon Allāh after taking all practical means. "Tie your camel, then trust in Allāh." Not laziness but trusting outcomes to Allāh.', frontArabic: 'تَوَكُّل', backArabic: null, category: 'concept', tags: ['akhlāq', 'tawakkul', 'reliance'], difficulty: 'EASY' as const },
-    { front: 'Tawbah — Three Conditions', back: '1. Regret (nadam) for the sin. 2. Abandon the sin immediately. 3. Firm resolve never to return. If it involves others\' rights, a fourth condition applies.', frontArabic: 'تَوْبَة', backArabic: null, category: 'concept', tags: ['akhlāq', 'tawbah', 'repentance'], difficulty: 'MEDIUM' as const },
-    { front: 'Ḥayā\' (Modesty)', back: '"Īmān consists of more than sixty branches. And ḥayā\' is a part of faith." Modesty in gaze is an essential aspect of ḥayā\'.', frontArabic: 'حَيَاء', backArabic: null, category: 'concept', tags: ['akhlāq', 'ḥayā\'', 'modesty'], difficulty: 'EASY' as const },
-    { front: 'Istighfār', back: 'Seeking Allāh\'s forgiveness. The Prophet ﷺ sought forgiveness more than 70 times daily despite being sinless. It brings relief and opens doors of provision.', frontArabic: 'اِسْتِغْفَار', backArabic: null, category: 'concept', tags: ['akhlāq', 'istighfār', 'forgiveness'], difficulty: 'EASY' as const },
-    { front: 'Shortness of Life (Imām Ghazālī)', back: 'A man in a well: serpent below, lion above, two mice gnawing the branch, honey on the branch. People are distracted by worldly pleasures while forgetting death.', frontArabic: null, backArabic: null, category: 'concept', tags: ['akhlāq', 'dunyā', 'parable'], difficulty: 'MEDIUM' as const },
-    { front: 'Qur\'ān 65:2–3 (Way Out)', back: '"Whoever fears Allāh, He brings forth a way out for him, and provides for him from sources he could never imagine." The promise of Allāh for those with taqwā.', frontArabic: null, backArabic: 'وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا', category: 'concept', tags: ['akhlāq', 'taqwā', 'qur\'ān'], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    akhlaqFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAkhlaq.id, orderIndex } },
-        create: { ...fc, unitId: unitAkhlaq.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += akhlaqFlashcards.length;
-
-  // --- Ādāb Flashcards (6) ---
-
-  const adabFlashcards = [
-    { front: 'Ādāb of Debate', back: 'Intend to reach the correct conclusion, not to win. Speak with respect, listen fully, use evidence, and accept when wrong. Avoid personal attacks.', frontArabic: 'آدَاب المُنَاظَرَة', backArabic: null, category: 'concept', tags: ['ādāb', 'debate', 'etiquette'], difficulty: 'EASY' as const },
-    { front: 'Ādāb of Nikāḥ', back: 'Keep it simple, perform in a masjid if possible, announce publicly. The fiancé and fiancée remain non-maḥram until the nikāḥ is complete.', frontArabic: 'آدَاب النِّكَاح', backArabic: null, category: 'concept', tags: ['ādāb', 'nikāḥ', 'etiquette'], difficulty: 'EASY' as const },
-    { front: 'Ādāb of the Seller', back: 'Be honest, mark prices clearly, do not swear oaths to sell, inform buyers of defects, be fair in weighing, and do not hoard goods.', frontArabic: 'آدَاب البَائِع', backArabic: null, category: 'concept', tags: ['ādāb', 'seller', 'transactions'], difficulty: 'EASY' as const },
-    { front: 'Ādāb of the Buyer', back: 'Do not be extravagant, do not lie when returning items, pay willingly and on time, do not haggle excessively, and be generous to sellers in need.', frontArabic: 'آدَاب المُشْتَرِي', backArabic: null, category: 'concept', tags: ['ādāb', 'buyer', 'transactions'], difficulty: 'EASY' as const },
-    { front: 'Walīmah', back: 'The wedding feast — a sunnah of the Prophet ﷺ. Should be simple and within one\'s means. "The worst feast is where the rich are invited and the poor left out."', frontArabic: 'وَلِيمَة', backArabic: null, category: 'vocabulary', tags: ['ādāb', 'walīmah', 'nikāḥ'], difficulty: 'EASY' as const },
-    { front: '"Speak Good or Remain Silent"', back: '"Whoever believes in Allāh and the Last Day, let him speak good or remain silent." Applies to all dealings — speech, business, and social life.', frontArabic: null, backArabic: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', category: 'ḥadīth', tags: ['ādāb', 'speech', 'silence'], difficulty: 'EASY' as const },
-  ];
-
-    await Promise.all(
-    adabFlashcards.map((fc, i) => {
-      const orderIndex = flashcardIndex + i;
-
-      return prisma.flashCard.upsert({
-        where: { unitId_orderIndex: { unitId: unitAdab.id, orderIndex } },
-        create: { ...fc, unitId: unitAdab.id, courseId: course.id, orderIndex },
-        update: {
-          front: fc.front,
-          back: fc.back,
-          frontArabic: fc.frontArabic ?? null,
-          backArabic: fc.backArabic ?? null,
-          category: fc.category,
-          tags: fc.tags,
-          difficulty: fc.difficulty,
-        },
-      });
-    })
-  );
-  flashcardIndex += adabFlashcards.length;
-
-  console.log('✅ Created flashcards for all 7 units');
-
-  // ══════════════════════════════════════════════
-  // ARABIC TERMS
-  // ══════════════════════════════════════════════
-
-  console.log('');
-  console.log('🔤 Creating Arabic terms...');
-
-    await prisma.arabicTerm.deleteMany({ where: { unitId: unitFiqh.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAhadith.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitSirah.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitTarikh.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAqaid.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAkhlaq.id } });
-  await prisma.arabicTerm.deleteMany({ where: { unitId: unitAdab.id } });
-
-await prisma.arabicTerm.createMany({
-    data: [
-      // Fiqh terms (10)
-      { unitId: unitFiqh.id, arabicText: 'إِشْرَاق', transliteration: 'Ishrāq', translation: 'Nafl ṣalāh performed after sunrise' },
-      { unitId: unitFiqh.id, arabicText: 'ضُحَى', transliteration: 'Ḍuḥā', translation: 'Nafl ṣalāh in the second half of the morning' },
-      { unitId: unitFiqh.id, arabicText: 'تَهَجُّد', transliteration: 'Tahajjud', translation: 'Night prayer after waking from sleep' },
-      { unitId: unitFiqh.id, arabicText: 'خُشُوع', transliteration: 'Khushū\'', translation: 'Humility and devotion in ṣalāh' },
-      { unitId: unitFiqh.id, arabicText: 'نِكَاح', transliteration: 'Nikāḥ', translation: 'Marriage in Islām' },
-      { unitId: unitFiqh.id, arabicText: 'مَهْر', transliteration: 'Mahr', translation: 'Dower given by the groom to the bride' },
-      { unitId: unitFiqh.id, arabicText: 'طَلَاق', transliteration: 'Ṭalāq', translation: 'Divorce' },
-      { unitId: unitFiqh.id, arabicText: 'عِدَّة', transliteration: '\'Iddah', translation: 'Waiting period after divorce' },
-      { unitId: unitFiqh.id, arabicText: 'رِبَا', transliteration: 'Ribā', translation: 'Interest — ḥarām in Islām' },
-      { unitId: unitFiqh.id, arabicText: 'بُيُوع', transliteration: 'Buyū\'', translation: 'Trade and transactions' },
-      // Aḥādīth terms (5)
-      { unitId: unitAhadith.id, arabicText: 'صَدَقَة', transliteration: 'Ṣadaqah', translation: 'Voluntary charity' },
-      { unitId: unitAhadith.id, arabicText: 'سَلَام', transliteration: 'Salām', translation: 'Greeting of peace' },
-      { unitId: unitAhadith.id, arabicText: 'صَبْر', transliteration: 'Ṣabr', translation: 'Patience in trials and obedience' },
-      { unitId: unitAhadith.id, arabicText: 'تَوَكُّل', transliteration: 'Tawakkul', translation: 'Reliance upon Allāh' },
-      { unitId: unitAhadith.id, arabicText: 'إِيمَان', transliteration: 'Īmān', translation: 'Faith — belief in Allāh and His Messenger' },
-      // Sīrah terms (4)
-      { unitId: unitSirah.id, arabicText: 'شَمَائِل', transliteration: 'Shamā\'il', translation: 'The noble character traits of Rasūlullāh ﷺ' },
-      { unitId: unitSirah.id, arabicText: 'ذُو النُّورَيْن', transliteration: 'Dhun Nūrayn', translation: 'Possessor of Two Lights — title of \'Uthmān رضي الله عنه' },
-      { unitId: unitSirah.id, arabicText: 'خُلَفَاء الرَّاشِدُون', transliteration: 'Khulafā\' ar-Rāshidūn', translation: 'The Rightly Guided Caliphs' },
-      { unitId: unitSirah.id, arabicText: 'خَوَارِج', transliteration: 'Khawārij', translation: 'A sect of extremists who emerged after Ṣiffīn' },
-      // Tārīkh terms (2)
-      { unitId: unitTarikh.id, arabicText: 'أَنْدَلُس', transliteration: 'Andalus', translation: 'Muslim Spain (711–1492 AD)' },
-      { unitId: unitTarikh.id, arabicText: 'صَلَاح الدِّين', transliteration: 'Ṣalāḥuddīn', translation: 'The great Muslim leader who conquered Jerusalem in 1187 AD' },
-      // Aqā'id terms (4)
-      { unitId: unitAqaid.id, arabicText: 'مُتَشَابِهَات', transliteration: 'Mutashābihāt', translation: 'Ambiguous verses whose apparent meaning is unclear' },
-      { unitId: unitAqaid.id, arabicText: 'تَفْوِيض', transliteration: 'Tafwīḍ', translation: 'Handing over the meaning of ambiguous texts to Allāh' },
-      { unitId: unitAqaid.id, arabicText: 'تَأْوِيل', transliteration: 'Ta\'wīl', translation: 'Interpreting texts in a manner befitting Allāh\'s majesty' },
-      { unitId: unitAqaid.id, arabicText: 'إِسْنَاد', transliteration: 'Isnād', translation: 'Chain of narration — ensuring authenticity of knowledge' },
-      // Akhlāq terms (3)
-      { unitId: unitAkhlaq.id, arabicText: 'تَقْوَى', transliteration: 'Taqwā', translation: 'God-consciousness — abstaining from sin for fear of Allāh' },
-      { unitId: unitAkhlaq.id, arabicText: 'تَوْبَة', transliteration: 'Tawbah', translation: 'Repentance — returning to Allāh after sinning' },
-      { unitId: unitAkhlaq.id, arabicText: 'حَيَاء', transliteration: 'Ḥayā\'', translation: 'Modesty — a branch of faith' },
-      // Ādāb terms (1)
-      { unitId: unitAdab.id, arabicText: 'وَلِيمَة', transliteration: 'Walīmah', translation: 'Wedding feast — a sunnah of the Prophet ﷺ' },
-    ],
+  const unit7 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-sirah-uthman' } },
+    create: {
+      slug: 'maktab-8-sirah-uthman',
+      courseId: course.id,
+      orderIndex: 7,
+      title: 'Sīrah — \'Uthmān Ibn \'Affān رضي الله عنه',
+      description: 'The life of \'Uthmān ibn \'Affān: why he was called Dhū al-Nūrayn, his extraordinary generosity (well of Rūmah, Tabūk expedition), his greatest legacy of standardising the Qur\'an (Muṣḥaf \'Uthmānī), and his martyrdom.',
+      content: uthmanContent,
+    },
+    update: {
+      title: 'Sīrah — \'Uthmān Ibn \'Affān رضي الله عنه',
+      description: 'The life of \'Uthmān ibn \'Affān: why he was called Dhū al-Nūrayn, his extraordinary generosity (well of Rūmah, Tabūk expedition), his greatest legacy of standardising the Qur\'an (Muṣḥaf \'Uthmānī), and his martyrdom.',
+      content: uthmanContent,
+    },
   });
+  console.log('✅ Unit 7:', unit7.title);
 
-  console.log('✅ Created Arabic terms for all units');
+  // =============================================
+  // UNIT 8: SĪRAH — \'Alī Ibn Abī Ṭālib رضي الله عنه
+  // =============================================
 
-  // ══════════════════════════════════════════════
+  const aliContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Describe \'Alī\'s upbringing in the household of the Prophet ﷺ.</li>
+  <li>Explain his special title and the famous ḥadīth about knowledge.</li>
+  <li>Know his role as a warrior and leader in early Islam.</li>
+  <li>Describe the circumstances of his caliphate and martyrdom.</li>
+</ul>
+
+<h3>Growing Up in the Prophet\'s Household</h3>
+<p>\'Alī ibn Abī Ṭālib رضي الله عنه was born approximately 10 years before prophethood. When the Prophet ﷺ was raising children in his household, \'Alī (then 5–6 years old) came to live with him. He grew up seeing revelation come, witnessing the Prophet\'s worship and character from the closest proximity.</p>
+<p><strong>First youth to accept Islam:</strong> He was the first child to accept the message of the Prophet ﷺ, accepting Islam at approximately age 10, before most adults had come forward.</p>
+
+<h3>His Title: Karram Allāhu Wajhah</h3>
+<p>\'Alī is given the special honorific <em>Karram Allāhu wajhah</em> — \'May Allāh honour his face\' — because his face never prostrated to an idol. He was raised in the Prophet\'s household and accepted Islam so young that he never once committed the sin of shirk or idol-worship. This is a unique distinction.</p>
+
+<h3>The Gateway to the City of Knowledge</h3>
+<p>The Prophet ﷺ said: <em>"I am the city of knowledge and \'Alī is its gate. Whoever wishes to enter the city, let him enter through the gate."</em> (Related by multiple chains)</p>
+<p>\'Alī was famed for his profound scholarship in Qur\'anic tafsīr, fiqh, Arabic language, and spiritual wisdom. He was appointed by the Prophet ﷺ as the judge of Yemen, a role requiring immense knowledge and wisdom.</p>
+
+<h3>Brave Warrior</h3>
+<ul>
+  <li><strong>Battle of Badr:</strong> Fought in the first major battle. Showed exceptional bravery in single combat.</li>
+  <li><strong>Battle of Uḥud:</strong> Among the few who stayed to protect the Prophet ﷺ when others fled.</li>
+  <li><strong>Battle of Khandaq:</strong> Killed the famous warrior \'Amr ibn \'Abd Wudd in single combat, a decisive moment of the battle.</li>
+  <li><strong>Khaybar:</strong> The Prophet ﷺ handed him the banner, saying: <em>"I will give it to a man who loves Allāh and His Messenger, and whom Allāh and His Messenger love."</em></li>
+</ul>
+
+<h3>His Caliphate (656–661 CE)</h3>
+<p>Following the martyrdom of \'Uthmān, \'Alī was selected as the fourth Caliph. His caliphate was marked by internal strife (fitnah): the Battle of the Camel, the Battle of Ṣiffīn, and the Arbitration of Ṩār. These events were tests for the young Muslim community and are studied carefully by historians and scholars.</p>
+
+<h3>Martyrdom in Kūfah</h3>
+<p>In 40 AH, while entering the mosque in Kūfah for Fajr prayer, \'Alī was struck by Ibn Muljam, a member of the Khawārij, with a poisoned sword. He passed away two days later. His last words were words of forgiveness and remembrance of Allāh.</p>
+<p>The Prophet ﷺ said about him: <em>"\'Alī is from me and I am from \'Alī."</em> His love and honour are part of loving the Prophet ﷺ.</p>
+`.trim();
+
+  const unit8 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-sirah-ali' } },
+    create: {
+      slug: 'maktab-8-sirah-ali',
+      courseId: course.id,
+      orderIndex: 8,
+      title: 'Sīrah — \'Alī Ibn Abī Ṭālib رضي الله عنه',
+      description: '\'Alī ibn Abī Ṭālib: first youth to accept Islam, his unique title Karram Allāhu wajhah, the ḥadīth about the city of knowledge, bravery in battles, his caliphate during the fitnah period, and martyrdom in Kūfah.',
+      content: aliContent,
+    },
+    update: {
+      title: 'Sīrah — \'Alī Ibn Abī Ṭālib رضي الله عنه',
+      description: '\'Alī ibn Abī Ṭālib: first youth to accept Islam, his unique title Karram Allāhu wajhah, the ḥadīth about the city of knowledge, bravery in battles, his caliphate during the fitnah period, and martyrdom in Kūfah.',
+      content: aliContent,
+    },
+  });
+  console.log('✅ Unit 8:', unit8.title);
+
+  // =============================================
+  // UNIT 9: TĀRĪKH — Prophet Ayyūb ʿalayhi al-salām
+  // =============================================
+
+  const ayyubContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Describe the severe trials that Ayyūb ʿalayhi al-salām endured with patience.</li>
+  <li>Recite and understand his du\'a\' from the Qur\'an.</li>
+  <li>Appreciate Allāh\'s response to sincere patience and du\'a\'.</li>
+  <li>Apply the lesson of patient gratitude to one\'s own life.</li>
+</ul>
+
+<h3>Who Was Ayyūb ʿalayhi al-salām?</h3>
+<p>Ayyūb (Job) was a prophet of Allāh who lived in the land of \'Uẓ. He was blessed with immense wealth, a large family, excellent health, and social honour. He was deeply grateful to Allāh for every blessing.</p>
+
+<h3>The Great Trials</h3>
+<p>Allāh tested Ayyūb with an extraordinary series of calamities:</p>
+<ul>
+  <li><strong>Wealth:</strong> His entire wealth was destroyed.</li>
+  <li><strong>Family:</strong> His children died one by one.</li>
+  <li><strong>Health:</strong> He was afflicted with a severe skin disease for 18 years. His body was covered with painful sores. He could barely move.</li>
+  <li><strong>Social isolation:</strong> Almost everyone abandoned him except his devoted wife, who served him throughout his illness.</li>
+</ul>
+<p>Despite all this, Ayyūb never complained, never lost faith, and never stopped praising Allāh. The angels marvelled at his patience.</p>
+
+<h3>His Du\'a\' to Allāh</h3>
+<p class="arabic" dir="rtl" lang="ar">أَنِّي مَسَّنِيَ الضُّرُّ وَأَنْتَ أَرْحَمُ الرَّاحِمِينَ</p>
+<p><em>"Indeed, adversity has touched me, and You are the Most Merciful of the merciful."</em> (Qur\'an 21:83)</p>
+<p>This du\'a\' is a masterpiece of supplication: Ayyūb simply described his condition and called upon Allāh\'s mercy. He did not demand, complain, or question Allāh\'s wisdom. He acknowledged his pain, and acknowledged Allāh\'s attribute of mercy. Allāh responded immediately.</p>
+
+<h3>Allāh\'s Response</h3>
+<p>Allāh says: <em>"So We responded to him, removed the affliction which he had, and We restored his family to him, and the like thereof along with them — as a mercy from Us and as a lesson for the worshippers of Allāh."</em> (21:84)</p>
+<ul>
+  <li>His health was completely restored (Allāh told him to strike the ground — a spring appeared for him to wash and drink).</li>
+  <li>His wealth was returned doubled.</li>
+  <li>His family was restored.</li>
+</ul>
+
+<h3>Lessons</h3>
+<ul>
+  <li><strong>Patience in calamity is an act of worship.</strong></li>
+  <li><strong>Du\'a\' is the weapon of the believer.</strong> Call on Allāh with humility and certainty in His mercy.</li>
+  <li><strong>Trials are not punishments.</strong> Allāh tests those He loves most.</li>
+  <li><strong>All relief comes from Allāh alone.</strong> The deeper the patience, the greater the restoration.</li>
+</ul>
+<p>The Prophet ﷺ said: <em>"The greatest reward comes with the greatest trial. When Allāh loves a people He tests them."</em> (Tirmidhī)</p>
+`.trim();
+
+  const unit9 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-tarikh-ayyub' } },
+    create: {
+      slug: 'maktab-8-tarikh-ayyub',
+      courseId: course.id,
+      orderIndex: 9,
+      title: 'Tārīkh — Prophet Ayyūb ʿalayhi al-salām',
+      description: 'The story of Prophet Ayyūb: his severe trials (18 years of illness, loss of wealth and family), his unwavering patience, his Qur\'anic du\'a\' (21:83), Allāh\'s response restoring everything doubled, and lessons for daily life.',
+      content: ayyubContent,
+    },
+    update: {
+      title: 'Tārīkh — Prophet Ayyūb ʿalayhi al-salām',
+      description: 'The story of Prophet Ayyūb: his severe trials (18 years of illness, loss of wealth and family), his unwavering patience, his Qur\'anic du\'a\' (21:83), Allāh\'s response restoring everything doubled, and lessons for daily life.',
+      content: ayyubContent,
+    },
+  });
+  console.log('✅ Unit 9:', unit9.title);
+
+  // =============================================
+  // UNIT 10: TĀRĪKH — Andalusia & The Crusades
+  // =============================================
+
+  const andalusiaContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Summarise how Muslims entered Andalusia and what \'Golden Age\' achievements followed.</li>
+  <li>Explain the significance of Córdoba as a centre of civilisation.</li>
+  <li>Describe the Crusades and the Muslim response under Ṣalāḥuddīn al-Ayyūbī.</li>
+</ul>
+
+<h3>Islamic Andalusia (711–1492 CE)</h3>
+<h4>Ṭāriq ibn Ziyād and the Conquest</h4>
+<p>In 711 CE, the Umayyad general Ṭāriq ibn Ziyād crossed from North Africa to Iberia with 7,000 troops. On landing at what is now Gibraltar (Jabal Ṭāriq — Mountain of Ṭāriq), he burned the boats behind his army, declaring: <em>"The sea is behind you and the enemy is in front. By Allāh, there is no choice but patience and victory."</em> Within two years, most of the Iberian Peninsula was under Muslim rule.</p>
+
+<h4>The Golden Age under \'Abd al-Raḥmān III</h4>
+<p>Under the Umayyad Caliph \'Abd al-Raḥmān III (912–961 CE), Andalusia reached its peak. Córdoba became the greatest city in Europe:</p>
+<ul>
+  <li>Population of 500,000 — when London had under 20,000.</li>
+  <li>400 mosques, 300 public baths, and the magnificent Masjid of Córdoba.</li>
+  <li>70 public libraries — when most European monasteries had a handful of books.</li>
+  <li>Street lighting and running water — centuries before northern Europe.</li>
+</ul>
+
+<h4>Muslim Scholars of Andalusia</h4>
+<ul>
+  <li><strong>Ibn Rushd (Averroes):</strong> His commentaries on Aristotle preserved Greek philosophy for Europe and helped spark the European Renaissance.</li>
+  <li><strong>Ibn Ḥazm:</strong> Scholar of fiqh, literature, and comparative religion.</li>
+  <li><strong>Maimonides:</strong> The great Jewish philosopher who was educated in the Islamic scholarly tradition of Andalusia.</li>
+  <li><strong>Ibn Ḥayyiyān:</strong> Historian of Andalusia whose chronicles document this era in detail.</li>
+</ul>
+
+<h3>The Crusades (1095–1291 CE)</h3>
+<h4>The Call to War</h4>
+<p>In 1095, Pope Urban II called the Christian rulers of Europe to a holy war to \'reclaim\' Jerusalem from Muslim rule. In 1099, the Crusaders took Jerusalem. Contemporary accounts describe a massacre of the city\'s Muslim and Jewish population.</p>
+
+<h4>Ṣalāḥuddīn al-Ayyūbī and the Reconquest of Jerusalem</h4>
+<p>Ṣalāḥuddīn (Saladin, 1137–1193 CE) was a Kurdish Muslim leader who united the divided Muslim world. His character was renowned for justice, generosity, and nobility.</p>
+<p>On 2 October 1187, exactly 88 years after the Crusader conquest, Ṣalāḥuddīn retook Jerusalem. Unlike the Crusader conquest, there was <strong>no massacre</strong>. Christian inhabitants were guaranteed safety and allowed to leave with their possessions. Even his enemies praised his honour.</p>
+<p>He was reported to have wept on entering al-Masjid al-Aqṣā as it was purified and the adhān rang out once more.</p>
+
+<h3>Lesson for Muslims</h3>
+<p>Andalusia teaches us that intellectual excellence and faith can coexist — that Muslim civilisation at its peak was the greatest in the world. Its fall (completed in 1492 with the fall of Granada) reminds us what happens when Muslim unity and taqwā are neglected. Ṣalāḥuddīn shows us that the path to victory is through personal character and reliance on Allāh.</p>
+`.trim();
+
+  const unit10 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-tarikh-andalusia-crusades' } },
+    create: {
+      slug: 'maktab-8-tarikh-andalusia-crusades',
+      courseId: course.id,
+      orderIndex: 10,
+      title: 'Tārīkh — Andalusia & The Crusades',
+      description: 'Ṭāriq ibn Ziyād\'s conquest (711 CE), the Golden Age of Islamic Andalusia under \'Abd al-Raḥmān III, Córdoba as Europe\'s greatest city, Muslim scholars (Ibn Rushd, Ibn Ḥazm), the Crusades (1095 CE), and Ṣalāḥuddīn\'s reconquest of Jerusalem (1187) without massacre.',
+      content: andalusiaContent,
+    },
+    update: {
+      title: 'Tārīkh — Andalusia & The Crusades',
+      description: 'Ṭāriq ibn Ziyād\'s conquest (711 CE), the Golden Age of Islamic Andalusia under \'Abd al-Raḥmān III, Córdoba as Europe\'s greatest city, Muslim scholars (Ibn Rushd, Ibn Ḥazm), the Crusades (1095 CE), and Ṣalāḥuddīn\'s reconquest of Jerusalem (1187) without massacre.',
+      content: andalusiaContent,
+    },
+  });
+  console.log('✅ Unit 10:', unit10.title);
+
+  // =============================================
+  // UNIT 11: TĀRĪKH — The Ottoman Empire
+  // =============================================
+
+  const ottomanContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Trace the rise of the Ottoman Empire from a small Anatolian principality.</li>
+  <li>Explain the conquest of Constantinople and why the Prophet ﷺ foretold it.</li>
+  <li>Describe the peak of Ottoman power under Sulaymān the Magnificent.</li>
+  <li>Understand the fall of the caliphate and its significance.</li>
+</ul>
+
+<h3>Rise of the Ottomans</h3>
+<p>The Ottoman state began in the early 14th century as a small Turkish principality in north-western Anatolia under Osman I (after whom the dynasty is named). Through skilled military leadership, alliances, and the unifying banner of Islam, the Ottomans expanded rapidly.</p>
+<p>Under Sultan Murād I, the Ottomans expanded into the Balkans, defeating Crusader forces at the Battle of Kosovo (1389). The question of Constantinople — the great Byzantine capital that had stood for over a thousand years — became the dream of every Muslim ruler after the Prophet\'s ﷺ prophecy.</p>
+
+<h3>The Prophecy of the Prophet ﷺ</h3>
+<p>The Prophet ﷺ said: <em>"Verily, you will conquer Constantinople. What an excellent commander will its commander be, and what an excellent army will that army be."</em> (Aḥmad)</p>
+<p>This ḥadīth, recorded centuries before the event, was a source of motivation for Muslim rulers for 800 years.</p>
+
+<h3>Fatḥ al-QuṣṬantiniyyah (1453 CE)</h3>
+<p>Sultan Muḥammad ibn Murād, known as <strong>Muḥammad al-Fātiḥ</strong> (\'The Conqueror\'), became Sultan at age 19 and set his sights on Constantinople. At age 21, in 1453 CE, he led a massive army of 80,000 men and an unprecedented naval fleet.</p>
+<ul>
+  <li>He had enormous cannons constructed that could fire balls weighing over 500 kg.</li>
+  <li>When the sea chain blocked his fleet, he had 70 ships dragged overland on greased logs into the Golden Horn — the Byzantines woke to find an enemy fleet inside their harbour.</li>
+  <li>After 53 days of siege, on 29 May 1453, the walls were breached.</li>
+</ul>
+<p>Muḥammad al-Fātiḥ entered the city and immediately went to the great church of Hagia Sophia (Aya Sofya) and prayed. He was reported to have rubbed his face on the ground in gratitude to Allāh. He treated the Christian population with fairness and allowed religious freedom.</p>
+<p>The Prophet\'s ﷺ prophecy was fulfilled.</p>
+
+<h3>Peak Under Sulaymān the Magnificent (1520–1566 CE)</h3>
+<p>Under Sulaymān I, the Ottoman Empire reached its greatest extent: Hungary, the Middle East, North Africa, and parts of the Indian Ocean. He is called \'the Magnificent\' by Europeans and <em>Qānūnī</em> (\'the Lawgiver\') by Muslims for his comprehensive legal reforms. The Sulaymāniyya Mosque in Istanbul remains one of the most beautiful buildings in the world.</p>
+
+<h3>Decline and Fall of the Caliphate</h3>
+<p>Over centuries, the empire weakened: internal corruption, costly wars, and European colonialism took their toll. In World War I, the Ottomans allied with Germany and were defeated. European powers divided the Ottoman territories.</p>
+<p>In 1924, Mustafa Kemal (Atatürk) abolished the Ottoman Caliphate entirely — the first time in over a thousand years that the Muslim world had no Caliph. This remains one of the most significant events in modern Islamic history.</p>
+`.trim();
+
+  const unit11 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-tarikh-ottomans' } },
+    create: {
+      slug: 'maktab-8-tarikh-ottomans',
+      courseId: course.id,
+      orderIndex: 11,
+      title: 'Tārīkh — The Ottoman Empire',
+      description: 'Rise of the Ottoman Empire, the Prophet\'s ﷺ prophecy about Constantinople, Sultan Muḥammad al-Fātiḥ\'s conquest in 1453, peak under Sulaymān the Magnificent, and the abolition of the caliphate in 1924.',
+      content: ottomanContent,
+    },
+    update: {
+      title: 'Tārīkh — The Ottoman Empire',
+      description: 'Rise of the Ottoman Empire, the Prophet\'s ﷺ prophecy about Constantinople, Sultan Muḥammad al-Fātiḥ\'s conquest in 1453, peak under Sulaymān the Magnificent, and the abolition of the caliphate in 1924.',
+      content: ottomanContent,
+    },
+  });
+  console.log('✅ Unit 11:', unit11.title);
+
+  // =============================================
+  // UNIT 12: AQĀ\'ID — Attributes of Allāh & Istiwā\'
+  // =============================================
+
+  const attributesContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Define and categorise the attributes of Allāh according to Ahl al-Sunnah.</li>
+  <li>List the six essential (dhātiyyah) attributes and understand each.</li>
+  <li>Explain the correct Ahl al-Sunnah stance on istiwā\'.</li>
+  <li>Avoid the errors of ta\'tīl (negation) and tashbīh (comparison to creation).</li>
+</ul>
+
+<h3>Why Study the Attributes of Allāh?</h3>
+<p>Knowing Allāh properly is the foundation of all worship. If your concept of Allāh is incorrect, your relationship with Him will be distorted. ‘Ilm al-Kalām (Islamic theology) clarifies the correct beliefs about Allāh\'s nature.</p>
+
+<h3>Categories of Divine Attributes (Ṣifāt)</h3>
+<h4>1. Ṣifāt Dhātiyyah (Essential Attributes)</h4>
+<p>These are attributes inseparable from Allāh\'s Essence. The six essential attributes are:</p>
+<ul>
+  <li><strong>Wujūd (Existence):</strong> Allāh necessarily exists. His non-existence is impossible.</li>
+  <li><strong>Qidam (Pre-eternity / No beginning):</strong> Allāh has no beginning — He always was.</li>
+  <li><strong>Baqā\' (Everlastingness):</strong> Allāh has no end — He always will be.</li>
+  <li><strong>Qiyām binafsih (Self-subsistence):</strong> Allāh does not depend on anything or anyone. He is completely self-sufficient. <em>"Allāh is free of need of the worlds."</em> (3:97)</li>
+  <li><strong>Waḥdāniyyah (Oneness):</strong> Allāh is absolutely One, unique in His Essence, attributes, and actions.</li>
+  <li><strong>Mukhālafah lil-ḥawādith (Distinctness from Creation):</strong> Allāh does not resemble any created thing. <em>"There is nothing like Him."</em> (42:11)</li>
+</ul>
+
+<h4>2. Ṣifāt Ma\'nawiyyah (Descriptive Attributes)</h4>
+<p>These are attributes that Allāh has and that describe qualities: Power (Qudrah), Will (Irādah), Knowledge (\'Ilm), Life (Ḥayāh), Hearing (Sam\'a), Sight (Baṣar), and Speech (Kalām).</p>
+
+<h4>3. Ṣifāt Fi\'liyyah (Attributes of Action)</h4>
+<p>Attributes related to what Allāh does: creating, providing, giving life, causing death, etc. These are linked to His will and wisdom.</p>
+
+<h3>The Question of Istiwā\'</h3>
+<p>Allāh says: <em>"Al-Raḥmān \'alā al-\'arsh istawā"</em> — <em>"The Most Merciful rose/ascended over the Throne."</em> (20:5)</p>
+<p>This verse requires careful handling. The two errors to avoid are:</p>
+<ul>
+  <li><strong>Ta\'tīl (complete negation):</strong> Denying the attribute entirely, saying it means nothing. This is incorrect.</li>
+  <li><strong>Tashbīh (comparison):</strong> Imagining Allāh\'s istiwā\' is like a king sitting on a throne. This is also incorrect, as Allāh is unlike creation.</li>
+</ul>
+<p>The Ahl al-Sunnah position (following Imām Mālik and the Salaf): We <strong>affirm</strong> the attribute of istiwā\' as Allāh described — and we do so <strong>bilā kayf</strong> (without specifying the manner). When Imām Mālik was asked about this verse, he said: <em>"The istiwā\' is known, the manner is unknown, believing in it is obligatory, and asking about it is a bid\'ah."</em></p>
+<p>This principle of affirming without anthropomorphism and without negation is the <em>middle path</em> of Ahl al-Sunnah wa al-Jamā\'ah.</p>
+`.trim();
+
+  const unit12 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-aqaid-attributes' } },
+    create: {
+      slug: 'maktab-8-aqaid-attributes',
+      courseId: course.id,
+      orderIndex: 12,
+      title: 'Aqā\'id — Attributes of Allāh & Istiwā\'',
+      description: 'The categories of Allāh\'s attributes (Ṣifāt): six essential attributes (wujūd, qidam, baqā\', qiyām binafsih, waḥdāniyyah, mukhālafah lil-ḥawādith), Ṣifāt ma\'nawiyyah, Ṣifāt fi\'liyyah, and the correct Ahl al-Sunnah position on istiwā\' (bilā kayf).',
+      content: attributesContent,
+    },
+    update: {
+      title: 'Aqā\'id — Attributes of Allāh & Istiwā\'',
+      description: 'The categories of Allāh\'s attributes (Ṣifāt): six essential attributes (wujūd, qidam, baqā\', qiyām binafsih, waḥdāniyyah, mukhālafah lil-ḥawādith), Ṣifāt ma\'nawiyyah, Ṣifāt fi\'liyyah, and the correct Ahl al-Sunnah position on istiwā\' (bilā kayf).',
+      content: attributesContent,
+    },
+  });
+  console.log('✅ Unit 12:', unit12.title);
+
+  // =============================================
+  // UNIT 13: AQĀ\'ID — Complete Īmān & Following the \'Ulamā\'
+  // =============================================
+
+  const imanUlamaContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Define Īmān completely with its three components according to Ahl al-Sunnah.</li>
+  <li>Understand that Īmān can increase and decrease.</li>
+  <li>Explain the Qur\'anic obligation to follow qualified scholars.</li>
+  <li>Identify the dangers of following unqualified religious opinions.</li>
+</ul>
+
+<h3>What is Īmān?</h3>
+<p>Īmān (faith) is not merely saying the Sharīdah or believing in the heart. The complete definition, as held by Ahl al-Sunnah wa al-Jamā\'ah, has three components:</p>
+<ol>
+  <li><strong>Taṣdīq (inner belief):</strong> Sincerely believing in Allāh, His angels, His scriptures, His messengers, the Last Day, and divine decree (qadar) — with the heart.</li>
+  <li><strong>Iqrār (verbal acknowledgement):</strong> Affirming one\'s faith with the tongue — the Sharīdah (\'lā ilāha ill-Allāh Muḥammad-un rasūl-Allāh\').</li>
+  <li><strong>\'Amal (acting on it):</strong> Performing the obligatory acts and abstaining from the prohibited. Acts are part of Īmān and affect it.</li>
+</ol>
+<p><strong>Note:</strong> The Ḥanafī school holds that Īmān in its essence is taṣdīq (belief in the heart) — and that a believer\'s Īmān does not technically increase or decrease (though their Īmān\'s \'light\' and conviction can). The Shafi\'i and other schools hold that Īmān increases with obedience and decreases with disobedience — this has Qur\'anic support: <em>"And when His verses are recited to them, it increases them in faith."</em> (8:2)</p>
+
+<h3>The Importance of Following Qualified \'Ulamā\'</h3>
+<p>Allāh commands: <em>"Ask the people of knowledge if you do not know."</em> (Qur\'an 16:43 and 21:7)</p>
+<p>This verse establishes a principle: religious knowledge requires qualified scholars. Not everyone who reads online or picks up a book is qualified to give religious rulings (fatwā).</p>
+
+<h4>Qualities of a Reliable Scholar</h4>
+<ul>
+  <li>Trained in traditional Islamic sciences (fiqh, uṣūl al-fiqh, ḥadīth, tafsīr) from qualified teachers.</li>
+  <li>Connected to a chain of scholarship (isnād) going back to the Companions and ultimately to the Prophet ﷺ.</li>
+  <li>Known for personal piety, taqwā, and upright character.</li>
+  <li>Recognised and recommended by other trustworthy scholars.</li>
+</ul>
+
+<h4>Dangers of Unqualified Opinions</h4>
+<p>The Prophet ﷺ said: <em>"Allāh does not take away knowledge by extracting it from the hearts of men, but takes it away by the death of scholars. Until, when no scholar remains, people will take ignorant men as leaders, who will give fatāwā without knowledge, going astray themselves and leading others astray."</em> (Bukhārī and Muslim)</p>
+<p>In the social media age, everyone has a microphone. The following are red flags for unreliable religious guidance:</p>
+<ul>
+  <li>No formal traditional training in the subject being spoken about.</li>
+  <li>Contradicting scholarly consensus (ijmā\') without credible evidence.</li>
+  <li>Dismissing 1,400 years of scholarship as \'outdated\'.</li>
+  <li>Appealing to emotions rather than dalīl (evidence from Qur\'an and Sunnah).</li>
+</ul>
+<p>Your responsibility as a Muslim teenager: know who you are taking your religion from. Build relationships with reliable local scholars and institutions.</p>
+`.trim();
+
+  const unit13 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-aqaid-iman-ulama' } },
+    create: {
+      slug: 'maktab-8-aqaid-iman-ulama',
+      courseId: course.id,
+      orderIndex: 13,
+      title: 'Aqā\'id — Complete Īmān & Following the \'Ulamā\'',
+      description: 'Complete definition of Īmān: taṣdīq (inner belief), iqrār (verbal acknowledgement), \'amal (action); whether Īmān increases and decreases; Qur\'anic command to follow scholars (16:43); how to identify reliable \'ulamā\' and dangers of unqualified religious opinions.',
+      content: imanUlamaContent,
+    },
+    update: {
+      title: 'Aqā\'id — Complete Īmān & Following the \'Ulamā\'',
+      description: 'Complete definition of Īmān: taṣdīq (inner belief), iqrār (verbal acknowledgement), \'amal (action); whether Īmān increases and decreases; Qur\'anic command to follow scholars (16:43); how to identify reliable \'ulamā\' and dangers of unqualified religious opinions.',
+      content: imanUlamaContent,
+    },
+  });
+  console.log('✅ Unit 13:', unit13.title);
+
+  // =============================================
+  // UNIT 14: AKHLĀQ — Taqwā, Tawakkul & Tawbah
+  // =============================================
+
+  const taqwaTawbahContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Define taqwā and its three levels.</li>
+  <li>Explain the correct understanding of tawakkul using the ḥadīth of the camel.</li>
+  <li>State the three conditions of valid tawbah and the extra condition when someone else\'s right is involved.</li>
+</ul>
+
+<h3>Taqwā: The Core of Every Virtue</h3>
+<p>Taqwā literally means \'a shield\' — specifically, a shield between you and what you fear. In Islamic usage, it means shielding yourself from Allāh\'s displeasure through conscious awareness of Him in every action.</p>
+<p>The Prophet ﷺ said: <em>"Fear Allāh wherever you are, follow a bad deed with a good one to erase it, and deal with people with good character."</em> (Tirmidhī)</p>
+
+<h4>Three Levels of Taqwā</h4>
+<ol>
+  <li><strong>Avoiding ḥarām:</strong> Protecting yourself from what Allāh has explicitly forbidden — this is the minimum.</li>
+  <li><strong>Avoiding makrūh:</strong> Going beyond the minimum, avoiding disliked acts even when they are not forbidden.</li>
+  <li><strong>Avoiding everything that distracts from Allāh:</strong> The highest level — the saints (awliyā\') leave anything that occupies their heart from remembering Allāh.</li>
+</ol>
+
+<h4>How to Develop Taqwā</h4>
+<ul>
+  <li>Regular ṣalāh (Allāh says ṣalāh prevents from faḥshā\' and munkar).</li>
+  <li>Frequent dhikr and recitation of Qur\'an.</li>
+  <li>Keeping righteous company.</li>
+  <li>Reflecting on death and the Day of Judgement.</li>
+</ul>
+
+<h3>Tawakkul: Trust in Allāh — After Taking Means</h3>
+<p>Tawakkul is often misunderstood as fatalism: \'just leave everything to Allāh and do nothing.\' This is incorrect. The Prophet ﷺ corrected this understanding clearly.</p>
+<p>A man came to the Prophet ﷺ and said: <em>"Should I tie my camel or leave it and trust in Allāh?"</em> The Prophet ﷺ replied: <em>"Tie it, then trust in Allāh."</em> (Tirmidhī)</p>
+<p>True tawakkul means: <strong>take all the means available to you</strong> (study for the exam, lock the car, take the medicine) <strong>and then</strong> trust Allāh with the outcome. The outcome is in His hands; the effort is yours.</p>
+<p>Allāh says: <em>"And whoever relies upon Allāh — then He is sufficient for him."</em> (65:3) This comes after the command to take precautions.</p>
+
+<h3>Tawbah: Returning to Allāh</h3>
+<p>No one is free of sin. Allāh\'s door of tawbah (repentance) is always open. The Prophet ﷺ said: <em>"Allāh holds out His hand by night so the sinner of the day may repent, and He holds out His hand by day so the sinner of the night may repent — until the sun rises from the west."</em> (Muslim)</p>
+
+<h4>Three Conditions of Valid Tawbah</h4>
+<ol>
+  <li><strong>Nadam (Regret):</strong> Genuinely feeling sorry for the sin — not just its consequences.</li>
+  <li><strong>Stop the sin:</strong> Immediately ceasing the sinful action.</li>
+  <li><strong>Resolve not to return:</strong> Sincerely intending never to commit that sin again.</li>
+</ol>
+
+<h4>Fourth Condition: When Someone Else\'s Right is Involved</h4>
+<p>If the sin involved another person (theft, backbiting, lying), a fourth condition is required: <strong>restore the right</strong> if possible (return stolen goods, pay debts) and/or <strong>seek forgiveness</strong> from the wronged person. If this is not possible, make excessive du\'a\' for them and pray Allāh compensates them on your behalf on the Day of Judgement.</p>
+`.trim();
+
+  const unit14 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-akhlaq-taqwa-tawakkul-tawbah' } },
+    create: {
+      slug: 'maktab-8-akhlaq-taqwa-tawakkul-tawbah',
+      courseId: course.id,
+      orderIndex: 14,
+      title: 'Akhlāq — Taqwā, Tawakkul & Tawbah',
+      description: 'Taqwā as a shield, its three levels, how to develop it; tawakkul after taking means (ḥadīth of the camel); three conditions of valid tawbah (nadam, stop, resolve) plus the fourth when another\'s right is involved; Allāh\'s door of tawbah is always open.',
+      content: taqwaTawbahContent,
+    },
+    update: {
+      title: 'Akhlāq — Taqwā, Tawakkul & Tawbah',
+      description: 'Taqwā as a shield, its three levels, how to develop it; tawakkul after taking means (ḥadīth of the camel); three conditions of valid tawbah (nadam, stop, resolve) plus the fourth when another\'s right is involved; Allāh\'s door of tawbah is always open.',
+      content: taqwaTawbahContent,
+    },
+  });
+  console.log('✅ Unit 14:', unit14.title);
+
+  // =============================================
+  // UNIT 15: AKHLĀQ & ĀDĀB — Modesty, Debate & Transactions
+  // =============================================
+
+  const adabFinalContent = `
+<h2>Learning Objectives</h2>
+<ul>
+  <li>Understand the Qur\'anic command to lower the gaze and why it applies to both genders.</li>
+  <li>Know the etiquette of Islamic debate: seeking truth not victory.</li>
+  <li>Ādāb of walīmah and celebrating nikāh appropriately.</li>
+  <li>Know the ḥadīth on honesty in transactions.</li>
+</ul>
+
+<h3>Modesty in Gaze (Ḥifẓ al-Baṣar)</h3>
+<p>Allāh commands: <em>"Tell the believing men to lower their gaze and guard their chastity — that is purer for them. Indeed Allāh is Aware of what they do. And tell the believing women to lower their gaze and guard their chastity."</em> (Qur\'an 24:30–31)</p>
+
+<h4>Why This Command?</h4>
+<p>Uncontrolled gazing is the first step toward ẓinā (unlawful relations). The Prophet ﷺ called the unlawful gaze the \'adultery of the eyes.\' In an age of constant digital screens, social media, and advertising that exploits the human gaze, this command is more relevant than ever.</p>
+
+<h4>Practical Steps</h4>
+<ul>
+  <li>Recognise the impulse — don\'t pretend it doesn\'t exist.</li>
+  <li>Look away immediately when your gaze falls on something ḥarām.</li>
+  <li>Be mindful of what you scroll through online.</li>
+  <li>Fill your time with productive, beneficial activities.</li>
+  <li>Make du\'a\' for protection of the heart and gaze.</li>
+</ul>
+<p>Modesty (hayā\') is comprehensive: in dress, speech, behaviour, and gaze. The Prophet ﷺ said: <em>"Hayā\' does not bring anything except good."</em> (Bukhārī)</p>
+
+<h3>Etiquette of Debate (Adāb al-Ḥiwār)</h3>
+<p>Debate and discussion are part of academic and Islamic life. The Qur\'an itself uses argument and reasoning. However, Islamic scholarship has a strict ethics of debate:</p>
+<ul>
+  <li><strong>Seek truth, not victory.</strong> The goal of a debate should be for the best argument to prevail, not for <em>you</em> to prevail.</li>
+  <li><strong>Do not mock your opponent.</strong> Allāh says: <em>"O you who believe, let not one group mock another."</em> (49:11)</li>
+  <li><strong>Do not raise your voice.</strong> The Prophet ﷺ never shouted in argument.</li>
+  <li><strong>Acknowledge good points.</strong> When the other person makes a valid argument, acknowledge it: this is a sign of intellectual honesty.</li>
+  <li><strong>Concede when wrong.</strong> Imām al-Shāfi\'ī said: <em>"I never debated anyone except hoping that Allāh would place the truth on his tongue."</em></li>
+  <li><strong>Know when to stop.</strong> Allāh says debates with those who persist in falsehood should end gracefully: <em>"We have our deeds and you have your deeds."</em> (28:55)</li>
+</ul>
+
+<h3>Ādāb of Walīmah (Wedding Celebration)</h3>
+<p>The walīmah (post-nikāh celebration) is a confirmed sunnah. The Prophet ﷺ said: <em>"Have a walīmah even with a single sheep."</em> Its proper etiquette:</p>
+<ul>
+  <li>It should be simple and modest, not wasteful.</li>
+  <li>Attending the walīmah of a Muslim when invited is a right owed to them.</li>
+  <li>Mixed gatherings with free mixing are not appropriate.</li>
+  <li>Music, dancing, and extravagance are to be avoided.</li>
+</ul>
+
+<h3>Honesty in Transactions</h3>
+<p>The Prophet ﷺ said: <em>"Whoever cheats us is not from us."</em> (Muslim) This includes:</p>
+<ul>
+  <li>Hiding defects in goods being sold.</li>
+  <li>Giving short measure or weight.</li>
+  <li>Making false claims about a product.</li>
+  <li>Charging for work not done.</li>
+</ul>
+<p>The Prophet ﷺ described the honest merchant: <em>"The trustworthy, honest merchant will be with the prophets, the truthful, and the martyrs."</em> (Tirmidhī)</p>
+<p>Being a young Muslim of integrity in your future career — in whatever field you choose — is itself an act of worship and da\'wah.</p>
+`.trim();
+
+  const unit15 = await prisma.unit.upsert({
+    where: { courseId_slug: { courseId: course.id, slug: 'maktab-8-adab-final' } },
+    create: {
+      slug: 'maktab-8-adab-final',
+      courseId: course.id,
+      orderIndex: 15,
+      title: 'Akhlāq & Ādāb — Modesty, Debate & Transactions',
+      description: 'Lowering the gaze (Qur\'an 24:30–31) and why; etiquette of Islamic debate (seek truth not victory, concede when wrong); ādāb of walīmah (wedding celebration); the ḥadīth on cheating in transactions ("he who cheats us is not from us").',
+      content: adabFinalContent,
+    },
+    update: {
+      title: 'Akhlāq & Ādāb — Modesty, Debate & Transactions',
+      description: 'Lowering the gaze (Qur\'an 24:30–31) and why; etiquette of Islamic debate (seek truth not victory, concede when wrong); ādāb of walīmah (wedding celebration); the ḥadīth on cheating in transactions ("he who cheats us is not from us").',
+      content: adabFinalContent,
+    },
+  });
+  console.log('✅ Unit 15:', unit15.title);
+
+  // =============================================
+  // QUIZ QUESTIONS (6-8 per unit, 15 units)
+  // =============================================
+
+  const allQuestions = [
+    // ---- Unit 1: Nawafil & Khushu ----
+    {
+      unitId: unit1.id,
+      externalId: 'cb8-q1-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'When is the Tahájjud prayer performed?',
+      options: ["After \'Ishā\' before midnight", 'In the last third of the night', 'Just before Fajr adhān', 'After sunrise'],
+      correctAnswer: 'In the last third of the night',
+      explanation: 'Tahájjud is ideally prayed in the last third of the night, when Allāh descends to the lowest heaven and accepts supplications.',
+    },
+    {
+      unitId: unit1.id,
+      externalId: 'cb8-q1-2',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'How many times more reward does congregational prayer carry compared to praying alone?',
+      options: ['10 times', '17 times', '27 times', '100 times'],
+      correctAnswer: '27 times',
+      explanation: 'The Prophet ﷺ said: "Prayer in congregation is 27 degrees superior to prayer offered alone." (Bukhārī and Muslim)',
+    },
+    {
+      unitId: unit1.id,
+      externalId: 'cb8-q1-3',
+      type: 'FILL_BLANK' as const,
+      questionText: 'Khushū\' in prayer means ________ and presence of heart.',
+      options: ['speed', 'humility', 'loudness', 'length'],
+      correctAnswer: 'humility',
+      explanation: 'Khushū\' means humility, submissiveness, and full presence of heart and mind before Allāh during prayer.',
+    },
+    {
+      unitId: unit1.id,
+      externalId: 'cb8-q1-4',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'The Awwābīn prayer is performed:',
+      options: ['Before Fajr', "After Ṣubh", 'After Maghrib', "Between Dhuhr and \'Aṣr"],
+      correctAnswer: 'After Maghrib',
+      explanation: "Awwābīn (prayer of the oft-returning) is performed after Maghrib prayer.",
+    },
+    {
+      unitId: unit1.id,
+      externalId: 'cb8-q1-5',
+      type: 'TRUE_FALSE' as const,
+      questionText: 'Tarāwīḥ prayer is only performed during Ramaḍān nights.',
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: 'Tarāwīḥ is a special nightly prayer in congregation performed during the nights of Ramaḍān.',
+    },
+    {
+      unitId: unit1.id,
+      externalId: 'cb8-q1-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'The Ḓuḥā prayer can be performed with how many rak\'at (maximum)?',
+      options: ["2 rak\'at", "4 rak\'at", "8 rak\'at", "12 rak\'at"],
+      correctAnswer: "12 rak\'at",
+      explanation: "Ḓuḥā prayer can be prayed from 2 rak\'at minimum up to 12 rak\'at maximum in the mid-morning.",
+    },
+
+    // ---- Unit 2: Nikah & Talaq ----
+    {
+      unitId: unit2.id,
+      externalId: 'cb8-q2-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'Which of the following is a required condition for a valid Nikāḥ?',
+      options: ['A large mahr', "The consent of the husband\'s father", 'Two witnesses', 'An imam to perform it'],
+      correctAnswer: 'Two witnesses',
+      explanation: 'A valid nikāḥ requires: offer and acceptance (ījāb/qabūl), two witnesses, the walī (guardian) for the bride, and the mahr.',
+    },
+    {
+      unitId: unit2.id,
+      externalId: 'cb8-q2-2',
+      type: 'FILL_BLANK' as const,
+      questionText: 'The mahr is a mandatory ________ given by the groom to the bride.',
+      options: ['service', 'gift', 'promise', 'dowry to family'],
+      correctAnswer: 'gift',
+      explanation: 'The mahr (dower) is a mandatory gift of money or property given exclusively to the bride, not her family.',
+    },
+    {
+      unitId: unit2.id,
+      externalId: 'cb8-q2-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'Ṭalāq al-Sunnah means:',
+      options: ['Three divorces at once', 'One revocable divorce', 'Divorce during menses', 'Divorce by the wife'],
+      correctAnswer: 'One revocable divorce',
+      explanation: "Ṭalāq al-Sunnah is one revocable divorce pronounced during the wife\'s period of purity (ṯuhr), allowing the couple to reconcile during the \'iddah.",
+    },
+    {
+      unitId: unit2.id,
+      externalId: 'cb8-q2-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Pronouncing three divorces at once is considered Ṭalāq al-bid\'ah and is sinful even if it takes effect.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "Ṭalāq al-bid\'ah (pronouncing three divorces at once) is sinful and contrary to the Sunnah, though the majority of scholars consider it legally effective.",
+    },
+    {
+      unitId: unit2.id,
+      externalId: 'cb8-q2-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The \'iddah refers to:",
+      options: ['The mahr amount', 'The waiting period after divorce or widowhood', 'The wedding celebration', 'The nikāḥ ceremony'],
+      correctAnswer: 'The waiting period after divorce or widowhood',
+      explanation: "\'Iddah is the mandatory waiting period a woman must observe after divorce or the death of her husband before she may remarry.",
+    },
+    {
+      unitId: unit2.id,
+      externalId: 'cb8-q2-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Rujū\' (returning to the marriage) is permitted:",
+      options: ['Only with a new nikāḥ', "During the \'iddah of a revocable divorce", "After the \'iddah ends", 'Never after any divorce'],
+      correctAnswer: "During the \'iddah of a revocable divorce",
+      explanation: "Rujū\' (reconciliation) is possible during the \'iddah of a revocable divorce without a new nikāḥ or mahr.",
+    },
+
+    // ---- Unit 3: Transactions ----
+    {
+      unitId: unit3.id,
+      externalId: 'cb8-q3-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'Which of the following is a condition for a valid sale in Islam?',
+      options: ['The item must be cheap', 'The item must be owned by the seller', 'The buyer must be a Muslim', 'The sale must happen in a mosque'],
+      correctAnswer: 'The item must be owned by the seller',
+      explanation: 'For a valid sale: the price and item must be known, the item must be owned by and deliverable by the seller.',
+    },
+    {
+      unitId: unit3.id,
+      externalId: 'cb8-q3-2',
+      type: 'FILL_BLANK' as const,
+      questionText: 'Ribā means ________ or usury.',
+      options: ['charity', 'profit', 'interest', 'trade'],
+      correctAnswer: 'interest',
+      explanation: 'Ribā means interest or usury — any predetermined additional amount charged on a loan or deferred payment, prohibited in Islam.',
+    },
+    {
+      unitId: unit3.id,
+      externalId: 'cb8-q3-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "In which Qur\'anic verse does Allāh clearly prohibit ribā?",
+      options: ['2:255', '2:275', '3:130 only', '4:29'],
+      correctAnswer: '2:275',
+      explanation: "Qur\'an 2:275 states: "Allāh has permitted trade and forbidden ribā (usury/interest)."",
+    },
+    {
+      unitId: unit3.id,
+      externalId: 'cb8-q3-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: 'Maysir (gambling) is permitted if the winnings are donated to charity.',
+      options: ['True', 'False'],
+      correctAnswer: 'False',
+      explanation: "Maysir (gambling) is absolutely prohibited in Islam regardless of how winnings are used. Allāh prohibits it in Qur\'an 5:90.",
+    },
+    {
+      unitId: unit3.id,
+      externalId: 'cb8-q3-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'Ribā al-Faḍl refers to:',
+      options: ['Deferred payment interest', 'Unequal exchange of the same commodity', 'Gambling debts', 'Interest on mortgages'],
+      correctAnswer: 'Unequal exchange of the same commodity',
+      explanation: "Ribā al-faḍl is the exchange of the same commodity in unequal amounts (e.g., 1kg of dates for 2kg of dates). Ribā al-nasī\'ah is deferred payment interest.",
+    },
+    {
+      unitId: unit3.id,
+      externalId: 'cb8-q3-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'Ijārah in Islamic finance refers to:',
+      options: ['Profit-sharing', 'A hire or lease contract', 'Islamic insurance', 'Partnership investment'],
+      correctAnswer: 'A hire or lease contract',
+      explanation: 'Ijārah is a hire or lease contract where one party uses an asset owned by another in exchange for rental payments.',
+    },
+
+    // ---- Unit 4: Ahadith Worship ----
+    {
+      unitId: unit4.id,
+      externalId: 'cb8-q4-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'According to the ḥadīth on the sweetness of Īmān, how many conditions are given?',
+      options: ['Two', 'Three', 'Four', 'Five'],
+      correctAnswer: 'Three',
+      explanation: "The Prophet ﷺ listed three conditions: (1) Allāh and the Messenger are dearest to him, (2) he loves someone solely for Allāh\'s sake, (3) he hates returning to disbelief as he hates being thrown into fire.",
+    },
+    {
+      unitId: unit4.id,
+      externalId: 'cb8-q4-2',
+      type: 'FILL_BLANK' as const,
+      questionText: 'The ḥadīth states that true wealth is the ________ of the soul.',
+      options: ['cleanliness', 'contentment', 'strength', 'beauty'],
+      correctAnswer: 'contentment',
+      explanation: "The Prophet ﷺ said: "Wealth is not in having many possessions, but wealth is the contentment of the soul (ghinā\' al-nafs)." (Bukhārī)",
+    },
+    {
+      unitId: unit4.id,
+      externalId: 'cb8-q4-3',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Allāh descends to the lowest heaven during the last third of every night.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "The Prophet ﷺ said: "Our Lord descends to the lowest heaven each night during the last third of the night, and says: Who is calling Me so I may answer? Who is asking Me so I may give?" (Bukhārī)",
+    },
+    {
+      unitId: unit4.id,
+      externalId: 'cb8-q4-4',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'What does the ḥadīth say about the reward of patience (ṣabr)?',
+      options: ['It equals 10 good deeds', "Allāh sets no limit to its reward", "It is rewarded like a voluntary fast", 'It is only for those tested severely'],
+      correctAnswer: "Allāh sets no limit to its reward",
+      explanation: "Allāh says: "Indeed, the patient will be given their reward without account (without limit)." (Qur\'an 39:10)",
+    },
+    {
+      unitId: unit4.id,
+      externalId: 'cb8-q4-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'The first condition for the sweetness of Īmān is:',
+      options: ["Performing Ḥajj", "That Allāh and His Messenger are dearer to him than anything else", "Memorising the Qur\'an", 'Loving the poor'],
+      correctAnswer: "That Allāh and His Messenger are dearer to him than anything else",
+      explanation: "The Prophet ﷺ said: "There are three qualities that whoever has them, will find the sweetness of Īmān: that Allāh and His Messenger are dearer to him than anything else..." (Bukhārī)",
+    },
+    {
+      unitId: unit4.id,
+      externalId: 'cb8-q4-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'In the ḥadīth, to what does the person with the sweetness of Īmān compare returning to disbelief?',
+      options: ['Eating poison', 'Being thrown into fire', 'Drowning in the sea', 'Losing all wealth'],
+      correctAnswer: 'Being thrown into fire',
+      explanation: 'The third condition is: "He hates to return to disbelief as he hates to be thrown into fire." (Bukhārī)',
+    },
+
+    // ---- Unit 5: Ahadith Character ----
+    {
+      unitId: unit5.id,
+      externalId: 'cb8-q5-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The ḥadīth "Allāh does not look at your forms but your hearts and deeds" means:",
+      options: ["Appearance is irrelevant in Islam", "Internal sincerity and deeds matter most to Allāh", "You must not care about how you look", "Physical beauty is a sin"],
+      correctAnswer: "Internal sincerity and deeds matter most to Allāh",
+      explanation: "Allāh judges by what is in the heart (intention, sincerity) and by what one actually does — not by wealth, beauty, or social status.",
+    },
+    {
+      unitId: unit5.id,
+      externalId: 'cb8-q5-2',
+      type: 'FILL_BLANK' as const,
+      questionText: 'The ḥadīth says ṣadaqah extinguishes sins like ________ extinguishes fire.',
+      options: ['sand', 'water', 'wind', 'earth'],
+      correctAnswer: 'water',
+      explanation: "The Prophet ﷺ said: "Ṣadaqah extinguishes sins as water extinguishes fire." (Tirmidhī)",
+    },
+    {
+      unitId: unit5.id,
+      externalId: 'cb8-q5-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'How many rights of a Muslim over another Muslim are mentioned in the famous ḥadīth?',
+      options: ['Four', 'Five', 'Six', 'Seven'],
+      correctAnswer: 'Six',
+      explanation: "The Prophet ﷺ enumerated six rights: (1) greet with salām, (2) accept invitations, (3) give naṣīḥah, (4) say yarḥamukallāh when someone sneezes, (5) visit the sick, (6) follow the janāzah.",
+    },
+    {
+      unitId: unit5.id,
+      externalId: 'cb8-q5-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: 'The ḥadīth teaches that begging is better than working if you are poor.',
+      options: ['True', 'False'],
+      correctAnswer: 'False',
+      explanation: 'The Prophet ﷺ said it is better to take a rope, gather firewood, and sell it than to beg. Self-sufficiency is praised and begging without necessity is discouraged.',
+    },
+    {
+      unitId: unit5.id,
+      externalId: 'cb8-q5-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "When a Muslim sneezes and says "al-ḥamdulillāh", the correct response is:",
+      options: ["SubhānAllāh", "Yarḥamukallāh", "Āmīn", "MāshāAllāh"],
+      correctAnswer: "Yarḥamukallāh",
+      explanation: "When a Muslim sneezes and praises Allāh, the one who hears should respond "yarḥamukallāh" (may Allāh have mercy on you).",
+    },
+    {
+      unitId: unit5.id,
+      externalId: 'cb8-q5-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'The ḥadīth about spreading salām widely refers to spreading it:',
+      options: ['Only to those you know well', 'To both people you know and strangers', 'Only to the elderly', 'Only in the mosque'],
+      correctAnswer: 'To both people you know and strangers',
+      explanation: "The Prophet ﷺ commanded spreading salām widely — to those you know AND those you do not know — as a means of spreading love and goodwill.",
+    },
+
+    // ---- Unit 6: Shamail ----
+    {
+      unitId: unit6.id,
+      externalId: 'cb8-q6-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The word "shamā\'il" refers to:",
+      options: ["The biography of the Prophet ﷺ", "The noble characteristics (physical and moral) of the Prophet ﷺ", "The battles of the Prophet ﷺ", "The Companions of the Prophet ﷺ"],
+      correctAnswer: "The noble characteristics (physical and moral) of the Prophet ﷺ",
+      explanation: "Shamā\'il refers to the noble qualities, description, manners, and characteristics of the Prophet Muḥammad ﷺ.",
+    },
+    {
+      unitId: unit6.id,
+      externalId: 'cb8-q6-2',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Which miracle of the Prophet ﷺ is confirmed directly in the Qur\'an?",
+      options: ['Feeding multitudes', 'Water from his fingers', 'The splitting of the moon', 'The speaking of animals'],
+      correctAnswer: 'The splitting of the moon',
+      explanation: "The Qur\'an states: "The Hour has drawn near and the moon has split." (54:1) — This refers to the miracle of the splitting of the moon.",
+    },
+    {
+      unitId: unit6.id,
+      externalId: 'cb8-q6-3',
+      type: 'FILL_BLANK' as const,
+      questionText: "The Prophet\'s ﷺ mission lasted approximately ________ years.",
+      options: ['10 years', '15 years', '20 years', '23 years'],
+      correctAnswer: '23 years',
+      explanation: 'The Prophet ﷺ received revelation for approximately 23 years: 13 years in Makkah and 10 years in Madīnah.',
+    },
+    {
+      unitId: unit6.id,
+      externalId: 'cb8-q6-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "The miracle of water flowing from the Prophet\'s ﷺ fingers at Ḥudaybiyah is recorded in the books of ḥadīth.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "The miracle of water flowing from between the Prophet\'s fingers at Ḥudaybiyah is authentically recorded in Bukhārī.",
+    },
+    {
+      unitId: unit6.id,
+      externalId: 'cb8-q6-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Who compiled the famous collection "Al-Shamā\'il al-Muḥammadiyyah"?",
+      options: ["Imām Bukhārī", "Imām Tirmidhī", "Imām Muslim", "Imām Abū Dāwūd"],
+      correctAnswer: "Imām Tirmidhī",
+      explanation: "Imām Tirmidhī compiled the famous collection "Al-Shamā\'il al-Muḥammadiyyah" which describes the physical and moral characteristics of the Prophet ﷺ.",
+    },
+    {
+      unitId: unit6.id,
+      externalId: 'cb8-q6-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: 'Which of the following was NOT a transformation the Prophet ﷺ brought?',
+      options: ['Abolishing idol worship', 'Ending female infanticide', 'Establishing the Roman Empire', 'Uniting Arab tribes'],
+      correctAnswer: 'Establishing the Roman Empire',
+      explanation: "The Prophet\'s mission transformed Arabia by ending idol worship, stopping female infanticide, establishing justice, and uniting tribes — not establishing the Roman Empire.",
+    },
+
+    // ---- Unit 7: Uthman ----
+    {
+      unitId: unit7.id,
+      externalId: 'cb8-q7-1',
+      type: 'FILL_BLANK' as const,
+      questionText: "\'Uthmān is called Dhū al-Nūrayn because he married two ________ of the Prophet ﷺ.",
+      options: ['sisters', 'daughters', 'aunts', 'cousins'],
+      correctAnswer: 'daughters',
+      explanation: "\'Uthmān married the Prophet\'s daughters Ruqayyah and (after her death) Umm Kulthūm, earning the title "Dhū al-Nūrayn" (He of the Two Lights).",
+    },
+    {
+      unitId: unit7.id,
+      externalId: 'cb8-q7-2',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "\'Uthmān\'s greatest achievement for the Muslim ummah was:",
+      options: ["Conquering Persia", "Standardising and preserving the Qur\'an in one written form", 'Building the first mosque', 'Introducing the Islamic calendar'],
+      correctAnswer: "Standardising and preserving the Qur\'an in one written form",
+      explanation: "\'Uthmān commissioned a standardised copy (Muṣḥaf \'Uthmānī) to unify Qur\'anic recitation across the expanding Muslim world.",
+    },
+    {
+      unitId: unit7.id,
+      externalId: 'cb8-q7-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "\'Uthmān bought the Well of Rūmah and donated it to:",
+      options: ['The poor only', 'His tribe', 'All Muslims for free use', 'The mosque treasury'],
+      correctAnswer: 'All Muslims for free use',
+      explanation: "\'Uthmān purchased the well of Rūmah from a Jewish owner and made it freely available to all Muslims.",
+    },
+    {
+      unitId: unit7.id,
+      externalId: 'cb8-q7-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "\'Uthmān was martyred while he was reading the Qur\'an.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "\'Uthmān was killed by rebels while reading the Qur\'an in his home, on the 18th of Dhūl Ḥijjah 35 AH.",
+    },
+    {
+      unitId: unit7.id,
+      externalId: 'cb8-q7-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The scholar who warned \'Uthmān about Qur\'anic dialect disputes was:",
+      options: ["Zayd ibn Thābit", "Ibn Mas\'ūd", "Ḥudhayfah ibn al-Yamān", "Abū Hurayrah"],
+      correctAnswer: "Ḥudhayfah ibn al-Yamān",
+      explanation: "Ḥudhayfah ibn al-Yamān rushed to \'Uthmān alarmed by disputes about Qur\'anic recitation, urging standardisation.",
+    },
+    {
+      unitId: unit7.id,
+      externalId: 'cb8-q7-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "During which period did \'Uthmān\'s caliphate take place?",
+      options: ['622–634 CE', '634–644 CE', '644–656 CE', '656–661 CE'],
+      correctAnswer: '644–656 CE',
+      explanation: "\'Uthmān ibn \'Affān was the third Caliph, reigning from 644 to 656 CE.",
+    },
+
+    // ---- Unit 8: Ali ----
+    {
+      unitId: unit8.id,
+      externalId: 'cb8-q8-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "At approximately what age did \'Alī accept Islam?",
+      options: ['Age 5', 'Age 10', 'Age 15', 'Age 20'],
+      correctAnswer: 'Age 10',
+      explanation: "\'Alī ibn Abī Ṭālib accepted Islam at approximately age 10, making him the first youth to embrace the faith.",
+    },
+    {
+      unitId: unit8.id,
+      externalId: 'cb8-q8-2',
+      type: 'FILL_BLANK' as const,
+      questionText: "\'Alī is given the title "Karram Allāhu wajhah" because his face never ________ to an idol.",
+      options: ['smiled', 'bowed', 'prostrated', 'turned'],
+      correctAnswer: 'prostrated',
+      explanation: "\'Alī never prostrated to an idol — he accepted Islam so young that he never committed shirk.",
+    },
+    {
+      unitId: unit8.id,
+      externalId: 'cb8-q8-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The Prophet ﷺ said: "I am the city of knowledge and \'Alī is its ___."",
+      options: ['scholar', 'gate', 'foundation', 'guardian'],
+      correctAnswer: 'gate',
+      explanation: "The Prophet ﷺ said: "I am the city of knowledge and \'Alī is its gate." This highlights \'Alī\'s unique depth of Islamic scholarship.",
+    },
+    {
+      unitId: unit8.id,
+      externalId: 'cb8-q8-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "\'Alī was the fourth and final Rightly Guided Caliph (Khalīfah Rāshid).",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "\'Alī ibn Abī Ṭālib was the fourth of the Rightly Guided Caliphs (Khulafā\' Rāshidūn), ruling from 656 to 661 CE.",
+    },
+    {
+      unitId: unit8.id,
+      externalId: 'cb8-q8-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "At which battle did \'Alī kill the famous warrior \'Amr ibn \'Abd Wudd?",
+      options: ['Battle of Badr', 'Battle of Uḥud', 'Battle of Khandaq', 'Battle of Khaybar'],
+      correctAnswer: 'Battle of Khandaq',
+      explanation: "At the Battle of Khandaq (the Trench), \'Alī killed \'Amr ibn \'Abd Wudd in single combat, a decisive moment that raised Muslim morale.",
+    },
+    {
+      unitId: unit8.id,
+      externalId: 'cb8-q8-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "\'Alī was martyred in which city?",
+      options: ["Madīnah", 'Damascus', "Kūfah", 'Makkah'],
+      correctAnswer: "Kūfah",
+      explanation: "\'Alī was struck with a poisoned sword in the mosque of Kūfah while going for Fajr prayer, and passed away in 40 AH.",
+    },
+
+    // ---- Unit 9: Ayyub ----
+    {
+      unitId: unit9.id,
+      externalId: 'cb8-q9-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "How long was Prophet Ayyūb afflicted with illness according to the narration?",
+      options: ['3 years', '7 years', '18 years', '40 years'],
+      correctAnswer: '18 years',
+      explanation: "According to Islamic tradition, Prophet Ayyūb was afflicted with a severe skin disease for 18 years.",
+    },
+    {
+      unitId: unit9.id,
+      externalId: 'cb8-q9-2',
+      type: 'FILL_BLANK' as const,
+      questionText: "Ayyūb\'s du\'a\' ends with "wa anta arḥamu ________ " (You are the Most Merciful of the merciful).",
+      options: ["al-\'ābidīn", "al-rāḥimīn", "al-ṣābirīn", "al-sālikin"],
+      correctAnswer: "al-rāḥimīn",
+      explanation: "Ayyūb\'s Qur\'anic du\'a\' (21:83): "Innī massaniya al-ḏurru wa anta arḥamu al-rāḥimīn."",
+    },
+    {
+      unitId: unit9.id,
+      externalId: 'cb8-q9-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "In Qur\'an 21:84, Allāh\'s response to Ayyūb included restoring his family:",
+      options: ['In the same number as before', 'One third of what he had before', 'Along with a like thereof (doubled)', 'Only if he asked again'],
+      correctAnswer: 'Along with a like thereof (doubled)',
+      explanation: "Allāh says He restored Ayyūb\'s family "and the like thereof along with them" — his blessings were doubled after his trial.",
+    },
+    {
+      unitId: unit9.id,
+      externalId: 'cb8-q9-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Prophet Ayyūb complained frequently to Allāh during his illness.",
+      options: ['True', 'False'],
+      correctAnswer: 'False',
+      explanation: "Despite 18 years of severe illness, Ayyūb never complained. His du\'a\' was a humble acknowledgement, not a complaint.",
+    },
+    {
+      unitId: unit9.id,
+      externalId: 'cb8-q9-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The Qur\'anic du\'a\' of Ayyūb appears in which Surah?",
+      options: ["Surah Yūsuf", "Surah al-Kahf", "Surah al-Anbiyā\'", "Surah Sād"],
+      correctAnswer: "Surah al-Anbiyā\'",
+      explanation: "Ayyūb\'s du\'a\' appears in Surah al-Anbiyā\' (21:83) and is also referenced in Surah Sād (38:41–44).",
+    },
+    {
+      unitId: unit9.id,
+      externalId: 'cb8-q9-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Who remained with Ayyūb throughout his illness when others abandoned him?",
+      options: ['His son', 'His brother', 'His wife', 'A neighbour'],
+      correctAnswer: 'His wife',
+      explanation: "Ayyūb\'s wife served him devotedly throughout his 18 years of illness, showing remarkable loyalty and patience.",
+    },
+
+    // ---- Unit 10: Andalusia & Crusades ----
+    {
+      unitId: unit10.id,
+      externalId: 'cb8-q10-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Who led the Muslim conquest of Andalusia in 711 CE?",
+      options: ["Mūsā ibn Nuṣayr", "Ṭāriq ibn Ziyād", "\'Abd al-Raḥmān I", "Sulaymān the Magnificent"],
+      correctAnswer: "Ṭāriq ibn Ziyād",
+      explanation: "Ṭāriq ibn Ziyād crossed from North Africa with 7,000 troops in 711 CE, landing at the mountain now called Gibraltar (Jabal Ṭāriq).",
+    },
+    {
+      unitId: unit10.id,
+      externalId: 'cb8-q10-2',
+      type: 'FILL_BLANK' as const,
+      questionText: "Islamic Andalusia reached its Golden Age under the Umayyad Caliph \'Abd al-Raḥmān ________ .",
+      options: ['I', 'II', 'III', 'IV'],
+      correctAnswer: 'III',
+      explanation: "\'Abd al-Raḥmān III (912–961 CE) led Andalusia to its peak, with Córdoba becoming the greatest city in Europe.",
+    },
+    {
+      unitId: unit10.id,
+      externalId: 'cb8-q10-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Which Muslim scholar of Andalusia was known as "Averroes" and preserved Greek philosophy?",
+      options: ["Ibn Ḥazm", "Ibn Rushd", "Ibn Ḥayyiyān", "Al-Zarqālī"],
+      correctAnswer: "Ibn Rushd",
+      explanation: "Ibn Rushd (Averroes, 1126–1198 CE) wrote extensive commentaries on Aristotle that were translated into Latin, helping to spark the European Renaissance.",
+    },
+    {
+      unitId: unit10.id,
+      externalId: 'cb8-q10-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Ṣalāḥuddīn al-Ayyūbī reconquered Jerusalem in 1187 CE without a massacre.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "Ṣalāḥuddīn retook Jerusalem on 2 October 1187 and guaranteed the safety of Christian inhabitants, in striking contrast to the 1099 Crusader conquest.",
+    },
+    {
+      unitId: unit10.id,
+      externalId: 'cb8-q10-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The First Crusade was called by:",
+      options: ["Emperor Frederick I", "Pope Urban II", "King Richard I", "Pope Gregory VII"],
+      correctAnswer: "Pope Urban II",
+      explanation: "In 1095, Pope Urban II called the First Crusade at the Council of Clermont, urging European Christians to recapture Jerusalem.",
+    },
+    {
+      unitId: unit10.id,
+      externalId: 'cb8-q10-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Córdoba during the Islamic Golden Age had approximately how many public libraries?",
+      options: ['5', '20', '70', '200'],
+      correctAnswer: '70',
+      explanation: "At its peak, Córdoba had approximately 70 public libraries, when most of Europe\'s monasteries had only a handful of manuscripts.",
+    },
+
+    // ---- Unit 11: Ottomans ----
+    {
+      unitId: unit11.id,
+      externalId: 'cb8-q11-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Sultan Muḥammad al-Fātiḥ conquered Constantinople at what age?",
+      options: ['Age 18', 'Age 21', 'Age 25', 'Age 30'],
+      correctAnswer: 'Age 21',
+      explanation: "Sultan Muḥammad ibn Murād (al-Fātiḥ) conquered Constantinople in 1453 CE at the age of 21, fulfilling the Prophet\'s ﷺ prophecy.",
+    },
+    {
+      unitId: unit11.id,
+      externalId: 'cb8-q11-2',
+      type: 'FILL_BLANK' as const,
+      questionText: "The Ottoman caliphate was abolished in ________ by Mustafa Kemal.",
+      options: ['1908', '1918', '1924', '1930'],
+      correctAnswer: '1924',
+      explanation: "Mustafa Kemal (Atatürk) abolished the Ottoman Caliphate in 1924, ending over a thousand years of continuous Islamic caliphate.",
+    },
+    {
+      unitId: unit11.id,
+      externalId: 'cb8-q11-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The Prophet ﷺ said the one who conquers Constantinople would be:",
+      options: ["A king from the Arabs", "An excellent commander with an excellent army", "The Mahdi", "A Turkish sultan named Sulayman"],
+      correctAnswer: "An excellent commander with an excellent army",
+      explanation: "The Prophet ﷺ said: "Verily you will conquer Constantinople. What an excellent commander will its commander be, and what an excellent army will that army be." (Aḥmad)",
+    },
+    {
+      unitId: unit11.id,
+      externalId: 'cb8-q11-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Muḥammad al-Fātiḥ had ships transported overland to bypass the sea chain blocking the harbour.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "In a remarkable military innovation, al-Fātiḥ had 70 ships dragged over greased logs across land into the Golden Horn, surprising the defenders.",
+    },
+    {
+      unitId: unit11.id,
+      externalId: 'cb8-q11-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Sulaymān the Magnificent was known as "Qānūnī" (the Lawgiver) because:",
+      options: ["He introduced Islamic law for the first time", "He implemented comprehensive legal reforms", "He ended all warfare", "He built the most mosques"],
+      correctAnswer: "He implemented comprehensive legal reforms",
+      explanation: "Sulaymān I is called "Qānūnī" by Muslims for his extensive legal reforms that systematised the Ottoman legal code.",
+    },
+    {
+      unitId: unit11.id,
+      externalId: 'cb8-q11-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "After entering Constantinople, what was the first act of Muḥammad al-Fātiḥ?",
+      options: ["He declared a public holiday", "He went to Hagia Sophia (Aya Sofya) and prayed", "He rebuilt the city walls", "He returned to Istanbul immediately"],
+      correctAnswer: "He went to Hagia Sophia (Aya Sofya) and prayed",
+      explanation: "Upon entering Constantinople, Muḥammad al-Fātiḥ went to the great church of Hagia Sophia and prayed there in gratitude to Allāh.",
+    },
+
+    // ---- Unit 12: Attributes ----
+    {
+      unitId: unit12.id,
+      externalId: 'cb8-q12-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: ""Qidam" as an attribute of Allāh means:",
+      options: ["Allāh is all-powerful", "Allāh has no beginning", "Allāh is self-sufficient", "Allāh is unlike His creation"],
+      correctAnswer: "Allāh has no beginning",
+      explanation: "Qidam means pre-eternity — Allāh always was, with no beginning. His existence is not caused by anything.",
+    },
+    {
+      unitId: unit12.id,
+      externalId: 'cb8-q12-2',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: ""Mukhālafah lil-ḥawādith" means:",
+      options: ["Allāh resembles His creation", "Allāh does not resemble any created thing", "Allāh created everything", "Allāh has no attributes"],
+      correctAnswer: "Allāh does not resemble any created thing",
+      explanation: "Mukhālafah lil-ḥawādith means distinctness from creation — Allāh is utterly unlike anything He created. (Qur\'an 42:11)",
+    },
+    {
+      unitId: unit12.id,
+      externalId: 'cb8-q12-3',
+      type: 'FILL_BLANK' as const,
+      questionText: "The Ahl al-Sunnah affirm Allāh\'s attribute of istiwā\' "bilā kayf", meaning without specifying ________ .",
+      options: ['the time', 'the manner', 'the reason', 'the place'],
+      correctAnswer: 'the manner',
+      explanation: ""Bilā kayf" means "without (specifying) how" — we affirm the attribute as stated in the Qur\'an without asking how or imagining a physical form.",
+    },
+    {
+      unitId: unit12.id,
+      externalId: 'cb8-q12-4',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "How many essential (ṣifāt dhātiyyah) attributes of Allāh are typically listed?",
+      options: ['Three', 'Five', 'Six', 'Nine'],
+      correctAnswer: 'Six',
+      explanation: "The six essential attributes are: wujūd, qidam, baqā\', qiyām binafsih, waḥdāniyyah, mukhālafah lil-ḥawādith.",
+    },
+    {
+      unitId: unit12.id,
+      externalId: 'cb8-q12-5',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Imām Mālik said that asking "how" about Allāh\'s istiwā\' is a bid\'ah (innovation).",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "Imām Mālik famously said: "The istiwā\' is known, the manner is unknown, believing in it is obligatory, and asking about it is a bid\'ah."",
+    },
+    {
+      unitId: unit12.id,
+      externalId: 'cb8-q12-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: ""Baqā\'" as an attribute of Allāh refers to His:",
+      options: ["Omnipotence", "Everlastingness (no end)", "Speech", "Oneness"],
+      correctAnswer: "Everlastingness (no end)",
+      explanation: "Baqā\' means everlastingness — Allāh has no end. He always will exist. This complements qidam (no beginning).",
+    },
+
+    // ---- Unit 13: Iman & Ulama ----
+    {
+      unitId: unit13.id,
+      externalId: 'cb8-q13-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Which is the correct three-component definition of Īmān?",
+      options: [
+        "Prayer, fasting, zakāh",
+        "Taṣdīq (inner belief), iqrār (verbal acknowledgement), \'amal (action)",
+        "Knowledge, intention, implementation",
+        "Tawbah, ṣalāh, du\'a\'",
+      ],
+      correctAnswer: "Taṣdīq (inner belief), iqrār (verbal acknowledgement), \'amal (action)",
+      explanation: "Ahl al-Sunnah defines Īmān as: taṣdīq with the heart, iqrār with the tongue, and \'amal with the limbs.",
+    },
+    {
+      unitId: unit13.id,
+      externalId: 'cb8-q13-2',
+      type: 'FILL_BLANK' as const,
+      questionText: "Allāh commands in Qur\'an 16:43: "Ask the people of ________ if you do not know."",
+      options: ['wealth', 'knowledge', 'authority', 'family'],
+      correctAnswer: 'knowledge',
+      explanation: "Qur\'an 16:43: "Fas\'ālū ahla al-dhikr in kuntum lā ta\'lamūn" — Ask the people of knowledge if you do not know.",
+    },
+    {
+      unitId: unit13.id,
+      externalId: 'cb8-q13-3',
+      type: 'TRUE_FALSE' as const,
+      questionText: "According to some schools, Īmān can increase with obedience and decrease with disobedience.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "The Qur\'an states "it increases them in faith" (8:2), supporting the view that Īmān fluctuates with deeds.",
+    },
+    {
+      unitId: unit13.id,
+      externalId: 'cb8-q13-4',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Which is a red flag for an unreliable religious opinion-giver?",
+      options: ["They studied for 20 years at a traditional institution", "They can cite Qur\'an and ḥadīth references", "They dismiss 1,400 years of scholarship as outdated", "They consult with other scholars"],
+      correctAnswer: "They dismiss 1,400 years of scholarship as outdated",
+      explanation: "Dismissing established scholarly tradition without credible alternative evidence is a sign of shallow scholarship.",
+    },
+    {
+      unitId: unit13.id,
+      externalId: 'cb8-q13-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The term "taṣdīq" in the definition of Īmān refers to:",
+      options: ["Verbal declaration of the Sharīdah", "Sincere inner belief in the heart", "Performance of ṣalāh", "Reading the Qur\'an"],
+      correctAnswer: "Sincere inner belief in the heart",
+      explanation: "Taṣdīq literally means "to affirm as true" — it is the sincere conviction and belief that resides in the heart.",
+    },
+    {
+      unitId: unit13.id,
+      externalId: 'cb8-q13-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The Prophet ﷺ warned that when ignorant leaders replace scholars, they will:",
+      options: ["Strengthen the ummah", "Give fatāwā without knowledge, going astray and leading others astray", "Bring a new prophet", "Build more mosques"],
+      correctAnswer: "Give fatāwā without knowledge, going astray and leading others astray",
+      explanation: "This ḥadīth (Bukhārī and Muslim) warns of the danger of religious ignorance and unqualified leadership.",
+    },
+
+    // ---- Unit 14: Taqwa, Tawakkul, Tawbah ----
+    {
+      unitId: unit14.id,
+      externalId: 'cb8-q14-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The literal meaning of taqwā is:",
+      options: ['Worship', 'A shield', 'Knowledge', 'Patience'],
+      correctAnswer: 'A shield',
+      explanation: "Taqwā literally means a shield — a shield between you and what you fear from Allāh\'s displeasure.",
+    },
+    {
+      unitId: unit14.id,
+      externalId: 'cb8-q14-2',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The ḥadīth about the camel teaches that tawakkul means:",
+      options: ["Leave everything to Allāh without effort", "Take all available means, then trust Allāh with the outcome", "Pray constantly and do no work", "Trust your own abilities first"],
+      correctAnswer: "Take all available means, then trust Allāh with the outcome",
+      explanation: "The Prophet ﷺ told the man: "Tie it (your camel), then trust in Allāh." — Take precautions and effort, then trust the outcome to Allāh.",
+    },
+    {
+      unitId: unit14.id,
+      externalId: 'cb8-q14-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "How many conditions are required for a valid tawbah when the sin is against Allāh only?",
+      options: ['One', 'Two', 'Three', 'Four'],
+      correctAnswer: 'Three',
+      explanation: "When the sin is between you and Allāh, three conditions apply: nadam (regret), stop the sin, resolve not to return.",
+    },
+    {
+      unitId: unit14.id,
+      externalId: 'cb8-q14-4',
+      type: 'FILL_BLANK' as const,
+      questionText: "The first condition of valid tawbah is ________ (sincere regret for the sin).",
+      options: ["iqrār", "nadam", "ṣabr", "zuhd"],
+      correctAnswer: "nadam",
+      explanation: "Nadam means sincere regret — genuinely feeling sorry for the sin because it displeased Allāh.",
+    },
+    {
+      unitId: unit14.id,
+      externalId: 'cb8-q14-5',
+      type: 'TRUE_FALSE' as const,
+      questionText: "Allāh\'s door of tawbah remains open with no exceptions until Judgement Day.",
+      options: ['True', 'False'],
+      correctAnswer: 'False',
+      explanation: "The door of tawbah closes at two points: at the moment of death, and when the sun rises from the west.",
+    },
+    {
+      unitId: unit14.id,
+      externalId: 'cb8-q14-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "When a sin involves wronging another person, what additional condition applies to tawbah?",
+      options: ["Pray 100 rak\'at", "Restore the right and/or seek forgiveness from the wronged person", "Fast for 10 days", "Give ṣadaqah equal to the harm caused"],
+      correctAnswer: "Restore the right and/or seek forgiveness from the wronged person",
+      explanation: "When the sin involves another person (theft, backbiting), the fourth condition is to return what was taken and/or seek forgiveness from the person wronged.",
+    },
+
+    // ---- Unit 15: Adab Final ----
+    {
+      unitId: unit15.id,
+      externalId: 'cb8-q15-1',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "In which Qur\'anic verses does Allāh command both men and women to lower their gaze?",
+      options: ['24:30–31', '33:53–59', '4:34–35', '2:187–188'],
+      correctAnswer: '24:30–31',
+      explanation: "Qur\'an 24:30 addresses believing men and 24:31 addresses believing women — both are commanded to lower their gaze and guard their chastity.",
+    },
+    {
+      unitId: unit15.id,
+      externalId: 'cb8-q15-2',
+      type: 'FILL_BLANK' as const,
+      questionText: "The Prophet ﷺ said: "Whoever cheats us is ________ of us."",
+      options: ['the best', 'part', 'not', 'the leader'],
+      correctAnswer: 'not',
+      explanation: ""Man ghashshanā falaysa minnā" — Whoever cheats us is not from us. (Muslim)",
+    },
+    {
+      unitId: unit15.id,
+      externalId: 'cb8-q15-3',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "Imām al-Shāfi\'ī said about debate: "I never debated anyone except hoping Allāh would place the truth on:",
+      options: ['my tongue', 'his tongue', "the moderator\'s tongue", 'both our tongues'],
+      correctAnswer: 'his tongue',
+      explanation: "Imām al-Shāfi\'ī said he hoped Allāh would place the truth on his opponent\'s tongue — showing the goal of debate is truth, not personal victory.",
+    },
+    {
+      unitId: unit15.id,
+      externalId: 'cb8-q15-4',
+      type: 'TRUE_FALSE' as const,
+      questionText: "The walīmah (wedding feast) is a sunnah that the Prophet ﷺ encouraged.",
+      options: ['True', 'False'],
+      correctAnswer: 'True',
+      explanation: "The Prophet ﷺ said: "Have a walīmah even with a single sheep." — It is a confirmed sunnah to celebrate a marriage with a meal.",
+    },
+    {
+      unitId: unit15.id,
+      externalId: 'cb8-q15-5',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "The Prophet ﷺ described the unlawful gaze as:",
+      options: ['A minor sin only', 'The adultery of the eyes', 'A type of kufr', 'A sin only for men'],
+      correctAnswer: 'The adultery of the eyes',
+      explanation: "The Prophet ﷺ said the eyes commit zinā (adultery) and their zinā is the unlawful gaze. This applies to both men and women.",
+    },
+    {
+      unitId: unit15.id,
+      externalId: 'cb8-q15-6',
+      type: 'MULTIPLE_CHOICE' as const,
+      questionText: "In Islamic debate etiquette, when should you concede?",
+      options: ["Never — always defend your position", "Only when you have more evidence", "When the other person makes a valid argument", "Only after the debate ends"],
+      correctAnswer: "When the other person makes a valid argument",
+      explanation: "Intellectual honesty requires acknowledging valid arguments. Conceding when wrong is a sign of strength and sincerity.",
+    },
+  ];
+
+  for (const q of allQuestions) {
+    await prisma.question.upsert({
+      where: { externalId: q.externalId },
+      create: {
+        unitId: q.unitId,
+        externalId: q.externalId,
+        type: q.type,
+        questionText: q.questionText,
+        options: JSON.stringify(q.options),
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      },
+      update: {
+        unitId: q.unitId,
+        type: q.type,
+        questionText: q.questionText,
+        options: JSON.stringify(q.options),
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      },
+    });
+  }
+  console.log(`✅ Upserted ${allQuestions.length} questions`);
+
+  // =============================================
+  // FLASHCARDS (25 total)
+  // =============================================
+
+  await prisma.flashCard.deleteMany({ where: { courseId: course.id } });
+
+  const flashcardData = [
+    { front: 'Tahájjud', back: 'Voluntary night prayer in the last third of the night; minimum 2 rak\'at. Among the most virtuous nawāfil.' },
+    { front: 'Khushū\'', back: 'Humility and full presence of heart during prayer. Developed by knowing the meanings of words, minimising distractions, and imagining it is one\'s last prayer.' },
+    { front: 'Mahr', back: 'The mandatory gift (money or property) given exclusively to the bride by the groom as a condition of valid nikāḥ.' },
+    { front: '\'Iddah', back: 'The mandatory waiting period after divorce or widowhood before a woman may remarry. Protects lineage and allows for reconciliation.' },
+    { front: 'Ribā', back: 'Interest or usury: any predetermined additional amount on a loan. Prohibited in Qur\'an 2:275. Two types: ribā al-faḍl and ribā al-nasī\'ah.' },
+    { front: 'Maysir', back: 'Gambling: wagering something of value on an uncertain outcome. Prohibited in Qur\'an 5:90 alongside alcohol.' },
+    { front: 'Ijārah', back: 'An Islamic hire or lease contract where one party uses an asset owned by another in exchange for agreed rental payments.' },
+    { front: 'Shamā\'il', back: 'The noble physical and moral characteristics of the Prophet Muḥammad ﷺ. Imām Tirmidhī compiled a famous collection of them.' },
+    { front: 'Dhū al-Nūrayn', back: "\'He of the Two Lights\' — title of \'Uthmān ibn \'Affān, who married two daughters of the Prophet ﷺ: Ruqayyah and Umm Kulthūm." },
+    { front: 'Muṣḥaf \'Uthmānī', back: 'The standardised written copy of the Qur\'an commissioned by \'Uthmān to unify all variant dialect copies. The basis of all Qur\'anic texts today.' },
+    { front: 'Karram Allāhu wajhah', back: 'Title of \'Alī ibn Abī Ṭālib: "May Allāh honour his face" — because he never prostrated to an idol, having grown up in the Prophet\'s household.' },
+    { front: 'Fatḥ al-QuṣṬantiniyyah', back: 'The Conquest of Constantinople (1453 CE) by Sultan Muḥammad al-Fātiḥ at age 21, fulfilling the Prophet\'s ﷺ prophecy about the city and its commander.' },
+    { front: 'Qidam', back: 'An essential attribute of Allāh: pre-eternity / having no beginning. Allāh always was, without a starting point.' },
+    { front: 'Baqā\'', back: 'An essential attribute of Allāh: everlastingness / having no end. Allāh always will be.' },
+    { front: 'Qiyām binafsih', back: 'An essential attribute of Allāh: self-subsistence. Allāh depends on nothing and no one; everything depends on Him.' },
+    { front: 'Mukhālafah lil-ḥawādith', back: "Allāh\'s distinctness from creation: He does not resemble anything He created. "There is nothing like Him." (Qur\'an 42:11)" },
+    { front: 'Istiwā\' / Bilā kayf', back: "Allāh\'s attribute of rising over the Throne. Ahl al-Sunnah affirm it as stated in Qur\'an 20:5 but without specifying the manner (bilā kayf)." },
+    { front: 'Taṣdīq', back: "The first component of Īmān: sincere inner belief in the heart. Believing Allāh, His angels, books, messengers, Last Day, and divine decree." },
+    { front: 'Nadam', back: 'The first condition of tawbah: sincere regret for the sin — feeling genuinely sorry because it displeased Allāh, not merely for its consequences.' },
+    { front: 'Tawakkul', back: "Reliance on Allāh AFTER taking all available means. Not fatalism. The Prophet\'s ﷺ teaching: "Tie your camel, then trust in Allāh." (Tirmidhī)" },
+    { front: 'Taqwā', back: "Literally "a shield" — shielding oneself from Allāh\'s displeasure. Three levels: avoiding ḥarām, avoiding makrūh, and avoiding everything that distracts from Allāh." },
+    { front: "Ṣalāḥuddīn al-Ayyūbī", back: 'Muslim Kurdish leader (1137–1193 CE) who united the Muslim world and reconquered Jerusalem (1187) without massacre. Known for justice, generosity, and nobility.' },
+    { front: 'Waliīmah', back: "The post-nikāḥ wedding feast. A confirmed sunnah. The Prophet ﷺ said: "Have a walīmah even with a single sheep." Attending when invited is a right of the Muslim." },
+    { front: "Ḥifẓ al-Baṣar", back: 'Lowering/guarding the gaze. Commanded for both men and women in Qur\'an 24:30–31. The Prophet ﷺ called the unlawful gaze "the adultery of the eyes."' },
+    { front: "Innī massaniya al-ḏurru", back: "Ayyūb\'s Qur\'anic du\'a\': "Indeed adversity has touched me, and You are the Most Merciful of the merciful." (21:83) — Model supplication in times of trial." },
+  ];
+
+  for (let i = 0; i < flashcardData.length; i++) {
+    const fc = flashcardData[i];
+    await prisma.flashCard.create({
+      data: {
+        courseId: course.id,
+        front: fc.front,
+        back: fc.back,
+        category: 'Vocabulary',
+        tags: ['maktab-8'],
+        orderIndex: i,
+      },
+    });
+  }
+  console.log(`✅ Created ${flashcardData.length} flashcards`);
+
+  // =============================================
+  // ARABIC TERMS (18 total)
+  // =============================================
+
+  await prisma.arabicTerm.deleteMany({ where: { courseId: course.id } });
+
+  const arabicTermsData = [
+    { arabicText: 'الخشوع', transliteration: 'al-khushū\'', translation: 'Humility and full presence of heart before Allāh in prayer' },
+    { arabicText: 'المهر', transliteration: 'al-mahr', translation: 'The mandatory gift given by the groom to the bride in nikāḥ' },
+    { arabicText: 'العدة', transliteration: 'al-\'iddah', translation: 'The waiting period after divorce or widowhood' },
+    { arabicText: 'الربا', transliteration: 'al-ribā', translation: 'Interest or usury, prohibited in Qur\'an 2:275' },
+    { arabicText: 'الميسر', transliteration: 'al-maysir', translation: 'Gambling, prohibited in Qur\'an 5:90' },
+    { arabicText: 'الشمائل', transliteration: 'al-shamā\'il', translation: 'The noble physical and moral characteristics of the Prophet ﷺ' },
+    { arabicText: 'ذو النورين', transliteration: 'Dhū al-Nūrayn', translation: 'He of the Two Lights — title of \'Uthmān ibn \'Affān' },
+    { arabicText: 'الاستواء', transliteration: 'al-istiwā\'', translation: "Allāh\'s rising/ascending over the Throne, affirmed without specifying how (bilā kayf)" },
+    { arabicText: 'القدم', transliteration: 'al-qidam', translation: 'Pre-eternity — Allāh has no beginning' },
+    { arabicText: 'البقاء', transliteration: 'al-baqā\'', translation: 'Everlastingness — Allāh has no end' },
+    { arabicText: 'التصديق', transliteration: 'al-taṣdīq', translation: 'Sincere inner belief — the first component of Īmān' },
+    { arabicText: 'الندم', transliteration: 'al-nadam', translation: 'Sincere regret — the first condition of valid tawbah' },
+    { arabicText: 'التوكل', transliteration: 'al-tawakkul', translation: 'Trust and reliance on Allāh after taking available means' },
+    { arabicText: 'التقوى', transliteration: 'al-taqwā', translation: 'Fear/consciousness of Allāh; a shield between oneself and His displeasure' },
+    { arabicText: 'التوبة', transliteration: 'al-tawbah', translation: 'Repentance — returning to Allāh; requires nadam, stopping the sin, and resolve not to return' },
+    { arabicText: 'الوليمة', transliteration: 'al-walīmah', translation: 'The post-nikāḥ wedding feast; a confirmed sunnah' },
+    { arabicText: 'حفظ البصر', transliteration: 'ḥifẓ al-baṣar', translation: 'Lowering and guarding the gaze; commanded for both men and women in Qur\'an 24:30–31' },
+    { arabicText: 'صلاة الجماعة', transliteration: 'ṣalāt al-jamā\'ah', translation: 'Congregational prayer, rewarded 27 times more than praying alone' },
+  ];
+
+  for (const t of arabicTermsData) {
+    await prisma.arabicTerm.create({
+      data: {
+        courseId: course.id,
+        arabicText: t.arabicText,
+        transliteration: t.transliteration,
+        translation: t.translation,
+      },
+    });
+  }
+  console.log(`✅ Created ${arabicTermsData.length} Arabic terms`);
+
+  // =============================================
   // SUMMARY
-  // ══════════════════════════════════════════════
+  // =============================================
 
-  console.log('');
-  console.log('🎉 Maktab Coursebook 8 seed completed!');
-  console.log('');
-  console.log('📊 Summary:');
-  console.log('   - 1 Course: An Nasihah Coursebook 8 (ages 13-14)');
-  console.log('   - 7 Units: Fiqh, Aḥādīth, Sīrah, Tārīkh, Aqā\'id, Akhlāq, Ādāb');
-  console.log(`   - ${8 + 7 + 6 + 6 + 6 + 7 + 5} Quiz questions (45 total)`);
-  console.log(`   - ${flashcardIndex} Flashcards`);
-  console.log(`   - 29 Arabic terms`);
+  const unitCount = await prisma.unit.count({ where: { courseId: course.id } });
+  const questionCount = await prisma.question.count({
+    where: { unit: { courseId: course.id } },
+  });
+  const flashcardCount = await prisma.flashCard.count({ where: { courseId: course.id } });
+  const arabicTermCount = await prisma.arabicTerm.count({ where: { courseId: course.id } });
+
+  console.log('\n=== Maktab Coursebook 8 Seed Complete ===');
+  console.log(`Units:        ${unitCount}`);
+  console.log(`Questions:    ${questionCount}`);
+  console.log(`Flashcards:   ${flashcardCount}`);
+  console.log(`Arabic Terms: ${arabicTermCount}`);
+  console.log('=========================================\n');
 }
 
-// Allow standalone execution
+// ──────────────────────────────────────────────
+// Standalone execution
+// ──────────────────────────────────────────────
 async function main() {
   try {
     await seedMaktabCoursebook8();
