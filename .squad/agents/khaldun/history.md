@@ -1,10 +1,37 @@
+## Session 2026-07-26
+
+### Maktab Audit & Unit Split Plan
+
+**Task:** (1) Correctness audit of all 12 Maktab seed files; (2) Detailed unit-split plan for CB1-CB4, CB6Boys, CB6Girls, CB7, CB8, Foundation1, Foundation2, FurtherStudiesNW.
+
+**Output:** `.squad/decisions/inbox/khaldun-maktab-audit-plan.md`
+
+**Key Findings:**
+
+1. **Audit: ALL 12 FILES PASS.** No `correctAnswer` mismatches found. Total: 323 MULTIPLE_CHOICE, 100 TRUE_FALSE, 63 FILL_BLANK questions audited across all 12 files. Every correctAnswer in MULTIPLE_CHOICE exactly matches one of its option strings. Every TRUE_FALSE has 'True' or 'False'.
+
+2. **Unit Split Plan:** All current coursebooks have ONE unit per subject (Fiqh, A·∏•ƒÅdƒ´th, Sƒ´rah, TƒÅrƒ´kh, AqƒÅ æid, AkhlƒÅq, ƒÄdƒÅb) ‚Äî 7 units per book. Each subject unit bundles multiple sub-topics making quizzes too broad. The plan splits each subject into 2‚Äì3 focused topic-units.
+   - CB1-CB4: 7 units ‚Üí ~14-16 units each
+   - CB6Boys/Girls: 7 units ‚Üí ~14 units each
+   - CB7, CB8: 7 units ‚Üí ~14-15 units each
+   - Foundation1, Foundation2: 3 units ‚Äî **already well-scoped, no structural split needed** (add sub-lesson depth only)
+   - Further Studies NW: 9 units ‚Üí ~20 units (most complex)
+
+3. **Slug convention:** New slugs follow `maktab-{N}-{subject}-{topic}` pattern (e.g., `maktab-1-fiqh-pillars`, `maktab-1-fiqh-tahara-wudu`).
+
+4. **Implementation note:** Existing question banks are redistributed (not duplicated) to new units. Old single-subject slugs deprecated once new tree is live.
+
+5. **CB5 excluded** ‚Äî being handled by Khwarizmi.
+
+---
+
 ## Learnings
 
 ### Child Architecture (discovered 2026-07-10)
 
 1. **Dual auth systems:** Parent uses `authStore` + `familyStore.selectedMember`; child uses separate `childAuthStore` with its own JWT. These are entirely independent sessions.
-2. **Two enrollment models, no bridge:** `ProgramEnrollment` (Maktab) and `CourseEnrollment` (individual courses) are parallel ó enrolling in a Program does NOT create CourseEnrollment records. This is the root cause of "enrolled courses don't show."
-3. **Nav is static in MainLayout:** `MainLayout.tsx` lines 21-29 ó the navigation array never filters by role/member type. All parent-side users see all items regardless of selectedMember.
+2. **Two enrollment models, no bridge:** `ProgramEnrollment` (Maktab) and `CourseEnrollment` (individual courses) are parallel ÔøΩ enrolling in a Program does NOT create CourseEnrollment records. This is the root cause of "enrolled courses don't show."
+3. **Nav is static in MainLayout:** `MainLayout.tsx` lines 21-29 ÔøΩ the navigation array never filters by role/member type. All parent-side users see all items regardless of selectedMember.
 4. **No learner-switch security:** `SelectLearner.tsx` ? `selectMember()` is a single-click set with zero PIN/password verification for child?parent transitions.
 5. **"Next lesson" doesn't exist:** No backend endpoint or frontend logic computes the first incomplete unit per course. `UnitProgress.completedAt` is the data source for computing this.
 6. **GradeDashboard already IS the cross-subject view:** `/child/maktab` ? `GradeDashboard.tsx` renders stage progress ring + per-subject cards. It works IF CourseEnrollment records exist.
@@ -15,7 +42,7 @@
 ## Session 2026-07-10T16:40Z
 
 **GOVERNANCE: Production Completion Gate Now Mandatory**
-**From:** Scribe ó Multi-session enrollment E2E consolidation
+**From:** Scribe ÔøΩ Multi-session enrollment E2E consolidation
 
 **New Rule:** All features must pass authenticated end-to-end test against production before claiming completion. "CI green + code review" is no longer sufficient.
 
@@ -29,7 +56,7 @@
 
 ## Session 2026-07-10T04:04Z
 
-**Cross-Agent Note: EnrollModal Pattern ó fetchMembers(family.id) on Mount**
+**Cross-Agent Note: EnrollModal Pattern ÔøΩ fetchMembers(family.id) on Mount**
 **From:** Scribe, noting Ibn Sina's fix
 
 **Pattern:** All parent pages using `EnrollModal` or other components dependent on `useFamilyStore().members` must call `fetchMembers(family.id)` on component mount. This ensures the family member list is populated before the modal renders.
@@ -49,14 +76,14 @@
 ## Session 2026-07-10T03:09Z
 
 **Maktab Path-Selection Now Discoverable (Ibn Sina + Scribe)**
-**Work:** Scribe ó Archived Ibn Sina's navigation fix to decisions and orchestration log.
+**Work:** Scribe ÔøΩ Archived Ibn Sina's navigation fix to decisions and orchestration log.
 
 **Context:** Ibn Sina added a single sidebar entry (`Maktab ??` ? `/programs`) to expose the Maktab curriculum enrollment flow. The learning-path selector (After-School vs Weekend) lives in `frontend/src/pages/program/ProgramCatalog.tsx` in the `EnrollModal` component. Now discoverable in prod (commit 95d5ed1, CI/CD GREEN).
 
 **Files Documented:**
-- `.squad/decisions.md` ó merged decision #1
-- `.squad/orchestration-log/2026-07-10T03-09-08Z-ibn-sina-maktab-nav.md` ó full orchestration event
-- `.squad/log/2026-07-10T03-09-08Z-ibn-sina-maktab-nav-discoverability.md` ó session summary
+- `.squad/decisions.md` ÔøΩ merged decision #1
+- `.squad/orchestration-log/2026-07-10T03-09-08Z-ibn-sina-maktab-nav.md` ÔøΩ full orchestration event
+- `.squad/log/2026-07-10T03-09-08Z-ibn-sina-maktab-nav-discoverability.md` ÔøΩ session summary
 
 **Status:** ? Feature now linked from parent sidebar.
 
@@ -65,7 +92,7 @@
 ## Session 2026-07-10T02:51Z
 
 **skip_app_build Regression & Revert**
-**Work:** Khaldun-Lead ó Detected and resolved regression in cache-control fix deployment.
+**Work:** Khaldun-Lead ÔøΩ Detected and resolved regression in cache-control fix deployment.
 
 **Issue:**
 Commit 96b3a01 introduced `skip_app_build: true` in CI workflow to avoid redundant builds. However, without a pre-built artifact or build step in the SWA action, the action uploaded the entire `frontend/` directory including `node_modules/` ? "The number of static files was too large" error.
@@ -81,14 +108,14 @@ Commit 96b3a01 introduced `skip_app_build: true` in CI workflow to avoid redunda
 
 ## Session 2026-07-09T21:25Z
 
-**Prod Deploy Gap ó Root Cause & Fix**
-**Work:** Khaldun-Lead ó Investigated why new frontend features were not visible in production despite successful CI/CD.
+**Prod Deploy Gap ÔøΩ Root Cause & Fix**
+**Work:** Khaldun-Lead ÔøΩ Investigated why new frontend features were not visible in production despite successful CI/CD.
 
 **Findings:**
 1. **Primary root cause confirmed:** `frontend/public/staticwebapp.config.json` had no `Cache-Control` headers. Azure SWA/CDN with no explicit directive can serve a cached `index.html`, delivering the old JS bundle even after a successful deploy. The new hashed JS chunks (new code) exist on SWA but the cached `index.html` never references them.
-2. **Secondary issue:** `frontend/staticwebapp.config.json` (repo root) was an orphan ó Vite only copies `public/` into `dist/`, so this file was never deployed. Any edits to it would silently have no effect in production.
+2. **Secondary issue:** `frontend/staticwebapp.config.json` (repo root) was an orphan ÔøΩ Vite only copies `public/` into `dist/`, so this file was never deployed. Any edits to it would silently have no effect in production.
 3. **Tertiary issue:** CI ran both a manual `npm run build` AND the SWA action without `skip_app_build: true`, letting Oryx attempt a redundant rebuild.
-4. **Hypothesis C (nav gates):** New Du'a & 99-Names links on ChildDashboardHome are NOT gated by enrollment ó they render for all children. GradeDashboard is gated by active program enrollment, which is expected/correct.
+4. **Hypothesis C (nav gates):** New Du'a & 99-Names links on ChildDashboardHome are NOT gated by enrollment ÔøΩ they render for all children. GradeDashboard is gated by active program enrollment, which is expected/correct.
 5. **Hypothesis D (wrong env):** Confirmed `action: "upload"` on push to `main` with no `deployment_environment` targets production. No issue.
 
 **Fix Applied (commit 96b3a01):**
@@ -104,7 +131,7 @@ Commit 96b3a01 introduced `skip_app_build: true` in CI workflow to avoid redunda
 ## Session 2026-07-09T11:17Z
 
 **Maktab Online School Gap Analysis**
-**Work:** Khaldun-Lead ó Completed research spike
+**Work:** Khaldun-Lead ÔøΩ Completed research spike
 
 **Output:** `docs/maktab-online-school-spike.html` (88KB, comprehensive product gap analysis)
 

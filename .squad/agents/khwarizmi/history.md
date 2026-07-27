@@ -130,3 +130,13 @@ Key prior work:
 - Seeds: Applied two-step upsert+blob pattern to top 5 files (further-studies-nw, CB3, CB1, CB2, CB4); documented pattern in seed.ts comment block for remaining 32 files
 - `@azure/storage-blob ^12.31.0` already in package.json
 
+**Course Progress Bug Fix + Dashboard Progress % (2026-07-19):** ✅ COMPLETE
+- Root cause 1: `isUnitComplete()` in `course.service.ts` required ALL THREE of `videoCompleted && readingCompleted && quizCompleted`. Most units have no video, so `videoCompleted` was never set → progress stuck at 0% forever.
+- Fix: Changed `isUnitComplete` to return `Boolean(progress?.readingCompleted)` only. Reading is the canonical completion signal.
+- Also fixed `getMemberProgress` `completedUnits` filter (same triple-AND bug) to `up => up.readingCompleted`.
+- Root cause 2: `getChildrenWithStats()` in `dashboard.service.ts` returned raw `enrollments.length` (all statuses) and no progress %. Parent Dashboard couldn't show per-child progress.
+- Fix: Added `progress` and `status` to enrollment select; compute `activeEnrollments` (status ≠ COMPLETED), `completedEnrollments`, and `averageProgress` (avg of ACTIVE enrollments). Return shape now includes `coursesEnrolled` (active only), `coursesCompleted`, `overallProgress`.
+- Root cause 3: `getFamilySummary()` counted ALL enrollments for `activeCoursesCount` via `_count.enrollments`. Now queries `enrollments: { where: { status: 'ACTIVE' } }` and sums `m.enrollments.length`.
+- Frontend `ChildSummary` type already had `coursesCompleted` and `overallProgress` fields — no change needed.
+- `tsc --noEmit` zero errors on both backend and frontend.
+
