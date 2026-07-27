@@ -2505,13 +2505,21 @@ export async function seedMaktabCoursebook5() {
     { unitId: unitSick.id, front: 'What du\'ā\' did the Prophet ﷺ teach for the sick?', back: '"Adhhibil-ba\'sa rabb al-nās, washfi anta al-shāfī, lā shifā\'a illā shifā\'uk, shifā\'an lā yughādiru saqamā" — "Remove the hardship, O Lord of mankind... a cure that leaves no illness behind."' },
   ];
 
-  // Insert flashcards per unit
+  // Delete existing flashcards for each unit then re-create
+  const flashUnitIds = [...new Set(flashcardData.map(f => f.unitId))];
+  for (const uid of flashUnitIds) {
+    await prisma.flashCard.deleteMany({ where: { unitId: uid } });
+  }
+
   for (const fc of flashcardData) {
-    await prisma.flashcard.create({
+    await prisma.flashCard.create({
       data: {
         unitId: fc.unitId,
+        courseId: course.id,
         front: fc.front,
         back: fc.back,
+        category: 'definition',
+        tags: [],
         orderIndex: flashcardData.filter(f => f.unitId === fc.unitId).indexOf(fc),
       },
     });
@@ -2618,10 +2626,9 @@ export async function seedMaktabCoursebook5() {
     await prisma.arabicTerm.create({
       data: {
         unitId: t.unitId,
-        term: t.term,
+        arabicText: t.term,
         transliteration: t.transliteration,
-        definition: t.definition,
-        orderIndex: arabicTermsData.filter(x => x.unitId === t.unitId).indexOf(t),
+        translation: t.definition,
       },
     });
   }
