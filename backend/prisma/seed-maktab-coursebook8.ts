@@ -1174,7 +1174,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "In which Qur\'anic verse does Allāh clearly prohibit ribā?",
       options: ['2:255', '2:275', '3:130 only', '4:29'],
       correctAnswer: '2:275',
-      explanation: "Qur\'an 2:275 states: "Allāh has permitted trade and forbidden ribā (usury/interest)."",
+      explanation: "Qur\'an 2:275 states: \"Allāh has permitted trade and forbidden ribā (usury/interest).\"",
     },
     {
       unitId: unit3.id,
@@ -1221,7 +1221,7 @@ export async function seedMaktabCoursebook8() {
       questionText: 'The ḥadīth states that true wealth is the ________ of the soul.',
       options: ['cleanliness', 'contentment', 'strength', 'beauty'],
       correctAnswer: 'contentment',
-      explanation: "The Prophet ﷺ said: "Wealth is not in having many possessions, but wealth is the contentment of the soul (ghinā\' al-nafs)." (Bukhārī)",
+      explanation: "The Prophet ﷺ said: \"Wealth is not in having many possessions, but wealth is the contentment of the soul (ghinā\' al-nafs).\" (Bukhārī)",
     },
     {
       unitId: unit4.id,
@@ -1230,7 +1230,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "Allāh descends to the lowest heaven during the last third of every night.",
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: "The Prophet ﷺ said: "Our Lord descends to the lowest heaven each night during the last third of the night, and says: Who is calling Me so I may answer? Who is asking Me so I may give?" (Bukhārī)",
+      explanation: "The Prophet ﷺ said: \"Our Lord descends to the lowest heaven each night during the last third of the night, and says: Who is calling Me so I may answer? Who is asking Me so I may give?\" (Bukhārī)",
     },
     {
       unitId: unit4.id,
@@ -1239,7 +1239,7 @@ export async function seedMaktabCoursebook8() {
       questionText: 'What does the ḥadīth say about the reward of patience (ṣabr)?',
       options: ['It equals 10 good deeds', "Allāh sets no limit to its reward", "It is rewarded like a voluntary fast", 'It is only for those tested severely'],
       correctAnswer: "Allāh sets no limit to its reward",
-      explanation: "Allāh says: "Indeed, the patient will be given their reward without account (without limit)." (Qur\'an 39:10)",
+      explanation: "Allāh says: \"Indeed, the patient will be given their reward without account (without limit).\" (Qur\'an 39:10)",
     },
     {
       unitId: unit4.id,
@@ -1248,7 +1248,7 @@ export async function seedMaktabCoursebook8() {
       questionText: 'The first condition for the sweetness of Īmān is:',
       options: ["Performing Ḥajj", "That Allāh and His Messenger are dearer to him than anything else", "Memorising the Qur\'an", 'Loving the poor'],
       correctAnswer: "That Allāh and His Messenger are dearer to him than anything else",
-      explanation: "The Prophet ﷺ said: "There are three qualities that whoever has them, will find the sweetness of Īmān: that Allāh and His Messenger are dearer to him than anything else..." (Bukhārī)",
+      explanation: "The Prophet ﷺ said: \"There are three qualities that whoever has them, will find the sweetness of Īmān: that Allāh and His Messenger are dearer to him than anything else...\" (Bukhārī)",
     },
     {
       unitId: unit4.id,
@@ -1265,7 +1265,7 @@ export async function seedMaktabCoursebook8() {
       unitId: unit5.id,
       externalId: 'cb8-q5-1',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "The ḥadīth "Allāh does not look at your forms but your hearts and deeds" means:",
+      questionText: "The ḥadīth \"Allāh does not look at your forms but your hearts and deeds\" means:",
       options: ["Appearance is irrelevant in Islam", "Internal sincerity and deeds matter most to Allāh", "You must not care about how you look", "Physical beauty is a sin"],
       correctAnswer: "Internal sincerity and deeds matter most to Allāh",
       explanation: "Allāh judges by what is in the heart (intention, sincerity) and by what one actually does — not by wealth, beauty, or social status.",
@@ -1277,7 +1277,7 @@ export async function seedMaktabCoursebook8() {
       questionText: 'The ḥadīth says ṣadaqah extinguishes sins like ________ extinguishes fire.',
       options: ['sand', 'water', 'wind', 'earth'],
       correctAnswer: 'water',
-      explanation: "The Prophet ﷺ said: "Ṣadaqah extinguishes sins as water extinguishes fire." (Tirmidhī)",
+      explanation: "The Prophet ﷺ said: \"Ṣadaqah extinguishes sins as water extinguishes fire.\" (Tirmidhī)",
     },
     {
       unitId: unit5.id,
@@ -1301,10 +1301,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit5.id,
       externalId: 'cb8-q5-5',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "When a Muslim sneezes and says "al-ḥamdulillāh", the correct response is:",
+      questionText: "When a Muslim sneezes and says \"al-ḥamdulillāh\", the correct response is:",
       options: ["SubhānAllāh", "Yarḥamukallāh", "Āmīn", "MāshāAllāh"],
       correctAnswer: "Yarḥamukallāh",
-      explanation: "When a Muslim sneezes and praises Allāh, the one who hears should respond "yarḥamukallāh" (may Allāh have mercy on you).",
+      explanation: "When a Muslim sneezes and praises Allāh, the one who hears should respond \"yarḥamukallāh\" (may Allāh have mercy on you).",
     },
     {
       unitId: unit5.id,
@@ -1321,7 +1321,7 @@ export async function seedMaktabCoursebook8() {
       unitId: unit6.id,
       externalId: 'cb8-q6-1',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "The word "shamā\'il" refers to:",
+      questionText: "The word \"shamā\'il\" refers to:",
       options: ["The biography of the Prophet ﷺ", "The noble characteristics (physical and moral) of the Prophet ﷺ", "The battles of the Prophet ﷺ", "The Companions of the Prophet ﷺ"],
       correctAnswer: "The noble characteristics (physical and moral) of the Prophet ﷺ",
       explanation: "Shamā\'il refers to the noble qualities, description, manners, and characteristics of the Prophet Muḥammad ﷺ.",
@@ -1333,7 +1333,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "Which miracle of the Prophet ﷺ is confirmed directly in the Qur\'an?",
       options: ['Feeding multitudes', 'Water from his fingers', 'The splitting of the moon', 'The speaking of animals'],
       correctAnswer: 'The splitting of the moon',
-      explanation: "The Qur\'an states: "The Hour has drawn near and the moon has split." (54:1) — This refers to the miracle of the splitting of the moon.",
+      explanation: "The Qur\'an states: \"The Hour has drawn near and the moon has split.\" (54:1) — This refers to the miracle of the splitting of the moon.",
     },
     {
       unitId: unit6.id,
@@ -1357,10 +1357,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit6.id,
       externalId: 'cb8-q6-5',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "Who compiled the famous collection "Al-Shamā\'il al-Muḥammadiyyah"?",
+      questionText: "Who compiled the famous collection \"Al-Shamā\'il al-Muḥammadiyyah\"?",
       options: ["Imām Bukhārī", "Imām Tirmidhī", "Imām Muslim", "Imām Abū Dāwūd"],
       correctAnswer: "Imām Tirmidhī",
-      explanation: "Imām Tirmidhī compiled the famous collection "Al-Shamā\'il al-Muḥammadiyyah" which describes the physical and moral characteristics of the Prophet ﷺ.",
+      explanation: "Imām Tirmidhī compiled the famous collection \"Al-Shamā\'il al-Muḥammadiyyah\" which describes the physical and moral characteristics of the Prophet ﷺ.",
     },
     {
       unitId: unit6.id,
@@ -1380,7 +1380,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "\'Uthmān is called Dhū al-Nūrayn because he married two ________ of the Prophet ﷺ.",
       options: ['sisters', 'daughters', 'aunts', 'cousins'],
       correctAnswer: 'daughters',
-      explanation: "\'Uthmān married the Prophet\'s daughters Ruqayyah and (after her death) Umm Kulthūm, earning the title "Dhū al-Nūrayn" (He of the Two Lights).",
+      explanation: "\'Uthmān married the Prophet\'s daughters Ruqayyah and (after her death) Umm Kulthūm, earning the title \"Dhū al-Nūrayn\" (He of the Two Lights).",
     },
     {
       unitId: unit7.id,
@@ -1442,7 +1442,7 @@ export async function seedMaktabCoursebook8() {
       unitId: unit8.id,
       externalId: 'cb8-q8-2',
       type: 'FILL_BLANK' as const,
-      questionText: "\'Alī is given the title "Karram Allāhu wajhah" because his face never ________ to an idol.",
+      questionText: "\'Alī is given the title \"Karram Allāhu wajhah\" because his face never ________ to an idol.",
       options: ['smiled', 'bowed', 'prostrated', 'turned'],
       correctAnswer: 'prostrated',
       explanation: "\'Alī never prostrated to an idol — he accepted Islam so young that he never committed shirk.",
@@ -1451,10 +1451,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit8.id,
       externalId: 'cb8-q8-3',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "The Prophet ﷺ said: "I am the city of knowledge and \'Alī is its ___."",
+      questionText: "The Prophet ﷺ said: \"I am the city of knowledge and \'Alī is its ___.\"",
       options: ['scholar', 'gate', 'foundation', 'guardian'],
       correctAnswer: 'gate',
-      explanation: "The Prophet ﷺ said: "I am the city of knowledge and \'Alī is its gate." This highlights \'Alī\'s unique depth of Islamic scholarship.",
+      explanation: "The Prophet ﷺ said: \"I am the city of knowledge and \'Alī is its gate.\" This highlights \'Alī\'s unique depth of Islamic scholarship.",
     },
     {
       unitId: unit8.id,
@@ -1498,10 +1498,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit9.id,
       externalId: 'cb8-q9-2',
       type: 'FILL_BLANK' as const,
-      questionText: "Ayyūb\'s du\'a\' ends with "wa anta arḥamu ________ " (You are the Most Merciful of the merciful).",
+      questionText: "Ayyūb\'s du\'a\' ends with \"wa anta arḥamu ________ \" (You are the Most Merciful of the merciful).",
       options: ["al-\'ābidīn", "al-rāḥimīn", "al-ṣābirīn", "al-sālikin"],
       correctAnswer: "al-rāḥimīn",
-      explanation: "Ayyūb\'s Qur\'anic du\'a\' (21:83): "Innī massaniya al-ḏurru wa anta arḥamu al-rāḥimīn."",
+      explanation: "Ayyūb\'s Qur\'anic du\'a\' (21:83): \"Innī massaniya al-ḏurru wa anta arḥamu al-rāḥimīn.\"",
     },
     {
       unitId: unit9.id,
@@ -1510,7 +1510,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "In Qur\'an 21:84, Allāh\'s response to Ayyūb included restoring his family:",
       options: ['In the same number as before', 'One third of what he had before', 'Along with a like thereof (doubled)', 'Only if he asked again'],
       correctAnswer: 'Along with a like thereof (doubled)',
-      explanation: "Allāh says He restored Ayyūb\'s family "and the like thereof along with them" — his blessings were doubled after his trial.",
+      explanation: "Allāh says He restored Ayyūb\'s family \"and the like thereof along with them\" — his blessings were doubled after his trial.",
     },
     {
       unitId: unit9.id,
@@ -1563,7 +1563,7 @@ export async function seedMaktabCoursebook8() {
       unitId: unit10.id,
       externalId: 'cb8-q10-3',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "Which Muslim scholar of Andalusia was known as "Averroes" and preserved Greek philosophy?",
+      questionText: "Which Muslim scholar of Andalusia was known as \"Averroes\" and preserved Greek philosophy?",
       options: ["Ibn Ḥazm", "Ibn Rushd", "Ibn Ḥayyiyān", "Al-Zarqālī"],
       correctAnswer: "Ibn Rushd",
       explanation: "Ibn Rushd (Averroes, 1126–1198 CE) wrote extensive commentaries on Aristotle that were translated into Latin, helping to spark the European Renaissance.",
@@ -1622,7 +1622,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "The Prophet ﷺ said the one who conquers Constantinople would be:",
       options: ["A king from the Arabs", "An excellent commander with an excellent army", "The Mahdi", "A Turkish sultan named Sulayman"],
       correctAnswer: "An excellent commander with an excellent army",
-      explanation: "The Prophet ﷺ said: "Verily you will conquer Constantinople. What an excellent commander will its commander be, and what an excellent army will that army be." (Aḥmad)",
+      explanation: "The Prophet ﷺ said: \"Verily you will conquer Constantinople. What an excellent commander will its commander be, and what an excellent army will that army be.\" (Aḥmad)",
     },
     {
       unitId: unit11.id,
@@ -1637,10 +1637,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit11.id,
       externalId: 'cb8-q11-5',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "Sulaymān the Magnificent was known as "Qānūnī" (the Lawgiver) because:",
+      questionText: "Sulaymān the Magnificent was known as \"Qānūnī\" (the Lawgiver) because:",
       options: ["He introduced Islamic law for the first time", "He implemented comprehensive legal reforms", "He ended all warfare", "He built the most mosques"],
       correctAnswer: "He implemented comprehensive legal reforms",
-      explanation: "Sulaymān I is called "Qānūnī" by Muslims for his extensive legal reforms that systematised the Ottoman legal code.",
+      explanation: "Sulaymān I is called \"Qānūnī\" by Muslims for his extensive legal reforms that systematised the Ottoman legal code.",
     },
     {
       unitId: unit11.id,
@@ -1657,7 +1657,7 @@ export async function seedMaktabCoursebook8() {
       unitId: unit12.id,
       externalId: 'cb8-q12-1',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: ""Qidam" as an attribute of Allāh means:",
+      questionText: "\"Qidam\" as an attribute of Allāh means:",
       options: ["Allāh is all-powerful", "Allāh has no beginning", "Allāh is self-sufficient", "Allāh is unlike His creation"],
       correctAnswer: "Allāh has no beginning",
       explanation: "Qidam means pre-eternity — Allāh always was, with no beginning. His existence is not caused by anything.",
@@ -1666,7 +1666,7 @@ export async function seedMaktabCoursebook8() {
       unitId: unit12.id,
       externalId: 'cb8-q12-2',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: ""Mukhālafah lil-ḥawādith" means:",
+      questionText: "\"Mukhālafah lil-ḥawādith\" means:",
       options: ["Allāh resembles His creation", "Allāh does not resemble any created thing", "Allāh created everything", "Allāh has no attributes"],
       correctAnswer: "Allāh does not resemble any created thing",
       explanation: "Mukhālafah lil-ḥawādith means distinctness from creation — Allāh is utterly unlike anything He created. (Qur\'an 42:11)",
@@ -1675,10 +1675,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit12.id,
       externalId: 'cb8-q12-3',
       type: 'FILL_BLANK' as const,
-      questionText: "The Ahl al-Sunnah affirm Allāh\'s attribute of istiwā\' "bilā kayf", meaning without specifying ________ .",
+      questionText: "The Ahl al-Sunnah affirm Allāh\'s attribute of istiwā\' \"bilā kayf\", meaning without specifying ________ .",
       options: ['the time', 'the manner', 'the reason', 'the place'],
       correctAnswer: 'the manner',
-      explanation: ""Bilā kayf" means "without (specifying) how" — we affirm the attribute as stated in the Qur\'an without asking how or imagining a physical form.",
+      explanation: "\"Bilā kayf\" means \"without (specifying) how\" — we affirm the attribute as stated in the Qur\'an without asking how or imagining a physical form.",
     },
     {
       unitId: unit12.id,
@@ -1693,16 +1693,16 @@ export async function seedMaktabCoursebook8() {
       unitId: unit12.id,
       externalId: 'cb8-q12-5',
       type: 'TRUE_FALSE' as const,
-      questionText: "Imām Mālik said that asking "how" about Allāh\'s istiwā\' is a bid\'ah (innovation).",
+      questionText: "Imām Mālik said that asking \"how\" about Allāh\'s istiwā\' is a bid\'ah (innovation).",
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: "Imām Mālik famously said: "The istiwā\' is known, the manner is unknown, believing in it is obligatory, and asking about it is a bid\'ah."",
+      explanation: "Imām Mālik famously said: \"The istiwā\' is known, the manner is unknown, believing in it is obligatory, and asking about it is a bid\'ah.\"",
     },
     {
       unitId: unit12.id,
       externalId: 'cb8-q12-6',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: ""Baqā\'" as an attribute of Allāh refers to His:",
+      questionText: "\"Baqā\'\" as an attribute of Allāh refers to His:",
       options: ["Omnipotence", "Everlastingness (no end)", "Speech", "Oneness"],
       correctAnswer: "Everlastingness (no end)",
       explanation: "Baqā\' means everlastingness — Allāh has no end. He always will exist. This complements qidam (no beginning).",
@@ -1727,10 +1727,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit13.id,
       externalId: 'cb8-q13-2',
       type: 'FILL_BLANK' as const,
-      questionText: "Allāh commands in Qur\'an 16:43: "Ask the people of ________ if you do not know."",
+      questionText: "Allāh commands in Qur\'an 16:43: \"Ask the people of ________ if you do not know.\"",
       options: ['wealth', 'knowledge', 'authority', 'family'],
       correctAnswer: 'knowledge',
-      explanation: "Qur\'an 16:43: "Fas\'ālū ahla al-dhikr in kuntum lā ta\'lamūn" — Ask the people of knowledge if you do not know.",
+      explanation: "Qur\'an 16:43: \"Fas\'ālū ahla al-dhikr in kuntum lā ta\'lamūn\" — Ask the people of knowledge if you do not know.",
     },
     {
       unitId: unit13.id,
@@ -1739,7 +1739,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "According to some schools, Īmān can increase with obedience and decrease with disobedience.",
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: "The Qur\'an states "it increases them in faith" (8:2), supporting the view that Īmān fluctuates with deeds.",
+      explanation: "The Qur\'an states \"it increases them in faith\" (8:2), supporting the view that Īmān fluctuates with deeds.",
     },
     {
       unitId: unit13.id,
@@ -1754,10 +1754,10 @@ export async function seedMaktabCoursebook8() {
       unitId: unit13.id,
       externalId: 'cb8-q13-5',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "The term "taṣdīq" in the definition of Īmān refers to:",
+      questionText: "The term \"taṣdīq\" in the definition of Īmān refers to:",
       options: ["Verbal declaration of the Sharīdah", "Sincere inner belief in the heart", "Performance of ṣalāh", "Reading the Qur\'an"],
       correctAnswer: "Sincere inner belief in the heart",
-      explanation: "Taṣdīq literally means "to affirm as true" — it is the sincere conviction and belief that resides in the heart.",
+      explanation: "Taṣdīq literally means \"to affirm as true\" — it is the sincere conviction and belief that resides in the heart.",
     },
     {
       unitId: unit13.id,
@@ -1786,7 +1786,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "The ḥadīth about the camel teaches that tawakkul means:",
       options: ["Leave everything to Allāh without effort", "Take all available means, then trust Allāh with the outcome", "Pray constantly and do no work", "Trust your own abilities first"],
       correctAnswer: "Take all available means, then trust Allāh with the outcome",
-      explanation: "The Prophet ﷺ told the man: "Tie it (your camel), then trust in Allāh." — Take precautions and effort, then trust the outcome to Allāh.",
+      explanation: "The Prophet ﷺ told the man: \"Tie it (your camel), then trust in Allāh.\" — Take precautions and effort, then trust the outcome to Allāh.",
     },
     {
       unitId: unit14.id,
@@ -1839,16 +1839,16 @@ export async function seedMaktabCoursebook8() {
       unitId: unit15.id,
       externalId: 'cb8-q15-2',
       type: 'FILL_BLANK' as const,
-      questionText: "The Prophet ﷺ said: "Whoever cheats us is ________ of us."",
+      questionText: "The Prophet ﷺ said: \"Whoever cheats us is ________ of us.\"",
       options: ['the best', 'part', 'not', 'the leader'],
       correctAnswer: 'not',
-      explanation: ""Man ghashshanā falaysa minnā" — Whoever cheats us is not from us. (Muslim)",
+      explanation: "\"Man ghashshanā falaysa minnā\" — Whoever cheats us is not from us. (Muslim)",
     },
     {
       unitId: unit15.id,
       externalId: 'cb8-q15-3',
       type: 'MULTIPLE_CHOICE' as const,
-      questionText: "Imām al-Shāfi\'ī said about debate: "I never debated anyone except hoping Allāh would place the truth on:",
+      questionText: "Imām al-Shāfi\'ī said about debate: \"I never debated anyone except hoping Allāh would place the truth on:",
       options: ['my tongue', 'his tongue', "the moderator\'s tongue", 'both our tongues'],
       correctAnswer: 'his tongue',
       explanation: "Imām al-Shāfi\'ī said he hoped Allāh would place the truth on his opponent\'s tongue — showing the goal of debate is truth, not personal victory.",
@@ -1860,7 +1860,7 @@ export async function seedMaktabCoursebook8() {
       questionText: "The walīmah (wedding feast) is a sunnah that the Prophet ﷺ encouraged.",
       options: ['True', 'False'],
       correctAnswer: 'True',
-      explanation: "The Prophet ﷺ said: "Have a walīmah even with a single sheep." — It is a confirmed sunnah to celebrate a marriage with a meal.",
+      explanation: "The Prophet ﷺ said: \"Have a walīmah even with a single sheep.\" — It is a confirmed sunnah to celebrate a marriage with a meal.",
     },
     {
       unitId: unit15.id,
@@ -1928,16 +1928,16 @@ export async function seedMaktabCoursebook8() {
     { front: 'Qidam', back: 'An essential attribute of Allāh: pre-eternity / having no beginning. Allāh always was, without a starting point.' },
     { front: 'Baqā\'', back: 'An essential attribute of Allāh: everlastingness / having no end. Allāh always will be.' },
     { front: 'Qiyām binafsih', back: 'An essential attribute of Allāh: self-subsistence. Allāh depends on nothing and no one; everything depends on Him.' },
-    { front: 'Mukhālafah lil-ḥawādith', back: "Allāh\'s distinctness from creation: He does not resemble anything He created. "There is nothing like Him." (Qur\'an 42:11)" },
+    { front: 'Mukhālafah lil-ḥawādith', back: "Allāh\'s distinctness from creation: He does not resemble anything He created. \"There is nothing like Him.\" (Qur\'an 42:11)" },
     { front: 'Istiwā\' / Bilā kayf', back: "Allāh\'s attribute of rising over the Throne. Ahl al-Sunnah affirm it as stated in Qur\'an 20:5 but without specifying the manner (bilā kayf)." },
     { front: 'Taṣdīq', back: "The first component of Īmān: sincere inner belief in the heart. Believing Allāh, His angels, books, messengers, Last Day, and divine decree." },
     { front: 'Nadam', back: 'The first condition of tawbah: sincere regret for the sin — feeling genuinely sorry because it displeased Allāh, not merely for its consequences.' },
-    { front: 'Tawakkul', back: "Reliance on Allāh AFTER taking all available means. Not fatalism. The Prophet\'s ﷺ teaching: "Tie your camel, then trust in Allāh." (Tirmidhī)" },
-    { front: 'Taqwā', back: "Literally "a shield" — shielding oneself from Allāh\'s displeasure. Three levels: avoiding ḥarām, avoiding makrūh, and avoiding everything that distracts from Allāh." },
+    { front: 'Tawakkul', back: "Reliance on Allāh AFTER taking all available means. Not fatalism. The Prophet\'s ﷺ teaching: \"Tie your camel, then trust in Allāh.\" (Tirmidhī)" },
+    { front: 'Taqwā', back: "Literally \"a shield\" — shielding oneself from Allāh\'s displeasure. Three levels: avoiding ḥarām, avoiding makrūh, and avoiding everything that distracts from Allāh." },
     { front: "Ṣalāḥuddīn al-Ayyūbī", back: 'Muslim Kurdish leader (1137–1193 CE) who united the Muslim world and reconquered Jerusalem (1187) without massacre. Known for justice, generosity, and nobility.' },
-    { front: 'Waliīmah', back: "The post-nikāḥ wedding feast. A confirmed sunnah. The Prophet ﷺ said: "Have a walīmah even with a single sheep." Attending when invited is a right of the Muslim." },
+    { front: 'Waliīmah', back: "The post-nikāḥ wedding feast. A confirmed sunnah. The Prophet ﷺ said: \"Have a walīmah even with a single sheep.\" Attending when invited is a right of the Muslim." },
     { front: "Ḥifẓ al-Baṣar", back: 'Lowering/guarding the gaze. Commanded for both men and women in Qur\'an 24:30–31. The Prophet ﷺ called the unlawful gaze "the adultery of the eyes."' },
-    { front: "Innī massaniya al-ḏurru", back: "Ayyūb\'s Qur\'anic du\'a\': "Indeed adversity has touched me, and You are the Most Merciful of the merciful." (21:83) — Model supplication in times of trial." },
+    { front: "Innī massaniya al-ḏurru", back: "Ayyūb\'s Qur\'anic du\'a\': \"Indeed adversity has touched me, and You are the Most Merciful of the merciful.\" (21:83) — Model supplication in times of trial." },
   ];
 
   for (let i = 0; i < flashcardData.length; i++) {
@@ -1959,33 +1959,41 @@ export async function seedMaktabCoursebook8() {
   // ARABIC TERMS (18 total)
   // =============================================
 
-  await prisma.arabicTerm.deleteMany({ where: { courseId: course.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit1.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit2.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit3.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit6.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit7.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit12.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit13.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit14.id } });
+  await prisma.arabicTerm.deleteMany({ where: { unitId: unit15.id } });
 
   const arabicTermsData = [
-    { arabicText: 'الخشوع', transliteration: 'al-khushū\'', translation: 'Humility and full presence of heart before Allāh in prayer' },
-    { arabicText: 'المهر', transliteration: 'al-mahr', translation: 'The mandatory gift given by the groom to the bride in nikāḥ' },
-    { arabicText: 'العدة', transliteration: 'al-\'iddah', translation: 'The waiting period after divorce or widowhood' },
-    { arabicText: 'الربا', transliteration: 'al-ribā', translation: 'Interest or usury, prohibited in Qur\'an 2:275' },
-    { arabicText: 'الميسر', transliteration: 'al-maysir', translation: 'Gambling, prohibited in Qur\'an 5:90' },
-    { arabicText: 'الشمائل', transliteration: 'al-shamā\'il', translation: 'The noble physical and moral characteristics of the Prophet ﷺ' },
-    { arabicText: 'ذو النورين', transliteration: 'Dhū al-Nūrayn', translation: 'He of the Two Lights — title of \'Uthmān ibn \'Affān' },
-    { arabicText: 'الاستواء', transliteration: 'al-istiwā\'', translation: "Allāh\'s rising/ascending over the Throne, affirmed without specifying how (bilā kayf)" },
-    { arabicText: 'القدم', transliteration: 'al-qidam', translation: 'Pre-eternity — Allāh has no beginning' },
-    { arabicText: 'البقاء', transliteration: 'al-baqā\'', translation: 'Everlastingness — Allāh has no end' },
-    { arabicText: 'التصديق', transliteration: 'al-taṣdīq', translation: 'Sincere inner belief — the first component of Īmān' },
-    { arabicText: 'الندم', transliteration: 'al-nadam', translation: 'Sincere regret — the first condition of valid tawbah' },
-    { arabicText: 'التوكل', transliteration: 'al-tawakkul', translation: 'Trust and reliance on Allāh after taking available means' },
-    { arabicText: 'التقوى', transliteration: 'al-taqwā', translation: 'Fear/consciousness of Allāh; a shield between oneself and His displeasure' },
-    { arabicText: 'التوبة', transliteration: 'al-tawbah', translation: 'Repentance — returning to Allāh; requires nadam, stopping the sin, and resolve not to return' },
-    { arabicText: 'الوليمة', transliteration: 'al-walīmah', translation: 'The post-nikāḥ wedding feast; a confirmed sunnah' },
-    { arabicText: 'حفظ البصر', transliteration: 'ḥifẓ al-baṣar', translation: 'Lowering and guarding the gaze; commanded for both men and women in Qur\'an 24:30–31' },
-    { arabicText: 'صلاة الجماعة', transliteration: 'ṣalāt al-jamā\'ah', translation: 'Congregational prayer, rewarded 27 times more than praying alone' },
+    { unitId: unit1.id, arabicText: 'الخشوع', transliteration: 'al-khushū\'', translation: 'Humility and full presence of heart before Allāh in prayer' },
+    { unitId: unit2.id, arabicText: 'المهر', transliteration: 'al-mahr', translation: 'The mandatory gift given by the groom to the bride in nikāḥ' },
+    { unitId: unit2.id, arabicText: 'العدة', transliteration: 'al-\'iddah', translation: 'The waiting period after divorce or widowhood' },
+    { unitId: unit3.id, arabicText: 'الربا', transliteration: 'al-ribā', translation: 'Interest or usury, prohibited in Qur\'an 2:275' },
+    { unitId: unit3.id, arabicText: 'الميسر', transliteration: 'al-maysir', translation: 'Gambling, prohibited in Qur\'an 5:90' },
+    { unitId: unit6.id, arabicText: 'الشمائل', transliteration: 'al-shamā\'il', translation: 'The noble physical and moral characteristics of the Prophet ﷺ' },
+    { unitId: unit7.id, arabicText: 'ذو النورين', transliteration: 'Dhū al-Nūrayn', translation: 'He of the Two Lights — title of \'Uthmān ibn \'Affān' },
+    { unitId: unit12.id, arabicText: 'الاستواء', transliteration: 'al-istiwā\'', translation: "Allāh\'s rising/ascending over the Throne, affirmed without specifying how (bilā kayf)" },
+    { unitId: unit12.id, arabicText: 'القدم', transliteration: 'al-qidam', translation: 'Pre-eternity — Allāh has no beginning' },
+    { unitId: unit12.id, arabicText: 'البقاء', transliteration: 'al-baqā\'', translation: 'Everlastingness — Allāh has no end' },
+    { unitId: unit13.id, arabicText: 'التصديق', transliteration: 'al-taṣdīq', translation: 'Sincere inner belief — the first component of Īmān' },
+    { unitId: unit14.id, arabicText: 'الندم', transliteration: 'al-nadam', translation: 'Sincere regret — the first condition of valid tawbah' },
+    { unitId: unit14.id, arabicText: 'التوكل', transliteration: 'al-tawakkul', translation: 'Trust and reliance on Allāh after taking available means' },
+    { unitId: unit14.id, arabicText: 'التقوى', transliteration: 'al-taqwā', translation: 'Fear/consciousness of Allāh; a shield between oneself and His displeasure' },
+    { unitId: unit14.id, arabicText: 'التوبة', transliteration: 'al-tawbah', translation: 'Repentance — returning to Allāh; requires nadam, stopping the sin, and resolve not to return' },
+    { unitId: unit2.id, arabicText: 'الوليمة', transliteration: 'al-walīmah', translation: 'The post-nikāḥ wedding feast; a confirmed sunnah' },
+    { unitId: unit15.id, arabicText: 'حفظ البصر', transliteration: 'ḥifẓ al-baṣar', translation: 'Lowering and guarding the gaze; commanded for both men and women in Qur\'an 24:30–31' },
+    { unitId: unit1.id, arabicText: 'صلاة الجماعة', transliteration: 'ṣalāt al-jamā\'ah', translation: 'Congregational prayer, rewarded 27 times more than praying alone' },
   ];
 
   for (const t of arabicTermsData) {
     await prisma.arabicTerm.create({
       data: {
-        courseId: course.id,
+        unitId: t.unitId,
         arabicText: t.arabicText,
         transliteration: t.transliteration,
         translation: t.translation,
@@ -2003,7 +2011,7 @@ export async function seedMaktabCoursebook8() {
     where: { unit: { courseId: course.id } },
   });
   const flashcardCount = await prisma.flashCard.count({ where: { courseId: course.id } });
-  const arabicTermCount = await prisma.arabicTerm.count({ where: { courseId: course.id } });
+  const arabicTermCount = await prisma.arabicTerm.count({ where: { unit: { courseId: course.id } } });
 
   console.log('\n=== Maktab Coursebook 8 Seed Complete ===');
   console.log(`Units:        ${unitCount}`);

@@ -2286,8 +2286,11 @@ export async function seedMaktabCoursebook4() {
     { unitId: unitNeighbours.id, term: 'جار', transliteration: 'Jar', definition: 'Neighbour — includes up to 40 houses in each direction; has important rights in Islamic law and ethics' },
   ];
 
-  // Delete existing arabicTerms for this course, then recreate
-  await prisma.arabicTerm.deleteMany({ where: { courseId: course.id } });
+  // Delete existing arabicTerms per unit, then recreate
+  const uniqueUnitIds = [...new Set(arabicTermsData.map(t => t.unitId))];
+  for (const unitId of uniqueUnitIds) {
+    await prisma.arabicTerm.deleteMany({ where: { unitId } });
+  }
 
   for (const t of arabicTermsData) {
     await prisma.arabicTerm.create({
@@ -2296,7 +2299,6 @@ export async function seedMaktabCoursebook4() {
         transliteration: t.transliteration,
         translation: t.definition,
         unitId: t.unitId,
-        courseId: course.id,
       },
     });
   }

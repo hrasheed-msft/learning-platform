@@ -17,8 +17,8 @@ export async function seedMaktabCoursebook7() {
   // Course upsert
   const course = await prisma.course.upsert({
     where: { slug: 'maktab-coursebook-7' },
-    update: { title: 'Maktab Coursebook 7', description: 'Advanced Islamic studies for ages 12–13, covering fiqh, ahadith, sirah, tarikh, aqaid, akhlaq and adab.', level: 'INTERMEDIATE', ageGroup: '12-13', isActive: true },
-    create: { slug: 'maktab-coursebook-7', title: 'Maktab Coursebook 7', description: 'Advanced Islamic studies for ages 12–13, covering fiqh, ahadith, sirah, tarikh, aqaid, akhlaq and adab.', level: 'INTERMEDIATE', ageGroup: '12-13', isActive: true },
+    update: { title: 'Maktab Coursebook 7', description: 'Advanced Islamic studies for ages 12–13, covering fiqh, ahadith, sirah, tarikh, aqaid, akhlaq and adab.', category: 'FIQH', ageLevels: ['TEEN'], isPublished: true },
+    create: { slug: 'maktab-coursebook-7', title: 'Maktab Coursebook 7', description: 'Advanced Islamic studies for ages 12–13, covering fiqh, ahadith, sirah, tarikh, aqaid, akhlaq and adab.', category: 'FIQH', ageLevels: ['TEEN'], isPublished: true },
   });
 
   // Remove old broad units if they exist
@@ -1302,24 +1302,24 @@ export async function seedMaktabCoursebook7() {
 
   // ─── ARABIC TERMS ────────────────────────────────────────────────────────────
   const arabicTermsData = [
-    { unitId: unit1.id, arabicText: 'مَكْرُوهَات', translation: 'Disliked acts (in salah) that reduce reward without invalidating the prayer' },
-    { unitId: unit1.id, arabicText: 'سُتْرَة', translation: 'Barrier placed in front of a person praying' },
-    { unitId: unit1.id, arabicText: 'سَجْدَة التِّلَاوَة', translation: 'Prostration of recitation — performed when a verse of prostration is heard' },
-    { unitId: unit2.id, arabicText: 'نِصَاب', translation: 'Minimum threshold of wealth above which zakah becomes obligatory' },
-    { unitId: unit2.id, arabicText: 'فَرَائِض', translation: 'Fixed shares in Islamic inheritance prescribed in the Quran' },
-    { unitId: unit3.id, arabicText: 'اعْتِكَاف', translation: 'Seclusion in the masjid with the intention of worship' },
-    { unitId: unit3.id, arabicText: 'لَيْلَةُ الْقَدْر', translation: 'The Night of Power — better than a thousand months' },
-    { unitId: unit3.id, arabicText: 'أُضْحِيَة', translation: 'The ritual animal sacrifice performed during Eid al-Adha' },
-    { unitId: unit4.id, arabicText: 'صَلَوَات', translation: 'Blessings sent upon the Prophet Muhammad (peace be upon him)' },
-    { unitId: unit5.id, arabicText: 'نَمِيمَة', translation: 'Tale-carrying — conveying words between people to cause division or harm' },
-    { unitId: unit5.id, arabicText: 'غِيبَة', translation: 'Backbiting — mentioning something true about a person that they would dislike' },
-    { unitId: unit9.id, arabicText: 'بَيْت الْحِكْمَة', translation: 'House of Wisdom — the great Abbasid library and academy in Baghdad' },
-    { unitId: unit10.id, arabicText: 'قَدَر', translation: 'Divine decree — Allah\'s complete knowledge, recording, will and creation of all things' },
-    { unitId: unit10.id, arabicText: 'اللَّوْح الْمَحْفُوظ', translation: 'The Preserved Tablet on which all events of creation are recorded' },
-    { unitId: unit11.id, arabicText: 'بَرْزَخ', translation: 'The intermediary state between death and resurrection' },
-    { unitId: unit11.id, arabicText: 'الصِّرَاط', translation: 'The bridge over Jahannam that all must cross on the Day of Judgement' },
-    { unitId: unit12.id, arabicText: 'صَدَقَة جَارِيَة', translation: 'Ongoing charity whose reward continues after death' },
-    { unitId: unit14.id, arabicText: 'أَدَب', translation: 'Islamic etiquette and manners — showing respect and courtesy in all interactions' },
+    { unitId: unit1.id, arabicText: 'مَكْرُوهَات', transliteration: 'Makruhat', translation: 'Disliked acts (in salah) that reduce reward without invalidating the prayer' },
+    { unitId: unit1.id, arabicText: 'سُتْرَة', transliteration: 'Sutrah', translation: 'Barrier placed in front of a person praying' },
+    { unitId: unit1.id, arabicText: 'سَجْدَة التِّلَاوَة', transliteration: 'Sajdah al-Tilawah', translation: 'Prostration of recitation — performed when a verse of prostration is heard' },
+    { unitId: unit2.id, arabicText: 'نِصَاب', transliteration: 'Nisab', translation: 'Minimum threshold of wealth above which zakah becomes obligatory' },
+    { unitId: unit2.id, arabicText: 'فَرَائِض', transliteration: "Fara'id", translation: 'Fixed shares in Islamic inheritance prescribed in the Quran' },
+    { unitId: unit3.id, arabicText: 'اعْتِكَاف', transliteration: "I'tikaf", translation: 'Seclusion in the masjid with the intention of worship' },
+    { unitId: unit3.id, arabicText: 'لَيْلَةُ الْقَدْر', transliteration: 'Laylat al-Qadr', translation: 'The Night of Power — better than a thousand months' },
+    { unitId: unit3.id, arabicText: 'أُضْحِيَة', transliteration: 'Udhiyyah', translation: 'The ritual animal sacrifice performed during Eid al-Adha' },
+    { unitId: unit4.id, arabicText: 'صَلَوَات', transliteration: 'Salawat', translation: 'Blessings sent upon the Prophet Muhammad (peace be upon him)' },
+    { unitId: unit5.id, arabicText: 'نَمِيمَة', transliteration: 'Nameemah', translation: 'Tale-carrying — conveying words between people to cause division or harm' },
+    { unitId: unit5.id, arabicText: 'غِيبَة', transliteration: 'Ghibah', translation: 'Backbiting — mentioning something true about a person that they would dislike' },
+    { unitId: unit9.id, arabicText: 'بَيْت الْحِكْمَة', transliteration: 'Bayt al-Hikmah', translation: 'House of Wisdom — the great Abbasid library and academy in Baghdad' },
+    { unitId: unit10.id, arabicText: 'قَدَر', transliteration: 'Qadar', translation: 'Divine decree — Allah\'s complete knowledge, recording, will and creation of all things' },
+    { unitId: unit10.id, arabicText: 'اللَّوْح الْمَحْفُوظ', transliteration: 'Al-Lawh al-Mahfuz', translation: 'The Preserved Tablet on which all events of creation are recorded' },
+    { unitId: unit11.id, arabicText: 'بَرْزَخ', transliteration: 'Barzakh', translation: 'The intermediary state between death and resurrection' },
+    { unitId: unit11.id, arabicText: 'الصِّرَاط', transliteration: 'As-Sirat', translation: 'The bridge over Jahannam that all must cross on the Day of Judgement' },
+    { unitId: unit12.id, arabicText: 'صَدَقَة جَارِيَة', transliteration: 'Sadaqah Jariyah', translation: 'Ongoing charity whose reward continues after death' },
+    { unitId: unit14.id, arabicText: 'أَدَب', transliteration: 'Adab', translation: 'Islamic etiquette and manners — showing respect and courtesy in all interactions' },
   ];
 
   const uniqueUnitIds = [...new Set(arabicTermsData.map((t) => t.unitId))];
@@ -1331,6 +1331,7 @@ export async function seedMaktabCoursebook7() {
       data: {
         unitId: t.unitId,
         arabicText: t.arabicText,
+        transliteration: t.transliteration,
         translation: t.translation,
       },
     });

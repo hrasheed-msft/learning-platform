@@ -3,21 +3,22 @@
 const prisma = new PrismaClient();
 
 export async function seedMaktabCoursebook6Boys() {
-  const family = await prisma.family.findFirst({ where: { name: 'Ahmad Family' } });
-  if (!family) { console.log('Ahmad Family not found, skipping CB6 Boys seed.'); return; }
-
   const course = await prisma.course.upsert({
     where: { slug: 'maktab-coursebook-6-boys' },
     create: {
       slug: 'maktab-coursebook-6-boys',
       title: 'Maktab Coursebook 6 (Boys)',
       description: 'Maktab Coursebook 6 for boys aged 11-12, covering Fiqh, Ahadith, Sirah, Tarikh, Aqaid, Akhlaq and Adab.',
-      familyId: family.id,
-      ageGroup: 'UPPER_PRIMARY',
+      category: 'FIQH',
+      ageLevels: ['CHILD', 'PRE_TEEN'],
+      isPublished: true,
     },
     update: {
       title: 'Maktab Coursebook 6 (Boys)',
       description: 'Maktab Coursebook 6 for boys aged 11-12, covering Fiqh, Ahadith, Sirah, Tarikh, Aqaid, Akhlaq and Adab.',
+      category: 'FIQH',
+      ageLevels: ['CHILD', 'PRE_TEEN'],
+      isPublished: true,
     },
   });
   const courseId = course.id;

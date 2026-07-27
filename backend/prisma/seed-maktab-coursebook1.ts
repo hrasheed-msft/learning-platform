@@ -1009,19 +1009,19 @@ export async function seedMaktabCoursebook1() {
   console.log('');
   console.log('📖 Creating Arabic terms...');
 
-  const arabicTermsData: Array<{ unitId: string; arabicText: string; translation: string }> = [
-    { unitId: unitPillars.id, arabicText: '\u0634\u064e\u0647\u064e\u0627\u062f\u064e\u0629', translation: 'Shahadah — the declaration of faith: "There is no god but Allah and Muhammad is His messenger." The first and most important pillar of Islam.' },
-    { unitId: unitTahara.id, arabicText: '\u0648\u064f\u0636\u064f\u0648\u0621', translation: 'Wudu — the special way of washing (ablution) we do before salah. We wash our hands, mouth, nose, face, arms, head, ears, and feet.' },
-    { unitId: unitHadithIntro.id, arabicText: '\u062d\u064e\u062f\u0650\u064a\u062b', translation: 'Hadith — a record of what Rasulullah SAW said, did, or approved of. The plural is ahadith. We follow them because Allah says to obey the Messenger.' },
-    { unitId: unitHadithChar.id, arabicText: '\u0635\u0650\u062f\u0652\u0642', translation: 'Sidq — truthfulness. Islam teaches us to always speak the truth. Truth leads to Jannah and is one of the best qualities a Muslim can have.' },
-    { unitId: unitSirahEarly.id, arabicText: '\u0633\u0650\u064a\u0631\u064e\u0629', translation: 'Sirah — the life story and biography of Rasulullah SAW. Learning his life helps us follow his beautiful example.' },
-    { unitId: unitSirahYouth.id, arabicText: '\u0627\u0644\u0652\u0623\u064e\u0645\u0650\u064a\u0646', translation: 'Al-Amin — "The Most Trustworthy." A title given to Rasulullah SAW by the people of Makkah because of his perfect honesty and trustworthiness.' },
-    { unitId: unitAdam.id, arabicText: '\u0625\u0650\u0628\u0652\u0644\u0650\u064a\u0633', translation: "Iblis — another name for Shaytan (the devil). He was proud and refused to obey Allah's command to prostrate to Adam. He is the enemy of humans." },
-    { unitId: unitNuh.id, arabicText: '\u0633\u064e\u0641\u0650\u064a\u0646\u064e\u0629', translation: 'Safinah — a ship or ark. Allah commanded Nuh (peace be upon him) to build a great ark to save the believers and animals from the flood.' },
-    { unitId: unitAqaid.id, arabicText: '\u0625\u0650\u064a\u0645\u064e\u0627\u0646', translation: "Iman — faith and belief. A Muslim's iman includes seven articles: belief in Allah, angels, divine books, prophets, the Last Day, Qadar, and resurrection." },
-    { unitId: unitAkhlaqRespect.id, arabicText: '\u0637\u064e\u0647\u064e\u0627\u0631\u064e\u0629', translation: 'Taharah — purity and cleanliness. Rasulullah SAW said cleanliness is half of faith. We must keep our body, clothes and surroundings clean.' },
-    { unitId: unitAkhlaqSpeech.id, arabicText: '\u0635\u064e\u062f\u064e\u0642\u064e\u0629', translation: 'Sadaqah — voluntary charity or a good deed. Even smiling at your brother and speaking a kind word is sadaqah and earns reward from Allah.' },
-    { unitId: unitAdabDaily.id, arabicText: '\u0623\u064e\u062f\u064e\u0628', translation: 'Adab — Islamic etiquette and good manners. Following the adab of Rasulullah SAW in eating, drinking, sleeping, and daily life is an act of worship.' },
+  const arabicTermsData: Array<{ unitId: string; arabicText: string; transliteration: string; translation: string }> = [
+    { unitId: unitPillars.id, arabicText: '\u0634\u064e\u0647\u064e\u0627\u062f\u064e\u0629', transliteration: 'Shahadah', translation: 'Shahadah — the declaration of faith: "There is no god but Allah and Muhammad is His messenger." The first and most important pillar of Islam.' },
+    { unitId: unitTahara.id, arabicText: '\u0648\u064f\u0636\u064f\u0648\u0621', transliteration: 'Wudu', translation: 'Wudu — the special way of washing (ablution) we do before salah. We wash our hands, mouth, nose, face, arms, head, ears, and feet.' },
+    { unitId: unitHadithIntro.id, arabicText: '\u062d\u064e\u062f\u0650\u064a\u062b', transliteration: 'Hadith', translation: 'Hadith — a record of what Rasulullah SAW said, did, or approved of. The plural is ahadith. We follow them because Allah says to obey the Messenger.' },
+    { unitId: unitHadithChar.id, arabicText: '\u0635\u0650\u062f\u0652\u0642', transliteration: 'Sidq', translation: 'Sidq — truthfulness. Islam teaches us to always speak the truth. Truth leads to Jannah and is one of the best qualities a Muslim can have.' },
+    { unitId: unitSirahEarly.id, arabicText: '\u0633\u0650\u064a\u0631\u064e\u0629', transliteration: 'Sirah', translation: 'Sirah — the life story and biography of Rasulullah SAW. Learning his life helps us follow his beautiful example.' },
+    { unitId: unitSirahYouth.id, arabicText: '\u0627\u0644\u0652\u0623\u064e\u0645\u0650\u064a\u0646', transliteration: 'Al-Amin', translation: 'Al-Amin — "The Most Trustworthy." A title given to Rasulullah SAW by the people of Makkah because of his perfect honesty and trustworthiness.' },
+    { unitId: unitAdam.id, arabicText: '\u0625\u0650\u0628\u0652\u0644\u0650\u064a\u0633', transliteration: 'Iblis', translation: "Iblis — another name for Shaytan (the devil). He was proud and refused to obey Allah's command to prostrate to Adam. He is the enemy of humans." },
+    { unitId: unitNuh.id, arabicText: '\u0633\u064e\u0641\u0650\u064a\u0646\u064e\u0629', transliteration: 'Safinah', translation: 'Safinah — a ship or ark. Allah commanded Nuh (peace be upon him) to build a great ark to save the believers and animals from the flood.' },
+    { unitId: unitAqaid.id, arabicText: '\u0625\u0650\u064a\u0645\u064e\u0627\u0646', transliteration: 'Iman', translation: "Iman — faith and belief. A Muslim's iman includes seven articles: belief in Allah, angels, divine books, prophets, the Last Day, Qadar, and resurrection." },
+    { unitId: unitAkhlaqRespect.id, arabicText: '\u0637\u064e\u0647\u064e\u0627\u0631\u064e\u0629', transliteration: 'Taharah', translation: 'Taharah — purity and cleanliness. Rasulullah SAW said cleanliness is half of faith. We must keep our body, clothes and surroundings clean.' },
+    { unitId: unitAkhlaqSpeech.id, arabicText: '\u0635\u064e\u062f\u064e\u0642\u064e\u0629', transliteration: 'Sadaqah', translation: 'Sadaqah — voluntary charity or a good deed. Even smiling at your brother and speaking a kind word is sadaqah and earns reward from Allah.' },
+    { unitId: unitAdabDaily.id, arabicText: '\u0623\u064e\u062f\u064e\u0628', transliteration: 'Adab', translation: 'Adab — Islamic etiquette and good manners. Following the adab of Rasulullah SAW in eating, drinking, sleeping, and daily life is an act of worship.' },
   ];
 
   // Delete and re-create Arabic terms per unit
@@ -1035,6 +1035,7 @@ export async function seedMaktabCoursebook1() {
       data: {
         unitId: t.unitId,
         arabicText: t.arabicText,
+        transliteration: t.transliteration,
         translation: t.translation,
       },
     });
