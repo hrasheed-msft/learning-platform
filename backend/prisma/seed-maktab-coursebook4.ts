@@ -2255,6 +2255,7 @@ export async function seedMaktabCoursebook4() {
         courseId: course.id,
         category: 'Vocabulary',
         tags: ['maktab-4'],
+        orderIndex: flashcardData.indexOf(f),
       },
     });
   }

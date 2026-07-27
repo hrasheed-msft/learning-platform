@@ -1365,7 +1365,7 @@ export async function seedMaktabCoursebook2() {
   console.log(`   ArabicTerms:  ${arabicTermsData.length}`);
 }
 
-main()
+seedMaktabCoursebook2()
   .catch((e) => {
     console.error(e);
     process.exit(1);

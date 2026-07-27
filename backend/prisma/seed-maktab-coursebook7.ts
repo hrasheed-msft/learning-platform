@@ -8,11 +8,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function seedMaktabCoursebook7() {
-  // Demo family
-  const demoParent = await prisma.user.findFirst({ where: { email: 'demo@example.com' } });
-  const demoChild = demoParent
-    ? await prisma.user.findFirst({ where: { parentId: demoParent.id } })
-    : null;
+  // Demo child (not applicable in this seed)
+  const demoChild: { id: string } | null = null;
 
   // Course upsert
   const course = await prisma.course.upsert({
