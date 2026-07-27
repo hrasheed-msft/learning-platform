@@ -184,8 +184,8 @@ export class AssessmentService {
       },
     });
 
-    // Update unit progress if passed
-    if (passed && unit) {
+    // Always update unit progress so resume tracking and highest-score logic work correctly
+    if (unit) {
       const enrollment = await prisma.courseEnrollment.findUnique({
         where: { memberId_courseId: { memberId, courseId: unit.courseId } },
       });
@@ -194,9 +194,14 @@ export class AssessmentService {
         const existingProgress = await prisma.unitProgress.findUnique({
           where: { enrollmentId_unitId: { enrollmentId: enrollment.id, unitId } },
         });
+
+        // Preserve: once passed, never revert; always keep the highest score
+        const alreadyPassed = Boolean(existingProgress?.quizCompleted);
+        const nowQuizCompleted = passed || alreadyPassed;
+        const bestScore = Math.max(existingProgress?.quizScore ?? 0, score);
         const nowCompleted = isUnitComplete({
           ...existingProgress,
-          quizCompleted: true,
+          quizCompleted: nowQuizCompleted,
         });
 
         await prisma.unitProgress.upsert({
@@ -204,28 +209,30 @@ export class AssessmentService {
           create: {
             enrollmentId: enrollment.id,
             unitId,
-            quizCompleted: true,
+            quizCompleted: passed,
             quizScore: score,
-            completedAt: nowCompleted ? new Date() : null,
+            completedAt: passed && nowCompleted ? new Date() : null,
           },
           update: {
-            quizCompleted: true,
-            quizScore: score,
+            quizCompleted: nowQuizCompleted,
+            quizScore: bestScore,
             completedAt: nowCompleted ? existingProgress?.completedAt ?? new Date() : null,
           },
         });
 
-        const enrollmentProgress = await CourseService.updateCourseProgress(enrollment.id);
-        if (enrollmentProgress?.previousStatus !== 'COMPLETED' && enrollmentProgress?.status === 'COMPLETED') {
-          try {
-            await recordActivity(memberId, member.familyId, 'COURSE_COMPLETED', {
-              courseId: unit.courseId,
-              courseTitle: unit.course.title,
-              unitId: unit.id,
-              unitTitle: unit.title,
-            });
-          } catch (err) {
-            console.error('Failed to record course completion activity:', err);
+        if (passed) {
+          const enrollmentProgress = await CourseService.updateCourseProgress(enrollment.id);
+          if (enrollmentProgress?.previousStatus !== 'COMPLETED' && enrollmentProgress?.status === 'COMPLETED') {
+            try {
+              await recordActivity(memberId, member.familyId, 'COURSE_COMPLETED', {
+                courseId: unit.courseId,
+                courseTitle: unit.course.title,
+                unitId: unit.id,
+                unitTitle: unit.title,
+              });
+            } catch (err) {
+              console.error('Failed to record course completion activity:', err);
+            }
           }
         }
       }

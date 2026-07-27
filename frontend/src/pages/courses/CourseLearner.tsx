@@ -29,6 +29,15 @@ function isUnitCompleted(progress?: EnrollmentUnitProgress) {
   return Boolean(progress.videoCompleted && progress.readingCompleted && progress.quizCompleted);
 }
 
+// A unit is "done enough" to unlock the next one once reading or quiz is completed
+function isUnitUnlockable(progress?: EnrollmentUnitProgress) {
+  if (!progress) return false;
+  if (progress.status) {
+    return progress.status === 'completed' || progress.status === 'in_progress';
+  }
+  return Boolean(progress.readingCompleted || progress.quizCompleted);
+}
+
 function hasUnitStarted(progress?: EnrollmentUnitProgress) {
   if (!progress) {
     return false;
@@ -314,7 +323,7 @@ export default function CourseLearner() {
               const isCompleted = isUnitCompleted(unitProgress);
               const isInProgress = !isCompleted && hasUnitStarted(unitProgress);
               const isResumeTarget = resumeUnit?.id === unit.id;
-              const isLocked = index > 0 && !isUnitCompleted(previousProgress) && !isResumeTarget;
+              const isLocked = index > 0 && !isUnitUnlockable(previousProgress) && !isResumeTarget;
 
               return (
                 <div

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCourseStore, useFamilyStore, useAuthStore } from '@/stores';
 import { 
-  ArrowLeft, Clock, Users, BookOpen, Lock, CheckCircle, Loader2, SquareStack, ChevronRight
+  ArrowLeft, Clock, Users, BookOpen, CheckCircle, Loader2, SquareStack, ChevronRight
 } from 'lucide-react';
 
 export default function CourseDetail() {
@@ -257,7 +257,7 @@ export default function CourseDetail() {
                     </p>
                   </div>
                 </div>
-                <Lock className="w-5 h-5 text-gray-400" />
+                <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
             ))
           )}
