@@ -1742,7 +1742,7 @@ export async function seedMaktabCoursebook5() {
 
     // ── Unit 10: Fatḥ Makkah ──
     {
-      unitId: unitFathMakkah.id,
+      unitId: unitFath.id,
       externalId: 'maktab-5-fath-q1',
       type: 'MULTIPLE_CHOICE',
       questionText: 'What triggered the Conquest of Makkah in 8 AH?',
@@ -1751,7 +1751,7 @@ export async function seedMaktabCoursebook5() {
       explanation: 'The Quraysh allied tribe (Banū Bakr) attacked the Banū Khuzā\'ah — allies of the Muslims — in violation of the Ḥudaybiyah treaty. This gave the Prophet ﷺ the legal cause to march on Makkah.',
     },
     {
-      unitId: unitFathMakkah.id,
+      unitId: unitFath.id,
       externalId: 'maktab-5-fath-q2',
       type: 'TRUE_FALSE',
       questionText: 'The Conquest of Makkah was largely bloodless because the Prophet ﷺ declared a general amnesty.',
@@ -1760,7 +1760,7 @@ export async function seedMaktabCoursebook5() {
       explanation: 'When the Prophet ﷺ entered Makkah victorious, he declared a general amnesty saying: "Go, for you are free." This was a remarkable act of forgiveness for people who had persecuted Muslims for years.',
     },
     {
-      unitId: unitFathMakkah.id,
+      unitId: unitFath.id,
       externalId: 'maktab-5-fath-q3',
       type: 'MULTIPLE_CHOICE',
       questionText: 'How many idols did the Prophet ﷺ destroy upon entering the Ka\'bah?',
@@ -1769,7 +1769,7 @@ export async function seedMaktabCoursebook5() {
       explanation: 'There were 360 idols around and inside the Ka\'bah. The Prophet ﷺ knocked them down with his staff, reciting: "Truth has come, and falsehood has perished." (Qur\'ān 17:81)',
     },
     {
-      unitId: unitFathMakkah.id,
+      unitId: unitFath.id,
       externalId: 'maktab-5-fath-q4',
       type: 'MULTIPLE_CHOICE',
       questionText: 'Who gave the first adhān (call to prayer) from the roof of the Ka\'bah after the Conquest of Makkah?',
@@ -1778,7 +1778,7 @@ export async function seedMaktabCoursebook5() {
       explanation: 'The Prophet ﷺ commanded Bilāl رضي الله عنه — the freed slave who had been tortured for his faith — to give the adhān from the roof of the Ka\'bah. This was deeply symbolic.',
     },
     {
-      unitId: unitFathMakkah.id,
+      unitId: unitFath.id,
       externalId: 'maktab-5-fath-q5',
       type: 'TRUE_FALSE',
       questionText: 'After the Conquest of Makkah, Makkah became the new capital of the Islamic state and the Prophet ﷺ moved there permanently.',
@@ -2447,9 +2447,9 @@ export async function seedMaktabCoursebook5() {
     { unitId: unitHudaybiyah.id, front: 'What did Allāh reveal after the Treaty of Ḥudaybiyah?', back: 'Sūrah al-Fatḥ (Chapter 48) was revealed, declaring the treaty a "clear victory" (fatḥun mubīn) and praising those who gave the Bay\'ah al-Riḍwān.' },
 
     // ── Fatḥ Makkah flashcards ──
-    { unitId: unitFathMakkah.id, front: 'What was the Prophet\'s ﷺ proclamation upon entering Makkah?', back: '"Go, for you are free." This general amnesty forgave even the most bitter enemies of Islām, demonstrating the Prophet\'s ﷺ merciful character.' },
-    { unitId: unitFathMakkah.id, front: 'What did the Prophet ﷺ recite upon destroying the idols?', back: '"Jā\'a al-ḥaqq wa zahaqa al-bāṭil, inna al-bāṭila kāna zahūqā" — "Truth has come and falsehood has perished — falsehood is ever bound to perish." (Qur\'ān 17:81)' },
-    { unitId: unitFathMakkah.id, front: 'Who gave the first adhān from the Ka\'bah after the Conquest of Makkah?', back: 'Bilāl ibn Rabāḥ رضي الله عنه — the former Ethiopian slave who had been tortured for his faith by Umayyah ibn Khalaf — gave the first adhān from the roof of the Ka\'bah.' },
+    { unitId: unitFath.id, front: 'What was the Prophet\'s ﷺ proclamation upon entering Makkah?', back: '"Go, for you are free." This general amnesty forgave even the most bitter enemies of Islām, demonstrating the Prophet\'s ﷺ merciful character.' },
+    { unitId: unitFath.id, front: 'What did the Prophet ﷺ recite upon destroying the idols?', back: '"Jā\'a al-ḥaqq wa zahaqa al-bāṭil, inna al-bāṭila kāna zahūqā" — "Truth has come and falsehood has perished — falsehood is ever bound to perish." (Qur\'ān 17:81)' },
+    { unitId: unitFath.id, front: 'Who gave the first adhān from the Ka\'bah after the Conquest of Makkah?', back: 'Bilāl ibn Rabāḥ رضي الله عنه — the former Ethiopian slave who had been tortured for his faith by Umayyah ibn Khalaf — gave the first adhān from the roof of the Ka\'bah.' },
 
     // ── Farewell Sermon flashcards ──
     { unitId: unitFarewell.id, front: 'What was revealed during the Farewell Sermon?', back: '"This day I have perfected your religion for you, completed My favour upon you, and chosen Islām as your religion." (Qur\'ān 5:3) Marking the completion of divine revelation.' },
@@ -2571,7 +2571,7 @@ export async function seedMaktabCoursebook5() {
     { unitId: unitHudaybiyah.id, unitSlug: 'maktab-5-sirah-hudaybiyah', term: 'فتح مبين', transliteration: 'Fatḥun Mubīn', definition: 'A clear/manifest victory. Allāh described the Treaty of Ḥudaybiyah as a fatḥun mubīn in Sūrah al-Fatḥ (48:1).' },
 
     // ── Fatḥ Makkah Arabic terms ──
-    { unitId: unitFathMakkah.id, unitSlug: 'maktab-5-sirah-fath', term: 'فتح مكة', transliteration: 'Fatḥ Makkah', definition: 'The Conquest of Makkah in 8 AH — the bloodless entry of the Prophet ﷺ and 10,000 companions into Makkah, ending idol worship at the Ka\'bah.' },
+    { unitId: unitFath.id, unitSlug: 'maktab-5-sirah-fath', term: 'فتح مكة', transliteration: 'Fatḥ Makkah', definition: 'The Conquest of Makkah in 8 AH — the bloodless entry of the Prophet ﷺ and 10,000 companions into Makkah, ending idol worship at the Ka\'bah.' },
 
     // ── Farewell Sermon Arabic terms ──
     { unitId: unitFarewell.id, unitSlug: 'maktab-5-sirah-farewell', term: 'خطبة الوداع', transliteration: 'Khuṭbat al-Wadā\'', definition: 'The Farewell Sermon — delivered by the Prophet ﷺ on the 9th of Dhul Ḥijjah at \'Arafāt during his final Ḥajj, summarising the core principles of Islām.' },
