@@ -77,7 +77,7 @@ function deriveFlashcardTags(unitSlug: string | null, courseSlug: string | null)
     };
   }
 
-  const coursebookMatch = unitSlug.match(/^maktab-(1|2|3|4|5|6b|6g|7|8)-(fiqh|ahadith|sirah|tarikh|aqaid|akhlaq|adab)$/);
+  const coursebookMatch = unitSlug.match(/^maktab-(1|2|3|4|5|6b|6g|7|8)-(fiqh|ahadith|sirah|tarikh|aqaid|akhlaq|adab)/);
   if (coursebookMatch) {
     const stageCode = coursebookMatch[1];
     const subjectCode = coursebookMatch[2];
