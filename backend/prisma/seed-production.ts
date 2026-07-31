@@ -7,16 +7,18 @@
  * Seeds included:
  *   1. Foundation 1 (course + units + flashcards + quizzes)
  *   2. Foundation 2 (course + units + flashcards + quizzes)
- *   3. Quran Longer Surahs (course + units, fetches from api.quran.com)
- *   4. Weekend Path Tags (marks after-school-only units)
- *   5. FlashCard Tags (backfills stageTag/subjectTag)
- *   6. Maktab Program (creates Program + 12 ProgramStages + links courses)
+ *   3. Quran Short Surahs / Juz Amma (course + units + vocab + flashcards, fetches from api.quran.com)
+ *   4. Quran Longer Surahs (course + units + vocab + flashcards, fetches from api.quran.com)
+ *   5. Weekend Path Tags (marks after-school-only units)
+ *   6. FlashCard Tags (backfills stageTag/subjectTag)
+ *   7. Maktab Program (creates Program + 12 ProgramStages + links courses)
  *
  * Usage: DATABASE_URL="postgresql://..." npx ts-node prisma/seed-production.ts
  */
 
 import { seedMaktabFoundation1 } from './seed-maktab-foundation1';
 import { seedMaktabFoundation2 } from './seed-maktab-foundation2';
+import { seedQuranMemorizationCourse } from './seed-quran-memorization';
 import { seedQuranLongerSurahs } from './seed-quran-longer-surahs';
 import { seedWeekendPathTags } from './seed-weekend-path-tags';
 import { seedFlashcardTags } from './seed-flashcard-tags';
@@ -34,7 +36,10 @@ async function main() {
   await seedMaktabFoundation1();
   await seedMaktabFoundation2();
 
-  // 2. Longer surahs (fetches from API — may take a minute)
+  // 2. Short surahs / Juz Amma (fetches from API — may take a minute)
+  await seedQuranMemorizationCourse();
+
+  // 3. Longer surahs (fetches from API — may take a minute)
   await seedQuranLongerSurahs();
 
   // 3. Post-processing: path tags

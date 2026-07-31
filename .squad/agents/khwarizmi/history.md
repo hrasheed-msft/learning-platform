@@ -13,6 +13,25 @@ Key prior work:
 
 ## Quick Status (Most Recent)
 
+**Quran Vocab + FlashCards in Both Memorization Seeds (2026-07-31):** ✅ COMPLETE
+- Updated both `seed-quran-memorization.ts` and `seed-quran-longer-surahs.ts`
+- Added 4th parallel API call to `fetchSurahData`: `GET /api/v4/verses/by_chapter/{n}?words=true&per_page=300`
+- New types `WordData` and `WordByWordResponse`; `SurahData` extended with `wordsByAyah: WordData[][]`
+- `buildUnitContent` gains `words: WordData[]` parameter; appends "Key Vocabulary" grid section to each ayah unit
+- Ayah units: arabicTerms replaced with one entry per vocabulary word (not full-ayah text); no audioUrl (word-level audio not available)
+- Flashcards: one per vocabulary word, front=English translation, back=Arabic, category=vocabulary, difficulty=EASY, subjectTag=QURAN; deleted+recreated on re-seed
+- Review units: unchanged — still create one arabicTerm per full ayah; no flashcards added
+- `limitToAyahs` slice in longer surahs seed applied to `wordsByAyah` alongside the other fields
+- Console log updated: `✅ ${surah.name}: N units processed (X vocab words, X flashcards)`
+- `tsc --noEmit` zero errors
+
+## Learnings
+
+- **word-by-word API filter:** The quran.com word-by-word endpoint returns both `char_type_name: 'word'` and `char_type_name: 'end'` entries per verse. The `'end'` entries are verse number markers (Unicode end-of-ayah glyphs), not actual words — always filter them out before mapping to vocabulary terms.
+- **FlashCard @@unique[unitId, orderIndex]:** orderIndex must reset to 0 per unit. Reuse the array `.map((word, i) => ...)` index directly.
+- **arabicTerm audioUrl for word-level vocab:** Word-level audio clips are not available from the quran.com or everyayah.com APIs; set `audioUrl: null` explicitly.
+- **limitToAyahs slice:** When slicing data client-side for partial surahs (e.g. Al-Kahf first 10), the `wordsByAyah` array must be sliced alongside `arabicTexts`, `transliterations`, and `translations` — easy to forget the 4th field.
+
 **Program/ProgramStage/ProgramEnrollment Schema + API (2026-07-09):** ✅ COMPLETE
 - Maktab curriculum abstraction: Program (named curriculum), ProgramStage (year/grade), ProgramEnrollment (child enrollment tracking)
 - Added `LearningPath` (AFTER_SCHOOL, WEEKEND) and `Gender` (MALE, FEMALE) enums

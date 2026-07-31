@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, FlashCardDifficulty } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -45,6 +45,27 @@ interface SurahData {
   arabicTexts: string[];
   transliterations: string[];
   translations: string[];
+  wordsByAyah: WordData[][];
+}
+
+interface WordData {
+  arabic: string;
+  transliteration: string;
+  translation: string;
+  position: number;
+}
+
+interface WordByWordResponse {
+  verses: Array<{
+    verse_number: number;
+    words: Array<{
+      char_type_name: string;
+      text_uthmani: string;
+      transliteration: { text: string };
+      translation: { text: string };
+      position: number;
+    }>;
+  }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -94,7 +115,18 @@ function buildUnitContent(
   audioSrc: string,
   transliteration: string,
   translation: string,
+  words: WordData[],
 ): string {
+  const vocabCards = words
+    .map(
+      w => `  <div style="background: #f9fafb; border-radius: 0.5rem; padding: 0.75rem; border: 1px solid #e5e7eb;">
+    <p dir="rtl" lang="ar" style="font-size: 1.25rem; font-family: 'Amiri', serif; margin: 0 0 0.25rem;">${w.arabic}</p>
+    <p style="font-size: 0.8rem; color: #6b7280; font-style: italic; margin: 0 0 0.25rem;">${w.transliteration}</p>
+    <p style="font-size: 0.9rem; color: #374151; font-weight: 500; margin: 0;">${w.translation}</p>
+  </div>`,
+    )
+    .join('\n');
+
   return `<div class="quran-verse">
   <p class="arabic-large" dir="rtl" lang="ar">${arabicText}</p>
   <audio controls style="width:100%; margin-top: 1rem;">
@@ -107,7 +139,12 @@ function buildUnitContent(
 <p style="font-size: 1.1rem; color: #4b5563; font-style: italic;">${transliteration}</p>
 
 <h3>Translation</h3>
-<p style="font-size: 1.1rem; color: #374151;">${translation}</p>`;
+<p style="font-size: 1.1rem; color: #374151;">${translation}</p>
+
+<h3>Key Vocabulary</h3>
+<div class="vocabulary-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 0.5rem;">
+${vocabCards}
+</div>`;
 }
 
 function buildSurahReviewContent(
@@ -160,10 +197,11 @@ ${ayahDetails}
 // ---------------------------------------------------------------------------
 
 async function fetchSurahData(surahNumber: number, limitToAyahs?: number): Promise<SurahData> {
-  const [arabicRes, translitRes, translationRes] = await Promise.all([
+  const [arabicRes, translitRes, translationRes, wordByWordRes] = await Promise.all([
     fetch(`https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${surahNumber}`),
     fetch(`https://api.quran.com/api/v4/quran/translations/57?chapter_number=${surahNumber}`),
     fetch(`https://api.quran.com/api/v4/quran/translations/20?chapter_number=${surahNumber}`),
+    fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahNumber}?words=true&word_fields=text_uthmani,transliteration,translation&per_page=300`),
   ]);
 
   if (!arabicRes.ok) {
@@ -175,23 +213,38 @@ async function fetchSurahData(surahNumber: number, limitToAyahs?: number): Promi
   if (!translationRes.ok) {
     throw new Error(`Translation API failed for surah ${surahNumber}: HTTP ${translationRes.status}`);
   }
+  if (!wordByWordRes.ok) {
+    throw new Error(`Word-by-word API failed for surah ${surahNumber}: HTTP ${wordByWordRes.status}`);
+  }
 
   const arabicData = (await arabicRes.json()) as QuranVerseResponse;
   const translitData = (await translitRes.json()) as QuranTranslationResponse;
   const translationData = (await translationRes.json()) as QuranTranslationResponse;
+  const wordByWordData = (await wordByWordRes.json()) as WordByWordResponse;
 
   let arabicTexts = arabicData.verses.map(v => v.text_uthmani);
   let transliterations = translitData.translations.map(t => t.text);
   let translations = translationData.translations.map(t => stripHtml(t.text));
+  let wordsByAyah: WordData[][] = wordByWordData.verses.map(verse =>
+    verse.words
+      .filter(w => w.char_type_name === 'word')
+      .map(w => ({
+        arabic: w.text_uthmani,
+        transliteration: w.transliteration.text,
+        translation: w.translation.text,
+        position: w.position,
+      })),
+  );
 
   // If limitToAyahs is set (e.g. Al-Kahf first 10), slice client-side
   if (limitToAyahs !== undefined && limitToAyahs > 0) {
     arabicTexts = arabicTexts.slice(0, limitToAyahs);
     transliterations = transliterations.slice(0, limitToAyahs);
     translations = translations.slice(0, limitToAyahs);
+    wordsByAyah = wordsByAyah.slice(0, limitToAyahs);
   }
 
-  return { arabicTexts, transliterations, translations };
+  return { arabicTexts, transliterations, translations, wordsByAyah };
 }
 
 // ---------------------------------------------------------------------------
@@ -302,12 +355,16 @@ export async function seedQuranLongerSurahs() {
       throw err;
     }
 
+    let surahVocabWords = 0;
+    let surahFlashcards = 0;
+
     // Upsert each ayah unit
     for (let ayahIndex = 0; ayahIndex < surah.ayahCount; ayahIndex++) {
       const ayahNum = ayahIndex + 1;
       const arabic = surahData.arabicTexts[ayahIndex] ?? '';
       const translit = surahData.transliterations[ayahIndex] ?? '';
       const translation = surahData.translations[ayahIndex] ?? '';
+      const words = surahData.wordsByAyah[ayahIndex] ?? [];
       const audio = buildAudioUrl(surah.number, ayahNum);
       const slug = ayahSlug(surah.name, ayahNum);
       activeUnitSlugs.push(slug);
@@ -324,7 +381,7 @@ export async function seedQuranLongerSurahs() {
             title: `${surah.name} - Ayah ${ayahNum}`,
             description: `Memorize Ayah ${ayahNum} of Surah ${surah.name} (${surah.number}:${ayahNum})`,
             orderIndex: globalOrderIndex,
-            content: buildUnitContent(arabic, audio, translit, translation),
+            content: buildUnitContent(arabic, audio, translit, translation, words),
           },
         });
         unitId = existingUnit.id;
@@ -337,7 +394,7 @@ export async function seedQuranLongerSurahs() {
             title: `${surah.name} - Ayah ${ayahNum}`,
             description: `Memorize Ayah ${ayahNum} of Surah ${surah.name} (${surah.number}:${ayahNum})`,
             orderIndex: globalOrderIndex,
-            content: buildUnitContent(arabic, audio, translit, translation),
+            content: buildUnitContent(arabic, audio, translit, translation, words),
           },
         });
         unitId = newUnit.id;
@@ -356,15 +413,43 @@ export async function seedQuranLongerSurahs() {
       });
 
       await prisma.arabicTerm.deleteMany({ where: { unitId } });
-      await prisma.arabicTerm.create({
-        data: {
-          unitId,
-          arabicText: arabic,
-          transliteration: translit,
-          translation,
-          audioUrl: audio,
-        },
-      });
+      await Promise.all(
+        words.map(word =>
+          prisma.arabicTerm.create({
+            data: {
+              unitId,
+              arabicText: word.arabic,
+              transliteration: word.transliteration,
+              translation: word.translation,
+              audioUrl: null,
+            },
+          }),
+        ),
+      );
+
+      await prisma.flashCard.deleteMany({ where: { unitId } });
+      await Promise.all(
+        words.map((word, i) =>
+          prisma.flashCard.create({
+            data: {
+              unitId,
+              courseId: course.id,
+              front: word.translation,
+              back: word.arabic,
+              backArabic: word.arabic,
+              category: 'vocabulary',
+              tags: ['quran', 'vocabulary', surahSlug(surah.name)],
+              difficulty: FlashCardDifficulty.EASY,
+              orderIndex: i,
+              subjectTag: 'QURAN',
+              stageTag: null,
+            },
+          }),
+        ),
+      );
+
+      surahVocabWords += words.length;
+      surahFlashcards += words.length;
 
       globalOrderIndex++;
     }
@@ -442,7 +527,7 @@ export async function seedQuranLongerSurahs() {
 
     globalOrderIndex++;
 
-    console.log(`   ✅ ${surah.name}: ${surah.ayahCount + 1} units processed`);
+    console.log(`   ✅ ${surah.name}: ${surah.ayahCount + 1} units processed (${surahVocabWords} vocab words, ${surahFlashcards} flashcards)`);
 
     // Be polite to the quran.com API — 300ms between surahs
     await sleep(300);

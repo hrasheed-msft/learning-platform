@@ -25,6 +25,8 @@ on:
           - seed-maktab-foundation2
           - seed-maktab-further-studies-nw
           - seed-maktab-program
+          - seed-quran-memorization
+          - seed-quran-longer-surahs
           - seed-production
 
 jobs:
