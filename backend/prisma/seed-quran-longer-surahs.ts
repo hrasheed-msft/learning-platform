@@ -434,8 +434,9 @@ export async function seedQuranLongerSurahs() {
             data: {
               unitId,
               courseId: course.id,
-              front: word.translation,
-              back: word.arabic,
+              front: word.transliteration,
+              frontArabic: word.arabic,
+              back: word.translation,
               backArabic: word.arabic,
               category: 'vocabulary',
               tags: ['quran', 'vocabulary', surahSlug(surah.name)],
