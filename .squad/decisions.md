@@ -368,6 +368,416 @@ This replaces "code review + CI green" as the completion bar.
 
 ---
 
+### 50. Ibn Sina Decision — Dashboard Reconcile: Parent Progress Display (2026-07-19)
+
+**Author:** Ibn Sina (Frontend Dev)
+**Status:** Implemented
+
+**Context**
+
+Two dashboard views showed inconsistent progress data:
+- Parent Dashboard (children overview list) had no progress % column
+- Child Dashboard showed per-course progress bars reading `enrollment.progress` from backend
+
+Khwarizmi was simultaneously fixing `isUnitComplete` (to trigger on `readingCompleted` alone) and updating `getChildrenWithStats` to return `overallProgress` and correct `coursesEnrolled`/`coursesCompleted` counts.
+
+**Decision**
+
+1. **Extend `ChildSummary` type:** Added `overallProgress: number` and `coursesCompleted: number` to `ChildSummary` in `frontend/src/types/dashboard.ts`. These are computed by the backend `getChildrenWithStats` endpoint — frontend treats them as read-only.
+
+2. **Add Overall Progress column to ParentDashboard:** In the children overview list (`ParentDashboard.tsx`), added a "Progress" stat cell showing `child.overallProgress%` (hidden sm:block, styled identically to other stat cells). Updated the "Courses" stat to read `{N} active` + optional `({M} done)` suffix.
+
+3. **No changes to ChildDetailView or ChildDashboardHome:** Both views already read progress from the correct backend fields: `ChildDetailView` uses `course.progress` from `selectedChildStats.courseProgress`; `ChildDashboardHome` uses `enrollment.progress ?? 0` from `useChildEnrollments`.
+
+**Rationale**
+
+Single source of truth: both parent and child views now read from the same backend-computed `enrollment.progress`. When Khwarizmi's `isUnitComplete` fix lands, both dashboards update correctly with zero further frontend changes.
+
+**Files Changed**
+
+- **Modified:** `frontend/src/types/dashboard.ts` — added `overallProgress`, `coursesCompleted` to `ChildSummary`
+- **Modified:** `frontend/src/pages/dashboard/ParentDashboard.tsx` — added Progress stat, improved Courses stat
+
+**Validation**
+
+`npx tsc --noEmit` passed with zero errors.
+
+---
+
+### 51. Unit Completion = readingCompleted Only (2026-07-19)
+
+**Author:** Khwarizmi
+**Status:** Implemented
+
+**Context**
+
+Course progress was permanently stuck at 0% for all enrolled members. The `isUnitComplete()` helper in `course.service.ts` required all three flags (`videoCompleted && readingCompleted && quizCompleted`) to be true simultaneously. In practice, most course units have no video content, so `videoCompleted` is never set → no unit ever passes the gate → `enrollment.progress` stays 0%.
+
+**Decision**
+
+**Reading completion is the canonical "unit done" signal.** A unit is complete when `readingCompleted = true`.
+
+Video and quiz completion remain tracked on `UnitProgress` for analytics purposes but are not required for the unit to count as complete in progress calculations.
+
+**Changes**
+
+| File | Change |
+|---|---|
+| `backend/src/services/course.service.ts` | `isUnitComplete()` returns `Boolean(progress?.readingCompleted)` |
+| `backend/src/services/course.service.ts` | `getMemberProgress` `completedUnits` filter: `up => up.readingCompleted` |
+| `backend/src/services/dashboard.service.ts` | `getChildrenWithStats()` now returns `coursesEnrolled` (active only), `coursesCompleted`, `overallProgress` (avg % across ACTIVE enrollments) |
+| `backend/src/services/dashboard.service.ts` | `getFamilySummary()` `activeCoursesCount` now queries `status: 'ACTIVE'` enrollments only |
+| `frontend/src/types/dashboard.ts` | `ChildSummary` already had `overallProgress` and `coursesCompleted` — no change needed |
+
+**Impact on Quiz-Completion-Only Flows**
+
+Quiz completion alone (`quizCompleted = true`, `readingCompleted = false`) will **NOT** mark a unit complete under the new logic. This is intentional: a learner who jumps straight to the quiz without reading the lesson has not completed the unit. If a future flow (e.g., assessment-only mode) needs quiz-only completion, introduce a separate flag or a dedicated completion pathway rather than widening the `isUnitComplete` gate again.
+
+**Alternatives Rejected**
+
+- **Any-of-three**: Would let a video-only or quiz-only action count as complete — too broad, degrades learning integrity.
+- **Weighted/ordered**: Over-engineered for current needs; revisit if curriculum team requires richer completion criteria.
+
+---
+
+### 52. Unit Content → Azure Blob Storage Migration (2026-07-17)
+
+**Author:** Khwarizmi (Backend Dev)
+**Date:** 2026-07-17
+**Status:** Implemented
+
+**Decision**
+
+Unit lesson content (rich HTML, Arabic text) is migrated from `units.content @db.Text` (PostgreSQL) to Azure Blob Storage. The DB now stores a `contentUrl String?` pointing to the blob URL. The `content` column is retained as a deprecated nullable fallback until all records are confirmed migrated, at which point a separate cleanup migration will drop it.
+
+**Why**
+
+The `content` column was the primary PostgreSQL storage cost driver. Each unit stores 10–80 KB of HTML content with Arabic text. At ~50,000 lines across 37 seed files and hundreds of units, the cost differential between Azure Blob Storage and Azure PostgreSQL Flexible Server for this bulk text data is significant. Blob Storage is orders of magnitude cheaper per GB for static content.
+
+**What Changed**
+
+**Schema (`backend/prisma/schema.prisma`)**
+- Added `contentUrl String?` to `Unit` model
+- Annotated `content String? @db.Text` as deprecated
+
+**Migration (`backend/prisma/migrations/20260717_add_unit_content_url/migration.sql`)**
+```sql
+ALTER TABLE "units" ADD COLUMN "contentUrl" TEXT;
+```
+
+**New Files**
+- `backend/prisma/helpers/blob-upload.ts` — `uploadUnitContent()` and `isBlobStorageAvailable()` utility
+- `backend/prisma/migrate-content-to-blob.ts` — idempotent one-time migration script (run against prod)
+
+**Infra (`infra/resources.bicep`)**
+- Added `Standard_LRS / StorageV2 / Hot` storage account
+- Added `course-content` blob container with public `Blob` access
+- Added CORS rule: `GET` from `*` origins
+- Added KV secret `storage-connection-string`
+- Added `AZURE_STORAGE_CONNECTION_STRING` env var to Container App
+- Added outputs: `storageAccountName`, `storageEndpoint`
+
+**API (`backend/src/services/course.service.ts`)**
+- `getUnit()` now returns `content.contentUrl` alongside `content.text`
+- Backward compatible: `text` is `null` after migration, `contentUrl` is the new blob URL
+
+**Seed Files — Two-Step Pattern (top 5 by volume)**
+Applied to: `seed-maktab-further-studies-nw.ts`, `seed-maktab-coursebook3.ts`, `seed-maktab-coursebook1.ts`, `seed-maktab-coursebook2.ts`, `seed-maktab-coursebook4.ts`
+
+Pattern:
+```typescript
+import { uploadUnitContent, isBlobStorageAvailable } from './helpers/blob-upload';
+
+// Step 1: upsert with content inline in create; update block does NOT set content
+const unit = await prisma.unit.upsert({
+  where: { courseId_slug: { courseId: course.id, slug: 'unit-slug' } },
+  create: { slug: '...', courseId: course.id, title: '...', orderIndex: 0, content: htmlContent },
+  update: { title: '...', description: '...', orderIndex: 0 }, // no content!
+});
+
+// Step 2: upload to blob if available and not yet migrated
+if (isBlobStorageAvailable() && unit.content && !unit.contentUrl) {
+  const blobUrl = await uploadUnitContent(unit.id, unit.content!);
+  await prisma.unit.update({
+    where: { id: unit.id },
+    data: { contentUrl: blobUrl, content: null },
+  });
+}
+```
+
+Remaining seed files (32 others) still use inline `content:` in both create and update. They should be updated to follow this pattern before the next full re-seed in a blob-enabled environment.
+
+**Rollback**
+
+The `content` column is NOT dropped. To rollback:
+1. In `course.service.ts`, revert `getUnit()` to use only `content.text`
+2. Do NOT run the migration script
+3. The DB still has the HTML content inline
+
+---
+
+### 53. Khaldun Review: Unit Content → Azure Blob Storage Migration (2026-07-17)
+
+**Date:** 2026-07-17
+**Reviewer:** Khaldun (Lead / Architect)
+**Verdict:** APPROVED WITH NOTES
+
+**Area-by-Area Review**
+
+1. **`infra/resources.bicep` — Storage Account + Container:** APPROVED
+   - `Standard_LRS StorageV2` is appropriate for non-critical content (source of truth remains the seed files)
+   - Public blob access (`publicAccess: 'Blob'`) is intentional — course content is educational material meant for enrolled users' browsers to fetch directly without passing through the API
+   - CORS `GET *` is correct for cross-origin fetch from SWA
+   - Connection string stored in Key Vault and passed as Container App secret — good
+   - Outputs include `storageAccountName` and `storageEndpoint` — useful for CI/CD
+
+2. **`backend/prisma/schema.prisma` — `contentUrl` column:** APPROVED
+   - Nullable `String?` allows gradual migration
+   - Comment marks `content` as deprecated — good signal for future devs
+   - No breaking changes to existing queries
+
+3. **`backend/prisma/migrations/20260717_add_unit_content_url/migration.sql`:** APPROVED
+   - Simple `ADD COLUMN` with nullable TEXT — zero-downtime DDL on PostgreSQL
+   - No default, no constraint — safe for production
+
+4. **`backend/prisma/helpers/blob-upload.ts`:** APPROVED
+   - Singleton container client pattern avoids repeated connection initialization
+   - Content-Type header set to `text/html; charset=utf-8`
+   - 24h cache-control is reasonable for curriculum content that changes infrequently
+   - `isBlobStorageAvailable()` allows graceful degradation in local dev
+
+5. **`backend/prisma/migrate-content-to-blob.ts`:** APPROVED
+   - Idempotent: `WHERE content IS NOT NULL AND contentUrl IS NULL`
+   - `--dry-run` shows what would be migrated without side effects
+   - `--no-clear` allows parallel validation (blob + DB both available during testing)
+   - Per-unit error handling — one failure doesn't abort the batch
+   - Disconnects Prisma on exit
+
+6. **`backend/src/services/course.service.ts` — `getUnit()` response shape:** APPROVED
+   - Returns both `content.text` and `content.contentUrl` — frontend can choose
+   - After migration, `text` will be null, but field is present for backward compat
+   - No breaking API contract change
+
+7. **Seed files (coursebook1–4, further-studies):** APPROVED
+   - Two-step pattern: upsert with inline content → conditional blob upload
+   - Guard: `isBlobStorageAvailable() && unit.content && !unit.contentUrl`
+   - `update` clause in upsert does NOT include `content` — re-seeding won't overwrite blob URLs
+   - Without `AZURE_STORAGE_CONNECTION_STRING`, seeds still populate inline content — local dev works
+
+8. **Frontend: types, hook, UnitViewer:** APPROVED WITH CONCERN
+   - `useUnitContent` hook correctly prioritizes `contentUrl` over `text`
+   - Graceful fallback: on blob fetch failure, falls back to `content.text` if available
+   - Loading skeleton and error states handled in UnitViewer
+   - `SyncedTextContent` uses `dangerouslySetInnerHTML` — this is **pre-existing** and applies equally to inline content. The blob source doesn't introduce new XSS surface since we control blob uploads
+
+**Concerns / Follow-Up Items**
+
+- **CONCERN 1: No HTML sanitization on blob content (low risk, document)** — `dangerouslySetInnerHTML` renders blob HTML without sanitization. Currently safe because only our seed scripts and migration script upload to the blob container. Follow-up: If admin content editing is ever added, add DOMPurify or similar before render.
+
+- **CONCERN 2: CORS origin wildcard** — `allowedOrigins: ['*']` is fine for now (public educational content), but when moving to a custom domain, tighten to the specific SWA domain(s).
+
+- **CONCERN 3: No blob CDN layer** — For production traffic at scale, consider placing Azure CDN or Front Door in front of the blob endpoint. The 24h `Cache-Control` header is already CDN-friendly.
+
+**Final Verdict**
+
+**APPROVED WITH NOTES** — Ship it. The implementation is sound, backward-compatible, and safely idempotent. Follow-up items (sanitization, CORS tightening, CDN) are non-blocking enhancements for a future iteration.
+
+---
+
+### 54. Learner-Switching UI Flow (2026-07-21)
+
+**Author:** Ibn Sina  
+**Date:** 2026-07-21  
+**Status:** Implemented
+
+**Decision**
+
+Introduced a `isParentInStudentMode` flag in `familyStore` to distinguish between two parent→child scenarios:
+
+1. **Parent previewing** (from parent dashboard → child view): `isParentInStudentMode = false` → amber "Parent preview" banner shown in `ChildLayout`
+2. **Parent in student mode** (SelectLearner → pick child): `isParentInStudentMode = true` → no banner, full student UX, "Switch Learner" button available in sidebar
+
+**Key Rules**
+
+- **Switch Learner button** is always visible in left nav when `isParentAuth === true` (both `ChildLayout` and `MainLayout`).
+- The button requires PIN verification (`authService.verifyParentPin`) before proceeding to `/select-learner`.
+- If parent has no PIN configured, a toast message shows ("Set a parent PIN in Settings…") and the switch proceeds anyway.
+- PIN status is pre-fetched on mount to avoid latency at click time.
+- `isParentInStudentMode` is included in `familyStore` `partialize` so it survives page refreshes.
+
+**Files Changed**
+
+- `frontend/src/stores/familyStore.ts` — added `isParentInStudentMode` state + action + persist
+- `frontend/src/pages/SelectLearner.tsx` — `completeSelect` sets the flag
+- `frontend/src/components/auth/ParentPinModal.tsx` — `targetMember` now optional; added `memberId`, `title`, `description` props
+- `frontend/src/components/layouts/ChildLayout.tsx` — Switch Learner button, refined `isParentViewing` logic
+- `frontend/src/components/layouts/MainLayout.tsx` — replaced multi-branch switcher with unified PIN-gated "Switch Learner" button
+
+---
+
+### 55. Learner-Switch Flow E2E Tests (2026-07-21)
+
+**Author:** Biruni (Tester)
+**Date:** 2026-07-21
+**Status:** Implemented
+
+**Decision**
+
+Wrote 6 comprehensive E2E Playwright tests for the learner-switch flow introduced in Decision #54 (Learner-Switching UI Flow).
+
+**Test File**
+
+`frontend/e2e/learner-switch-flow.spec.ts`
+
+**Test Coverage**
+
+| # | Test | Route | Key Assertion |
+|---|------|-------|---------------|
+| 1 | Parent → child (Student View) | `/child/dashboard` | No preview banner; Switch Learner in sidebar; student nav visible |
+| 2 | Parent → self (Parent View) | `/dashboard` | Stays on /dashboard; Switch Learner visible; parent nav; no preview banner |
+| 3 | Switch Learner from ChildLayout | `/child/dashboard` | PIN modal with "Enter your PIN to switch learner"; correct PIN → /select-learner |
+| 4 | Switch Learner from MainLayout | `/dashboard` | PIN modal same description; correct PIN → /select-learner |
+| 5 | Child direct login bypass | `/child/dashboard` | Not redirected to /select-learner or /child-login; Switch Learner absent |
+| 6 | Parent preview banner | `/child/dashboard` | "Parent preview" banner + "← Parent View" link + Switch Learner button all visible |
+
+**State Injected**
+
+All tests use `page.addInitScript` to inject `localStorage`:
+
+- `auth-storage`: parent auth (accessToken, refreshToken, user, family, isAuthenticated)
+- `family-storage`: `{ selectedMember, isParentInStudentMode }` — the new flag from Ibn Sina's implementation
+- `child-auth-storage` (Test 5 only): `{ member, isAuthenticated: true, isChildSession: true, accessToken: 'mock-token' }`
+
+**Key Technical Decisions**
+
+1. **`isParentInStudentMode`** distinguishes "parent in full student mode" (no banner) from "parent previewing child view" (amber banner). Tests 1 and 6 use the same selectedMember but differ only in this flag.
+
+2. **Test 5 (child direct login)** uses a mock JWT — the routing test only requires `isAuthenticated && isChildSession` to be true in the Zustand store. API calls will fail with 401 but the page must NOT redirect.
+
+3. **Switch Learner locator** in sidebar tests is scoped to `aside` (`page.locator('aside').getByRole(...)`) to avoid ambiguity with the banner's own Switch Learner button in Test 6.
+
+4. **PIN status wait** (Tests 3 & 4): `page.waitForResponse('/auth/parent-pin/status')` before clicking — same race condition guard established in `phase1-pin-gate.spec.ts`. Without this, `hasPinCache` may not be populated and the PIN modal may not appear.
+
+5. **Auto-submit on 4th digit**: `firstInput.pressSequentially(parentPin, { delay: 100 })` — React focus management advances input focus, and the modal auto-submits after the 4th digit.
+
+**Test Account Constants**
+
+- Parent email: `hassan.rasheed1@live.com` (env: `E2E_PARENT_EMAIL`)
+- Parent PIN: `5823` (env: `E2E_PARENT_PIN`)
+- Ibn Sharif (child): `id = b32bf819-1662-47c5-b80f-2e2ca6bd26ab`, `familyId = fb93318f-648d-4bee-808e-71ff89f6c371`
+- Hassan self-enrolled member: `id = 885ba420-5188-44f0-bbf1-30e622ec65aa`
+
+---
+
+### 56. Maktab Coursebook 5 — Unit Split Restructure (2026-07-26)
+
+**Date:** 2026-07-26  
+**Author:** Khwarizmi (Backend Dev)  
+**Status:** Implemented  
+
+**Summary**
+
+Completely rewrote `backend/prisma/seed-maktab-coursebook5.ts` to split 7 large multi-topic units into **22 focused single-topic units**. Each unit now covers exactly ONE main topic/heading, and every quiz tests only that unit's content.
+
+**Before:** 7 units × multiple unrelated sub-topics per unit  
+**After:** 22 units × 1 focused topic each
+
+**Key Changes**
+
+- 7 → 22 units (3x more granular)
+- 112 questions redistributed (5–6 per unit)
+- ~58 flashcards redistributed across all 22 units
+- ~50 Arabic terms redistributed from the original 7 units
+- Old unit slugs not deleted (new units have new slugs; a separate migration/cleanup script would be needed)
+
+**File Stats**
+
+- **File:** `backend/prisma/seed-maktab-coursebook5.ts`
+- **Size:** ~176KB (was 179KB)
+- **Lines:** 2774
+- **TypeScript check:** ✅ No errors (`npx tsc --noEmit`)
+
+---
+
+### 57. Maktab Coursebook Audit & Unit Split Plan (2026-07-26)
+
+**Date:** 2026-07-26
+**Author:** Khaldun (Lead/Architect), Khwarizmi
+
+**Part 1: Answer Correctness Audit Results**
+
+Audit method: Parse every `prisma.question.upsert` block in each file by splitting on that token, then extract `type`, `correctAnswer`, and `options` fields. For `MULTIPLE_CHOICE`, verify `correctAnswer` is in the parsed options array. For `TRUE_FALSE`, verify value is `'True'` or `'False'`. `FILL_BLANK` is exempt (no options check needed).
+
+**Verdict: All 12 files pass the correctness audit.**
+
+Every `correctAnswer` in a `MULTIPLE_CHOICE` question exactly matches one of the strings in its `options` array. Every `TRUE_FALSE` question has `correctAnswer` of `'True'` or `'False'`. No questions have `type: 'MULTIPLE_CHOICE'` with missing or undefined options.
+
+**Part 2: Unit Split Plan**
+
+**Design Principle:** Each current unit bundles an entire subject (Fiqh, Aḥādīth, Sīrah, etc.) into one large unit. The goal is to split each subject unit into **topic-focused sub-units**, each covering ONE main topic, so that quizzes are targeted rather than broad.
+
+Slug pattern: `maktab-{N}-{subject}-{topic}` (for coursebooks); `foundation-{N}-{subject}-{topic}` (for foundation); `maktab-fs-{topic}` (for further studies).
+
+**Status:** Decision approved; Coursebook 5 implementation complete. Remaining coursebooks (1–4, 6–8) to follow.
+
+---
+
+### 58. Quran Memorization: Word-by-Word Vocabulary + FlashCards (2026-07-31)
+
+**Author:** Khwarizmi (Backend Dev)  
+**Date:** 2026-07-31  
+**Status:** Implemented
+
+**Context**
+
+Both Quran memorization seed files previously created a single `ArabicTerm` per ayah unit containing the full ayah text as a monolithic vocabulary entry. There were also no `FlashCard` entries for Quran vocabulary. The quran.com v4 API provides word-by-word breakdowns that enable richer vocabulary learning.
+
+**Decision**
+
+Fetch word-by-word data from the quran.com API and use it to generate per-word `ArabicTerm` entries and `FlashCard` entries for every individual ayah unit. Review units are unchanged.
+
+**Changes Made**
+
+**Files modified:**
+- `backend/prisma/seed-quran-memorization.ts`
+- `backend/prisma/seed-quran-longer-surahs.ts`
+
+**API added:**
+```
+GET https://api.quran.com/api/v4/verses/by_chapter/{n}?words=true&word_fields=text_uthmani,transliteration,translation&per_page=300
+```
+Called as a 4th parallel fetch alongside the existing 3 calls in `fetchSurahData`. Filter `char_type_name === 'word'` to exclude verse-number end markers.
+
+**New types:** `WordData`, `WordByWordResponse`; `SurahData.wordsByAyah: WordData[][]`
+
+**`buildUnitContent`:** Added `words: WordData[]` parameter. Appends a "Key Vocabulary" CSS grid section (Arabic word + transliteration + translation) at the bottom of each ayah unit's HTML.
+
+**ArabicTerm seeding (ayah units):** Replaced single full-ayah entry with one entry per vocabulary word. `arabicText` = word Arabic, `transliteration` = word transliteration, `translation` = word English meaning, `audioUrl` = null (no word-level audio available).
+
+**ArabicTerm seeding (review units):** Unchanged — one entry per full ayah.
+
+**FlashCard seeding (ayah units only):** One flashcard per vocabulary word. Front = English translation, back = Arabic word, `backArabic` = Arabic word, `category` = `'vocabulary'`, `tags` = `['quran', 'vocabulary', <surah-slug>]`, `difficulty` = `EASY`, `subjectTag` = `'QURAN'`. Deleted and recreated on re-seed (idempotent). No flashcards on review units.
+
+**Console logging:** Per-surah log line updated to include vocab word count and flashcard count.
+
+**Key Decisions**
+
+1. **Word-level arabicTerms over full-ayah**: Granular vocabulary terms are more useful for spaced repetition and search than a single multi-word blob. The full-ayah text is still present in the unit `content` HTML.
+
+2. **No word-level audio**: The everyayah.com dataset provides ayah-level audio only. `audioUrl: null` is set explicitly rather than constructing a broken URL.
+
+3. **Review units excluded from flashcards**: Review units aggregate the whole surah. Duplicating all vocab flashcards there would inflate the flashcard deck without adding learning value.
+
+4. **`per_page=300`**: Covers all surahs in both seed files (largest is Al-Waqi'ah at 96 ayahs, well under the limit). No pagination logic needed.
+
+5. **`limitToAyahs` slice**: The `wordsByAyah` array is sliced alongside the other arrays in `seed-quran-longer-surahs.ts` to keep the Al-Kahf first-10-ayahs constraint consistent.
+
+**Validation**
+
+`npx tsc --noEmit` passes with zero errors after all changes.
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
