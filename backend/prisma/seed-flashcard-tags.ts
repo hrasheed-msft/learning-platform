@@ -43,38 +43,26 @@ function incrementCount(counts: Map<string, number>, key: string) {
   counts.set(key, (counts.get(key) ?? 0) + 1);
 }
 
-function getFoundationSubjectTag(unitSlug: string, prefix: string) {
+function getFoundationSubjectTag(unitSlug: string, prefix: string): string | null {
   const suffix = unitSlug.slice(prefix.length);
-  const subjectTag = FOUNDATION_SUBJECT_TAGS[suffix];
-
-  if (!subjectTag) {
-    throw new Error(`Unrecognized foundation unit slug: ${unitSlug}`);
-  }
-
-  return subjectTag;
+  return FOUNDATION_SUBJECT_TAGS[suffix] ?? null;
 }
 
-function deriveFlashcardTags(unitSlug: string | null, courseSlug: string | null): DerivedTags {
-  if (!courseSlug) {
-    throw new Error('FlashCard belongs to a course without a slug');
-  }
-
-  if (!unitSlug) {
-    throw new Error(`FlashCard in course "${courseSlug}" belongs to a unit without a slug`);
+function deriveFlashcardTags(unitSlug: string | null, courseSlug: string | null): DerivedTags | null {
+  if (!courseSlug || !unitSlug) {
+    return null;
   }
 
   if (courseSlug === 'maktab-foundation-1' || unitSlug.startsWith('foundation-1-')) {
-    return {
-      stageTag: 'F1',
-      subjectTag: getFoundationSubjectTag(unitSlug, 'foundation-1-'),
-    };
+    const subjectTag = getFoundationSubjectTag(unitSlug, 'foundation-1-');
+    if (!subjectTag) return null;
+    return { stageTag: 'F1', subjectTag };
   }
 
   if (courseSlug === 'maktab-foundation-2' || unitSlug.startsWith('foundation-2-')) {
-    return {
-      stageTag: 'F2',
-      subjectTag: getFoundationSubjectTag(unitSlug, 'foundation-2-'),
-    };
+    const subjectTag = getFoundationSubjectTag(unitSlug, 'foundation-2-');
+    if (!subjectTag) return null;
+    return { stageTag: 'F2', subjectTag };
   }
 
   const coursebookMatch = unitSlug.match(/^maktab-(1|2|3|4|5|6b|6g|7|8)-(fiqh|ahadith|sirah|tarikh|aqaid|akhlaq|adab)/);
@@ -90,19 +78,12 @@ function deriveFlashcardTags(unitSlug: string | null, courseSlug: string | null)
 
   if (unitSlug.startsWith('maktab-fs-')) {
     const suffix = unitSlug.slice('maktab-fs-'.length);
-    const subjectTag = FURTHER_STUDIES_SUBJECT_TAGS[suffix];
-
-    if (!subjectTag) {
-      throw new Error(`Unrecognized Further Studies unit slug: ${unitSlug}`);
-    }
-
-    return {
-      stageTag: 'FS',
-      subjectTag,
-    };
+    const subjectTag = FURTHER_STUDIES_SUBJECT_TAGS[suffix] ?? null;
+    if (!subjectTag) return null;
+    return { stageTag: 'FS', subjectTag };
   }
 
-  throw new Error(`Unrecognized maktab unit slug: ${unitSlug}`);
+  return null;
 }
 
 function chunkItems<T>(items: T[], chunkSize: number) {
@@ -177,9 +158,16 @@ export async function seedFlashcardTags() {
   const updatesByTagPair = new Map<string, string[]>();
   const stageCounts = new Map<string, number>();
   const subjectCounts = new Map<string, number>();
+  const skippedSlugs = new Set<string>();
 
   for (const flashcard of flashcards) {
-    const { stageTag, subjectTag } = deriveFlashcardTags(flashcard.unit.slug, flashcard.course.slug);
+    const tags = deriveFlashcardTags(flashcard.unit.slug, flashcard.course.slug);
+    if (!tags) {
+      skippedSlugs.add(flashcard.unit.slug ?? '(no slug)');
+      continue;
+    }
+
+    const { stageTag, subjectTag } = tags;
     const key = `${stageTag}|${subjectTag}`;
 
     incrementCount(stageCounts, stageTag);
@@ -208,6 +196,12 @@ export async function seedFlashcardTags() {
   }
 
   console.log(`   ✓ Tagged ${updatedCount} flashcard(s) across ${updatesByTagPair.size} stage/subject group(s)`);
+  if (skippedSlugs.size > 0) {
+    console.log(`   ⚠ Skipped ${skippedSlugs.size} unrecognized unit slug(s) — add to FURTHER_STUDIES_SUBJECT_TAGS or COURSEBOOK_SUBJECT_TAGS to tag them:`);
+    for (const slug of skippedSlugs) {
+      console.log(`     - ${slug}`);
+    }
+  }
   logCounts('By stage', stageCounts, STAGE_ORDER);
   logCounts('By subject', subjectCounts, SUBJECT_ORDER);
   console.log('✅ Flashcard stage/subject tags backfilled');
