@@ -12,6 +12,7 @@
  *   5. Weekend Path Tags (marks after-school-only units)
  *   6. FlashCard Tags (backfills stageTag/subjectTag)
  *   7. Maktab Program (creates Program + 12 ProgramStages + links courses)
+ *   8. Stories from Seerah (10 hadith stories with bilingual text, discussion Qs, flashcards)
  *
  * Usage: DATABASE_URL="postgresql://..." npx ts-node prisma/seed-production.ts
  */
@@ -23,6 +24,7 @@ import { seedQuranLongerSurahs } from './seed-quran-longer-surahs';
 import { seedWeekendPathTags } from './seed-weekend-path-tags';
 import { seedFlashcardTags } from './seed-flashcard-tags';
 import { seedMaktabProgram } from './seed-maktab-program';
+import { seedSeerahStoriesCourse } from './seed-seerah-stories';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -50,6 +52,9 @@ async function main() {
 
   // 5. Program structure (links everything together)
   await seedMaktabProgram();
+
+  // 6. Seerah Stories (10 hadith stories with bilingual text, flashcards, quizzes)
+  await seedSeerahStoriesCourse();
 
   console.log('');
   console.log('🎉 Production content seed completed successfully!');

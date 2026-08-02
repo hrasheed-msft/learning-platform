@@ -28,6 +28,8 @@ Key prior work:
 ## Learnings
 
 - **word-by-word API filter:** The quran.com word-by-word endpoint returns both `char_type_name: 'word'` and `char_type_name: 'end'` entries per verse. The `'end'` entries are verse number markers (Unicode end-of-ayah glyphs), not actual words — always filter them out before mapping to vocabulary terms.
+
+- **Seerah Stories seed (2026-08-02):** `seed-seerah-stories.ts` created with 10 hadith units (Bukhari 3, 3905, 6025, 1356, 7507, 1149, 4280, 1301, 5997; Muslim 923a). Pattern: no Ahmad Family guard, findFirst→delete→recreate for idempotency, each unit has arabicTerms + flashcards (FlashCardDifficulty.MEDIUM) + one quiz question. Wired into seed-production.ts (step 6, after seedMaktabProgram) and run-seed.yml options list. `tsc --noEmit` zero errors.
 - **FlashCard @@unique[unitId, orderIndex]:** orderIndex must reset to 0 per unit. Reuse the array `.map((word, i) => ...)` index directly.
 - **arabicTerm audioUrl for word-level vocab:** Word-level audio clips are not available from the quran.com or everyayah.com APIs; set `audioUrl: null` explicitly.
 - **limitToAyahs slice:** When slicing data client-side for partial surahs (e.g. Al-Kahf first 10), the `wordsByAyah` array must be sliced alongside `arabicTexts`, `transliterations`, and `translations` — easy to forget the 4th field.

@@ -28,6 +28,7 @@ on:
           - seed-quran-memorization
           - seed-quran-longer-surahs
           - seed-production
+          - seed-seerah-stories
 
 jobs:
   run-seed:
