@@ -95,7 +95,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc1Data.length; i++) {
     const fc = fc1Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit1.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit1.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit1.id, type: 'MULTIPLE_CHOICE', questionText: 'What were the first words of the Quran revealed to the Prophet ﷺ?', options: JSON.stringify(['Bismillah ir-Rahman ir-Rahim', "Iqra bismi Rabbika alladhi khalaq — Read in the name of your Lord who created", 'Alif Lam Mim', 'Qul Huwa Allahu Ahad']), correctAnswer: "Iqra bismi Rabbika alladhi khalaq — Read in the name of your Lord who created", explanation: 'The first revelation came in the Cave of Hira when the angel Jibreel pressed the Prophet three times and commanded Iqra bismi Rabbika — the opening verses of Surah Al-Alaq (96:1-3).', difficulty: 'EASY' } });
@@ -157,7 +157,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc2Data.length; i++) {
     const fc = fc2Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit2.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit2.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit2.id, type: 'MULTIPLE_CHOICE', questionText: 'How many nights did the Prophet ﷺ and Abu Bakr hide in the Cave of Thawr during the Hijrah?', options: JSON.stringify(['One night', 'Three nights', 'Seven nights', 'Ten nights']), correctAnswer: 'Three nights', explanation: 'The Prophet ﷺ and Abu Bakr stayed in the Cave of Thawr for three nights. During this time, Abdullah ibn Abi Bakr secretly brought them news from Makkah, and Amir ibn Fuhaira brought fresh milk each night.', difficulty: 'EASY' } });
@@ -217,7 +217,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc3Data.length; i++) {
     const fc = fc3Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit3.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit3.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit3.id, type: 'MULTIPLE_CHOICE', questionText: 'When a Bedouin urinated in the mosque, what did the Prophet ﷺ tell the companions?', options: JSON.stringify(['Expel him from the mosque immediately', 'Leave him and let him finish, then pour water over it', 'Punish him as an example', 'Make him clean the mosque himself']), correctAnswer: 'Leave him and let him finish, then pour water over it', explanation: "The Prophet ﷺ said \"Do not interrupt his urination\" — protecting the man's dignity — and then simply asked for water to be poured over the area.", difficulty: 'EASY' } });
@@ -277,7 +277,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc4Data.length; i++) {
     const fc = fc4Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit4.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit4.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit4.id, type: 'MULTIPLE_CHOICE', questionText: 'When the Prophet ﷺ visited his sick Jewish servant boy and the boy accepted Islam, what did the Prophet say as he left?', options: JSON.stringify(['Alhamdulillah, another Muslim joined us', 'Praises be to Allah Who saved the boy from the Hell-fire', 'May Allah bless you with health', 'SubhanAllah for this blessing']), correctAnswer: 'Praises be to Allah Who saved the boy from the Hell-fire', explanation: "The Prophet ﷺ said \"Alhamdulillahi alladhi anqadhahu min al-nar.\" This shows his genuine love and care for the boy's eternal wellbeing, not just his worldly health.", difficulty: 'MEDIUM' } });
@@ -339,7 +339,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc5Data.length; i++) {
     const fc = fc5Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit5.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit5.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit5.id, type: 'MULTIPLE_CHOICE', questionText: 'In this hadith, why does Allah say He forgives the man who keeps sinning and returning?', options: JSON.stringify(['Because the man performed many good deeds', 'Because the man knew he had a Lord who forgives and kept returning to Him', 'Because the man fasted and prayed', 'Because the sin was minor']), correctAnswer: 'Because the man knew he had a Lord who forgives and kept returning to Him', explanation: "Allah said: \"My slave has known that he has a Lord who forgives sins.\" The key was the slave's knowledge of Allah's mercy and his sincere return (tawbah) each time.", difficulty: 'EASY' } });
@@ -401,7 +401,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc6Data.length; i++) {
     const fc = fc6Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit6.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit6.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit6.id, type: 'MULTIPLE_CHOICE', questionText: 'When the Prophet ﷺ told Bilal he had heard his footsteps in Paradise, what did Bilal say was his best deed?', options: JSON.stringify(['He called the adhan five times a day faithfully', 'He memorized the entire Quran', 'He always prayed after making wudu, day or night', 'He gave all his wealth in charity']), correctAnswer: 'He always prayed after making wudu, day or night', explanation: 'Bilal said: "Whenever I performed ablution during the day or night, I prayed after that ablution as much as was written for me." His most rewarded deed was a simple, consistent habit.', difficulty: 'MEDIUM' } });
@@ -463,7 +463,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc7Data.length; i++) {
     const fc = fc7Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit7.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit7.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit7.id, type: 'MULTIPLE_CHOICE', questionText: "When the Prophet ﷺ stood at the Ka'ba after the Conquest of Makkah and addressed the Quraysh who had persecuted Muslims for 20 years, what did he say?", options: JSON.stringify(['You will all be punished for what you did', 'Go — you are free (Adhabu fa-antum at-tulaqa)', 'Half of you are freed and half will be judged', 'Only those who accepted Islam before are forgiven']), correctAnswer: 'Go — you are free (Adhabu fa-antum at-tulaqa)', explanation: 'The Prophet ﷺ declared a general amnesty: "Adhabu fa-antum at-tulaqa" — Go, you are free. This is considered one of the most magnanimous acts of clemency in recorded history.', difficulty: 'MEDIUM' } });
@@ -523,7 +523,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc8Data.length; i++) {
     const fc = fc8Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit8.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit8.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit8.id, type: 'MULTIPLE_CHOICE', questionText: 'When Abu Talha asked Umm Sulaym about their son who had died while he was away, what did she say?', options: JSON.stringify(['She told him immediately that their son had died', 'She said the child is quiet and I hope he is in peace — waiting until morning to tell him', 'She sent someone else to tell him', 'She told him to ask the Prophet what happened']), correctAnswer: 'She said the child is quiet and I hope he is in peace — waiting until morning to tell him', explanation: 'Umm Sulaym chose to wait until after her tired husband had rested, and in the morning after Fajr, she gently told him. This was an act of profound sabr and wisdom.', difficulty: 'MEDIUM' } });
@@ -583,7 +583,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc9Data.length; i++) {
     const fc = fc9Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit9.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit9.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit9.id, type: 'MULTIPLE_CHOICE', questionText: "When Sa'd ibn Ubada saw the Prophet ﷺ weeping, he asked what this was. What was the Prophet's answer?", options: JSON.stringify(['Crying is not permitted for a believer', "This is compassion which Allah has placed in the hearts of His servants, and Allah shows compassion only to those who are compassionate", 'I weep because this child will go to Paradise', 'Only prophets are permitted to cry']), correctAnswer: "This is compassion which Allah has placed in the hearts of His servants, and Allah shows compassion only to those who are compassionate", explanation: "The Prophet ﷺ said: 'Hadhihi rahmatun ja'alaha Allahu fi qulubi ibadih.' He validated emotional expression as a divine gift, and linked mercy given to mercy received.", difficulty: 'MEDIUM' } });
@@ -643,7 +643,7 @@ export async function seedSeerahStoriesCourse() {
   ];
   for (let i = 0; i < fc10Data.length; i++) {
     const fc = fc10Data[i];
-    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit10.id } });
+    await prisma.flashCard.create({ data: { front: fc.front, frontArabic: fc.frontArabic, back: fc.back, backArabic: fc.frontArabic, courseId: course.id, category: 'vocabulary', tags: fc.tags, difficulty: FlashCardDifficulty.MEDIUM, orderIndex: i, unitId: unit10.id } });
   }
 
   await prisma.question.create({ data: { unitId: unit10.id, type: 'MULTIPLE_CHOICE', questionText: "When al-Aqra ibn Habis told the Prophet ﷺ 'I have ten children and I have never kissed any of them,' what did the Prophet ﷺ say?", options: JSON.stringify(['That is very good — it teaches them strength', 'Whoever is not merciful to others will not be treated mercifully', 'You should kiss at least the youngest one', "It depends on the child's temperament"]), correctAnswer: 'Whoever is not merciful to others will not be treated mercifully', explanation: "The Prophet ﷺ said 'Man la yarham la yurham' — Whoever does not show mercy will not be treated mercifully. He connected parental affection directly to receiving divine mercy, making it a matter of faith, not just culture.", difficulty: 'EASY' } });
