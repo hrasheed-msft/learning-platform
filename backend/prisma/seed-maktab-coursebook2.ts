@@ -1,4 +1,5 @@
-﻿import { PrismaClient } from '@prisma/client';
+﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -1358,6 +1359,37 @@ export async function seedMaktabCoursebook2() {
   console.log(`✅ ArabicTerms created: ${arabicTermsData.length}`);
 
   // ── Summary ──
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-2-midyear-assessment',
+    'maktab-2-completion-assessment',
+    'Mid-Year Assessment — Coursebook 2',
+    'Completion Assessment — Coursebook 2',
+    7, // firstHalfLastOrderIndex: unit 7 (Sirah — Wahy)
+    14, // originalMaxOrderIndex: unit 14 (Adab — Greeting, Speech & Sneeze)
+    [
+      { externalId: 'maktab-2-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is tayammum?', options: ['Washing with water', 'Dry purification using clean earth or dust', 'A type of salah', 'A type of fast'], correctAnswer: 'Dry purification using clean earth or dust', explanation: 'Tayammum is the Islamic procedure for dry purification, used when water is unavailable or harmful to use.' },
+      { externalId: 'maktab-2-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'How many times is salah performed daily?', options: ['Three', 'Four', 'Five', 'Seven'], correctAnswer: 'Five', explanation: 'Muslims perform five daily prayers: Fajr, Zuhr, Asr, Maghrib, and Isha.' },
+      { externalId: 'maktab-2-my-q3', type: 'MULTIPLE_CHOICE', questionText: 'According to the hadith, which action is a sign of a munafiq (hypocrite)?', options: ['Praying in congregation', 'Breaking promises', 'Giving sadaqah', 'Fasting in Ramadan'], correctAnswer: 'Breaking promises', explanation: 'One of the signs of a hypocrite mentioned in the hadith is that when they make a promise, they break it.' },
+      { externalId: 'maktab-2-my-q4', type: 'TRUE_FALSE', questionText: 'Rasulullah SAW was given the title Al-Amin (The Trustworthy) by his people before prophethood.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Even before receiving prophethood, the people of Makkah recognised his exceptional trustworthiness and called him Al-Amin.' },
+      { externalId: 'maktab-2-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'Who brought the first revelation to Rasulullah SAW?', options: ['Jibrail AS', 'Mikail AS', 'Israfil AS', 'Izrail AS'], correctAnswer: 'Jibrail AS', explanation: 'The angel Jibrail (Gabriel) AS brought the first revelation — the opening verses of Surah Al-Alaq — to Rasulullah SAW in the Cave of Hira.' },
+      { externalId: 'maktab-2-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'In which cave did Rasulullah SAW receive his first revelation?', options: ['Cave of Thawr', 'Cave of Hira', 'Cave of Uhud', 'Cave of Badr'], correctAnswer: 'Cave of Hira', explanation: 'Rasulullah SAW was meditating in the Cave of Hira on Mount Noor when he received the first revelation at the age of 40.' },
+    ],
+    [
+      { externalId: 'maktab-2-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is the minimum distance of water (in terms of volume) after which water cannot be considered impure by contact?', options: ['100 litres', 'Two qullahs', 'One litre', 'Any amount'], correctAnswer: 'Two qullahs', explanation: 'Water reaches the threshold of two qullahs (approximately 190 litres) after which it does not become impure by contact with a small impurity, provided its colour, smell, or taste does not change.' },
+      { externalId: 'maktab-2-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What was Prophet Hud AS sent to?', options: ['The people of Thamud', 'The people of Ad', 'The people of Midian', 'The people of Sodom'], correctAnswer: 'The people of Ad', explanation: 'Prophet Hud AS was sent to the people of Ad, a powerful nation in southern Arabia known for their physical strength and towering structures.' },
+      { externalId: 'maktab-2-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'The she-camel of Prophet Salih AS was a sign from Allah. What happened when his people harmed her?', options: ['A plague struck them', 'A thunderbolt destroyed them', 'They were flooded', 'They wandered for 40 years'], correctAnswer: 'A thunderbolt destroyed them', explanation: 'When the people of Thamud killed the she-camel after being warned, a mighty blast from Allah destroyed the entire nation within three days.' },
+      { externalId: 'maktab-2-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'How many angels does Allah mention by name in the Quran?', options: ['Two', 'Three', 'Four', 'Seven'], correctAnswer: 'Four', explanation: 'Four angels are mentioned by name in the Quran: Jibrail, Mikail, Israfil, and Izrail (Malak al-Mawt).' },
+      { externalId: 'maktab-2-ca-q5', type: 'MULTIPLE_CHOICE', questionText: 'Which of the following is one of the four divinely revealed books (kutub)?', options: ['Hadith Qudsi', 'Sunnah', 'Injil (Gospel)', 'Seerah'], correctAnswer: 'Injil (Gospel)', explanation: 'The four major divinely revealed books are the Tawrah (to Musa AS), Zabur (to Dawud AS), Injil (to Isa AS), and the Quran (to Muhammad SAW).' },
+      { externalId: 'maktab-2-ca-q6', type: 'TRUE_FALSE', questionText: 'Fulfilling a promise is an Islamic duty even if the person you promised is not a Muslim.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Keeping promises is a universal Islamic duty. Rasulullah SAW kept his agreements with Muslims and non-Muslims alike.' },
+      { externalId: 'maktab-2-ca-q7', type: 'FILL_BLANK', questionText: 'When someone sneezes and says "Alhamdulillah," we reply with "_____".', options: null, correctAnswer: 'Yarhamukallah', explanation: 'When a Muslim sneezes and praises Allah, others should respond with "Yarhamukallah" (May Allah have mercy on you). The sneezer then replies "Yahdikumullahu wa yuslihu balakum."' },
+    ],
+  );
   console.log('\n🎉 Maktab Coursebook 2 seed complete!');
   console.log(`   Units:        14`);
   console.log(`   Questions:    ${quizData.length}`);

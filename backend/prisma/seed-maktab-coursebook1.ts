@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -1041,6 +1042,37 @@ export async function seedMaktabCoursebook1() {
     });
   }
   console.log(`✅ Created ${arabicTermsData.length} Arabic terms`);
+
+  // ── ASSESSMENTS ───────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-1-midyear-assessment',
+    'maktab-1-completion-assessment',
+    'Mid-Year Assessment — Coursebook 1',
+    'Completion Assessment — Coursebook 1',
+    6, // firstHalfLastOrderIndex: unit 6 (Sirah Youth & Marriage)
+    12, // originalMaxOrderIndex: unit 12 (Adab)
+    [
+      { externalId: 'maktab-1-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'How many pillars of Islam are there?', options: ['Three', 'Four', 'Five', 'Six'], correctAnswer: 'Five', explanation: 'There are five pillars: Shahadah, Salah, Zakah, Sawm, and Hajj.' },
+      { externalId: 'maktab-1-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'What do we say at the START of wudu?', options: ['Alhamdulillah', 'Bismillah', 'SubhanAllah', 'Allahu Akbar'], correctAnswer: 'Bismillah', explanation: 'We begin wudu by saying "Bismillah" after making our intention.' },
+      { externalId: 'maktab-1-my-q3', type: 'MULTIPLE_CHOICE', questionText: 'What is a hadith?', options: ['A chapter of the Quran', 'What Rasulullah SAW said, did, or approved', 'A type of prayer', 'A du\'a'], correctAnswer: 'What Rasulullah SAW said, did, or approved', explanation: 'A hadith is a record of what Rasulullah SAW said, did himself, or did not say "no" to when he saw it.' },
+      { externalId: 'maktab-1-my-q4', type: 'TRUE_FALSE', questionText: 'Passing wind breaks wudu.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Passing wind is one of the things that breaks wudu. You must make wudu again before praying.' },
+      { externalId: 'maktab-1-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'Where was Rasulullah SAW born?', options: ['Madinah', 'Makkah', 'Syria', 'Yemen'], correctAnswer: 'Makkah', explanation: 'Rasulullah SAW was born in the holy city of Makkah.' },
+      { externalId: 'maktab-1-my-q6', type: 'FILL_BLANK', questionText: 'The title "Al-Amin" given to Rasulullah SAW means "The Most _____".', options: null, correctAnswer: 'Trustworthy', explanation: '"Al-Amin" means "The Most Trustworthy." The people of Makkah gave him this title because of his perfect honesty.' },
+    ],
+    [
+      { externalId: 'maktab-1-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What was Prophet Adam (peace be upon him) created from?', options: ['Water', 'Fire', 'Clay', 'Light'], correctAnswer: 'Clay', explanation: 'Allah created Adam (AS) from clay. He was the first human being and the first prophet.' },
+      { externalId: 'maktab-1-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'How many articles of faith are there in Islam?', options: ['Five', 'Six', 'Seven', 'Eight'], correctAnswer: 'Seven', explanation: 'The seven articles of faith are: belief in Allah, angels, divine books, prophets, the Last Day, Qadar, and resurrection.' },
+      { externalId: 'maktab-1-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'For how many years did Nuh (AS) call his people to Allah?', options: ['100 years', '500 years', '950 years', '1000 years'], correctAnswer: '950 years', explanation: 'Nuh (AS) called his people to Allah for 950 years without giving up.' },
+      { externalId: 'maktab-1-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'Which hand do we eat with according to the Sunnah?', options: ['Left hand', 'Right hand', 'Either hand', 'Both hands'], correctAnswer: 'Right hand', explanation: 'We eat with the right hand, as Rasulullah SAW taught us.' },
+      { externalId: 'maktab-1-ca-q5', type: 'TRUE_FALSE', questionText: 'Your smile at your Muslim brother is a form of sadaqah (charity).', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Rasulullah SAW said: "Your smile for your brother is sadaqah." (Tirmidhi).' },
+      { externalId: 'maktab-1-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'Which pillar of Islam involves giving money to those who need it?', options: ['Salah', 'Sawm', 'Hajj', 'Zakah'], correctAnswer: 'Zakah', explanation: 'Zakah is the third pillar of Islam — giving a portion of wealth to those in need.' },
+      { externalId: 'maktab-1-ca-q7', type: 'FILL_BLANK', questionText: 'Rasulullah SAW said: "Cleanliness is half of _____.', options: null, correctAnswer: 'faith', explanation: '"Cleanliness is half of faith." (Sahih Muslim). Taharah is central to Islamic worship.' },
+    ],
+  );
 
   console.log('\n🎉 Maktab Coursebook 1 seed complete!');
   console.log('   Course: Maktab Coursebook 1');

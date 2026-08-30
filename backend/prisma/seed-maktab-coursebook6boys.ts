@@ -1,4 +1,5 @@
-﻿import { PrismaClient } from '@prisma/client';
+﻿﻿﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -742,6 +743,37 @@ After: send ṣalawāt on the Prophet ﷺ, then recite the masnūn duʿāʾ.</p>
     });
   }
 
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    courseId,
+    'maktab-6b-midyear-assessment',
+    'maktab-6b-completion-assessment',
+    'Mid-Year Assessment — Stage 6 (Boys)',
+    'Completion Assessment — Stage 6 (Boys)',
+    8, // firstHalfLastOrderIndex: unit 8 (Sirah — Abu Bakr al-Siddiq)
+    16, // originalMaxOrderIndex: unit 16 (Adab — Adhan, Eid & Jumuah)
+    [
+      { externalId: 'maktab-6b-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What are the three categories of water in Islamic fiqh?', options: ['Clean, dirty, warm', 'Tahir Mutahhir, Tahir, and Najis', 'River, rain, and well water', 'Wudu water, Ghusl water, Tayammum water'], correctAnswer: 'Tahir Mutahhir, Tahir, and Najis', explanation: 'The three categories are: Tahir Mutahhir (pure and purifying), Tahir (pure but not purifying), and Najis (impure).' },
+      { externalId: 'maktab-6b-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'What makes ghusl obligatory upon a male?', options: ['Missing Fajr prayer', 'Reaching puberty (maturity) or janabah', 'Any bleeding', 'Contact with a dog'], correctAnswer: 'Reaching puberty (maturity) or janabah', explanation: 'Ghusl becomes obligatory upon males when they reach puberty (via a wet dream or other signs) or after janabah (major ritual impurity).' },
+      { externalId: 'maktab-6b-my-q3', type: 'MULTIPLE_CHOICE', questionText: 'What is the minimum number of people required for Jumuah salah to be valid?', options: ['One', 'Two', 'Three', 'At least three adults besides the imam'], correctAnswer: 'At least three adults besides the imam', explanation: 'According to the Hanafi school, Jumuah salah requires the imam plus at least three adult males as congregants to be valid.' },
+      { externalId: 'maktab-6b-my-q4', type: 'TRUE_FALSE', questionText: 'Abu Bakr al-Siddiq RA was the first adult male to accept Islam.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Abu Bakr al-Siddiq RA is widely regarded as the first adult free male to accept Islam. He believed immediately when Rasulullah SAW told him about his prophethood.' },
+      { externalId: 'maktab-6b-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'Which of the seven major sins mentioned in the hadith involves wrongly taking others\' wealth?', options: ['Shirk', 'Magic', 'Consuming usury (riba)', 'Killing a soul'], correctAnswer: 'Consuming usury (riba)', explanation: 'Among the seven major sins mentioned in the hadith is consuming riba (usury/interest), which involves wrongfully taking others\' wealth through exploitative loans.' },
+      { externalId: 'maktab-6b-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is the Sunnah colour of the Prophet\'s turban?', options: ['Green', 'Red', 'White', 'Black'], correctAnswer: 'White', explanation: 'The Prophet SAW is reported to have worn white turbans. White is considered the Sunnah colour, symbolising purity and simplicity.' },
+    ],
+    [
+      { externalId: 'maktab-6b-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What gift was Prophet Dawud AS given that the mountains and birds would respond to?', options: ['The ability to fly', 'His beautiful melodious voice', 'The power to move water', 'The language of birds only'], correctAnswer: 'His beautiful melodious voice', explanation: 'Allah blessed Dawud AS with a miraculous, melodious voice when reciting the Zabur (Psalms). The mountains and birds would glorify Allah along with him.' },
+      { externalId: 'maktab-6b-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'Who is the founder of Ahlus Sunnah wal-Jamaah?', options: ['Imam Abu Hanifah', 'Imam al-Ashari and Imam al-Maturidi', 'Imam Shafi\'i', 'Imam Malik'], correctAnswer: 'Imam al-Ashari and Imam al-Maturidi', explanation: 'The creed of Ahlus Sunnah wal-Jamaah was systematised by Imam Abu al-Hasan al-Ashari and Imam Abu Mansur al-Maturidi, who codified the beliefs from the Quran and Sunnah.' },
+      { externalId: 'maktab-6b-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'What are the five essential qualities of all prophets?', options: ['Sidq, Amanah, Tabligh, Fatanah, Ismah', 'Taqwa, Ilm, Adl, Sabr, Shukr', 'Iman, Amal, Ikhlas, Tawakkul, Tawbah', 'Salah, Zakah, Sawm, Hajj, Shahadah'], correctAnswer: 'Sidq, Amanah, Tabligh, Fatanah, Ismah', explanation: 'All prophets must possess: Sidq (truthfulness), Amanah (trustworthiness), Tabligh (conveying the message), Fatanah (intelligence), and Ismah (protection from sin).' },
+      { externalId: 'maktab-6b-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What is ghibah and is it permissible?', options: ['Praising someone in their absence — it is permissible', 'Backbiting (mentioning someone\'s faults in their absence) — it is haram', 'Giving advice to someone — it is Sunnah', 'Complimenting someone — it is mustahabb'], correctAnswer: 'Backbiting (mentioning someone\'s faults in their absence) — it is haram', explanation: 'Ghibah (backbiting) is mentioning someone\'s real faults in their absence in a way they would dislike. Allah compares it to eating the flesh of your dead brother (Quran 49:12).' },
+      { externalId: 'maktab-6b-ca-q5', type: 'TRUE_FALSE', questionText: 'On Eid day, it is Sunnah to take a different route home from the Eid prayer than the route you took to reach it.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'It is from the Sunnah of Rasulullah SAW to return from the Eid prayer via a different route, so that the blessings of Eid spread across more of the community.' },
+      { externalId: 'maktab-6b-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is kibr (pride) in Islamic terminology?', options: ['Being confident in one\'s abilities', 'Rejecting the truth and looking down upon others', 'Being grateful for Allah\'s blessings', 'Taking pride in one\'s family'], correctAnswer: 'Rejecting the truth and looking down upon others', explanation: 'Rasulullah SAW defined kibr (arrogance) as: "Rejecting the truth and looking down upon people." (Sahih Muslim). It is one of the spiritual diseases of the heart.' },
+      { externalId: 'maktab-6b-ca-q7', type: 'FILL_BLANK', questionText: 'The Sunan al-Fitrah are the natural practices of the _____, including circumcision, trimming the moustache, and clipping nails.', options: null, correctAnswer: 'Prophets', explanation: 'The Sunan al-Fitrah are the natural and prophetic practices that all human beings of sound nature are inclined to, and which were practised by all the prophets.' },
+    ],
+  );
   console.log('\u2705 CB6 Boys seed complete:');
   console.log('   Units: 16');
   console.log('   Questions: ' + quizData.length);

@@ -96,7 +96,9 @@ export default function CourseLearner() {
   const backLinkPath = isChildRoute ? '/child/courses' : '/dashboard';
   const browseCoursesPath = isChildRoute ? '/child/courses' : '/courses';
   const storeEnrollment = enrollments.find((enrollment) => enrollment.courseId === courseId);
-  const activeMemberId = state?.memberId ?? (isChildRoute ? childMember?.id : selectedMember?.id);
+  // In parent-student-mode on /child/ routes, childMember is null (no actual child login),
+  // so fall back to the family store's selectedMember.
+  const activeMemberId = state?.memberId ?? (isChildRoute ? (childMember?.id ?? selectedMember?.id) : selectedMember?.id);
 
   useEffect(() => {
     if (state?.enrollment) {
@@ -323,7 +325,7 @@ export default function CourseLearner() {
               const isCompleted = isUnitCompleted(unitProgress);
               const isInProgress = !isCompleted && hasUnitStarted(unitProgress);
               const isResumeTarget = resumeUnit?.id === unit.id;
-              const isLocked = index > 0 && !isUnitUnlockable(previousProgress) && !isResumeTarget;
+              const isLocked = index > 0 && !isUnitUnlockable(previousProgress) && !isResumeTarget && !isCompleted;
 
               return (
                 <div

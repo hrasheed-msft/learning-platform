@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -2014,6 +2015,37 @@ export async function seedMaktabCoursebook8() {
   const flashcardCount = await prisma.flashCard.count({ where: { courseId: course.id } });
   const arabicTermCount = await prisma.arabicTerm.count({ where: { unit: { courseId: course.id } } });
 
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-8-midyear-assessment',
+    'maktab-8-completion-assessment',
+    'Mid-Year Assessment — Coursebook 8',
+    'Completion Assessment — Coursebook 8',
+    7, // firstHalfLastOrderIndex: unit 7 (Sirah — Uthman ibn Affan RA)
+    15, // originalMaxOrderIndex: unit 15 (Adab — Final Comprehensive)
+    [
+      { externalId: 'maktab-8-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is khushu in salah?', options: ['Reciting loudly', 'Concentration, humility and presence of heart in prayer', 'Performing salah quickly', 'Praying in congregation only'], correctAnswer: 'Concentration, humility and presence of heart in prayer', explanation: 'Khushu is the quality of concentration, humility, and spiritual presence during prayer. Allah praises the believers who have khushu in their salah (Quran 23:1-2).' },
+      { externalId: 'maktab-8-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'What are the conditions for a valid Islamic marriage (nikah)?', options: ['Only love and mutual agreement', 'Offer and acceptance in the presence of two witnesses and a mahr', 'A religious ceremony only', 'Government registration only'], correctAnswer: 'Offer and acceptance in the presence of two witnesses and a mahr', explanation: 'An Islamic nikah requires: an offer (ijab) from one party, acceptance (qabul) from the other, two male Muslim witnesses, and an agreed mahr (marriage gift to the bride).' },
+      { externalId: 'maktab-8-my-q3', type: 'TRUE_FALSE', questionText: 'Riba (usury/interest) is permitted in Islamic finance for business transactions.', options: ['True', 'False'], correctAnswer: 'False', explanation: 'Riba is absolutely forbidden in Islam. Allah declares war on those who deal in riba (Quran 2:279). Islamic finance uses alternative profit-and-loss sharing models instead.' },
+      { externalId: 'maktab-8-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'According to the hadith, what is the best deed in the sight of Allah?', options: ['Performing Hajj', 'Salah at its proper time', 'Giving the most sadaqah', 'Reading the most Quran'], correctAnswer: 'Salah at its proper time', explanation: 'When Rasulullah SAW was asked what deed is most beloved to Allah, he replied: "Prayer at its proper time." Then he said: "Being dutiful to parents," then "Jihad in Allah\'s cause." (Bukhari & Muslim).' },
+      { externalId: 'maktab-8-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'Uthman ibn Affan RA was known for which two great services to Islam?', options: ['Compiling the Quran and the Conquest of Persia', 'Standardising the Quran and building the Masjid al-Nabawi extension', 'Fighting the riddah wars and building schools', 'The conquest of Makkah and distributing the booty of Badr'], correctAnswer: 'Standardising the Quran and building the Masjid al-Nabawi extension', explanation: 'Uthman RA standardised the Quran into a single dialect (the Uthmanic codex) and distributed copies to all provinces. He also extended the Masjid al-Nabawi and the Masjid al-Haram.' },
+      { externalId: 'maktab-8-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'Which nawafil prayer is performed in the last third of the night?', options: ['Duha prayer', 'Awwabin prayer', 'Tahajjud prayer', 'Ishraq prayer'], correctAnswer: 'Tahajjud prayer', explanation: 'Tahajjud (qiyam al-layl) is the voluntary night prayer performed in the last third of the night. It was a Sunnah of Rasulullah SAW and is highly praised in the Quran (17:79).' },
+    ],
+    [
+      { externalId: 'maktab-8-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is the lesson from the story of Prophet Ayyub AS?', options: ['That wealth is the most important thing in life', 'That patience (sabr) in trials brings Allah\'s mercy and relief', 'That illness is a punishment from Allah', 'That making du\'a is not effective'], correctAnswer: 'That patience (sabr) in trials brings Allah\'s mercy and relief', explanation: 'Ayyub AS was tested with extreme illness and loss for many years but remained patient and grateful. Allah healed him completely and restored his blessings, making him an example of sabr.' },
+      { externalId: 'maktab-8-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'Al-Andalus (Islamic Spain) is historically significant because:', options: ['It was the first Muslim conquest', 'It was a major centre of Islamic learning and civilisation for centuries', 'It is where the Quran was first compiled', 'It is where the first masjid was built'], correctAnswer: 'It was a major centre of Islamic learning and civilisation for centuries', explanation: 'Al-Andalus (Muslim-ruled Iberian Peninsula, 711–1492 CE) was a golden age of Islamic science, philosophy, medicine, and culture that contributed enormously to European civilisation.' },
+      { externalId: 'maktab-8-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'Which Islamic empire conquered Constantinople in 1453?', options: ['The Abbasid Caliphate', 'The Umayyad Caliphate', 'The Ottoman Empire', 'The Mughal Empire'], correctAnswer: 'The Ottoman Empire', explanation: 'Sultan Mehmed II (Mehmed the Conqueror) of the Ottoman Empire conquered Constantinople in 1453 CE, fulfilling a prophecy of Rasulullah SAW about a virtuous leader who would conquer the city.' },
+      { externalId: 'maktab-8-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What is the difference between Allah\'s Sifat Dhatiyyah and Sifat Fi\'liyyah?', options: ['One is for angels, one is for humans', 'Dhatiyyah are essential attributes of Allah\'s being; Fi\'liyyah are attributes of His actions', 'One is in the Quran and one is in the Sunnah only', 'There is no difference'], correctAnswer: 'Dhatiyyah are essential attributes of Allah\'s being; Fi\'liyyah are attributes of His actions', explanation: 'Sifat Dhatiyyah (essential attributes) are inseparable from Allah\'s being (e.g., Life, Knowledge). Sifat Fi\'liyyah (active attributes) relate to Allah\'s actions (e.g., creating, providing, forgiving).' },
+      { externalId: 'maktab-8-ca-q5', type: 'TRUE_FALSE', questionText: 'Tawbah (repentance) is accepted by Allah from sincere believers at any time during their life.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Allah is Al-Tawwab (the Ever-Accepting of Repentance). Tawbah is accepted until the death-rattle begins (or the sun rises from the West at the end of time). Allah promises to forgive sincere repentance (Quran 39:53).' },
+      { externalId: 'maktab-8-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is tawakkul in Islamic spirituality?', options: ['Complete passivity without taking any action', 'Reliance on Allah after taking the appropriate means', 'Worrying about the future', 'Giving up when things go wrong'], correctAnswer: 'Reliance on Allah after taking the appropriate means', explanation: 'Tawakkul is placing complete trust in Allah while taking all appropriate worldly means. Rasulullah SAW said: "Tie your camel, then put your trust in Allah." (Tirmidhi).' },
+      { externalId: 'maktab-8-ca-q7', type: 'FILL_BLANK', questionText: 'Ali ibn Abi Talib RA was the fourth Caliph and the cousin and _____ of Rasulullah SAW.', options: null, correctAnswer: 'son-in-law', explanation: 'Ali RA was the cousin of Rasulullah SAW who grew up in his household, and became his son-in-law by marrying Fatimah RA, the daughter of Rasulullah SAW.' },
+    ],
+  );
   console.log('\n=== Maktab Coursebook 8 Seed Complete ===');
   console.log(`Units:        ${unitCount}`);
   console.log(`Questions:    ${questionCount}`);

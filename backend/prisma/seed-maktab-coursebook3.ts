@@ -1,4 +1,5 @@
-﻿import { PrismaClient } from '@prisma/client';
+﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -1646,6 +1647,37 @@ export async function seedMaktabCoursebook3() {
   // SUMMARY
   // ══════════════════════════════════════════════
 
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-3-midyear-assessment',
+    'maktab-3-completion-assessment',
+    'Mid-Year Assessment — Coursebook 3',
+    'Completion Assessment — Coursebook 3',
+    8, // firstHalfLastOrderIndex: unit 8 (Tarikh — Ibrahim AS)
+    16, // originalMaxOrderIndex: unit 16 (Adab — Study & Walk)
+    [
+      { externalId: 'maktab-3-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is najasah?', options: ['A type of prayer', 'Ritual impurity', 'A form of charity', 'A chapter of Quran'], correctAnswer: 'Ritual impurity', explanation: 'Najasah refers to ritual impurity in Islamic law. It can be physical (on the body or clothing) and must be removed before prayer.' },
+      { externalId: 'maktab-3-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'When is ghusl (full ritual bath) obligatory?', options: ['Before every salah', 'After janabah (major ritual impurity)', 'Every Friday', 'Before eating'], correctAnswer: 'After janabah (major ritual impurity)', explanation: 'Ghusl becomes obligatory after janabah — a state of major ritual impurity — including after marital relations and upon reaching maturity.' },
+      { externalId: 'maktab-3-my-q3', type: 'MULTIPLE_CHOICE', questionText: 'Which of the following is a Sunnah act in salah?', options: ['Saying Allahu Akbar to begin', 'Reciting Al-Fatihah', 'Raising hands to the ears at takbir-e-tahrimah', 'Performing ruku and sujud'], correctAnswer: 'Raising hands to the ears at takbir-e-tahrimah', explanation: 'Raising the hands to the ears (for men) when saying the opening Allahu Akbar is a confirmed Sunnah of the prayer.' },
+      { externalId: 'maktab-3-my-q4', type: 'TRUE_FALSE', questionText: 'Rasulullah SAW and his early companions migrated to Abyssinia (Ethiopia) to escape persecution.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Due to severe persecution in Makkah, Rasulullah SAW advised his companions to migrate to Abyssinia, where the just Christian king Negus gave them protection.' },
+      { externalId: 'maktab-3-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'What is the name of the night journey Rasulullah SAW made from Makkah to Jerusalem?', options: ['Al-Miraj', 'Al-Isra', 'Al-Hijrah', 'Al-Badr'], correctAnswer: 'Al-Isra', explanation: 'Al-Isra was the miraculous night journey from Masjid al-Haram in Makkah to Masjid al-Aqsa in Jerusalem. This was followed by Al-Miraj, the ascent through the heavens.' },
+      { externalId: 'maktab-3-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'Prophet Ibrahim AS is known as:', options: ['The Prophet of Patience', 'The Friend of Allah (Khalilullah)', 'The First Prophet', 'The Prophet of the Sea'], correctAnswer: 'The Friend of Allah (Khalilullah)', explanation: 'Ibrahim AS was given the special title "Khalilullah" — the intimate friend of Allah — due to his extraordinary obedience and love for Allah.' },
+    ],
+    [
+      { externalId: 'maktab-3-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'Who built the Kabah in Makkah?', options: ['Prophet Adam AS alone', 'Prophet Muhammad SAW', 'Ibrahim and Ismail AS together', 'The angels'], correctAnswer: 'Ibrahim and Ismail AS together', explanation: 'Prophet Ibrahim AS and his son Ismail AS built the Kabah together as a house of worship for Allah, as mentioned in Surah Al-Baqarah (2:127).' },
+      { externalId: 'maktab-3-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'Which of the following is a quality that all prophets must possess?', options: ['Kitman (concealment)', 'Sidq (truthfulness)', 'Kibr (pride)', 'Ghibah (backbiting)'], correctAnswer: 'Sidq (truthfulness)', explanation: 'All prophets must possess the quality of Sidq (truthfulness). Prophets never lie — it is impossible (muhaal) for them to do so.' },
+      { externalId: 'maktab-3-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'What is the first thing to happen on the Day of Judgment?', options: ['People are judged', 'The records are given', 'The trumpet is blown', 'Jannah gates open'], correctAnswer: 'The trumpet is blown', explanation: 'The trumpet (Sur) will be blown by Israfil AS, causing all living things to die, followed by a second blow to resurrect all people for the Day of Judgment.' },
+      { externalId: 'maktab-3-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'Which of the following is a right parents have over their children in Islam?', options: ['Obedience and care', 'Only financial support', 'Only du\'a', 'Only respect in old age'], correctAnswer: 'Obedience and care', explanation: 'Parents have extensive rights including respect, obedience (in permissible matters), financial support when needed, and emotional care throughout their lives.' },
+      { externalId: 'maktab-3-ca-q5', type: 'TRUE_FALSE', questionText: 'It is permissible to speak in the masjid about worldly matters without any Islamic purpose.', options: ['True', 'False'], correctAnswer: 'False', explanation: 'The masjid is a sacred space. Unnecessary worldly conversation without a good purpose is discouraged. We should maintain the sanctity of Allah\'s house.' },
+      { externalId: 'maktab-3-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'Which du\'a should be recited when beginning a journey?', options: ['Inna lillahi wa inna ilayhi rajiun', 'Subhan alladhi sakhkhara lana hadha', 'Alhamdulillah', 'Bismillah tawakkaltu'], correctAnswer: 'Subhan alladhi sakhkhara lana hadha', explanation: 'When boarding a vehicle or starting a journey, Rasulullah SAW would recite "Subhan alladhi sakhkhara lana hadha wa ma kunna lahu muqrinin" (Quran 43:13).' },
+      { externalId: 'maktab-3-ca-q7', type: 'FILL_BLANK', questionText: 'Allah raised Rasulullah SAW up to the heavens in the event known as "_____."', options: null, correctAnswer: 'Al-Miraj', explanation: 'Al-Miraj (the Ascension) was the miraculous journey through the seven heavens that followed Al-Isra. During this journey, the five daily prayers were made obligatory.' },
+    ],
+  );
   console.log('\n🎉 Maktab Coursebook 3 seed complete!');
   console.log(`   📚 Course: ${course.title}`);
   console.log('   📖 Units: 16');

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -2029,6 +2030,37 @@ just before the congregation stands for prayer.</p>
   }
   console.log(`✅ Created ${arabicTermsData.length} Arabic terms`);
 
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-6g-midyear-assessment',
+    'maktab-6g-completion-assessment',
+    'Mid-Year Assessment — Stage 6 (Girls)',
+    'Completion Assessment — Stage 6 (Girls)',
+    6, // firstHalfLastOrderIndex: unit 6 (Sirah — Shamail)
+    13, // originalMaxOrderIndex: unit 13 (Adab — Hijab & Adhan)
+    [
+      { externalId: 'maktab-6g-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'Which type of water can be used for both drinking and ritual purification?', options: ['Tahir only', 'Tahir Mutahhir', 'Najis water after filtering', 'Any water if clean'], correctAnswer: 'Tahir Mutahhir', explanation: 'Only Tahir Mutahhir (pure and purifying) water is valid for ritual purification such as wudu and ghusl. This includes rain, river, sea, and well water that has not changed.' },
+      { externalId: 'maktab-6g-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'Upon reaching puberty, a girl must begin performing which obligatory acts of worship?', options: ['Zakah and Hajj only', 'All five pillars of Islam including salah and sawm', 'Only salah', 'No acts of worship until marriage'], correctAnswer: 'All five pillars of Islam including salah and sawm', explanation: 'Upon reaching puberty (maturity), all five pillars of Islam become obligatory. For females, ghusl also becomes obligatory after menstruation ends.' },
+      { externalId: 'maktab-6g-my-q3', type: 'MULTIPLE_CHOICE', questionText: 'Which of the following is included in the janazah salah?', options: ['Ruku and sujud', 'Four takbirs (Allahu Akbar) without ruku or sujud', 'Two rakahs with Fatihah', 'A khutbah before the prayer'], correctAnswer: 'Four takbirs (Allahu Akbar) without ruku or sujud', explanation: 'Janazah salah consists of four takbirs, recitation of Fatihah and salawat (blessings on the Prophet SAW), and du\'a for the deceased — with no ruku or sujud.' },
+      { externalId: 'maktab-6g-my-q4', type: 'TRUE_FALSE', questionText: 'The physical characteristics of Rasulullah SAW — his Shamail — are recorded in detail in Islamic tradition.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'The Shamail al-Muhammadiyah by Imam al-Tirmidhi and other books record the detailed physical description of Rasulullah SAW based on narrations from his companions.' },
+      { externalId: 'maktab-6g-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'What is the Islamic concept described in the hadith: "None of you truly believes until he loves for his brother what he loves for himself"?', options: ['Tawakkul', 'Ukhuwwah (brotherhood)', 'Taqwa', 'Ikhlas'], correctAnswer: 'Ukhuwwah (brotherhood)', explanation: 'This famous hadith (Bukhari & Muslim) describes the principle of Islamic brotherhood (ukhuwwah) — wishing for others what we wish for ourselves.' },
+      { externalId: 'maktab-6g-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'Who was Khadijah RA to Rasulullah SAW?', options: ['His daughter', 'His aunt', 'His first wife and first believer', 'His grandmother'], correctAnswer: 'His first wife and first believer', explanation: 'Khadijah RA was the beloved first wife of Rasulullah SAW and the first person to accept Islam. She supported him unconditionally throughout the early years of prophethood.' },
+    ],
+    [
+      { externalId: 'maktab-6g-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What was Abu Bakr al-Siddiq RA\'s greatest achievement as Caliph?', options: ['Conquering Persia', 'Compiling the Quran and defeating the apostates (riddah wars)', 'Building the first masjid', 'Establishing Islamic law'], correctAnswer: 'Compiling the Quran and defeating the apostates (riddah wars)', explanation: 'During Abu Bakr\'s short caliphate, he fought the Wars of Riddah (apostasy), collected zakah from those who refused, and initiated the compilation of the Quran into a single manuscript.' },
+      { externalId: 'maktab-6g-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What miraculous ability was given to Prophet Sulayman AS?', options: ['The ability to split the sea', 'Command over wind, jinn, and understanding of animals\' speech', 'The ability to raise the dead', 'Control over fire'], correctAnswer: 'Command over wind, jinn, and understanding of animals\' speech', explanation: 'Allah gave Sulayman AS extraordinary gifts including understanding the speech of birds and animals, command over the jinn and winds, and an incomparable kingdom (Quran 27:16).' },
+      { externalId: 'maktab-6g-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'What is the Islamic definition of Ahlus Sunnah wal-Jamaah?', options: ['Those who follow any Muslim leader', 'Those who follow the Quran, Sunnah, and the way of the companions and early Muslim community', 'Only the scholars', 'Those who perform all five prayers'], correctAnswer: 'Those who follow the Quran, Sunnah, and the way of the companions and early Muslim community', explanation: 'Ahlus Sunnah wal-Jamaah refers to the mainstream majority Muslim community that follows the Quran, the authenticated Sunnah, and the understanding of the Sahaba and Tabi\'in.' },
+      { externalId: 'maktab-6g-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What is hasad (envy) and what does Islam say about it?', options: ['Admiring what others have — it is encouraged', 'Wishing that Allah removes a blessing from someone — it is haram', 'Being grateful for your own blessings — it is wajib', 'Sharing what you have — it is Sunnah'], correctAnswer: 'Wishing that Allah removes a blessing from someone — it is haram', explanation: 'Hasad is wishing for the removal of a blessing from someone else. It is haram and spiritually destructive. Rasulullah SAW warned: "Envy consumes good deeds as fire consumes wood." (Abu Dawud).' },
+      { externalId: 'maktab-6g-ca-q5', type: 'TRUE_FALSE', questionText: 'Hijab is obligatory for Muslim women when in the presence of non-mahram men.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Hijab (Islamic modest dress covering the body including the hair) is obligatory for Muslim women in the presence of non-mahram (non-related) men, as established by the Quran (24:31, 33:59).' },
+      { externalId: 'maktab-6g-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What are the five essential qualities all prophets must have?', options: ['Sidq, Amanah, Tabligh, Fatanah, Ismah', 'Iman, Amal, Taqwa, Ihsan, Zuhd', 'Salah, Sawm, Hajj, Zakah, Shahadah', 'Patience, wisdom, courage, love, justice'], correctAnswer: 'Sidq, Amanah, Tabligh, Fatanah, Ismah', explanation: 'All prophets must possess: Sidq (truthfulness), Amanah (trustworthiness), Tabligh (conveying the message), Fatanah (intelligence/wisdom), and Ismah (protection from sin).' },
+      { externalId: 'maktab-6g-ca-q7', type: 'FILL_BLANK', questionText: 'Responding to the adhan by repeating its words (except "hayya alas-salah/falah" which is replaced with "la hawla wala quwwata illa billah") earns a reward equivalent to _____.', options: null, correctAnswer: 'guaranteed intercession (shafaah) on the Day of Judgment', explanation: 'Rasulullah SAW said that whoever repeats after the mu\'adhdhin from the heart will enter Jannah, and he would intercede for them on the Day of Judgment.' },
+    ],
+  );
   console.log('\n🎉 Maktab Coursebook 6 (Girls) seed complete!');
   console.log('   Course: Maktab Coursebook 6 (Girls)');
   console.log('   Units: 13 focused units (was 7 broad units)');

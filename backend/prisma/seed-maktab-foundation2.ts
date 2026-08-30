@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -1198,6 +1199,35 @@ export async function seedMaktabFoundation2() {
   console.log('✅ Created flashcards for all 3 units');
 
   console.log('');
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-f2-midyear-assessment',
+    'maktab-f2-completion-assessment',
+    'Mid-Year Assessment — Foundation Year 2',
+    'Completion Assessment — Foundation Year 2',
+    0, // firstHalfLastOrderIndex: unit 0 (Quran)
+    2, // originalMaxOrderIndex: unit 2 (99 Names — continued)
+    [
+      { externalId: 'maktab-f2-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What does "Surah Al-Ikhlas" teach us about Allah?', options: ['Allah has a family', 'Allah is One, Eternal, and has no partners or equals', 'Allah needs our worship to be happy', 'Allah lives in the sky'], correctAnswer: 'Allah is One, Eternal, and has no partners or equals', explanation: 'Surah Al-Ikhlas (Say: He is Allah, the One; Allah, the Eternal; He begets not, nor was He begotten; and there is none like Him) teaches us the pure oneness of Allah.' },
+      { externalId: 'maktab-f2-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'What does Surah Al-Falaq teach us to seek protection from?', options: ['Hunger and thirst', 'The evil of what Allah has created, the darkness of night, magic, and the envy of the envious', 'Strong winds', 'All animals'], correctAnswer: 'The evil of what Allah has created, the darkness of night, magic, and the envy of the envious', explanation: 'Surah Al-Falaq asks Allah for protection from four things: the evil in creation, the darkness of night, those who blow on knots (magic), and the envy of the jealous person.' },
+      { externalId: 'maktab-f2-my-q3', type: 'TRUE_FALSE', questionText: 'Reciting the three Quls (Al-Ikhlas, Al-Falaq, An-Nas) three times morning and evening is a Sunnah of Rasulullah SAW.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Rasulullah SAW recommended reciting the three Quls three times each in the morning and evening for protection and blessing. (Abu Dawud, Tirmidhi).' },
+      { externalId: 'maktab-f2-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'What is the du\'a we say before eating?', options: ['Alhamdulillah', 'Bismillah ir-Rahman ir-Rahim', 'Subhanallah', 'Allahu Akbar'], correctAnswer: 'Bismillah ir-Rahman ir-Rahim', explanation: 'Before eating, we say "Bismillah" (In the name of Allah). Rasulullah SAW said that when you forget to say Bismillah at the beginning, say "Bismillah awwalahu wa akhirah" at any point.' },
+    ],
+    [
+      { externalId: 'maktab-f2-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What does "Al-Khaliq" mean?', options: ['The All-Knowing', 'The Creator', 'The Provider', 'The Forgiver'], correctAnswer: 'The Creator', explanation: '"Al-Khaliq" is one of Allah\'s beautiful names meaning "The Creator." Allah created everything — the sky, the earth, all animals, and every human being!' },
+      { externalId: 'maktab-f2-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What does "Ar-Razzaq" mean?', options: ['The Forgiving', 'The All-Powerful', 'The All-Provider', 'The Wise'], correctAnswer: 'The All-Provider', explanation: '"Ar-Razzaq" means "The All-Provider." Allah provides everything we need — food, water, shelter, and all blessings. He provides for ALL creation, not just Muslims.' },
+      { externalId: 'maktab-f2-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'What do we say when we hear bad news or something sad happens?', options: ['Alhamdulillah', 'Inna lillahi wa inna ilayhi rajiun', 'Subhanallah', 'Allahu Akbar'], correctAnswer: 'Inna lillahi wa inna ilayhi rajiun', explanation: '"Inna lillahi wa inna ilayhi rajiun" means "We belong to Allah and to Him we return." We say this in times of difficulty, loss, or sadness as an expression of our submission to Allah.' },
+      { externalId: 'maktab-f2-ca-q4', type: 'TRUE_FALSE', questionText: 'Saying "Alhamdulillah" after sneezing is a Sunnah of Rasulullah SAW.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'When we sneeze, we say "Alhamdulillah" (Praise be to Allah). Then others say "Yarhamukallah" (May Allah have mercy on you). The sneezer replies "Yahdikumullahu wa yuslihu balakum."' },
+      { externalId: 'maktab-f2-ca-q5', type: 'MULTIPLE_CHOICE', questionText: 'Which Surah is called the "Heart of the Quran"?', options: ['Surah Al-Fatihah', 'Surah Al-Ikhlas', 'Surah Yasin', 'Surah Al-Baqarah'], correctAnswer: 'Surah Yasin', explanation: 'Rasulullah SAW called Surah Yasin the "heart of the Quran" (Tirmidhi). Reciting it brings immense rewards and blessings.' },
+      { externalId: 'maktab-f2-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is the Islamic greeting?', options: ['Good morning', 'How are you?', 'As-salamu alaykum', 'Welcome'], correctAnswer: 'As-salamu alaykum', explanation: '"As-salamu alaykum" (Peace be upon you) is the Islamic greeting. Rasulullah SAW said that spreading salaam is a sign of a true believer and brings love and unity among Muslims.' },
+      { externalId: 'maktab-f2-ca-q7', type: 'FILL_BLANK', questionText: 'The name "Al-Ghaffar" means Allah is "The Most _____."', options: null, correctAnswer: 'Forgiving', explanation: '"Al-Ghaffar" means "The Most Forgiving" — Allah forgives again and again. No matter how many mistakes we make, if we are truly sorry and ask Allah, He will forgive us!' },
+    ],
+  );
   console.log('✅ Maktab Foundation 2 seed complete!');
   console.log('');
 }

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -1163,6 +1164,35 @@ export async function seedMaktabFoundation1() {
   console.log('✅ Created flashcards for all 3 units');
 
   console.log('');
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-f1-midyear-assessment',
+    'maktab-f1-completion-assessment',
+    'Mid-Year Assessment — Foundation Year 1',
+    'Completion Assessment — Foundation Year 1',
+    0, // firstHalfLastOrderIndex: unit 0 (Quran — Surah al-Fatihah)
+    2, // originalMaxOrderIndex: unit 2 (99 Names of Allah)
+    [
+      { externalId: 'maktab-f1-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is the first Surah in the Quran?', options: ['Surah Al-Baqarah', 'Surah Al-Fatihah', 'Surah Al-Ikhlas', 'Surah Al-Falaq'], correctAnswer: 'Surah Al-Fatihah', explanation: 'Surah Al-Fatihah is the very first Surah in the Quran. Its name means "The Opening." We recite it in every rakah of every salah — at least 17 times a day!' },
+      { externalId: 'maktab-f1-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'How many verses (ayahs) are in Surah Al-Fatihah?', options: ['5', '6', '7', '8'], correctAnswer: '7', explanation: 'Surah Al-Fatihah has 7 beautiful verses. It is sometimes called "As-Sab\'ul Mathani" which means "The Seven Oft-Repeated Verses."' },
+      { externalId: 'maktab-f1-my-q3', type: 'TRUE_FALSE', questionText: 'We say "Bismillah" before starting Surah Al-Fatihah in our salah.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'We begin by saying "Bismillah ir-Rahman ir-Rahim" (In the name of Allah, the Most Kind, the Most Merciful) before reciting Surah Al-Fatihah.' },
+      { externalId: 'maktab-f1-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'What do we say before going to sleep?', options: ['Alhamdulillah', 'Bismillah', 'Allahu Akbar', 'Subhanallah'], correctAnswer: 'Bismillah', explanation: 'Rasulullah SAW taught us to say "Bismillah" before sleeping and to recite the three Quls (al-Ikhlas, al-Falaq, an-Nas) — they protect us and bring blessings.' },
+    ],
+    [
+      { externalId: 'maktab-f1-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What does "Alhamdulillah" mean?', options: ['Praise be to Allah', 'Allah is the Greatest', 'Glory be to Allah', 'There is no god but Allah'], correctAnswer: 'Praise be to Allah', explanation: '"Alhamdulillah" means "All praise is for Allah." It is the second verse of Surah Al-Fatihah and one of the most beloved phrases to say throughout the day.' },
+      { externalId: 'maktab-f1-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What is the name given to the phrase "Bismillah ir-Rahman ir-Rahim"?', options: ['Basmala', 'Salawat', 'Tahmid', 'Tahlil'], correctAnswer: 'Basmala', explanation: 'The phrase "Bismillah ir-Rahman ir-Rahim" is called the Basmala. We say it before starting any good action — eating, writing, studying — to begin with Allah\'s blessing.' },
+      { externalId: 'maktab-f1-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'How many Beautiful Names (Asma ul-Husna) does Allah have?', options: ['33', '66', '99', '100'], correctAnswer: '99', explanation: 'Allah has 99 Beautiful Names (Asma ul-Husna). Rasulullah SAW said: "Allah has 99 names. Whoever memorises them will enter Paradise." (Bukhari).' },
+      { externalId: 'maktab-f1-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What does "Ar-Rahman" mean?', options: ['The All-Knowing', 'The Most Merciful to all creation', 'The Creator', 'The Most Powerful'], correctAnswer: 'The Most Merciful to all creation', explanation: '"Ar-Rahman" means the Most Merciful — Allah\'s mercy that covers ALL of His creation. He gives blessings to everyone: believers and non-believers alike.' },
+      { externalId: 'maktab-f1-ca-q5', type: 'TRUE_FALSE', questionText: 'Saying du\'a is a way of talking directly to Allah.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Du\'a is our direct connection with Allah! Rasulullah SAW said: "Du\'a is the essence of worship." (Tirmidhi). Allah says: "Call upon Me and I will answer you." (Quran 40:60).' },
+      { externalId: 'maktab-f1-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is the meaning of "La ilaha illallah"?', options: ['Allah is the Greatest', 'There is no god but Allah', 'Glory be to Allah', 'Praise be to Allah'], correctAnswer: 'There is no god but Allah', explanation: '"La ilaha illallah" means "There is no god but Allah." This is the most important statement a Muslim makes — it means we only worship Allah, our One and Only God.' },
+      { externalId: 'maktab-f1-ca-q7', type: 'FILL_BLANK', questionText: 'We say "Subhanallah" _____ times, "Alhamdulillah" _____ times, and "Allahu Akbar" _____ times after salah.', options: null, correctAnswer: '33, 33, 34', explanation: 'Rasulullah SAW taught us to say Subhanallah 33 times, Alhamdulillah 33 times, and Allahu Akbar 34 times after each fardh salah. This dhikr is a beautiful way to end our prayer.' },
+    ],
+  );
   console.log('✅ Maktab Foundation 1 seed complete!');
   console.log('');
 }

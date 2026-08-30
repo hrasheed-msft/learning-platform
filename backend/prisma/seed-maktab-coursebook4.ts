@@ -1,4 +1,5 @@
-﻿import { PrismaClient } from '@prisma/client';
+﻿﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -2311,6 +2312,37 @@ export async function seedMaktabCoursebook4() {
   // ═════════════════════════════════════════════
 
   console.log('');
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-4-midyear-assessment',
+    'maktab-4-completion-assessment',
+    'Mid-Year Assessment — Coursebook 4',
+    'Completion Assessment — Coursebook 4',
+    7, // firstHalfLastOrderIndex: unit 7 (Sirah — Brotherhood & Al-Ahzab)
+    14, // originalMaxOrderIndex: unit 14 (Adab — Comprehensive)
+    [
+      { externalId: 'maktab-4-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is masah and when is it performed?', options: ['Washing the feet three times', 'Wiping over leather socks during wudu', 'A form of ghusl', 'Cleaning the ears in wudu'], correctAnswer: 'Wiping over leather socks during wudu', explanation: 'Masah refers to wiping over leather socks (khuffayn) instead of washing the feet during wudu, valid for one day for a resident and three days for a traveller.' },
+      { externalId: 'maktab-4-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'How many wajib (necessary) acts of salah are there?', options: ['Six', 'Eight', 'Ten', 'Fourteen'], correctAnswer: 'Fourteen', explanation: 'There are fourteen wajib acts in salah. Omitting a wajib deliberately invalidates the prayer; omitting it forgetfully requires a corrective sujud al-sahw.' },
+      { externalId: 'maktab-4-my-q3', type: 'TRUE_FALSE', questionText: 'Sawm (fasting) in Ramadan is obligatory for all adult Muslims who are able.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Fasting the month of Ramadan is the fourth pillar of Islam, obligatory for every sane, adult Muslim who is physically able to fast.' },
+      { externalId: 'maktab-4-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'During the Hijrah, who accompanied Rasulullah SAW on the journey to Madinah?', options: ['Ali RA', 'Abu Bakr RA', 'Umar RA', 'Uthman RA'], correctAnswer: 'Abu Bakr RA', explanation: 'Rasulullah SAW made the blessed migration (Hijrah) to Madinah together with his closest companion Abu Bakr al-Siddiq RA.' },
+      { externalId: 'maktab-4-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'What was the name of the treaty that ended the Battle of Al-Ahzab (Trench)?', options: ['Treaty of Hudaybiyah', 'No treaty — the enemy retreated', 'Treaty of Madinah', 'Treaty of Umar'], correctAnswer: 'No treaty — the enemy retreated', explanation: 'The Battle of Al-Ahzab (Trench) ended when Allah sent a fierce storm and angels that caused confusion among the enemy coalition, forcing them to retreat.' },
+      { externalId: 'maktab-4-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'What special bond did Rasulullah SAW establish between the Muhajirun and Ansar in Madinah?', options: ['A trade partnership', 'Brotherhood (Muakhah)', 'A military alliance', 'A council of elders'], correctAnswer: 'Brotherhood (Muakhah)', explanation: 'Rasulullah SAW established a bond of brotherhood (Muakhah) between the Muhajirun (migrants from Makkah) and the Ansar (helpers of Madinah), pairing them as brothers.' },
+    ],
+    [
+      { externalId: 'maktab-4-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'Who was Prophet Yusuf AS sold to as a slave?', options: ['A Roman merchant', 'An Egyptian caravan', 'The king of Egypt', 'Laban the shepherd'], correctAnswer: 'An Egyptian caravan', explanation: 'After Yusuf AS was thrown into the well by his brothers, he was found by a travelling caravan and sold as a slave, eventually ending up in Egypt.' },
+      { externalId: 'maktab-4-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What role did Yusuf AS eventually hold in Egypt?', options: ['Army general', 'Treasurer and minister of grain', 'King of Egypt', 'High priest'], correctAnswer: 'Treasurer and minister of grain', explanation: 'After interpreting Pharaoh\'s dream, Yusuf AS was appointed minister of the treasury and grain stores of Egypt, a position through which he saved the country from famine.' },
+      { externalId: 'maktab-4-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'Which of the following is a major sign of the Day of Judgment?', options: ['Death of the righteous', 'The appearance of the Dajjal', 'An earthquake', 'A flood'], correctAnswer: 'The appearance of the Dajjal', explanation: 'The appearance of the Dajjal (a great deceiver) is one of the ten major signs that will precede the Day of Judgment, as mentioned in numerous authentic hadiths.' },
+      { externalId: 'maktab-4-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What is the most powerful protection against Shaytan according to the hadith?', options: ['Staying indoors', 'Reciting Ayat al-Kursi', 'Avoiding all technology', 'Reciting Surah Al-Baqarah in the home'], correctAnswer: 'Reciting Surah Al-Baqarah in the home', explanation: 'Rasulullah SAW said: "Do not make your houses like graves. Shaytan flees from the house in which Surah Al-Baqarah is recited." (Sahih Muslim).' },
+      { externalId: 'maktab-4-ca-q5', type: 'TRUE_FALSE', questionText: 'You must seek permission before entering a room where someone may not expect you.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Islam teaches us to seek permission (isti\'dhan) before entering someone\'s private space, as mentioned in the Quran (24:27-28) and demonstrated by the Sunnah.' },
+      { externalId: 'maktab-4-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What does Rasulullah SAW say about the rights of a neighbour?', options: ['Only Muslim neighbours have rights', 'Neighbours have no special rights in Islam', 'Jibrail AS kept recommending the right of neighbours until Rasulullah SAW thought they would inherit', 'You only need to share food with neighbours on Eid'], correctAnswer: 'Jibrail AS kept recommending the right of neighbours until Rasulullah SAW thought they would inherit', explanation: 'Rasulullah SAW said: "Jibrail kept recommending the rights of the neighbour to me, until I thought he would be included as an heir." (Bukhari & Muslim).' },
+      { externalId: 'maktab-4-ca-q7', type: 'FILL_BLANK', questionText: 'The Muhajirun were the companions who migrated from Makkah, while the _____ were the helpers of Madinah.', options: null, correctAnswer: 'Ansar', explanation: 'The Ansar ("Helpers") were the Muslims of Madinah — from the Aws and Khazraj tribes — who welcomed and supported the Muhajirun who migrated from Makkah.' },
+    ],
+  );
   console.log('🎉 Maktab Coursebook 4 seed complete!');
   console.log('   Units: 14 focused units');
   console.log(`   Quiz questions: ${quizData.length}`);

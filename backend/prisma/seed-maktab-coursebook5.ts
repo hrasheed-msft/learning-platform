@@ -1,4 +1,5 @@
-﻿import { PrismaClient } from '@prisma/client';
+﻿﻿import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
@@ -2634,6 +2635,37 @@ export async function seedMaktabCoursebook5() {
   }
   console.log(`✅ Created ${arabicTermsData.length} Arabic terms`);
 
+  
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-5-midyear-assessment',
+    'maktab-5-completion-assessment',
+    'Mid-Year Assessment — Coursebook 5',
+    'Completion Assessment — Coursebook 5',
+    11, // firstHalfLastOrderIndex: unit 11 (Sirah — Farewell Hajj)
+    22, // originalMaxOrderIndex: unit 22
+    [
+      { externalId: 'maktab-5-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is the Fardh (obligatory) acts of Hajj?', options: ['Tawaf, Sa\'i, and Wuquf at Arafah', 'Tawaf and wearing Ihram', 'Wuquf at Arafah only', 'Sa\'i and stoning the Jamarat'], correctAnswer: 'Tawaf, Sa\'i, and Wuquf at Arafah', explanation: 'The three fardh of Hajj are: (1) Ihram (entering the state of consecration), (2) Wuquf at Arafah (standing on the plain of Arafah), and (3) Tawaf al-Ziyarah (circling the Kabah after Arafah).' },
+      { externalId: 'maktab-5-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'According to the hadith, what are the three signs of a munafiq?', options: ['He lies, steals and cheats', 'When he speaks he lies, when he promises he breaks it, when he is trusted he betrays', 'He misses salah, zakah, and hajj', 'He disobeys parents, neighbours, and rulers'], correctAnswer: 'When he speaks he lies, when he promises he breaks it, when he is trusted he betrays', explanation: 'Rasulullah SAW identified three signs of a hypocrite: lying when speaking, breaking promises, and betraying trusts. (Bukhari & Muslim).' },
+      { externalId: 'maktab-5-my-q3', type: 'TRUE_FALSE', questionText: 'Intoxicants (khamr) are forbidden in Islam even in small amounts.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'All intoxicants are haram regardless of the quantity. Rasulullah SAW said: "Whatever intoxicates in large amounts, a small amount of it is also haram." (Abu Dawud, Tirmidhi).' },
+      { externalId: 'maktab-5-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'What was the significance of the Treaty of Hudaybiyah?', options: ['It was a military victory', 'It seemed like a defeat but was a great long-term victory for Islam', 'It gave Muslims control of Makkah', 'It ended the Battle of Badr'], correctAnswer: 'It seemed like a defeat but was a great long-term victory for Islam', explanation: 'The Treaty of Hudaybiyah (6 AH) appeared unfavourable to the Muslims, but Allah called it a "manifest victory" (Quran 48:1). It led to unprecedented growth of Islam.' },
+      { externalId: 'maktab-5-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'When was the Conquest of Makkah (Fath Makkah)?', options: ['6 AH', '8 AH', '10 AH', '12 AH'], correctAnswer: '8 AH', explanation: 'The Conquest of Makkah (Fath al-Makkah) occurred in Ramadan 8 AH (630 CE). Rasulullah SAW entered Makkah peacefully with 10,000 companions and declared a general amnesty.' },
+      { externalId: 'maktab-5-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'What key message did Rasulullah SAW deliver in his Farewell Sermon (Khutbat al-Wada)?', options: ['Instructions about trade only', 'That all Muslims are equal and have rights over each other', 'Rules of Hajj only', 'The names of his successors'], correctAnswer: 'That all Muslims are equal and have rights over each other', explanation: 'In his Farewell Sermon during the Farewell Hajj, Rasulullah SAW emphasised the sanctity of life and property, equal rights, and the universal brotherhood of all Muslims.' },
+    ],
+    [
+      { externalId: 'maktab-5-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'Who was Prophet Musa AS sent to?', options: ['The people of Ad', 'Pharaoh and the Israelites in Egypt', 'The people of Arabia', 'The Romans'], correctAnswer: 'Pharaoh and the Israelites in Egypt', explanation: 'Musa AS (Moses) was sent as a prophet to Pharaoh (Firaun) and the oppressed Children of Israel (Bani Israil) in Egypt.' },
+      { externalId: 'maktab-5-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What is the Islamic belief about Prophet Isa AS?', options: ['He was the son of God', 'He was crucified and died', 'He was a prophet created without a father by Allah\'s command', 'He started a new religion'], correctAnswer: 'He was a prophet created without a father by Allah\'s command', explanation: 'Isa AS (Jesus) was born miraculously to the Virgin Maryam by Allah\'s command ("Be!" — and he was). He was a prophet of Allah, not divine. He was not crucified; Allah raised him up.' },
+      { externalId: 'maktab-5-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'What is the punishment in the grave called?', options: ['Barzakh', 'Azab al-Qabr', 'Sirat al-Mustaqim', 'Yawm al-Hisab'], correctAnswer: 'Azab al-Qabr', explanation: 'Azab al-Qabr refers to the punishment of the grave — a reality for those who died in sin. It occurs in the barzakh (intermediate realm between death and resurrection).' },
+      { externalId: 'maktab-5-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What does qadr (divine decree) mean?', options: ['The belief in angels', 'The belief that Allah has knowledge of and control over all things', 'The belief in revealed books', 'The belief in prophets'], correctAnswer: 'The belief that Allah has knowledge of and control over all things', explanation: 'Qadr is the belief that Allah has complete knowledge of all things past, present, and future, and that everything occurs by His will and decree. It is the sixth pillar of iman.' },
+      { externalId: 'maktab-5-ca-q5', type: 'TRUE_FALSE', questionText: 'Maintaining family ties (silat al-rahim) is an Islamic obligation.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Rasulullah SAW emphasised the importance of silat al-rahim (maintaining family ties). Cutting family ties is a major sin, and keeping them is a means of barakah and long life.' },
+      { externalId: 'maktab-5-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is the Islamic ruling on consulting (mashwarah) in community matters?', options: ['It is forbidden (haram)', 'It is a confirmed Sunnah highly recommended by Allah in the Quran', 'It is only for rulers', 'It has no basis in Islam'], correctAnswer: 'It is a confirmed Sunnah highly recommended by Allah in the Quran', explanation: 'Allah commanded mutual consultation in Quran (42:38) and Rasulullah SAW regularly consulted his companions on important matters, making mashwarah a key Islamic principle.' },
+      { externalId: 'maktab-5-ca-q7', type: 'FILL_BLANK', questionText: 'The plain outside Makkah where pilgrims must stand during Hajj is called _____.', options: null, correctAnswer: 'Arafah', explanation: 'Wuquf at Arafah (standing on the plain of Arafah on the 9th of Dhul Hijjah) is the most important pillar of Hajj. Rasulullah SAW said: "Hajj is Arafah." (Tirmidhi).' },
+    ],
+  );
   console.log('\\n🎉 Maktab Coursebook 5 seed complete!');
   console.log('   Course: Maktab Coursebook 5');
   console.log('   Units: 22 focused units (was 7 broad units)');

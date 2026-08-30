@@ -1,16 +1,14 @@
-/**
+﻿﻿/**
  * Seed file for Maktab Coursebook 7 (CB7) — Age 12–13
  * 14 focused single-topic units
  */
 
 import { PrismaClient } from '@prisma/client';
+import { seedMaktabAssessments } from './helpers/maktab-assessment';
 
 const prisma = new PrismaClient();
 
 export async function seedMaktabCoursebook7() {
-  // Demo child (not applicable in this seed)
-  const demoChild: { id: string } | null = null;
-
   // Course upsert
   const course = await prisma.course.upsert({
     where: { slug: 'maktab-coursebook-7' },
@@ -236,7 +234,7 @@ export async function seedMaktabCoursebook7() {
   const unit8 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-tarikh-zakariyya-yahya' } },
     update: { title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8 },
-    create: { courseId: course.id, slug: 'maktab-7-tarikh-zakariyya-yahya', title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8 },
+      create: { courseId: course.id, slug: 'maktab-7-tarikh-zakariyya-yahya', title: 'T\u0101r\u012bkh \u2014 Prophets Zakariyy\u0101 & Ya\u1e25y\u0101 \u02bfalayhim al-sal\u0101m', description: 'The story of Zakariyya\'s du\'a, the miraculous birth of Yahya, and their lessons.', content: unit8Content, orderIndex: 8 },
   });
 
   // ─── UNIT 9 ─────────────────────────────────────────────────────────────────
@@ -262,7 +260,7 @@ export async function seedMaktabCoursebook7() {
   const unit9 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-tarikh-abbasids' } },
     update: { title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9 },
-    create: { courseId: course.id, slug: 'maktab-7-tarikh-abbasids', title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9 },
+      create: { courseId: course.id, slug: 'maktab-7-tarikh-abbasids', title: 'T\u0101r\u012bkh \u2014 The Abbasid Caliphate', description: 'Rise of the Abbasids, Baghdad, the Golden Age of Islam, and the Mongol invasion.', content: unit9Content, orderIndex: 9 },
   });
 
   // ─── UNIT 10 ────────────────────────────────────────────────────────────────
@@ -288,7 +286,7 @@ export async function seedMaktabCoursebook7() {
   const unit10 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-aqaid-qadar' } },
     update: { title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10 },
-    create: { courseId: course.id, slug: 'maktab-7-aqaid-qadar', title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10 },
+      create: { courseId: course.id, slug: 'maktab-7-aqaid-qadar', title: 'Aq\u0101\'id \u2014 Qadar (Divine Decree)', description: 'The four aspects of qadar, free will, and the correct response to calamity.', content: unit10Content, orderIndex: 10 },
   });
 
   // ─── UNIT 11 ────────────────────────────────────────────────────────────────
@@ -312,7 +310,7 @@ export async function seedMaktabCoursebook7() {
   const unit11 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-aqaid-akhirah-barzakh' } },
     update: { title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11 },
-    create: { courseId: course.id, slug: 'maktab-7-aqaid-akhirah-barzakh', title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11 },
+      create: { courseId: course.id, slug: 'maktab-7-aqaid-akhirah-barzakh', title: 'Aq\u0101\'id \u2014 Life After Death & Barzakh', description: 'The stages after death: barzakh, questioning in the grave, resurrection, and the final abode.', content: unit11Content, orderIndex: 11 },
   });
 
   // ─── UNIT 12 ────────────────────────────────────────────────────────────────
@@ -339,7 +337,7 @@ export async function seedMaktabCoursebook7() {
   const unit12 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-akhlaq-time-knowledge' } },
     update: { title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12 },
-    create: { courseId: course.id, slug: 'maktab-7-akhlaq-time-knowledge', title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12 },
+      create: { courseId: course.id, slug: 'maktab-7-akhlaq-time-knowledge', title: 'Akhl\u0101q \u2014 Value of Time & Pursuit of Knowledge', description: 'Hadith on five before five, duties of a student of knowledge, and etiquette with teachers.', content: unit12Content, orderIndex: 12 },
   });
 
   // ─── UNIT 13 ────────────────────────────────────────────────────────────────
@@ -367,7 +365,7 @@ export async function seedMaktabCoursebook7() {
   const unit13 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-akhlaq-rumours-salawat' } },
     update: { title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13 },
-    create: { courseId: course.id, slug: 'maktab-7-akhlaq-rumours-salawat', title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13 },
+      create: { courseId: course.id, slug: 'maktab-7-akhlaq-rumours-salawat', title: 'Akhl\u0101q \u2014 Avoiding Rumours & Sending \u1e62alaw\u0101t', description: 'Consequences of gossip, practical steps to purify speech, and the virtue of salawat.', content: unit13Content, orderIndex: 13 },
   });
 
   // ─── UNIT 14 ────────────────────────────────────────────────────────────────
@@ -404,7 +402,7 @@ export async function seedMaktabCoursebook7() {
   const unit14 = await prisma.unit.upsert({
     where: { courseId_slug: { courseId: course.id, slug: 'maktab-7-adab-social-conduct' } },
     update: { title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14 },
-    create: { courseId: course.id, slug: 'maktab-7-adab-social-conduct', title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14 },
+      create: { courseId: course.id, slug: 'maktab-7-adab-social-conduct', title: '\u0100d\u0101b \u2014 Social Interaction & Public Conduct', description: 'Islamic manners in gatherings, with elders, with youngsters, in public, and online.', content: unit14Content, orderIndex: 14 },
   });
 
   // ─── QUIZ DATA ───────────────────────────────────────────────────────────────
@@ -1334,23 +1332,45 @@ export async function seedMaktabCoursebook7() {
     });
   }
 
-  // Demo progress
-  if (demoChild) {
-    await prisma.unitProgress.upsert({
-      where: { userId_unitId: { userId: demoChild.id, unitId: unit1.id } },
-      update: { completed: true, score: 88 },
-      create: { userId: demoChild.id, unitId: unit1.id, completed: true, score: 88 },
-    });
-  }
-
   console.log('CB7 seeded: 14 units, 84 questions, 27 flashcards, 18 Arabic terms');
   console.log('Units: Advanced Salah, Zakah & Inheritance, I\'tikaf & Udhiyah, Ahadith (Time/Knowledge), Ahadith (Rumours), Shamail, \'Umar, Zakariyya & Yahya, Abbasids, Qadar, Akhirah & Barzakh, Akhlaq (Time/Knowledge), Akhlaq (Rumours/Salawat), Adab (Social Conduct)');
+
+  // ── ASSESSMENTS ─────────────────────────────────────────────────────────
+  console.log('');
+  console.log('📝 Adding assessments...');
+  await seedMaktabAssessments(
+    prisma,
+    course.id,
+    'maktab-7-midyear-assessment',
+    'maktab-7-completion-assessment',
+    'Mid-Year Assessment — Coursebook 7',
+    'Completion Assessment — Coursebook 7',
+    7, // firstHalfLastOrderIndex: unit 7 (Sirah — Umar ibn al-Khattab RA)
+    14, // originalMaxOrderIndex: unit 14 (Adab — Social Interaction & Public Conduct)
+    [
+      { externalId: 'maktab-7-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'What is a Makruh (disliked) act in salah?', options: ['Reciting Surah al-Fatihah', 'Performing ruku', 'Fidgeting or looking around unnecessarily', 'Reciting after the imam silently'], correctAnswer: 'Fidgeting or looking around unnecessarily', explanation: 'Makruhat (disliked acts) in salah include unnecessary movement, looking around, yawning, and not maintaining proper khushu (concentration). These do not invalidate salah but reduce its reward.' },
+      { externalId: 'maktab-7-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'What is the nisab for zakah on gold?', options: ['52.5 grams', '87.5 grams', '100 grams', '200 grams'], correctAnswer: '87.5 grams', explanation: 'The nisab for gold is 87.5 grams (7.5 tola). If one possesses this amount or more for a full lunar year, zakah at 2.5% becomes obligatory.' },
+      { externalId: 'maktab-7-my-q3', type: 'TRUE_FALSE', questionText: 'I\'tikaf (spiritual retreat) in the last ten nights of Ramadan is a confirmed Sunnah of Rasulullah SAW.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Rasulullah SAW regularly performed i\'tikaf in the last ten nights of Ramadan, especially in search of Laylatul Qadr. It is a confirmed Sunnah (Sunnah Muakkadah).' },
+      { externalId: 'maktab-7-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'Which hadith warns about wasting time?', options: ['Actions are by intentions', 'Two blessings people are deceived about: health and free time', 'Seek knowledge from the cradle to the grave', 'The world is the prison of the believer'], correctAnswer: 'Two blessings people are deceived about: health and free time', explanation: 'Rasulullah SAW said: "There are two blessings in which many people are at a loss: health and free time." (Bukhari). This teaches us to value our time and health.' },
+      { externalId: 'maktab-7-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'What was Umar ibn al-Khattab RA famous for before accepting Islam?', options: ['Being a great trader', 'His extraordinary strength and fierce opposition to Islam', 'Being a scholar', 'His close friendship with Abu Bakr RA'], correctAnswer: 'His extraordinary strength and fierce opposition to Islam', explanation: 'Umar RA was known for his physical strength, courage, and initially fierce opposition to Islam. His conversion was a turning point that significantly strengthened the Muslim community.' },
+      { externalId: 'maktab-7-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'What is the Sunnah description of the Prophet\'s hair?', options: ['Completely shaved', 'Long past the shoulders', 'Between the earlobes and shoulders', 'Tightly curled short hair'], correctAnswer: 'Between the earlobes and shoulders', explanation: 'The Shamail records that Rasulullah SAW\'s hair varied — sometimes to his earlobes, sometimes to his shoulders. He kept his hair clean and well-groomed.' },
+    ],
+    [
+      { externalId: 'maktab-7-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'What miracle was Zakariyya AS granted by Allah?', options: ['The ability to fly', 'A son (Yahya AS) born to his elderly wife who had been barren', 'The ability to speak to animals', 'Immunity to fire'], correctAnswer: 'A son (Yahya AS) born to his elderly wife who had been barren', explanation: 'Zakariyya AS made du\'a to Allah for a son in his old age, and Allah granted him Yahya (John the Baptist) — a son born miraculously to his elderly and barren wife.' },
+      { externalId: 'maktab-7-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'Which dynasty succeeded the Umayyad Caliphate?', options: ['The Ottoman Empire', 'The Fatimid Caliphate', 'The Abbasid Caliphate', 'The Mughal Empire'], correctAnswer: 'The Abbasid Caliphate', explanation: 'The Abbasid Caliphate (750–1258 CE) succeeded the Umayyads and was a golden age of Islamic civilisation, with Baghdad as its centre of learning, culture and scholarship.' },
+      { externalId: 'maktab-7-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'What are the four aspects of iman in Qadar?', options: ['Believing Allah knows all, wrote all, willed all, and created all', 'Believing in Angels, Books, Prophets, and the Last Day', 'Accepting all tests with patience', 'Trusting in fate without making any effort'], correctAnswer: 'Believing Allah knows all, wrote all, willed all, and created all', explanation: 'The four aspects of Qadar are: (1) Allah\'s complete knowledge (\'Ilm), (2) His writing everything in the Lawh al-Mahfuz (Kitabah), (3) His will (Iradah), and (4) His creating all things (Khalq).' },
+      { externalId: 'maktab-7-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'What is Barzakh?', options: ['The Bridge of Sirat', 'The realm between death and resurrection', 'A type of dhikr', 'A form of fasting'], correctAnswer: 'The realm between death and resurrection', explanation: 'Barzakh is the intermediate realm that souls inhabit after death and before the Day of Resurrection. Life in Barzakh may involve ni\'mah (blessing) or adhab (punishment) depending on one\'s deeds.' },
+      { externalId: 'maktab-7-ca-q5', type: 'TRUE_FALSE', questionText: 'Spreading rumours and unverified news is forbidden in Islam.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Allah commands: "O believers, if an evildoer brings you news, verify it" (Quran 49:6). Spreading unverified information that harms others is haram and a characteristic warned against in Islam.' },
+      { externalId: 'maktab-7-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'What does "sending salawat" (durood) on Rasulullah SAW mean?', options: ['Giving charity in his name', 'Reciting "Allahumma salli ala Muhammad" and its variants', 'Visiting his grave', 'Writing his name in Arabic'], correctAnswer: 'Reciting "Allahumma salli ala Muhammad" and its variants', explanation: 'Sending salawat means reciting blessings upon Rasulullah SAW. Allah Himself sends salawat, and commands the believers to do so too (Quran 33:56). It brings immense spiritual rewards.' },
+      { externalId: 'maktab-7-ca-q7', type: 'FILL_BLANK', questionText: 'Udhiyah (Qurbani) is performed on the 10th, 11th, and 12th of the Islamic month of _____.', options: null, correctAnswer: 'Dhul Hijjah', explanation: 'Udhiyah (the sacrificing of an animal) is performed on the days of Eid al-Adha: 10th, 11th, and 12th of Dhul Hijjah, in remembrance of Ibrahim AS\'s willingness to sacrifice his son.' },
+    ],
+  );
+  console.log('Maktab Coursebook 7 seed completed successfully.');
 }
 
 async function main() {
   try {
     await seedMaktabCoursebook7();
-    console.log('Maktab Coursebook 7 seed completed successfully.');
   } catch (error) {
     console.error('Error seeding Maktab Coursebook 7:', error);
     throw error;

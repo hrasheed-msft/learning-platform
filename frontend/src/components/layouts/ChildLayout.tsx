@@ -41,6 +41,10 @@ export default function ChildLayout() {
   const { isChildSession } = useChildAuthStore();
   const { isParentInStudentMode, setParentInStudentMode, selectedMember, selectMember } = useFamilyStore();
 
+  // Child-auth member takes priority; fall back to family store's selected member
+  // when a parent navigates to student mode (childMember is null in that case).
+  const activeMember = member ?? selectedMember;
+
   // Parent is previewing when they arrived via parent dashboard (not SelectLearner student-mode pick)
   const isParentViewing = isParentAuth && !isChildSession && !isParentInStudentMode;
 
@@ -127,13 +131,13 @@ export default function ChildLayout() {
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-secondary-100 rounded-full flex items-center justify-center">
               <span className="text-lg font-semibold text-secondary-600">
-                {member?.name?.charAt(0).toUpperCase()}
+                {activeMember?.name?.charAt(0).toUpperCase()}
               </span>
             </div>
             <div>
-              <p className="font-medium text-gray-800">{member?.name || 'Student'}</p>
+              <p className="font-medium text-gray-800">{activeMember?.name || 'Student'}</p>
               <p className="text-sm text-gray-500 capitalize">
-                {member?.ageCategory ? formatAgeCategory(member.ageCategory) : 'Student'}
+                {activeMember?.ageCategory ? formatAgeCategory(activeMember.ageCategory) : 'Student'}
               </p>
             </div>
           </div>
@@ -204,11 +208,11 @@ export default function ChildLayout() {
           {/* Student badge */}
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
-              <p className="font-medium text-gray-800">{member?.name}</p>
+              <p className="font-medium text-gray-800">{activeMember?.name}</p>
             </div>
             <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
               <span className="text-primary-700 font-semibold">
-                {member?.name?.charAt(0).toUpperCase()}
+                {activeMember?.name?.charAt(0).toUpperCase()}
               </span>
             </div>
           </div>
@@ -222,7 +226,7 @@ export default function ChildLayout() {
               <div className="flex items-center gap-2 text-amber-800">
                 <span>👁️</span>
                 <span className="font-medium">
-                  Parent preview — you're viewing {member?.name}'s dashboard
+                    Parent preview — you're viewing {activeMember?.name}'s dashboard
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
