@@ -256,7 +256,11 @@ export async function seedMaktabProgram() {
 }
 
 if (require.main === module) {
-  seedMaktabProgram()
+  // The program links the Nūrāniyyah course, so a standalone run makes sure it exists first
+  // (idempotent upserts — safe when it has already been seeded).
+  import('./seed-nuraniyyah')
+    .then(({ seedNuraniyyahCourse }) => seedNuraniyyahCourse())
+    .then(() => seedMaktabProgram())
     .catch((e) => {
       console.error('❌ Maktab program seed failed:', e);
       process.exit(1);
