@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { seedMaktabFoundation1 } from './seed-maktab-foundation1';
 import { seedMaktabFoundation2 } from './seed-maktab-foundation2';
+import { seedNuraniyyahCourse } from './seed-nuraniyyah';
 import { seedMaktabCoursebook1 } from './seed-maktab-coursebook1';
 import { seedMaktabCoursebook2 } from './seed-maktab-coursebook2';
 import { seedMaktabCoursebook3 } from './seed-maktab-coursebook3';
@@ -2792,6 +2793,7 @@ async function main() {
   // Maktab Coursebooks
   await seedMaktabFoundation1();
   await seedMaktabFoundation2();
+  await seedNuraniyyahCourse();
   await seedMaktabCoursebook1();
   await seedMaktabCoursebook2();
   await seedMaktabCoursebook3();

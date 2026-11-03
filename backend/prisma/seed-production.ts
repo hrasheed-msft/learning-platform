@@ -7,6 +7,7 @@
  * Seeds included:
  *   1. Foundation 1 (course + units + flashcards + quizzes)
  *   2. Foundation 2 (course + units + flashcards + quizzes)
+ *   2b. Nūrāniyyah — Learn to Read the Qur'ān (course + units + terms + flashcards + quizzes + assessments)
  *   3. Quran Short Surahs / Juz Amma (course + units + vocab + flashcards, fetches from api.quran.com)
  *   4. Quran Longer Surahs (course + units + vocab + flashcards, fetches from api.quran.com)
  *   5. Weekend Path Tags (marks after-school-only units)
@@ -19,6 +20,7 @@
 
 import { seedMaktabFoundation1 } from './seed-maktab-foundation1';
 import { seedMaktabFoundation2 } from './seed-maktab-foundation2';
+import { seedNuraniyyahCourse } from './seed-nuraniyyah';
 import { seedQuranMemorizationCourse } from './seed-quran-memorization';
 import { seedQuranLongerSurahs } from './seed-quran-longer-surahs';
 import { seedWeekendPathTags } from './seed-weekend-path-tags';
@@ -37,6 +39,7 @@ async function main() {
   // 1. Foundation stages (new courses)
   await seedMaktabFoundation1();
   await seedMaktabFoundation2();
+  await seedNuraniyyahCourse();
 
   // 2. Short surahs / Juz Amma (fetches from API — may take a minute)
   await seedQuranMemorizationCourse();

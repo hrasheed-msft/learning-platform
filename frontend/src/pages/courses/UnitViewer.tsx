@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, CheckCircle, Loader2, SquareStack } from 'lucide-react';
 import { courseService } from '@/services/courseService';
 import { useUnitContent } from '@/hooks/useUnitContent';
+import { useWordAudio } from '@/hooks/useWordAudio';
 import { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
 import QuranAudioPlayer from '@/components/QuranAudioPlayer';
@@ -41,6 +42,9 @@ export default function UnitViewer() {
   const contentContainerRef = useRef<HTMLDivElement>(null);
 
   const { html: resolvedHtml, loading: contentLoading, error: contentError } = useUnitContent(unit?.content);
+
+  // Click-to-play pronunciation clips embedded in lesson HTML ([data-audio])
+  useWordAudio(contentContainerRef, !loading && !contentLoading && Boolean(resolvedHtml), resolvedHtml);
 
   // Reset ALL local state when navigating to a different unit
   useEffect(() => {

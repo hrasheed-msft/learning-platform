@@ -51,6 +51,7 @@ const COURSEBOOK_SEEDS = [
   { file: 'seed-maktab-coursebook8.ts', prefix: 'maktab-8' },
   { file: 'seed-maktab-foundation1.ts', prefix: 'maktab-f1' },
   { file: 'seed-maktab-foundation2.ts', prefix: 'maktab-f2' },
+  { file: 'seed-nuraniyyah.ts', prefix: 'nuraniyyah' },
   { file: 'seed-maktab-further-studies-nw.ts', prefix: 'maktab-fs' },
 ];
 
