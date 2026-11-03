@@ -36,6 +36,8 @@ const PROGRAM_DESCRIPTION =
 // and should only join from CB5 (stage 7) onwards.
 const QURAN_JUZ_AMMA_SLUG = 'quran-memorization-juz-amma';
 const QURAN_LONGER_SURAHS_SLUG = 'quran-memorization-longer-surahs';
+// Qur'ān reading primer (Nūrāniyyah) shared by both foundation stages.
+const NURANIYYAH_SLUG = 'nuraniyyah-qaidah';
 
 /** First stage number (CB5, ages 10-11) where Longer Surahs is age-appropriate. */
 const LONGER_SURAHS_MIN_STAGE = 7;
@@ -44,20 +46,20 @@ const STAGES: StageDefinition[] = [
   {
     stageNumber: 1,
     name: 'Foundation 1',
-    description: 'Foundation stage for ages 4–5 using the Maktab Foundation 1 course.',
+    description: 'Foundation stage for ages 4–5 using the Maktab Foundation 1 course and the Nūrāniyyah Qur\'ān reading course.',
     ageMin: 4,
     ageMax: 5,
     orderIndex: 0,
-    courseSlugs: ['maktab-foundation-1'],
+    courseSlugs: ['maktab-foundation-1', NURANIYYAH_SLUG],
   },
   {
     stageNumber: 2,
     name: 'Foundation 2',
-    description: 'Foundation stage for ages 5–6 using the Maktab Foundation 2 course.',
+    description: 'Foundation stage for ages 5–6 using the Maktab Foundation 2 course and the Nūrāniyyah Qur\'ān reading course.',
     ageMin: 5,
     ageMax: 6,
     orderIndex: 1,
-    courseSlugs: ['maktab-foundation-2'],
+    courseSlugs: ['maktab-foundation-2', NURANIYYAH_SLUG],
   },
   {
     stageNumber: 3,
@@ -254,7 +256,11 @@ export async function seedMaktabProgram() {
 }
 
 if (require.main === module) {
-  seedMaktabProgram()
+  // The program links the Nūrāniyyah course, so a standalone run makes sure it exists first
+  // (idempotent upserts — safe when it has already been seeded).
+  import('./seed-nuraniyyah')
+    .then(({ seedNuraniyyahCourse }) => seedNuraniyyahCourse())
+    .then(() => seedMaktabProgram())
     .catch((e) => {
       console.error('❌ Maktab program seed failed:', e);
       process.exit(1);

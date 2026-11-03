@@ -13,9 +13,9 @@ export type AssessmentQuestion = {
  * Adds a Mid-Year Assessment and Completion Assessment unit to a Maktab course.
  *
  * Idempotent: safe to call on every seed run. On first call (when mid-year unit
- * does not yet exist), shifts all second-half units up by 1 position using a
- * single atomic PostgreSQL UPDATE — safe with @@unique([courseId, orderIndex])
- * because PostgreSQL evaluates uniqueness after the full statement, not per-row.
+ * does not yet exist), shifts all second-half units up by 1 position (inside the
+ * transaction, via negative values so the @@unique([courseId, orderIndex]) index
+ * is never violated mid-update).
  * On subsequent calls the units are already at their final positions and the
  * upserts are no-ops.
  *
@@ -70,13 +70,18 @@ export async function seedMaktabAssessments(
     });
 
     if (!existing) {
-      // Single atomic SQL UPDATE — PostgreSQL checks the unique constraint
-      // after all rows are processed, so no intermediate violations occur.
+      // Shift in two steps via negative values: PostgreSQL checks a non-deferrable
+      // unique index row by row, so a direct "+ 1" can collide with the next row.
       await tx.$executeRawUnsafe(
-        `UPDATE units SET order_index = order_index + 1
-         WHERE course_id = $1 AND order_index > $2`,
+        `UPDATE units SET "orderIndex" = -("orderIndex" + 1)
+         WHERE "courseId" = $1 AND "orderIndex" > $2`,
         courseId,
         firstHalfLastOrderIndex,
+      );
+      await tx.$executeRawUnsafe(
+        `UPDATE units SET "orderIndex" = -"orderIndex"
+         WHERE "courseId" = $1 AND "orderIndex" < 0`,
+        courseId,
       );
     }
 

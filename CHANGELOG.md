@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Nūrāniyyah — Learn to Read the Qur'ān course (`seed-nuraniyyah.ts`): 17 lessons plus a tajweed summary based on the Nuraniyah primer, with Arabic text, a pronunciation guide for every example, Qur'ānic recitation audio, flashcards, quizzes and mid-year/completion assessments. Linked to Maktab Foundation 1 and Foundation 2.
+- Tap-to-hear pronunciation clips (208 words and letters) cut from the Qaidah Nuraniyyah CD, a `useWordAudio` hook for `[data-audio]` elements in lessons, and `tools/nuraniyyah-audio` to split and match the CD tracks.
 - Initial project structure for frontend (React + Vite + TypeScript)
 - Initial project structure for backend (Node.js + Express + TypeScript)
 - Database schema with Prisma ORM
