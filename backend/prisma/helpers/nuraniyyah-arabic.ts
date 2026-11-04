@@ -19,8 +19,10 @@ const DAGGER_ALIF = '\u0670';
 const ALIF_WASLA = '\u0671';
 const TATWEEL = '\u0640';
 const MADDAH_ABOVE = '\u0653';
+const SMALL_WAW = '\u06E5';
+const SMALL_YA = '\u06E6';
 
-const MARKS = new Set([FATHA, DAMMA, KASRA, FATHATAN, DAMMATAN, KASRATAN, SHADDA, SUKUN, DAGGER_ALIF, MADDAH_ABOVE]);
+const MARKS = new Set([FATHA, DAMMA, KASRA, FATHATAN, DAMMATAN, KASRATAN, SHADDA, SUKUN, DAGGER_ALIF, MADDAH_ABOVE, SMALL_WAW, SMALL_YA]);
 
 const CONSONANTS: Record<string, string> = {
   'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'ḥ', 'خ': 'kh', 'د': 'd', 'ذ': 'dh',
@@ -161,6 +163,11 @@ export function transliterate(text: string): string {
     } else if (shortVowel) {
       out += shortVowel;
       lastVowel = shortVowel;
+      // Small yā / small wāw written above the letter lengthen kasrah / ḍammah
+      if (marks.has(SMALL_YA) || marks.has(SMALL_WAW)) {
+        out = out.slice(0, -1) + (marks.has(SMALL_YA) ? 'ī' : 'ū');
+        lastVowel = null;
+      }
     } else {
       lastVowel = null;
     }
@@ -220,6 +227,8 @@ export const NON_CONNECTING = new Set(['ا', 'د', 'ذ', 'ر', 'ز', 'و', 'ء']
 const LETTER_NAMES: Record<string, string> = {
   ...Object.fromEntries(LETTERS.map((l) => [l.ch, l.name])),
   'أ': 'alif',
+  'ؤ': 'wāw with hamzah',
+  'ئ': 'yāʾ with hamzah',
   'ى': 'yāʾ',
   'ة': 'tāʾ marbūṭah',
 };
