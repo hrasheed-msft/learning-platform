@@ -1,5 +1,4 @@
 import { transliterate } from './nuraniyyah-arabic';
-import { WORD_AUDIO } from './nuraniyyah-audio';
 
 /** Shared types and HTML builders for the Nūrāniyyah course content. */
 
@@ -47,11 +46,15 @@ export interface LessonDef {
 }
 
 /** Item with its pronunciation auto-generated, or supplied for text that needs a manual guide. */
-export function item(ar: string, tr?: string): PracticeItem {
-  return { ar, tr: tr ?? transliterate(ar), audio: WORD_AUDIO[ar] };
+export function item(ar: string, tr?: string, audio?: string): PracticeItem {
+  return { ar, tr: tr ?? transliterate(ar), audio };
 }
 
-export const items = (list: string[]): PracticeItem[] => list.map((ar) => item(ar));
+/** URL of a clip cut from the CD: cd is the CD lesson number, clip the 0-based position in that track. */
+export const clipUrl = (cd: number, clip: number): string =>
+  `/audio/nuraniyyah/cd${String(cd).padStart(2, '0')}-${String(clip + 1).padStart(3, '0')}.mp3`;
+
+export const items = (list: string[]): PracticeItem[] => list.map((a) => item(a));
 
 /** "ʾab" → "ab": syllable grids drop the hamzah carried by the alif. */
 export const stripHamza = (tr: string) => tr.replace(/ʾ/g, '');

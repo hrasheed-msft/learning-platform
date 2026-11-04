@@ -1,33 +1,33 @@
 import { PrismaClient } from '@prisma/client';
 import { seedMaktabAssessments } from './helpers/maktab-assessment';
-import { LessonDef } from './helpers/nuraniyyah-html';
-import { LESSONS_PART_1 } from './helpers/nuraniyyah-lessons-1';
-import { LESSONS_PART_2 } from './helpers/nuraniyyah-lessons-2';
-import { LESSONS_PART_3 } from './helpers/nuraniyyah-lessons-3';
+import { NURANIYYAH_LESSONS } from './helpers/nuraniyyah-lessons';
 
 const prisma = new PrismaClient();
 
 /**
  * Nūrāniyyah — Learn to Read the Qur'ān (Nūrānī Qā'idah)
- * Source: "Nuraniyah" tajweed primer — 17 lessons plus a summary of tajweed rules.
+ * Source: the Nūrāniyyah primer, pages 6–19 (11 lessons), with the "Qaidah Nuraniyyah" CD.
  *
- * Every Arabic example carries a pronunciation guide (generated from the vowelled
- * Arabic by helpers/nuraniyyah-arabic.ts), and Qur'ānic examples include recitation
- * audio. The course is linked to Maktab Foundation 1 and Foundation 2 by seed-maktab-program.ts.
+ * Every Arabic example carries a pronunciation guide (generated from the vowelled Arabic by
+ * helpers/nuraniyyah-arabic.ts) and most can be tapped to hear the teacher on the CD
+ * (clips built by tools/nuraniyyah-audio). The course is linked to Maktab Foundation 1 and
+ * Foundation 2 by seed-maktab-program.ts.
+ *
+ * Re-running is safe: it also removes units left over from earlier editions of the course.
  *
  * Can be run independently: npx ts-node prisma/seed-nuraniyyah.ts
  */
 
 export const NURANIYYAH_COURSE_SLUG = 'nuraniyyah-qaidah';
 
-export const NURANIYYAH_LESSONS: LessonDef[] = [...LESSONS_PART_1, ...LESSONS_PART_2, ...LESSONS_PART_3];
+export { NURANIYYAH_LESSONS };
 
 const COURSE_TITLE = 'Nūrāniyyah — Learn to Read the Qur\'ān';
 const COURSE_DESCRIPTION =
-  'Learn to read the Qur\'ān with tajwīd using the Nūrāniyyah (Nūrānī Qā\'idah) method. ' +
-  'Seventeen step-by-step lessons take you from the 29 Arabic letters, short vowels and tanwīn, ' +
-  'through madd, sukūn, qalqalah, shaddah and ghunnah, to the rules of noon sākinah and mīm sākinah. ' +
-  'Every Arabic example comes with a pronunciation guide, and Qur\'ānic examples include audio recitation.';
+  'Learn to read the Qur\'ān with the Nūrāniyyah (Nūrānī Qā\'idah) method. ' +
+  'Eleven step-by-step lessons follow the book page by page: the 29 Arabic letters, joined letters, ' +
+  'the separately recited letters, short vowels, tanwīn, the small alif, madd and līn, and sukūn with qalqalah. ' +
+  'Every Arabic example comes with a pronunciation guide, and most can be tapped to hear the teacher.';
 
 export async function seedNuraniyyahCourse() {
   console.log('📖 Starting Nūrāniyyah course seed...');
@@ -54,9 +54,16 @@ export async function seedNuraniyyahCourse() {
 
   console.log('✅ Created course:', course.title);
 
-  // orderIndex is only set on create: seedMaktabAssessments below shifts the
-  // second half of the units, and re-writing the original index on a re-run
-  // would collide with the assessment units.
+  // Earlier editions had more lessons and their own assessments (re-created below). Remove those units, then
+  // park the rest on negative positions so the new order never collides with the old one.
+  const slugs = NURANIYYAH_LESSONS.map((l) => l.slug);
+  const removed = await prisma.unit.deleteMany({ where: { courseId: course.id, slug: { notIn: slugs } } });
+  if (removed.count > 0) console.log(`🧹 Removed ${removed.count} unit(s) from earlier editions`);
+  await prisma.$executeRawUnsafe(
+    `UPDATE units SET "orderIndex" = -("orderIndex" + 1) WHERE "courseId" = $1`,
+    course.id,
+  );
+
   for (const [index, lesson] of NURANIYYAH_LESSONS.entries()) {
     const unit = await prisma.unit.upsert({
       where: { courseId_slug: { courseId: course.id, slug: lesson.slug } },
@@ -72,6 +79,7 @@ export async function seedNuraniyyahCourse() {
         title: lesson.title,
         description: lesson.description,
         content: lesson.html,
+        orderIndex: index,
       },
     });
 
@@ -109,8 +117,10 @@ export async function seedNuraniyyahCourse() {
       where: { unitId: unit.id, orderIndex: { gte: lesson.cards.length } },
     });
 
+    const questionIds: string[] = [];
     for (const [qIndex, q] of lesson.quiz.entries()) {
       const externalId = `${lesson.slug}-q${qIndex + 1}`;
+      questionIds.push(externalId);
       const data = {
         type: q.type,
         questionText: q.questionText,
@@ -125,6 +135,9 @@ export async function seedNuraniyyahCourse() {
         update: { ...data, unitId: unit.id },
       });
     }
+    await prisma.question.deleteMany({
+      where: { unitId: unit.id, externalId: { notIn: questionIds } },
+    });
 
     console.log(`✅ Unit ${index + 1}: ${lesson.title} (${lesson.cards.length} flashcards, ${lesson.quiz.length} questions)`);
   }
@@ -138,25 +151,25 @@ export async function seedNuraniyyahCourse() {
     'nuraniyyah-completion-assessment',
     'Mid-Year Assessment — Nūrāniyyah',
     'Completion Assessment — Nūrāniyyah',
-    8, // firstHalfLastOrderIndex: unit 8 (Lesson 9 — Sukūn and Qalqalah)
-    17, // originalMaxOrderIndex: unit 17 (Summary of Tajweed Rules)
+    4, // firstHalfLastOrderIndex: unit 4 (Lesson 5 — Tanwīn)
+    10, // originalMaxOrderIndex: unit 10 (Lesson 11 — Exercises on the Sukūn)
     [
       { externalId: 'nuraniyyah-my-q1', type: 'MULTIPLE_CHOICE', questionText: 'How many letters are in the Nūrāniyyah alphabet (counting hamzah)?', options: ['26', '28', '29', '30'], correctAnswer: '29', explanation: 'The Nūrāniyyah teaches 29 letters: the 28 letters from alif to yāʾ plus the hamzah.' },
       { externalId: 'nuraniyyah-my-q2', type: 'MULTIPLE_CHOICE', questionText: 'Which of these letters is a heavy letter?', options: ['ب (bāʾ)', 'ت (tāʾ)', 'ص (ṣād)', 'س (sīn)'], correctAnswer: 'ص (ṣād)', explanation: 'The heavy letters are خ ص ض ط ظ غ ق — remembered as خُصَّ ضَغْطٍ قِظْ.' },
       { externalId: 'nuraniyyah-my-q3', type: 'MULTIPLE_CHOICE', questionText: 'How is بُ read?', options: ['ba', 'bi', 'bu', 'bū'], correctAnswer: 'bu', explanation: 'The ḍammah gives the short sound "u": bu.' },
       { externalId: 'nuraniyyah-my-q4', type: 'MULTIPLE_CHOICE', questionText: 'What does tanwīn add to the end of a word?', options: ['A noon sound', 'A long vowel', 'A resting sound', 'A doubled letter'], correctAnswer: 'A noon sound', explanation: 'Tanwīn is an implied noon: ban, bin, bun. It is pronounced but not written as a letter.' },
-      { externalId: 'nuraniyyah-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'For how many ḥarakāt is the natural madd stretched?', options: ['One', 'Two', 'Four', 'Six'], correctAnswer: 'Two', explanation: 'The natural madd (madd ṭabīʿī) is held for two ḥarakāt.' },
-      { externalId: 'nuraniyyah-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'Which five letters are the qalqalah (bouncing) letters?', options: ['ق ط ب ج د', 'ن م ل ر و', 'ء ه ع ح غ خ', 'ا و ي'], correctAnswer: 'ق ط ب ج د', explanation: 'The bouncing letters are qāf, ṭāʾ, bāʾ, jīm and dāl — قُطْبُ جَدٍّ.' },
+      { externalId: 'nuraniyyah-my-q5', type: 'MULTIPLE_CHOICE', questionText: 'Which letters do not join to the letter after them?', options: ['ا د ذ ر ز و', 'ب ت ث ن ي', 'ك ل م ن ه', 'ج ح خ ع غ'], correctAnswer: 'ا د ذ ر ز و', explanation: 'Alif, dāl, dhāl, rāʾ, zāy and wāw join to the letter before them but never to the one after.' },
+      { externalId: 'nuraniyyah-my-q6', type: 'MULTIPLE_CHOICE', questionText: 'How is الٓمٓ recited at the start of Sūrat al-Baqarah?', options: ['Alif Lām Mīm', 'Alam', 'Alm', 'Ilm'], correctAnswer: 'Alif Lām Mīm', explanation: 'The separately recited letters are read by their names, one at a time.' },
     ],
     [
-      { externalId: 'nuraniyyah-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'How do you begin reading ٱهْدِنَا (hamzat al-waṣl, third letter has a kasrah)?', options: ['ahdinā', 'ihdinā', 'uhdinā', 'hdinā'], correctAnswer: 'ihdinā', explanation: 'When the third letter does not have a ḍammah, the hamzat al-waṣl takes a kasrah.' },
-      { externalId: 'nuraniyyah-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'What does a shaddah show?', options: ['The letter is silent', 'The letter is doubled', 'The vowel is long', 'The letter bounces'], correctAnswer: 'The letter is doubled', explanation: 'A shaddah means the letter is doubled — one resting letter and one vowelled letter.' },
-      { externalId: 'nuraniyyah-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'Which letters need ghunnah when they carry a shaddah?', options: ['Nūn and mīm', 'Lām and rāʾ', 'Bāʾ and tāʾ', 'Qāf and kāf'], correctAnswer: 'Nūn and mīm', explanation: 'A nūn or mīm with shaddah must be read with a two-beat nasal ghunnah.' },
-      { externalId: 'nuraniyyah-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'How many ḥarakāt is madd lāzim stretched?', options: ['Two', 'Four', 'Five', 'Six'], correctAnswer: 'Six', explanation: 'Madd lāzim (a madd letter followed by a sukūn or shaddah) is stretched six ḥarakāt.' },
-      { externalId: 'nuraniyyah-ca-q5', type: 'MULTIPLE_CHOICE', questionText: 'A noon sākinah is followed by the letter ب. Which rule applies?', options: ['Show (iẓhār)', 'Merge (idghām)', 'Hide (ikhfāʾ)', 'Change (iqlāb)'], correctAnswer: 'Change (iqlāb)', explanation: 'Before bāʾ the noon changes into a mīm and is hidden with ghunnah.' },
-      { externalId: 'nuraniyyah-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'Which letters make you merge a noon sākinah (idghām)?', options: ['ي ر م ل و ن', 'ء ه ع ح غ خ', 'ت ث ج د ذ', 'ب only'], correctAnswer: 'ي ر م ل و ن', explanation: 'The merging letters are ي ر م ل و ن (yarmalūn).' },
-      { externalId: 'nuraniyyah-ca-q7', type: 'TRUE_FALSE', questionText: 'When a mīm sākinah is followed by a bāʾ, it is hidden with ghunnah.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Before bāʾ, the mīm sākinah is hidden softly with ghunnah (ikhfāʾ shafawī).' },
-      { externalId: 'nuraniyyah-ca-q8', type: 'MULTIPLE_CHOICE', questionText: 'How is الٓمٓ recited at the start of Sūrat al-Baqarah?', options: ['Alif Lām Mīm', 'Alam', 'Alm', 'Ilm'], correctAnswer: 'Alif Lām Mīm', explanation: 'The separately recited letters are read by their names, one at a time.' },
+      { externalId: 'nuraniyyah-ca-q1', type: 'MULTIPLE_CHOICE', questionText: 'For how many ḥarakāt is the natural madd stretched?', options: ['One', 'Two', 'Four', 'Six'], correctAnswer: 'Two', explanation: 'The natural madd (madd ṭabīʿī) is held for two ḥarakāt.' },
+      { externalId: 'nuraniyyah-ca-q2', type: 'MULTIPLE_CHOICE', questionText: 'Which ḥarakah must come before the madd letter wāw (و)?', options: ['Fatḥah', 'Kasrah', 'Ḍammah', 'Sukūn'], correctAnswer: 'Ḍammah', explanation: 'Alif follows a fatḥah, yāʾ follows a kasrah and wāw follows a ḍammah.' },
+      { externalId: 'nuraniyyah-ca-q3', type: 'MULTIPLE_CHOICE', questionText: 'How is بَيْ read?', options: ['bī', 'bay', 'bā', 'bi'], correctAnswer: 'bay', explanation: 'A yāʾ with sukūn after a fatḥah is a līn letter and gives the sound "ay".' },
+      { externalId: 'nuraniyyah-ca-q4', type: 'MULTIPLE_CHOICE', questionText: 'How is the letter with a small alif بَٰ read?', options: ['ba', 'bā', 'bi', 'bū'], correctAnswer: 'bā', explanation: 'A small alif after a fatḥah stretches the vowel: bā.' },
+      { externalId: 'nuraniyyah-ca-q5', type: 'MULTIPLE_CHOICE', questionText: 'What is a sukūn?', options: ['A long vowel', 'A resting sound', 'A doubled letter', 'A noon sound'], correctAnswer: 'A resting sound', explanation: 'The sukūn replaces the ḥarakah: the letter rests and is read without a vowel.' },
+      { externalId: 'nuraniyyah-ca-q6', type: 'MULTIPLE_CHOICE', questionText: 'Which five letters are the qalqalah (bouncing) letters?', options: ['ق ط ب ج د', 'ن م ل ر و', 'ء ه ع ح غ خ', 'ا و ي'], correctAnswer: 'ق ط ب ج د', explanation: 'The bouncing letters are qāf, ṭāʾ, bāʾ, jīm and dāl — قُطْبُ جَدٍّ.' },
+      { externalId: 'nuraniyyah-ca-q7', type: 'TRUE_FALSE', questionText: 'Līn is a weaker form of madd.', options: ['True', 'False'], correctAnswer: 'True', explanation: 'Līn letters (wāw or yāʾ with sukūn after a fatḥah) are softer than the madd letters.' },
+      { externalId: 'nuraniyyah-ca-q8', type: 'MULTIPLE_CHOICE', questionText: 'How is the word أَنْتَ read?', options: ['ʾanta', 'ʾanata', 'ʾunta', 'ʾinta'], correctAnswer: 'ʾanta', explanation: 'The nūn rests (sukūn), so the word is ʾan-ta.' },
     ],
   );
 
