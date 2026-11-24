@@ -1,0 +1,152 @@
+[
+ {
+  "name": "t-a",
+  "letter": "ت",
+  "vowel": "a"
+ },
+ {
+  "name": "t-i",
+  "letter": "ت",
+  "vowel": "i"
+ },
+ {
+  "name": "t-u",
+  "letter": "ت",
+  "vowel": "u"
+ },
+ {
+  "name": "th-a",
+  "letter": "ث",
+  "vowel": "a"
+ },
+ {
+  "name": "th-i",
+  "letter": "ث",
+  "vowel": "i"
+ },
+ {
+  "name": "th-u",
+  "letter": "ث",
+  "vowel": "u"
+ },
+ {
+  "name": "j-a",
+  "letter": "ج",
+  "vowel": "a"
+ },
+ {
+  "name": "j-i",
+  "letter": "ج",
+  "vowel": "i"
+ },
+ {
+  "name": "j-u",
+  "letter": "ج",
+  "vowel": "u"
+ },
+ {
+  "name": "h-a",
+  "letter": "ح",
+  "vowel": "a"
+ },
+ {
+  "name": "h-i",
+  "letter": "ح",
+  "vowel": "i"
+ },
+ {
+  "name": "h-u",
+  "letter": "ح",
+  "vowel": "u"
+ },
+ {
+  "name": "kh-a",
+  "letter": "خ",
+  "vowel": "a"
+ },
+ {
+  "name": "kh-i",
+  "letter": "خ",
+  "vowel": "i"
+ },
+ {
+  "name": "kh-u",
+  "letter": "خ",
+  "vowel": "u"
+ },
+ {
+  "name": "dh-a",
+  "letter": "ذ",
+  "vowel": "a"
+ },
+ {
+  "name": "dh-i",
+  "letter": "ذ",
+  "vowel": "i"
+ },
+ {
+  "name": "dh-u",
+  "letter": "ذ",
+  "vowel": "u"
+ },
+ {
+  "name": "r-a",
+  "letter": "ر",
+  "vowel": "a"
+ },
+ {
+  "name": "r-i",
+  "letter": "ر",
+  "vowel": "i"
+ },
+ {
+  "name": "r-u",
+  "letter": "ر",
+  "vowel": "u"
+ },
+ {
+  "name": "sh-a",
+  "letter": "ش",
+  "vowel": "a"
+ },
+ {
+  "name": "sh-i",
+  "letter": "ش",
+  "vowel": "i"
+ },
+ {
+  "name": "sh-u",
+  "letter": "ش",
+  "vowel": "u"
+ },
+ {
+  "name": "S-a",
+  "letter": "ص",
+  "vowel": "a"
+ },
+ {
+  "name": "S-i",
+  "letter": "ص",
+  "vowel": "i"
+ },
+ {
+  "name": "S-u",
+  "letter": "ص",
+  "vowel": "u"
+ },
+ {
+  "name": "Z-a",
+  "letter": "ظ",
+  "vowel": "a"
+ },
+ {
+  "name": "Z-i",
+  "letter": "ظ",
+  "vowel": "i"
+ },
+ {
+  "name": "Z-u",
+  "letter": "ظ",
+  "vowel": "u"
+ }
+]

@@ -18,6 +18,7 @@ const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('@/pages/auth/VerifyEmailPage'));
 const ChildLoginPage = lazy(() => import('@/pages/auth/ChildLoginPage'));
+const ListeningLab = lazy(() => import('@/pages/listening/ListeningLab'));
 
 // Learner Picker (keep eager — critical path after login)
 import SelectLearner from '@/pages/SelectLearner';
@@ -164,6 +165,9 @@ function App() {
     <Routes>
       {/* Child Login — standalone page, not inside AuthLayout */}
       <Route path="/child-login" element={<ChildLoginPage />} />
+
+      {/* Experimental pronunciation-listening prototype (not linked from the app) */}
+      <Route path="/listening-lab" element={<ListeningLab />} />
 
       {/* Learner Picker — requires auth but not an active member */}
       <Route

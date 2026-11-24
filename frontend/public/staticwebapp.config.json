@@ -30,6 +30,7 @@
   },
   "mimeTypes": {
     ".json": "application/json",
-    ".woff2": "font/woff2"
+    ".woff2": "font/woff2",
+    ".wav": "audio/wav"
   }
 }
