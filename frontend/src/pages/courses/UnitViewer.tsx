@@ -5,6 +5,7 @@ import { ArrowLeft, FileText, Headphones, BookOpen, ChevronRight, ChevronLeft, C
 import { courseService } from '@/services/courseService';
 import { useUnitContent } from '@/hooks/useUnitContent';
 import { useWordAudio } from '@/hooks/useWordAudio';
+import { useNuraniyyahTransliterations } from '@/hooks/useNuraniyyahTransliterations';
 import { type UnitAudioSyncState } from '@/components/UnitAudioButton';
 import SyncedTextContent from '@/components/SyncedTextContent';
 import QuranAudioPlayer from '@/components/QuranAudioPlayer';
@@ -45,6 +46,10 @@ export default function UnitViewer() {
 
   // Click-to-play pronunciation clips embedded in lesson HTML ([data-audio])
   useWordAudio(contentContainerRef, !loading && !contentLoading && Boolean(resolvedHtml), resolvedHtml);
+
+  // Pronunciation guides (.nq-tr) are hidden until the learner switches them on
+  const { showTransliterations, toggleTransliterations } = useNuraniyyahTransliterations();
+  const hasTransliterations = Boolean(resolvedHtml?.includes('nq-tr'));
 
   // Reset ALL local state when navigating to a different unit
   useEffect(() => {
@@ -476,8 +481,30 @@ export default function UnitViewer() {
                 display: block;
                 object-fit: contain;
               }
+              [data-transliterations='off'] .unit-content .nq-tr {
+                display: none;
+              }
             `}</style>
-            <div ref={contentContainerRef}>
+            {hasTransliterations && !contentLoading && (
+              <div className="flex justify-end mb-3">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={showTransliterations}
+                  onClick={toggleTransliterations}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`inline-block h-4 w-7 rounded-full p-0.5 transition-colors ${showTransliterations ? 'bg-primary-600' : 'bg-gray-300'}`}
+                  >
+                    <span className={`block h-3 w-3 rounded-full bg-white transition-transform ${showTransliterations ? 'translate-x-3' : ''}`} />
+                  </span>
+                  Show pronunciation guide
+                </button>
+              </div>
+            )}
+            <div ref={contentContainerRef} data-transliterations={showTransliterations ? 'on' : 'off'}>
               {contentLoading && (
                 <div className="animate-pulse space-y-3 py-2">
                   <div className="h-4 bg-gray-200 rounded w-3/4" />

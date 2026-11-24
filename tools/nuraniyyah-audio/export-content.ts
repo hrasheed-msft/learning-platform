@@ -9,7 +9,7 @@
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { spell } from '../../backend/prisma/helpers/nuraniyyah-arabic';
-import { EXERCISE_WORDS, L2_CELLS } from '../../backend/prisma/helpers/nuraniyyah-data';
+import { EXERCISE_WORDS, L2_CELLS, L9_EXTRA_WORDS } from '../../backend/prisma/helpers/nuraniyyah-data';
 import { NURANIYYAH_LESSONS } from '../../backend/prisma/helpers/nuraniyyah-lessons';
 
 const urls = new Set<string>();
@@ -19,7 +19,8 @@ for (const lesson of NURANIYYAH_LESSONS) {
 
 const content = {
   l2Cells: L2_CELLS.map((c) => ({ ar: c, spelled: spell(c) })),
-  words: EXERCISE_WORDS,
+  // the two extra reading examples on page 18 are read at the end of the same CD track
+  words: { ...EXERCISE_WORDS, 9: [...EXERCISE_WORDS[9], ...L9_EXTRA_WORDS] },
   urls: [...urls].filter((u) => u.startsWith('/audio/nuraniyyah/')).sort(),
 };
 

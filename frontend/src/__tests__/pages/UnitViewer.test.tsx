@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import UnitViewer from '@/pages/courses/UnitViewer';
 import { courseService } from '@/services/courseService';
@@ -87,5 +87,46 @@ describe('UnitViewer', () => {
 
     await screen.findByText(/no standalone lesson link in this unit/i);
     expect(screen.queryByRole('link', { name: /open full interactive lesson/i })).not.toBeInTheDocument();
+  });
+
+  describe('pronunciation guide toggle', () => {
+    const guideHtml =
+      '<div><p lang="ar">بَ</p><p dir="ltr"><span class="nq-tr">ba </span><span>🔊</span></p></div>';
+
+    beforeEach(() => {
+      window.localStorage.removeItem('nuraniyyah-show-transliterations');
+      vi.mocked(courseService.getUnit).mockResolvedValue({
+        ...baseUnit,
+        content: { ...baseUnit.content, text: guideHtml },
+      } as any);
+    });
+
+    it('is off by default and shows the guide only after the learner switches it on', async () => {
+      const { container } = renderUnitViewer();
+
+      const toggle = await screen.findByRole('switch', { name: /show pronunciation guide/i });
+      const guide = container.querySelector('.nq-tr') as HTMLElement;
+      expect(toggle).toHaveAttribute('aria-checked', 'false');
+      expect(container.querySelector('[data-transliterations]')).toHaveAttribute('data-transliterations', 'off');
+      expect(getComputedStyle(guide).display).toBe('none');
+      expect(screen.getByText('🔊')).toBeVisible();
+
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-checked', 'true');
+      expect(container.querySelector('[data-transliterations]')).toHaveAttribute('data-transliterations', 'on');
+      expect(getComputedStyle(guide).display).not.toBe('none');
+    });
+
+    it('is not offered for units without a pronunciation guide', async () => {
+      vi.mocked(courseService.getUnit).mockResolvedValue({
+        ...baseUnit,
+        content: { ...baseUnit.content, text: '<p>Plain lesson.</p>' },
+      } as any);
+
+      renderUnitViewer();
+
+      await screen.findByText(/plain lesson/i);
+      expect(screen.queryByRole('switch', { name: /show pronunciation guide/i })).not.toBeInTheDocument();
+    });
   });
 });
