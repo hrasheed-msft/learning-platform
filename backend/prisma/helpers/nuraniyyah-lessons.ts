@@ -99,7 +99,7 @@ const lesson1: LessonDef = {
   description: 'Meet the 29 Arabic letters, tap each one to hear its name, and learn how each sounds.',
   html: `
 <h2>Welcome to the Nūrāniyyah 🌟</h2>
-<p>The <strong>Nūrāniyyah</strong> (<em>Nūrānī Qā'idah</em>) is a step-by-step primer that teaches you to <strong>read the Qur'ān correctly</strong>. Every Arabic example in this course comes with a <strong>pronunciation guide</strong> underneath, and cards marked 🔊 can be <strong>tapped to hear the teacher say them</strong> — the lessons follow the book page by page.</p>
+<p>The <strong>Nūrāniyyah</strong> (<em>Nūrānī Qā'idah</em>) is a step-by-step primer that teaches you to <strong>read the Qur'ān correctly</strong>. Every Arabic example in this course has a <strong>pronunciation guide</strong> you can switch on with the <em>Show pronunciation guide</em> button above the lesson. It is <strong>off by default</strong> so that you learn to recognise the letters themselves instead of leaning on the English spelling. Cards marked 🔊 can be <strong>tapped to hear the teacher say them</strong> — the lessons follow the book page by page.</p>
 <p>Begin every lesson with the Basmalah:</p>
 ${arabicLine('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', 'bismillāhir-raḥmānir-raḥīm')}
 
@@ -216,7 +216,7 @@ ${exampleBox('Lām-alif — لا', `<p>When lām ${ar('ل')} is followed by alif
 
 <h3>Practise reading joined letters</h3>
 ${page('7 – 9')}
-<p>Read each group slowly from <strong>right to left</strong>, saying the <strong>name of each letter</strong>. The guide spells the letters for you, and the teacher reads the cells on the recording — tap 🔊 to hear them.</p>
+<p>Read each group slowly from <strong>right to left</strong>, saying the <strong>name of each letter</strong>. The guide (when switched on) spells the letters for you, and the teacher reads the cells on the recording — tap 🔊 to hear them.</p>
 ${arabicGrid(lesson2Items, { min: 110, size: '2.5rem' })}
 ${tipBox('You can do it!', '<p>After Lessons 2 and 3 you should be able to recognise and tell apart <strong>any letter of the Qur\'ān without hesitation</strong>. Keep practising these pages until the shapes feel familiar.</p>')}
 `.trim(),
@@ -500,7 +500,7 @@ const lesson6: LessonDef = {
   html: `
 <h2>Exercises on the Ḥarakāt and Tanwīn — ${ar('تَدْرِيبَاتٌ عَلَى الْحَرَكَاتِ وَالتَّنْوِينِ')}</h2>
 ${page('12 – 13')}
-<p>Now you can read words! Take each word <strong>from right to left</strong>, say each letter with its ḥarakah, and then join the sounds together. Check yourself with the pronunciation underneath, and tap 🔊 to hear the teacher read the word.</p>
+<p>Now you can read words! Take each word <strong>from right to left</strong>, say each letter with its ḥarakah, and then join the sounds together. Tap 🔊 to hear the teacher read the word, and switch on the pronunciation guide if you want to check yourself.</p>
 ${tipBox('Remember', '<p><strong>Ḥarakāt are short sounds, and tanwīn is adding a noon to the ḥarakāt.</strong></p>')}
 ${exerciseGrid(6)}
 ${warnBox(
@@ -550,8 +550,9 @@ const lesson7Items = L7_SMALL_ALIF.map((l, k) =>
 const lesson7Extra = [
   item(`إ${K}${SMALL_YA}`, undefined, clipUrl(7, 18)),
   item(`ه${K}${SMALL_YA}`, undefined, clipUrl(7, 19)),
-  item(`أ${D}${SMALL_WAW}`, undefined, clipUrl(7, 20)),
+  item(`و${D}${SMALL_WAW}`, undefined, clipUrl(7, 20)),
   item(`ه${D}${SMALL_WAW}`, undefined, clipUrl(7, 21)),
+  item(`ء${D}${SMALL_WAW}`, undefined, clipUrl(7, 22)),
 ];
 
 const lesson7: LessonDef = {
@@ -576,7 +577,7 @@ ${table(
 ${arabicGrid(lesson7Items, { min: 100, size: '2.75rem' })}
 
 <h3>Small yāʾ and small wāw</h3>
-<p>The book ends the page with the hamzah and hāʾ carrying a small yāʾ or a small wāw:</p>
+<p>The book ends the page with five cells where the hamzah, wāw and hāʾ carry a small yāʾ or a small wāw:</p>
 ${arabicGrid(lesson7Extra, { min: 120, size: '2.75rem' })}
 ${tipBox('In the Qur\'ān', `<p>You will meet these in words like ${ar('بِهِۦ')} (<em>bihī</em>), ${ar('لَهُۥ')} (<em>lahū</em>) and ${ar('إِنَّهُۥ')} (<em>innahū</em>): the small mark tells you to stretch the vowel of the hāʾ for two beats.</p>`)}
 `.trim(),
@@ -754,11 +755,11 @@ const lesson9: LessonDef = {
   html: `
 <h2>Exercises on Tanwīn, the Three Madd Letters and Līn — ${ar('تَدْرِيبَاتٌ عَلَى التَّنْوِينِ وَحُرُوفِ الْمَدِّ الثَّلَاثَةِ وَحَرْفَيِ اللِّينِ')}</h2>
 ${page('16 – 18')}
-<p>Read these words using everything you have learned: ḥarakāt, tanwīn, madd and līn. Tap 🔊 to hear the teacher read a word, and check yourself with the pronunciation underneath.</p>
+<p>Read these words using everything you have learned: ḥarakāt, tanwīn, madd and līn. Tap 🔊 to hear the teacher read a word, and switch on the pronunciation guide if you want to check yourself.</p>
 ${exerciseGrid(9, EXERCISE_WORDS[9], 140)}
 
 <h3>Two more words from the book</h3>
-${arabicGrid(L9_EXTRA_WORDS.map((w) => item(w)), { min: 180, size: '2.75rem' })}
+${exerciseGrid(9, L9_EXTRA_WORDS, 180)}
 
 <h3>Sun letters and moon letters</h3>
 <p>The book lists the letters in two groups. Before the sun letters the lām of ${ar('ال')} is not pronounced and the next letter is doubled; before the moon letters the lām is pronounced clearly.</p>

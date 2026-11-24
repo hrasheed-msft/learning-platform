@@ -1,18 +1,27 @@
 """Build the audio plan for the Nuraniyyah course from the labelled CD clips.
 
-Reads  work/content.json  (from export-content.ts) and work/<NNN>.json  (from transcribe_all.py)
+Reads  work/content.json  (from export-content.ts), work/<NNN>.json  (transcribe_all.py) and, when present,
+       work/<NNN>.v2.json  (relabel.py)
 Writes backend/prisma/helpers/nuraniyyah-audio.ts  and  work/plan.json
 
-* Lesson 2 cells   : monotonic alignment of the spelled letter names against the clip labels (track 003).
-* Exercise words   : lessons 6, 9, 11 (tracks 007, 010, 013): monotonic alignment of each word against the
-                     clip labels, then words between two confident matches that sit on consecutive clips
-                     are filled in (most words are read as a single clip).
+The CD reads the book in order, so the plan is built from the *sequence*, not from isolated matches:
+
+* Lesson 2 cells   : the teacher reads every cell once, in order (track 003 = 2 intro clips + one clip per cell
+                     + closing jingle). The counts must agree, so cell k is clip k + 2.
+* Exercise words   : lessons 6, 9, 11 (tracks 007, 010, 013). A word the teacher spells out takes 2n - 1 clips (n
+                     letters-with-ḥarakah: each letter spelled, then a reading of everything so far) and the last
+                     clip reads the whole word; any other word is a single clip. structure.structural_plan walks the
+                     track word by word with that rule, so each word's clip follows from the previous one. The walk
+                     must end on the last clip before the closing jingle; the Whisper labels (align2) only
+                     cross-check it.
 * Lesson 10 groups : track 011 reads each letter as spelled clips followed by short clips for a/i/u;
                      the three short tail clips are joined into one clip per letter.
 Everything else (letters, harakat, tanween, madd, leen ...) is placed by position in the TS content.
 """
 import difflib, json, os, re
-from align import WORK, align, load_track, norm, skel
+from align import WORK, load_track, norm, skel
+from align2 import align_lesson, label_sim
+from structure import structural_plan
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 TS_OUT = os.path.join(REPO, 'backend', 'prisma', 'helpers', 'nuraniyyah-audio.ts')
@@ -22,8 +31,6 @@ NAMES = {'ا': 'الف', 'أ': 'همزة', 'ب': 'با', 'ت': 'تا', 'ث': 'ث
          'ف': 'فا', 'ق': 'قاف', 'ك': 'كاف', 'ل': 'لام', 'م': 'ميم', 'ن': 'نون', 'و': 'واو', 'ه': 'ها', 'ء': 'همزة', 'ي': 'يا',
          'ى': 'يا', 'ة': 'تا', 'ؤ': 'واو', 'ئ': 'يا'}
 EXERCISE_TRACKS = {6: '007', 9: '010', 11: '013'}
-MIN_CELL = 0.72
-MIN_WORD = 0.85
 
 
 def sk(s):
@@ -38,54 +45,20 @@ def cell_sim(cell, label):
     return difflib.SequenceMatcher(None, a, b).ratio()
 
 
-def align_cells(cells, clips):
-    n, m = len(cells), len(clips)
-    S = [[0.0] * m for _ in range(n)]
-    for i, c in enumerate(cells):
-        for j, cl in enumerate(clips):
-            if cl['text']:
-                s = cell_sim(c, cl['text'])
-                if s >= MIN_CELL:
-                    S[i][j] = s
-    dp = [[0.0] * (m + 1) for _ in range(n + 1)]
-    for i in range(1, n + 1):
-        for j in range(1, m + 1):
-            best = max(dp[i - 1][j], dp[i][j - 1])
-            if S[i - 1][j - 1] > 0:
-                best = max(best, dp[i - 1][j - 1] + S[i - 1][j - 1])
-            dp[i][j] = best
-    out, i, j = [None] * n, n, m
-    while i > 0 and j > 0:
-        if S[i - 1][j - 1] > 0 and abs(dp[i][j] - (dp[i - 1][j - 1] + S[i - 1][j - 1])) < 1e-9:
-            out[i - 1] = (clips[j - 1]['i'], round(S[i - 1][j - 1], 2))
-            i, j = i - 1, j - 1
-        elif dp[i][j] == dp[i - 1][j]:
-            i -= 1
-        else:
-            j -= 1
-    return out
+def l2_positional(cells, clips):
+    """Cell k is clip k + 2 (two intro clips first). Returns (clip per cell, similarity per cell)."""
+    if len(clips) != len(cells) + 3:
+        raise SystemExit(f'Lesson 2: {len(cells)} cells but {len(clips)} clips; expected cells + 3 '
+                         '(2 intro clips, 1 closing jingle). Check the transcribed cells against the book.')
+    return [k + 2 for k in range(len(cells))], [
+        cell_sim(c, clips[k + 2]['text']) if clips[k + 2]['text'] else None for k, c in enumerate(cells)]
 
 
-def accept(word, label):
-    sw, sc = skel(word), skel(label)
-    if len(sw) < 3:
-        return norm(word) == norm(label)
-    return len(sc) >= len(sw)
-
-
-def exercise_plan(words, clips):
-    res = align(words, clips, set())
-    anchors = {i: j for i, (j, s) in res.items() if s >= MIN_WORD and accept(words[i], clips[j]['text'])}
-    out = {i: clips[j]['i'] for i, j in anchors.items()}
-    filled = 0
-    order = sorted(anchors)
-    for a, b in zip(order, order[1:]):
-        ia, ib = clips[anchors[a]]['i'], clips[anchors[b]]['i']
-        if b - a > 1 and ib - ia == b - a:
-            for k in range(a + 1, b):
-                out[k] = ia + (k - a)
-                filled += 1
-    return out, len(anchors), filled
+def exercise_plan(words, track):
+    """Every word gets the clip the structural walk gives it; the Whisper labels only cross-check it."""
+    res, clips, labels = align_lesson(words, track)
+    walk, starts = structural_plan(words, clips, labels, res[0][0])
+    return walk, starts, res, clips, labels
 
 
 def sukoon_groups(clips):
@@ -108,23 +81,28 @@ def main():
     # Lesson 2
     t3 = load_track('003')
     cells = [c['ar'] for c in content['l2Cells']]
-    res = align_cells(cells, [c for c in t3 if 2 <= c['i'] <= 128])
-    l2 = [r[0] if r else None for r in res]
-    report.append(f"L2: {sum(1 for r in l2 if r is not None)}/{len(cells)} cells matched")
-    for i, r in enumerate(res):
-        if r:
-            report.append(f"   {cells[i]:8s} -> {r[0]:3d} sim {r[1]}  [{t3[r[0]]['text']}]")
+    l2, l2_sims = l2_positional(cells, t3)
+    weak = [k for k, s in enumerate(l2_sims) if s is not None and s < 0.5]
+    report.append(f"L2: {len(l2)}/{len(cells)} cells placed by order; {len(weak)} disagree with their label: {weak}")
+    for i, c in enumerate(l2):
+        report.append(f"   {i:3d} {cells[i]:8s} -> {c:3d} sim {l2_sims[i] if l2_sims[i] is None else round(l2_sims[i], 2)}  [{t3[c]['text']}]")
 
     # Exercise words
     word_clips = {}
     for lesson, track in EXERCISE_TRACKS.items():
         words = content['words'][str(lesson)]
-        clips = load_track(track)
-        plan, anchors, filled = exercise_plan(words, clips)
+        plan, starts, res, clips, labels = exercise_plan(words, track)
         word_clips[lesson] = {words[i]: c for i, c in plan.items()}
-        report.append(f"L{lesson}: {len(plan)}/{len(words)} words ({anchors} matched, {filled} filled by position)")
-        for i in sorted(plan):
-            report.append(f"   {words[i]:12s} -> {plan[i]:3d}  [{clips[plan[i]]['text']}]")
+        sims = {i: label_sim(w, [t for t in labels.get(plan[i], []) if t]) for i, w in enumerate(words)}
+        weak = [words[i] for i in sims if sims[i] < 0.5]
+        differs = [words[i] for i in plan if i in res and res[i][0] != plan[i]]
+        report.append(f"L{lesson}: {len(plan)}/{len(words)} words published; last word ends at clip {plan[len(words) - 1]} "
+                      f"of {len(clips)}; label disagrees: {weak}; differs from the best label match: {len(differs)}")
+        # lessons 6 and 9 end with their last word; lesson 11 is followed by extra reading practice
+        if lesson in (6, 9) and plan[len(words) - 1] != len(clips) - 2:
+            raise SystemExit(f'Lesson {lesson}: the walk ends at clip {plan[len(words) - 1]}, expected {len(clips) - 2}')
+        for i, w in enumerate(words):
+            report.append(f"   {i:3d} {w:12s} -> clips {starts[i]:3d}-{plan[i]:3d} sim {sims[i]:.2f} {labels.get(plan[i])}")
 
     # Lesson 10 groups
     t11 = load_track('011')

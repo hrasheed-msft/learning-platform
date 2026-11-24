@@ -20,6 +20,7 @@ import {
   L8_MADD_SINGLES,
   L8_MADD_SPELLED_A,
   L8_MADD_SPELLED_B,
+  L9_EXTRA_WORDS,
 } from '../../prisma/helpers/nuraniyyah-data';
 import { NURANIYYAH_LESSONS as LESSONS } from '../../prisma/helpers/nuraniyyah-lessons';
 
@@ -129,9 +130,19 @@ describe('Nūrāniyyah course content', () => {
   it('shows a pronunciation under every Arabic card', () => {
     for (const lesson of LESSONS) {
       const cards = lesson.html.match(/<p lang="ar"[^>]*>[^<]*<\/p>/g) ?? [];
-      const pronunciations = lesson.html.match(/<p dir="ltr"[^>]*>[^<]+(?:<span[^>]*>[^<]*<\/span>)?<\/p>/g) ?? [];
+      const pronunciations = lesson.html.match(/<span class="nq-tr">[^<]+<\/span>/g) ?? [];
       expect(pronunciations.length, lesson.slug).toBeGreaterThanOrEqual(cards.length);
     }
+  });
+
+  it('marks every pronunciation guide so the viewer can hide it', () => {
+    for (const lesson of LESSONS) {
+      expect(lesson.html, lesson.slug).not.toMatch(/<p dir="ltr"[^>]*>(?!<span class="nq-tr">)/);
+      expect(lesson.html, lesson.slug).not.toMatch(/<p dir="ltr"[^>]*><span class="nq-tr">[^<]*<\/span>(?!(?:<span aria-hidden="true">🔊<\/span>)?<\/p>)/);
+    }
+    // big Arabic lines and verses carry their own guide
+    const intro = LESSONS[0].html;
+    expect(intro).toMatch(/class="nq-tr">bismillāhir-raḥmānir-raḥīm</);
   });
 
   it('never leaks template placeholders or empty pronunciations', () => {
@@ -175,14 +186,29 @@ describe('Nūrāniyyah pronunciation clips', () => {
     }
   });
 
-  it('has an audio plan covering most of the exercise words and Lesson 2 cells', () => {
+  it('has an audio plan covering every exercise word and every Lesson 2 cell', () => {
+    // the CD reads the book in order, so nothing the book prints in these lessons may be left without a clip
+    expect(L2_CELLS).toHaveLength(127);
     expect(L2_CELL_CLIPS).toHaveLength(L2_CELLS.length);
-    expect(L2_CELL_CLIPS.filter((c) => c !== null).length).toBeGreaterThan(80);
-    for (const lesson of [6, 9, 11]) {
-      const matched = Object.keys(WORD_CLIPS[lesson] ?? {}).length;
-      expect(matched / EXERCISE_WORDS[lesson].length, `lesson ${lesson}`).toBeGreaterThan(0.6);
-    }
+    expect(L2_CELL_CLIPS.every((c) => c !== null)).toBe(true);
+    expect(L2_CELL_CLIPS).toEqual(L2_CELLS.map((_, k) => k + 2));
+    expect(Object.keys(WORD_CLIPS[6])).toHaveLength(EXERCISE_WORDS[6].length);
+    expect(Object.keys(WORD_CLIPS[9])).toHaveLength(EXERCISE_WORDS[9].length + L9_EXTRA_WORDS.length);
+    expect(Object.keys(WORD_CLIPS[11])).toHaveLength(EXERCISE_WORDS[11].length);
     expect(SUKOON_GROUP_URLS).toHaveLength(16);
+  });
+
+  it('lists the words of the book page by page, in book order', () => {
+    expect(EXERCISE_WORDS[9]).toHaveLength(99);
+    const words = EXERCISE_WORDS[9];
+    expect(words.slice(6, 8)).toEqual(['جَاءَ', 'جِيءَ']);
+    expect(words.indexOf('يَتِيمًا')).toBeLessThan(words.indexOf('يَسِيرًا'));
+  });
+
+  it('makes every audible card of the exercise lessons tappable', () => {
+    for (const [lesson, count] of [[6, 54], [9, 101], [11, 51], [2, 127]] as const) {
+      expect(urls(LESSONS[lesson - 1].html).length, `lesson ${lesson}`).toBeGreaterThanOrEqual(count);
+    }
   });
 
   it('never assigns the same clip to two different words', () => {

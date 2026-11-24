@@ -103,11 +103,11 @@ export function arabicGrid(list: PracticeItem[], opts: { min?: number; size?: st
       const playable = it.audio
         ? ` data-audio="${it.audio}" role="button" tabindex="0" aria-label="Play pronunciation of ${it.tr}" title="Tap to hear it"`
         : '';
+      const speaker = it.audio ? '<span aria-hidden="true">🔊</span>' : '';
       const cursor = it.audio ? 'cursor:pointer;' : '';
-      const speaker = it.audio ? ' <span aria-hidden="true">🔊</span>' : '';
       return `  <div${playable} style="${CARD_STYLE}${cursor}">
     <p lang="ar" style="${AR_STYLE}font-size:${size};line-height:1.7;">${it.ar}</p>
-    <p dir="ltr" style="${TR_STYLE}">${it.tr}${speaker}</p>
+    <p dir="ltr" style="${TR_STYLE}"><span class="nq-tr">${it.tr}${it.audio ? ' ' : ''}</span>${speaker}</p>
   </div>`;
     })
     .join('\n');
@@ -120,7 +120,7 @@ ${cards}
 export function arabicLine(ar: string, tr: string): string {
   return `<div style="text-align:center;margin:1rem 0;">
   <p dir="rtl" lang="ar" class="arabic-large" style="margin:0;">${ar}</p>
-  <p style="${TR_STYLE}font-size:1.05rem;">${tr}</p>
+  <p style="${TR_STYLE}font-size:1.05rem;" class="nq-tr">${tr}</p>
 </div>`;
 }
 
@@ -141,7 +141,7 @@ export function quranVerse(opts: {
   const label = opts.label ? `<p style="${TR_STYLE}margin-bottom:0.25rem;">${opts.label}</p>` : '';
   return `<div class="quran-verse">
   ${label}<p class="arabic-large" dir="rtl" lang="ar">${opts.ar}</p>
-  <p style="${TR_STYLE}font-size:1.05rem;">${opts.tr}</p>
+  <p style="${TR_STYLE}font-size:1.05rem;" class="nq-tr">${opts.tr}</p>
   <p style="font-size:0.8rem;color:#9ca3af;margin:0.25rem 0 0;">Qur'ān ${opts.ref}</p>
   <audio controls style="width:100%;margin-top:1rem;">
     <source src="${audioUrl(opts.surah, opts.ayah)}" type="audio/mpeg" />
